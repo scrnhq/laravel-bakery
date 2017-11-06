@@ -1,0 +1,26 @@
+{
+    "name": "scrnhq/laravel-bakery",
+    "keywords": ["laravel", "graphql"],
+    "authors": [
+        {
+            "name": "Erik Gaal",
+            "email": "e.gaal@scrn.com"
+        }
+    ],
+    "require": {
+        "php": "^7.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^6.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Scrn\\Bakery\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Scrn\\Bakery\\": "tests"
+        }
+    }
+}
