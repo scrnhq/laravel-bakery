@@ -14,6 +14,16 @@ class BakeryServiceProvider extends ServiceProvider
     public static $abstract = 'bakery';
 
     /**
+     * Get the path of the configuration file.
+     *
+     * @return void
+     */
+    private function getConfigPath()
+    {
+        return __DIR__ . '/../config/bakery.php';
+    }
+
+    /**
      * Register the service provider.
      *
      * @return void
@@ -63,6 +73,17 @@ class BakeryServiceProvider extends ServiceProvider
         foreach ($models as $model) {
             $bakery->addModel($model);
         }
+    }
+
+    /**
+     * Perform post-registration booting of services.
+     *
+     * @return void
+     */
+    public function boot()
+    {
+        $this->publishes([$this->getConfigPath() => config_path('bakery.php')], 'bakery');
+        $this->mergeConfigFrom($this->getConfigPath(), 'bakery');
     }
 
     /**
