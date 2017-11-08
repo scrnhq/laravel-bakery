@@ -7,6 +7,13 @@ use Illuminate\Support\ServiceProvider;
 class BakeryServiceProvider extends ServiceProvider
 {
     /**
+     * Abstract type to bind Bakery as in the Service Container.
+     *
+     * @var string
+     */
+    public static $abstract = 'bakery';
+
+    /**
      * Register the service provider.
      *
      * @return void
@@ -23,9 +30,27 @@ class BakeryServiceProvider extends ServiceProvider
      */
     public function registerBakery()
     {
-        $this->app->singleton('bakery', function ($app) {
-            return new Bakery();
+        $this->app->singleton(static::$abstract, function ($app) {
+            $bakery = new Bakery();
+
+            $this->addModels($bakery);
+
+            return $bakery;
         });
+    }
+
+    /**
+     * Register the models
+     *
+     * @param Bakery $bakery
+     */
+    protected function addModels(Bakery $bakery)
+    {
+        $models = $this->app['config']->get('bakery.models', []);
+
+        foreach ($models as $model) {
+            $bakery->addModel($model);
+        }
     }
 
     /**
@@ -35,6 +60,6 @@ class BakeryServiceProvider extends ServiceProvider
      */
     public function provides()
     {
-        return ['bakery'];
+        return [static::$abstract];
     }
 }

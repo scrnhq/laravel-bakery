@@ -16,12 +16,12 @@
     },
     "autoload": {
         "psr-4": {
-            "Scrn\\Bakery\\": "src"
+            "Scrn\\Bakery\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Scrn\\Bakery\\": "tests"
+            "Scrn\\Bakery\\Tests\\": "tests/"
         }
     }
 }
