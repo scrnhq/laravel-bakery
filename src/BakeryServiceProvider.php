@@ -21,6 +21,7 @@ class BakeryServiceProvider extends ServiceProvider
     public function register()
     {
         $this->registerBakery();
+        $this->registerRoute();
     }
 
     /**
@@ -37,6 +38,17 @@ class BakeryServiceProvider extends ServiceProvider
 
             return $bakery;
         });
+    }
+
+    /**
+     * Register the Bakery route.
+     *
+     * @return void
+     */
+    protected function registerRoute()
+    {
+        $router = $this->app['router'];
+        $router->any('/graphql', '\Scrn\Bakery\Http\Controller\BakeryController@query');
     }
 
     /**
