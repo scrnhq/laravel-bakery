@@ -1,27 +1,36 @@
 {
-    "name": "scrnhq/laravel-bakery",
-    "keywords": ["laravel", "graphql"],
-    "authors": [
-        {
-            "name": "Erik Gaal",
-            "email": "e.gaal@scrn.com"
-        }
-    ],
-    "require": {
-        "php": "^7.0"
+  "name": "scrnhq/laravel-bakery",
+  "keywords": ["laravel", "graphql"],
+  "authors": [
+    {
+      "name": "Erik Gaal",
+      "email": "e.gaal@scrn.com"
     },
-    "require-dev": {
-        "phpunit/phpunit": "^6.0",
-        "orchestra/testbench": "^3.5"
-    },
-    "autoload": {
-        "psr-4": {
-            "Scrn\\Bakery\\": "src"
-        }
-    },
-    "autoload-dev": {
-        "psr-4": {
-            "Scrn\\Bakery\\": "tests"
-        }
+    {
+      "name": "Robert van Steen",
+      "email": "r.vansteen@scrn.com"
     }
+  ],
+  "require": {
+    "php": "^7.0"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^6.0",
+    "orchestra/testbench": "^3.5",
+    "spatie/phpunit-watcher": "^1.3"
+  },
+  "autoload": {
+    "psr-4": {
+      "Scrn\\Bakery\\": "src"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Scrn\\Bakery\\": "tests"
+    }
+  },
+  "scripts": {
+    "test": "vendor/bin/phpunit",
+    "test:watch": "vendor/bin/phpunit-watcher watch"
+  }
 }
