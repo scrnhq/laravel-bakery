@@ -27,7 +27,7 @@ class BakeryController extends Controller
      * Handle an HTTP response containing the GraphQL query.
      *
      * @param Request $request
-     * @return Response
+     * @return JsonResponse
      */
     public function query(Request $request): JsonResponse
     {
@@ -52,8 +52,8 @@ class BakeryController extends Controller
      * Execute the GraphQL query and return the result.
      *
      * @param Schema $schema
-     * @param Array $input
-     * @return void
+     * @param array $input
+     * @return ExecutionResult
      */
     protected function executeQuery(Schema $schema, $input = []): ExecutionResult
     {
@@ -63,6 +63,6 @@ class BakeryController extends Controller
         $variables = json_decode(array_get($input, 'variables'));
         $operationName = array_get($input, 'operationName');
 
-        return GraphQL::executeAndReturnResult($schema, $query, $root, $context, $variables, $operationName);
+        return GraphQL::executeQuery($schema, $query, $root, $context, $variables, $operationName);
     }
 }
