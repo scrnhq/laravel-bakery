@@ -14,6 +14,13 @@ class BakeryServiceProvider extends ServiceProvider
     public static $abstract = 'bakery';
 
     /**
+     * A reference to the Bakery configuration when it is loaded.
+     *
+     * @var array
+     */
+    protected $config = [];
+
+    /**
      * Get the path of the configuration file.
      *
      * @return void
@@ -30,6 +37,9 @@ class BakeryServiceProvider extends ServiceProvider
      */
     public function register()
     {
+        $this->mergeConfigFrom($this->getConfigPath(), static::$abstract);
+        $this->config = $this->app['config']->get(static::$abstract);
+
         $this->registerBakery();
         $this->registerRoute();
     }
@@ -58,7 +68,7 @@ class BakeryServiceProvider extends ServiceProvider
     protected function registerRoute()
     {
         $router = $this->app['router'];
-        $router->any('/graphql', '\Scrn\Bakery\Http\Controller\BakeryController@query');
+        $router->any($this->config['route'], $this->config['controller']);
     }
 
     /**
@@ -68,7 +78,7 @@ class BakeryServiceProvider extends ServiceProvider
      */
     protected function addModels(Bakery $bakery)
     {
-        $models = $this->app['config']->get('bakery.models', []);
+        $models = $this->config['models'];
 
         foreach ($models as $model) {
             $bakery->addModel($model);
@@ -83,7 +93,6 @@ class BakeryServiceProvider extends ServiceProvider
     public function boot()
     {
         $this->publishes([$this->getConfigPath() => config_path('bakery.php')], 'bakery');
-        $this->mergeConfigFrom($this->getConfigPath(), 'bakery');
     }
 
     /**
