@@ -10,10 +10,16 @@ class Model extends BaseModel
 {
     use GraphQLResource;
 
+    /**
+     * The fields exposed in GraphQL.
+     *
+     * @return array
+     */
     public function fields()
     {
         return [
-            'id' => Type::ID,
+            'id' => Type::ID(),
+            'field' => Type::string(),
         ];
     }
 }
