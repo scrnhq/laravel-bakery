@@ -2,10 +2,13 @@
 
 namespace Scrn\Bakery\Queries;
 
+use Illuminate\Support\Fluent;
+use GraphQL\Type\Definition\Type;
+use Scrn\Bakery\Support\Facades\Bakery;
 use Illuminate\Database\Eloquent\Model;
 use GraphQL\Type\Definition\ObjectType;
 
-class EntityQuery extends ObjectType
+class EntityQuery extends Fluent
 {
     /**
      * A reference to the model.
@@ -20,14 +23,21 @@ class EntityQuery extends ObjectType
      */
     public function __construct(string $class)
     {
-        $name = $this->formatName($class);
+        $this->name = $this->formatName($class);
         $this->model = app()->make($class);
 
-        parent::__construct([
-            'name' => $name,
+        parent::__construct([]);
+    }
+
+    public function getAttributes()
+    {
+        return [
+            'name' => $this->name,
             'resolve' => [$this, 'resolve'],
+            'type' => Bakery::getType('Model'), 
+            'args' => ['id' => Type::ID()],
             'fields' => [],
-        ]);
+        ];
     }
 
     /**
@@ -47,7 +57,7 @@ class EntityQuery extends ObjectType
      * @param array $args
      * @return Model
      */
-    public function resolve($args = []): Model
+    public function resolve($root, $args = []): Model
     {
         $primaryKey = $this->model->getKeyName();
 
@@ -62,5 +72,10 @@ class EntityQuery extends ObjectType
         }
 
         return $query->firstOrFail();
+    }
+
+    public function toArray()
+    {
+        return $this->getAttributes();
     }
 }

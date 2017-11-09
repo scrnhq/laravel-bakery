@@ -15,6 +15,11 @@ class CollectionQueryTest extends TestCase
 {
     use WithDatabase;
 
+    protected function getEnvironmentSetUp($app)
+    {
+        $this->setupDatabase($app);
+    }
+
     /** @test */
     public function it_resolves_a_collection_without_arguments()
     {

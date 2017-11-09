@@ -14,6 +14,11 @@ class EntityQueryTest extends TestCase
 {
     use WithDatabase;
 
+    protected function getEnvironmentSetUp($app)
+    {
+        $this->setupDatabase($app);
+    }
+
     /** @test */
     public function it_resolves_an_entity_by_its_primary_key()
     {
@@ -82,7 +87,7 @@ class EntityQueryTest extends TestCase
         Model::create(['id' => '2']);
 
         $query = new EntityQuery(Model::class);
-        $result = $query->resolve(['id' => 1]);
+        $result = $query->resolve(null, ['id' => 1]);
     }
 
     /** @test */
@@ -102,6 +107,6 @@ class EntityQueryTest extends TestCase
         $model = Model::create(['slug' => 'test-model', 'category' => 'bar']);
 
         $query = new EntityQuery(Model::class);
-        $result = $query->resolve(['slug' => 'test-model', 'category' => 'foo']);
+        $result = $query->resolve(null, ['slug' => 'test-model', 'category' => 'foo']);
     }
 }

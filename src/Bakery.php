@@ -58,7 +58,13 @@ class Bakery
 
     public function getQueries()
     {
-        return $this->queries;
+        $queries = [];
+
+        foreach ($this->queries as $query) {
+            $queries[] = $query->toArray(); 
+        }
+
+        return $queries;
     }
 
     protected function registerEntityQuery($class)

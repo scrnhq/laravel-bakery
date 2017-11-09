@@ -50,16 +50,15 @@ class BakeryTest extends TestCase
     }
 
     /** @test */
-    public function it_registers_an_entity_query_for_a_model()
+    public function it_registers_an_entity_query_field_for_a_model()
     {
         $queries = app('bakery')->getQueries();
 
         $results = array_values(array_filter($queries, function($query) {
-            return get_class($query) === EntityQuery::class;
+            return $query['name'] === 'model'; 
         })); 
 
         $this->assertCount(1, $results);
-        $this->assertEquals($results[0]->name, 'model');
     }
 
     /** @test */
@@ -68,10 +67,9 @@ class BakeryTest extends TestCase
         $queries = app('bakery')->getQueries();
 
         $results = array_values(array_filter($queries, function ($query) {
-            return get_class($query) === CollectionQuery::class;
+            return $query['name'] === 'models'; 
         }));
 
         $this->assertCount(1, $results);
-        $this->assertEquals($results[0]->name, 'models');
     }
 }

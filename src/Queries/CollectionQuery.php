@@ -3,10 +3,13 @@
 namespace Scrn\Bakery\Queries;
 
 use Laravel\Eloquent\Model;
+use Illuminate\Support\Fluent;
+use GraphQL\Type\Definition\Type;
 use GraphQL\Type\Definition\ObjectType;
+use Scrn\Bakery\Support\Facades\Bakery;
 use Illuminate\Pagination\LengthAwarePaginator;
 
-class CollectionQuery extends ObjectType
+class CollectionQuery extends Fluent 
 {
 
     /**
@@ -24,6 +27,16 @@ class CollectionQuery extends ObjectType
             'resolve' => [$this, 'resolve'],
             'fields' => []
         ]);
+    }
+
+    public function getAttributes()
+    {
+        return [
+            'name' => $this->name,
+            'resolve' => [$this, 'resolve'],
+            'type' => Type::listOf(Bakery::getType('Model')),
+            'fields' => [],
+        ];
     }
 
     /**
@@ -45,5 +58,10 @@ class CollectionQuery extends ObjectType
     public function resolve(): LengthAwarePaginator
     {
         return $this->model->paginate();
+    }
+
+    public function toArray()
+    {
+        return $this->getAttributes();
     }
 }

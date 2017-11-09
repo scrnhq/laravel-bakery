@@ -4,12 +4,12 @@ namespace Scrn\Bakery\Tests;
 
 trait WithDatabase {
     /**
-     * Define environment setup.
+     * Set up a test database. 
      *
      * @param  \Illuminate\Foundation\Application  $app
      * @return void
      */
-    protected function getEnvironmentSetUp($app)
+    protected function setupDatabase($app)
     {
         // Setup default database to use sqlite :memory:
         $app['config']->set('database.default', 'testbench');
