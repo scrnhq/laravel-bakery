@@ -18,8 +18,9 @@ class EntityQuery extends ObjectType
      * @param string $class
      * @param string $name
      */
-    public function __construct(string $class, string $name)
+    public function __construct(string $class)
     {
+        $name = $this->formatName($class);
         $this->model = app()->make($class);
 
         parent::__construct([
@@ -27,6 +28,17 @@ class EntityQuery extends ObjectType
             'resolve' => [$this, 'resolve'],
             'fields' => [],
         ]);
+    }
+
+    /**
+     * Format a class name to the name for the entity query.
+     *
+     * @param string $class
+     * @return string
+     */
+    protected function formatName(string $class): string
+    {
+        return camel_case(str_singular(class_basename($class)));
     }
 
     /**

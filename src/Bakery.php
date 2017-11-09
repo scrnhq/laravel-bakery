@@ -61,38 +61,16 @@ class Bakery
         return $this->queries;
     }
 
-    /**
-     * Format a class name to the name for the entity query.
-     *
-     * @param string $class
-     * @return string
-     */
-    protected function formatEntityName(string $class): string
-    {
-        return camel_case(str_singular(class_basename($class)));
-    }
-
-    /**
-     * Format a class name to the name for the collection query.
-     *
-     * @param string $class
-     * @return string
-     */
-    protected function formatCollectionName(string $class): string
-    {
-        return camel_case(str_plural(class_basename($class)));
-    }
-
     protected function registerEntityQuery($class)
     {
-        $name = $this->formatEntityName($class);
-        $this->queries[$name] = new EntityQuery($class, $name);
+        $entityQuery = new EntityQuery($class);
+        $this->queries[$entityQuery->name] = $entityQuery;
     }
 
     protected function registerCollectionQuery($class)
     {
-        $name = $this->formatCollectionName($class);
-        $this->queries[$name] = new CollectionQuery($class, $name);
+        $collectionQuery = new CollectionQuery($class);
+        $this->queries[$collectionQuery->name] = $collectionQuery;
     }
 
     protected function registerEntityType($class)
@@ -115,16 +93,15 @@ class Bakery
             $types[] = $objectType;
         }
 
-        $query = $this->makeObjectType(['query' => Type::boolean()], [
-            'name' => 'Query',
-        ]);
-
         $mutation = $this->makeObjectType(['mutation' => Type::boolean()], [
             'name' => 'Mutation',
         ]);
 
         return new Schema([
-            'query' => $query,
+            'query' => new ObjectType([
+                'name' => 'Query',
+                'fields' => $this->getQueries(),
+            ]),
             'mutation' => $mutation,
             'subscription' => null,
             'types' => $types,

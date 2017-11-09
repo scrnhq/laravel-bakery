@@ -24,7 +24,7 @@ class EntityQueryTest extends TestCase
 
         $model = Model::create();
 
-        $query = new EntityQuery(Model::class, 'model');
+        $query = new EntityQuery(Model::class);
         $result = $query->resolve(['id' => 1]);
 
         $this->assertTrue($model->is($result));
@@ -43,7 +43,7 @@ class EntityQueryTest extends TestCase
 
         $model = Model::create(['slug' => 'test-model']);
 
-        $query = new EntityQuery(Model::class, 'model');
+        $query = new EntityQuery(Model::class);
         $result = $query->resolve(['slug' => 'test-model']);
 
         $this->assertTrue($model->is($result));
@@ -63,7 +63,7 @@ class EntityQueryTest extends TestCase
 
         $model = Model::create(['slug' => 'test-model', 'category' => 'foo']);
 
-        $query = new EntityQuery(Model::class, 'model');
+        $query = new EntityQuery(Model::class);
         $result = $query->resolve(['slug' => 'test-model', 'category' => 'foo']);
 
         $this->assertTrue($model->is($result));
@@ -81,7 +81,7 @@ class EntityQueryTest extends TestCase
 
         Model::create(['id' => '2']);
 
-        $query = new EntityQuery(Model::class, 'model');
+        $query = new EntityQuery(Model::class);
         $result = $query->resolve(['id' => 1]);
     }
 
@@ -101,7 +101,7 @@ class EntityQueryTest extends TestCase
 
         $model = Model::create(['slug' => 'test-model', 'category' => 'bar']);
 
-        $query = new EntityQuery(Model::class, 'model');
+        $query = new EntityQuery(Model::class);
         $result = $query->resolve(['slug' => 'test-model', 'category' => 'foo']);
     }
 }

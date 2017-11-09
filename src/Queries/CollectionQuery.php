@@ -14,8 +14,9 @@ class CollectionQuery extends ObjectType
      */
     protected $model;
 
-    public function __construct(string $class, string $name)
+    public function __construct(string $class)
     {
+        $name = $this->formatName($class);
         $this->model = app()->make($class);
 
         parent::__construct([

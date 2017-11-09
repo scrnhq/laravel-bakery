@@ -26,7 +26,7 @@ class CollectionQueryTest extends TestCase
         Model::create();
         Model::create();
 
-        $query = new CollectionQuery(Model::class, 'model');
+        $query = new CollectionQuery(Model::class);
         $result = $query->resolve();
 
         $this->assertCount(2, $result->items());

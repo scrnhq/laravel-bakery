@@ -28,7 +28,6 @@ class EntityQueryTest extends TestCase
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
         $response->assertStatus(200);
-        // dd($response->getContent());
-        // $response->assertJsonStructure(['data' => [ 'model' ] ]);
+        $response->assertJsonStructure(['data' => [ 'model' ] ]);
     }
 }
