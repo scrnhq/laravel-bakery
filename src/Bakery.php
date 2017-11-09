@@ -7,16 +7,38 @@ use GraphQL\GraphQL;
 use GraphQL\Type\Schema;
 use GraphQL\Executor\ExecutionResult;
 use GraphQL\Type\Definition\ObjectType;
+
+use Scrn\Bakery\Queries\EntityQuery;
+use Scrn\Bakery\Queries\CollectionQuery;
 use Scrn\Bakery\Exceptions\ModelNotRegistered;
 
 class Bakery
 {
     protected $models = [];
 
+    protected $queries = [];
+
     public function addModel($class)
     {
         $this->models[] = $class;
+        $this->queries[] = $this->createEntityQuery($class);
+        $this->queries[] = $this->createCollectionQuery($class);
         return $this;
+    }
+
+    public function getQueries()
+    {
+        return $this->queries;
+    }
+
+    protected function createEntityQuery($class)
+    {
+        return new EntityQuery($class); 
+    }
+
+    protected function createCollectionQuery($class)
+    {
+        return new CollectionQuery($class); 
     }
 
     /**
@@ -46,12 +68,9 @@ class Bakery
         $schema = new Schema([
             'query' => new ObjectType([
                 'name' => 'Query',
-                'fields' => [],
+                'fields' => $this->getQueries(),
             ]),
-            'mutation' => new ObjectType([
-                'name' => 'Mutation',
-                'fields' => [],
-            ]),
+            'mutation' => null, 
         ]);
 
         $root = null;
