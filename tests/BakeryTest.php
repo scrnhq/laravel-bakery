@@ -2,46 +2,55 @@
 
 namespace Scrn\Bakery\Tests;
 
-use Scrn\Bakery\Tests\Stubs;
-use Scrn\Bakery\Queries\EntityQuery;
-use Scrn\Bakery\Queries\CollectionQuery;
-use Scrn\Bakery\Exceptions\ModelNotRegistered;
-
-use GraphQL\Type\Definition\Type;
 use GraphQL\Type\Definition\ObjectType;
+use Scrn\Bakery\Exceptions\TypeNotFound;
+use Scrn\Bakery\Queries\CollectionQuery;
+use Scrn\Bakery\Queries\EntityQuery;
+use Scrn\Bakery\Support\Facades\Bakery;
+use Scrn\Bakery\Tests\Stubs;
 
 class BakeryTest extends TestCase
 {
-    protected function getEnvironmentSetUp($app)
+    /** @test */
+    public function it_can_register_a_model()
     {
-        $app['config']->set('bakery.models', [
-            Stubs\Model::class,
-        ]);
+        Bakery::addModel(Stubs\EmptyModel::class);
+
+        $models = Bakery::getModels();
+        $this->assertContains(Stubs\EmptyModel::class, $models);
     }
 
     /** @test */
-    public function it_returns_an_entity_type_for_a_model()
+    public function it_returns_the_object_type_for_a_model()
     {
-        $expected = new ObjectType([
-            'name' => 'Model',
-            'fields' => [
-                'id' => Type::ID(),
-            ],
-        ]);
+        $type = Bakery::getType('Model');
 
-        $this->assertEquals($expected, app('bakery')->entityType(Stubs\Model::class));
+        $this->assertInstanceOf(ObjectType::class, $type);
+
+        $typeOther = Bakery::getType('Model');
+
+        $this->assertSame($type, $typeOther);
     }
 
     /** @test */
-    public function it_throws_exception_for_unregistered_model()
+    public function it_throws_exception_for_unregistered_type()
     {
-        $this->expectException(ModelNotRegistered::class);
+        $this->expectException(TypeNotFound::class);
 
-        app('bakery')->entityType(Stubs\EmptyModel::class);
+        Bakery::getType('WrongType');
     }
 
     /** @test */
-    public function it_registers_an_entity_query_for_a_model() 
+    public function it_returns_the_schema()
+    {
+        $schema = Bakery::schema();
+
+//        $this->assertSchema($schema);
+        $this->assertArrayHasKey('Model', $schema->getTypeMap());
+    }
+
+    /** @test */
+    public function it_registers_an_entity_query_for_a_model()
     {
         $queries = app('bakery')->getQueries();
 
@@ -57,13 +66,12 @@ class BakeryTest extends TestCase
     public function it_registers_a_collection_query_for_a_model()
     {
         $queries = app('bakery')->getQueries();
-        
-        $results = array_values(array_filter($queries, function($query) {
+
+        $results = array_values(array_filter($queries, function ($query) {
             return get_class($query) === CollectionQuery::class;
-        })); 
+        }));
 
-
-        $this->assertCount(1, $results); 
+        $this->assertCount(1, $results);
         $this->assertEquals($results[0]->name, 'models');
     }
 }

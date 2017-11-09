@@ -42,4 +42,13 @@ class EntityTypeTest extends TestCase
         $this->assertInstanceOf(ObjectType::class, $objectType);
         $this->assertEquals($objectType->name, $type->name);
     }
+
+    /** @test */
+    public function it_returns_the_name()
+    {
+        $type = new EntityType(Stubs\Model::class);
+        $name = $type->name;
+
+        $this->assertEquals('Model', $name);
+    }
 }

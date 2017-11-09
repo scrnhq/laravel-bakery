@@ -27,5 +27,5 @@ return [
      | Here you can define the controller that should
      | handle the GraphQL requests. 
      */
-    'controller' => '\Scrn\Bakery\Http\Controller\BakeryController@query'
+    'controller' => '\Scrn\Bakery\Http\Controller\BakeryController@query',
 ];

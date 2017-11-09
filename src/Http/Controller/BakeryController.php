@@ -2,12 +2,9 @@
 
 namespace Scrn\Bakery\Http\Controller;
 
-use GraphQL\GraphQL;
-use GraphQL\Type\Schema;
-use Illuminate\Http\Request;
-use Illuminate\Http\Response;
-use Illuminate\Routing\Controller;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Routing\Controller;
 
 class BakeryController extends Controller
 {

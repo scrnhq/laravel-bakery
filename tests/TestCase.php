@@ -3,7 +3,7 @@
 namespace Scrn\Bakery\Tests;
 
 use Orchestra\Testbench\TestCase as OrchestraTestCase;
-use Scrn\Bakery\BakeryFacade;
+use Scrn\Bakery\Support\Facades\Bakery;
 use Scrn\Bakery\BakeryServiceProvider;
 use Scrn\Bakery\Tests\Stubs\Model;
 
@@ -30,7 +30,7 @@ class TestCase extends OrchestraTestCase
     protected function getPackageAliases($app)
     {
         return [
-            'Bakery' => BakeryFacade::class,
+            'Bakery' => Bakery::class,
         ];
     }
 }

@@ -1,10 +1,10 @@
 <?php
 
-namespace Scrn\Bakery;
+namespace Scrn\Bakery\Support\Facades;
 
 use Illuminate\Support\Facades\Facade;
 
-class BakeryFacade extends Facade
+class Bakery extends Facade
 {
     protected static function getFacadeAccessor()
     {
