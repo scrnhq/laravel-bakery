@@ -21,8 +21,8 @@ class Bakery
     public function addModel($class)
     {
         $this->models[] = $class;
-        $this->queries[] = $this->createEntityQuery($class);
-        $this->queries[] = $this->createCollectionQuery($class);
+        $this->registerEntityQuery($class);
+        $this->registerCollectionQuery($class);
         return $this;
     }
 
@@ -31,14 +31,38 @@ class Bakery
         return $this->queries;
     }
 
-    protected function createEntityQuery($class)
+    /**
+     * Format a class name to the name for the entity query.
+     *
+     * @param string $class
+     * @return string
+     */
+    protected function formatEntityName(string $class): string
     {
-        return new EntityQuery($class); 
+        return camel_case(str_singular(class_basename($class)));
     }
 
-    protected function createCollectionQuery($class)
+    /**
+     * Format a class name to the name for the collection query.
+     *
+     * @param string $class
+     * @return string
+     */
+    protected function formatCollectionName(string $class): string
     {
-        return new CollectionQuery($class); 
+        return camel_case(str_plural(class_basename($class)));
+    }
+
+    protected function registerEntityQuery($class)
+    {
+        $name = $this->formatEntityName($class);
+        $this->queries[$name] = new EntityQuery($class, $name); 
+    }
+
+    protected function registerCollectionQuery($class)
+    {
+        $name = $this->formatCollectionName($class);
+        $this->queries[$name] = new CollectionQuery($class, $name); 
     }
 
     /**

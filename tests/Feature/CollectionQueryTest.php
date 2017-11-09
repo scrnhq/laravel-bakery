@@ -6,7 +6,7 @@ use Scrn\Bakery\Tests\Stubs;
 use Scrn\Bakery\Tests\TestCase;
 use Scrn\Bakery\Http\Controller\BakeryController;
 
-class EntityQueryTest extends TestCase
+class CollectionQueryTest extends TestCase
 {
     protected function getEnvironmentSetUp($app)
     {
@@ -20,7 +20,7 @@ class EntityQueryTest extends TestCase
     {
         $query = '
             query {
-                model {
+                models {
                     id
                 }
             }

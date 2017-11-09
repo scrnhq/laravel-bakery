@@ -4,12 +4,19 @@ namespace Scrn\Bakery\Queries;
 
 use Laravel\Eloquent\Model;
 use GraphQL\Type\Definition\ObjectType;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class CollectionQuery extends ObjectType
 {
-    public function __construct(string $class)
+
+    /**
+     * A reference to the model.
+     */
+    protected $model;
+
+    public function __construct(string $class, string $name)
     {
-        $name = $this->formatName($class); 
+        $this->model = app()->make($class);
 
         parent::__construct([
             'name' => $name,
@@ -29,8 +36,13 @@ class CollectionQuery extends ObjectType
         return camel_case(str_plural(class_basename($class)));
     }
 
-    protected function resolve()
+    /**
+     * Resolve the entity query.
+     *
+     * @return LengthAwarePaginator
+     */
+    public function resolve(): LengthAwarePaginator
     {
-        // resolve
+        return $this->model->paginate();
     }
 }

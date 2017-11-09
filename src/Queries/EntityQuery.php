@@ -16,28 +16,17 @@ class EntityQuery extends ObjectType
      * Construct a new entity query.
      *
      * @param string $class
+     * @param string $name
      */
-    public function __construct(string $class)
+    public function __construct(string $class, string $name)
     {
         $this->model = app()->make($class);
-        $name = $this->formatName($class);
 
         parent::__construct([
             'name' => $name,
             'resolve' => [$this, 'resolve'],
             'fields' => [],
         ]);
-    }
-
-    /**
-     * Format the class name to the name for the entity query.
-     *
-     * @param string $class
-     * @return string
-     */
-    protected function formatName(string $class): string
-    {
-        return camel_case(str_singular(class_basename($class)));
     }
 
     /**

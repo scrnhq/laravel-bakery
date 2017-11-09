@@ -1,6 +1,6 @@
 <?php
 
-namespace Scrn\Bakery\Tests\Http\Controller;
+namespace Scrn\Bakery\Tests\Feature;
 
 use Scrn\Bakery\Tests\TestCase;
 use Scrn\Bakery\Http\Controller\BakeryController;
