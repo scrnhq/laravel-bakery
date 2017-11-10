@@ -2,10 +2,8 @@
 
 namespace Scrn\Bakery\Queries;
 
-use Laravel\Eloquent\Model;
 use Illuminate\Support\Fluent;
 use GraphQL\Type\Definition\Type;
-use GraphQL\Type\Definition\ObjectType;
 use Scrn\Bakery\Support\Facades\Bakery;
 use Illuminate\Pagination\LengthAwarePaginator;
 

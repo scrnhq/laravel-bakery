@@ -3,6 +3,7 @@
 namespace Scrn\Bakery;
 
 use Illuminate\Support\ServiceProvider;
+use Scrn\Bakery\Types\PaginationType;
 
 class BakeryServiceProvider extends ServiceProvider
 {
@@ -47,6 +48,8 @@ class BakeryServiceProvider extends ServiceProvider
             $bakery = new Bakery();
 
             $this->addModels($bakery);
+
+            $bakery->addType(new PaginationType(), 'Pagination');
 
             return $bakery;
         });

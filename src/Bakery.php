@@ -7,10 +7,10 @@ use GraphQL\GraphQL;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;
 use GraphQL\Type\Schema;
-use Scrn\Bakery\Exceptions\ModelNotRegistered;
 use Scrn\Bakery\Exceptions\TypeNotFound;
 use Scrn\Bakery\Queries\CollectionQuery;
 use Scrn\Bakery\Queries\EntityQuery;
+use Scrn\Bakery\Types\EntityType;
 
 class Bakery
 {
@@ -29,7 +29,7 @@ class Bakery
     protected $types = [];
 
     /**
-     * The type instances.
+     * The GraphQL type instances.
      *
      * @var array
      */
@@ -56,15 +56,16 @@ class Bakery
         return $this->models;
     }
 
+    public function addType($type, $name)
+    {
+        $this->types[$name] = $type;
+    }
+
     public function getQueries()
     {
-        $queries = [];
-
-        foreach ($this->queries as $query) {
-            $queries[] = $query->toArray(); 
-        }
-
-        return $queries;
+        return array_map(function ($query) {
+            return $query->toArray();
+        }, $this->queries);
     }
 
     protected function registerEntityQuery($class)
@@ -99,15 +100,16 @@ class Bakery
             $types[] = $objectType;
         }
 
+        $query = $this->makeObjectType($this->getQueries(), [
+            'name' => 'Query',
+        ]);
+
         $mutation = $this->makeObjectType(['mutation' => Type::boolean()], [
             'name' => 'Mutation',
         ]);
 
         return new Schema([
-            'query' => new ObjectType([
-                'name' => 'Query',
-                'fields' => $this->getQueries(),
-            ]),
+            'query' => $query,
             'mutation' => $mutation,
             'subscription' => null,
             'types' => $types,
@@ -131,44 +133,14 @@ class Bakery
         return $type;
     }
 
-    public function getEntityType($class, $fresh = false)
-    {
-        if (!in_array($class, $this->models)) {
-            throw new ModelNotRegistered('Model ' . $class . ' not registered.');
-        }
-
-        $model = app($class);
-
-        $typeName = class_basename($model);
-
-        if (!$fresh && isset($this->typeInstances[$typeName])) {
-            return $this->typeInstances[$typeName];
-        }
-
-        $type = $this->makeObjectType(
-            $model, [
-            'name' => $typeName,
-        ]);
-        $this->typeInstances[$typeName] = $type;
-
-        return $type;
-    }
-
-
     public function makeObjectType($type, $options = [])
     {
         $objectType = null;
-        if ($type instanceof ObjectType) {
-            $objectType = $type;
-            foreach ($options as $key => $value) {
-                $objectType->{$key} = $value;
-            }
-        } elseif (is_array($type)) {
+        if (is_array($type)) {
             $objectType = $this->makeObjectTypeFromFields($type, $options);
         } else {
             $objectType = $this->makeObjectTypeFromClass($type, $options);
         }
-
         return $objectType;
     }
 
@@ -181,7 +153,7 @@ class Bakery
 
     protected function makeObjectTypeFromClass($class, $options = [])
     {
-        return $class->toType();
+        return $class->toGraphQLType();
     }
 
     /**
@@ -201,5 +173,40 @@ class Bakery
         $operationName = array_get($input, 'operationName');
 
         return GraphQL::executeQuery($schema, $query, $root, $context, $variables, $operationName);
+    }
+
+    public function id()
+    {
+        return Type::ID();
+    }
+
+    public function string()
+    {
+        return Type::string();
+    }
+
+    public function int()
+    {
+        return Type::int();
+    }
+
+    public function boolean()
+    {
+        return Type::boolean();
+    }
+
+    public function float()
+    {
+        return Type::float();
+    }
+
+    public function listOf($wrappedType)
+    {
+        return Type::listOf($wrappedType);
+    }
+
+    public function nonNull($wrappedType)
+    {
+        return Type::nonNull($wrappedType);
     }
 }

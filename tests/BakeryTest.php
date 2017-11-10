@@ -4,8 +4,6 @@ namespace Scrn\Bakery\Tests;
 
 use GraphQL\Type\Definition\ObjectType;
 use Scrn\Bakery\Exceptions\TypeNotFound;
-use Scrn\Bakery\Queries\CollectionQuery;
-use Scrn\Bakery\Queries\EntityQuery;
 use Scrn\Bakery\Support\Facades\Bakery;
 use Scrn\Bakery\Tests\Stubs;
 

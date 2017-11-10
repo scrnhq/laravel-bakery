@@ -5,7 +5,7 @@ namespace Scrn\Bakery\Tests;
 use Closure;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;
-use Scrn\Bakery\EntityType;
+use Scrn\Bakery\Types\EntityType;
 use Scrn\Bakery\Tests\Stubs;
 
 class EntityTypeTest extends TestCase
@@ -37,7 +37,7 @@ class EntityTypeTest extends TestCase
     public function it_returns_the_object_type()
     {
         $type = new EntityType(Stubs\Model::class);
-        $objectType = $type->toType();
+        $objectType = $type->toGraphQLType();
 
         $this->assertInstanceOf(ObjectType::class, $objectType);
         $this->assertEquals($objectType->name, $type->name);
