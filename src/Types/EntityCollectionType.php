@@ -12,9 +12,7 @@ class EntityCollectionType extends Type
     {
         return [
             'pagination' => Bakery::getType('Pagination'),
-            'items' => [
-                Bakery::listOf(Bakery::getType(class_basename($this->model))),
-            ],
+            'items' => Bakery::listOf(Bakery::getType(class_basename($this->model))),
         ];
     }
 

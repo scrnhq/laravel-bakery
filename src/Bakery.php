@@ -2,19 +2,16 @@
 
 namespace Scrn\Bakery;
 
-use GraphQL\GraphQL;
-use GraphQL\Type\Schema;
-use GraphQL\Type\Definition\Type;
 use GraphQL\Executor\ExecutionResult;
+use GraphQL\GraphQL;
 use GraphQL\Type\Definition\ObjectType;
-
+use GraphQL\Type\Definition\Type;
+use GraphQL\Type\Schema;
 use Scrn\Bakery\Exceptions\TypeNotFound;
-
-use Scrn\Bakery\Queries\EntityQuery;
 use Scrn\Bakery\Queries\CollectionQuery;
-
-use Scrn\Bakery\Types\EntityType;
+use Scrn\Bakery\Queries\EntityQuery;
 use Scrn\Bakery\Types\EntityCollectionType;
+use Scrn\Bakery\Types\EntityType;
 
 class Bakery
 {
@@ -101,10 +98,8 @@ class Bakery
     public function schema()
     {
         $types = [];
-        foreach ($this->models as $model) {
-            $objectType = $this->makeObjectType(new EntityType($model));
-            $this->typeInstances[$objectType->name] = $objectType;
-            $types[] = $objectType;
+        foreach ($this->types as $name => $type) {
+            $types[] = $this->getType($name);
         }
 
         $query = $this->makeObjectType($this->getQueries(), [
