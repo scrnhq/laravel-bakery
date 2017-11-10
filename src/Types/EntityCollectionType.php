@@ -11,7 +11,7 @@ class EntityCollectionType extends Type
     public function fields()
     {
         return [
-            'pagination' => Bakery::getType('Pagination'),
+            'pagination' => Bakery::getType('Pagination'), 
             'items' => Bakery::listOf(Bakery::getType(class_basename($this->model))),
         ];
     }

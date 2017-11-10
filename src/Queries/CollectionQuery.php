@@ -40,7 +40,10 @@ class CollectionQuery extends Fluent
             'name' => $this->name,
             'resolve' => [$this, 'resolve'],
             'type' => Bakery::getType(class_basename($this->class) . 'Collection'),
-            'fields' => [],
+            'args' => [
+                'page' => Bakery::int(),
+                'count' => Bakery::int(),
+            ]
         ];
     }
 
@@ -63,9 +66,20 @@ class CollectionQuery extends Fluent
     public function resolve(): LengthAwarePaginator
     {
         return $this->model->paginate();
+        // return [
+        //     'items' => $result->items(),
+        //     'pagination' => [
+        //         'current_page' => $result->currentPage(),
+        //     ] ,
+        // ];
     }
 
-    public function toArray()
+    /**
+     * Convert the collection query to an array.
+     *
+     * @return array
+     */
+    public function toArray(): array
     {
         return $this->getAttributes();
     }

@@ -9,6 +9,8 @@ use Scrn\Bakery\Tests\Stubs\Model;
 
 class TestCase extends OrchestraTestCase
 {
+    use WithDatabase;
+
     protected function setUp()
     {
         parent::setUp();

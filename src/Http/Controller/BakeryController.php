@@ -2,6 +2,7 @@
 
 namespace Scrn\Bakery\Http\Controller;
 
+use GraphQL\Error\Debug;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
@@ -28,7 +29,8 @@ class BakeryController extends Controller
     {
         $input = $request->all();
 
-        $data = app('bakery')->executeQuery($input);
+        $debug = Debug::INCLUDE_DEBUG_MESSAGE | Debug::RETHROW_INTERNAL_EXCEPTIONS;
+        $data = app('bakery')->executeQuery($input)->toArray($debug);
 
         return response()->json($data, 200, []);
     }
