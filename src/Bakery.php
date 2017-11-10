@@ -209,4 +209,9 @@ class Bakery
     {
         return Type::nonNull($wrappedType);
     }
+
+    public function type($name)
+    {
+        return $this->getType($name);
+    }
 }
