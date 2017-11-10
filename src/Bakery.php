@@ -2,15 +2,19 @@
 
 namespace Scrn\Bakery;
 
-use GraphQL\Executor\ExecutionResult;
 use GraphQL\GraphQL;
-use GraphQL\Type\Definition\ObjectType;
-use GraphQL\Type\Definition\Type;
 use GraphQL\Type\Schema;
+use GraphQL\Type\Definition\Type;
+use GraphQL\Executor\ExecutionResult;
+use GraphQL\Type\Definition\ObjectType;
+
 use Scrn\Bakery\Exceptions\TypeNotFound;
-use Scrn\Bakery\Queries\CollectionQuery;
+
 use Scrn\Bakery\Queries\EntityQuery;
+use Scrn\Bakery\Queries\CollectionQuery;
+
 use Scrn\Bakery\Types\EntityType;
+use Scrn\Bakery\Types\EntityCollectionType;
 
 class Bakery
 {
@@ -84,6 +88,9 @@ class Bakery
     {
         $entityType = new EntityType($class);
         $this->types[$entityType->name] = $entityType;
+
+        $entityCollectionType = new EntityCollectionType($class);
+        $this->types[$entityCollectionType->name] = $entityCollectionType;
     }
 
     /**
@@ -108,12 +115,16 @@ class Bakery
             'name' => 'Mutation',
         ]);
 
-        return new Schema([
+        $schema = new Schema([
             'query' => $query,
             'mutation' => $mutation,
             'subscription' => null,
             'types' => $types,
         ]);
+
+        $schema->assertValid();
+
+        return $schema;
     }
 
     public function getType($name)

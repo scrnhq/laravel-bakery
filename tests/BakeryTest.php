@@ -43,7 +43,6 @@ class BakeryTest extends TestCase
     {
         $schema = Bakery::schema();
 
-//        $this->assertSchema($schema);
         $this->assertArrayHasKey('Model', $schema->getTypeMap());
     }
 

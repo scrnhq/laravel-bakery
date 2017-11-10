@@ -4,8 +4,9 @@ namespace Scrn\Bakery\Queries;
 
 use Illuminate\Support\Fluent;
 use GraphQL\Type\Definition\Type;
-use Scrn\Bakery\Support\Facades\Bakery;
 use Illuminate\Pagination\LengthAwarePaginator;
+
+use Scrn\Bakery\Support\Facades\Bakery;
 
 class CollectionQuery extends Fluent 
 {
@@ -15,8 +16,14 @@ class CollectionQuery extends Fluent
      */
     protected $model;
 
+    /**
+     * A reference to the class.
+     */
+    protected $class;
+
     public function __construct(string $class)
     {
+        $this->class = $class;
         $name = $this->formatName($class);
         $this->model = app()->make($class);
 
@@ -32,7 +39,7 @@ class CollectionQuery extends Fluent
         return [
             'name' => $this->name,
             'resolve' => [$this, 'resolve'],
-            'type' => Type::listOf(Bakery::getType('Model')),
+            'type' => Bakery::getType(class_basename($this->class) . 'Collection'),
             'fields' => [],
         ];
     }
