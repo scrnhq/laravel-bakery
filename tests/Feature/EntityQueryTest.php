@@ -44,4 +44,31 @@ class EntityQueryTest extends TestCase
         $response->assertJsonStructure(['data' => [ 'model' ] ]);
         $this->assertEquals(json_decode($response->getContent())->data->model->id, '1');
     }
+
+        /** @test */
+        public function it_returns_single_entity_for_a_lookup_field()
+        {
+            \Eloquent::unguard();
+
+            Schema::create('models', function ($table) {
+                $table->increments('id');
+                $table->string('slug');
+                $table->timestamps();
+            });
+    
+            Stubs\Model::create(['slug' => 'test-model']);
+    
+            $query = '
+                query {
+                    model(slug: "test-model") {
+                        id
+                    }
+                }
+            ';
+    
+            $response = $this->json('GET', '/graphql', ['query' => $query]);
+            $response->assertStatus(200);
+            $response->assertJsonStructure(['data' => [ 'model' ] ]);
+            $this->assertEquals(json_decode($response->getContent())->data->model->id, '1');
+        }
 }

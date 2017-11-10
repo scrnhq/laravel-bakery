@@ -22,4 +22,16 @@ class Model extends BaseModel
             'field' => Type::string(),
         ];
     }
+
+    /**
+     * The fields that can be used to look up the resource.
+     *
+     * @return array
+     */
+    public function lookupFields()
+    {
+        return [
+            'slug' => Type::string(),
+        ];
+    }
 }

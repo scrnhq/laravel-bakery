@@ -13,4 +13,9 @@ trait GraphQLResource
     {
         return [];
     }
+
+    public function lookupFields(): array
+    {
+        return [];
+    }
 }

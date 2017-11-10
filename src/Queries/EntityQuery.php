@@ -29,13 +29,20 @@ class EntityQuery extends Fluent
         parent::__construct([]);
     }
 
+    /**
+     * Get the attributes of the entity query.
+     *
+     * @return array
+     */
     public function getAttributes()
     {
         return [
             'name' => $this->name,
             'resolve' => [$this, 'resolve'],
-            'type' => Bakery::getType('Model'), 
-            'args' => ['id' => Type::ID()],
+            'type' => Bakery::getType(title_case($this->name)), 
+            'args' => array_merge([
+                $this->model->getKeyName() => Type::ID(),
+            ], $this->model->lookupFields()),
             'fields' => [],
         ];
     }
