@@ -10,7 +10,7 @@ class PaginationType extends Type
         'name' => 'Pagination',
     ];
 
-    public function fields()
+    public function fields(): array
     {
         return [
             'total' => [
@@ -33,10 +33,11 @@ class PaginationType extends Type
                 'type' => Bakery::int(),
                 'description' => 'The next page',
             ],
-            'prev_page' => [
+            'previous_page' => [
                 'type' => Bakery::int(),
                 'description' => 'The previous page',
             ]
         ];
     }
 }
+

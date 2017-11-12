@@ -17,8 +17,8 @@ class EntityTypeTest extends TestCase
         $fields = $type->getFields();
 
         $this->assertArrayHasKey('id', $fields);
-        $this->assertEquals($fields['id'], Type::ID());
-        $this->assertEquals($fields['field'], Type::string());
+        $this->assertEquals($fields['id']['type'], Type::ID());
+        $this->assertEquals($fields['field']['type'], Type::string());
     }
 
     /** @test */

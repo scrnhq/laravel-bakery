@@ -19,7 +19,10 @@ class Model extends BaseModel
     {
         return [
             'id' => Type::ID(),
+            'slug' => Type::string(),
             'field' => Type::string(),
+            'title' => Type::string(),
+            'body' => Type::string(),
         ];
     }
 

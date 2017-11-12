@@ -2,15 +2,14 @@
 
 namespace Scrn\Bakery\Queries;
 
-use Illuminate\Support\Fluent;
-use GraphQL\Type\Definition\Type;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
 
+use Scrn\Bakery\Support\Field;
 use Scrn\Bakery\Support\Facades\Bakery;
 
-class CollectionQuery extends Fluent 
+class CollectionQuery extends Field 
 {
-
     /**
      * A reference to the model.
      */
@@ -21,29 +20,49 @@ class CollectionQuery extends Fluent
      */
     protected $class;
 
+    /**
+     * The name of the query.
+     *
+     * @var string 
+     */
+    protected $name;
+
+    /**
+     * Construct a new collection query.
+     *
+     * @param string $class
+     */
     public function __construct(string $class)
     {
         $this->class = $class;
-        $name = $this->formatName($class);
+        $this->name = $this->formatName($class);
         $this->model = app()->make($class);
-
-        parent::__construct([
-            'name' => $name,
-            'resolve' => [$this, 'resolve'],
-            'fields' => []
-        ]);
     }
 
-    public function getAttributes()
+    /**
+     * Get the attributes of the collection query.
+     *
+     * @return array
+     */
+    public function attributes(): array
     {
         return [
             'name' => $this->name,
-            'resolve' => [$this, 'resolve'],
             'type' => Bakery::getType(class_basename($this->class) . 'Collection'),
-            'args' => [
-                'page' => Bakery::int(),
-                'count' => Bakery::int(),
-            ]
+        ];
+    }
+
+    /**
+     * Get the args of the query.
+     *
+     * @return array
+     */
+    public function args(): array
+    {
+        return [
+            'page' => Bakery::int(),
+            'count' => Bakery::int(),
+            'filter' => Bakery::getType(class_basename($this->class) . 'Filter'),
         ];
     }
 
@@ -63,24 +82,38 @@ class CollectionQuery extends Fluent
      *
      * @return LengthAwarePaginator
      */
-    public function resolve(): LengthAwarePaginator
+    public function resolve($root, $args)
     {
-        return $this->model->paginate();
-        // return [
-        //     'items' => $result->items(),
-        //     'pagination' => [
-        //         'current_page' => $result->currentPage(),
-        //     ] ,
-        // ];
+        $query = $this->model->query();
+
+        if (array_key_exists('filter', $args)) {
+            $query = $this->filter($query, $args['filter']);
+        }
+
+        return $query->paginate();
     }
 
     /**
-     * Convert the collection query to an array.
+     * Filter the query based on the filter argument.
      *
-     * @return array
+     * @param Builder $query
+     * @param array $args
+     * @return Builder
      */
-    public function toArray(): array
+    protected function filter(Builder $query, array $args)
     {
-        return $this->getAttributes();
+        foreach($args as $key => $value) {
+            if (ends_with($key, '_contains')) {
+                $key = str_before($key, '_contains');
+                $query->where($key, 'LIKE', '%' . $value . '%');
+            } else if(ends_with($key, '_not')) {
+                $key = str_before($key, '_not');
+                $query->where($key, '!=', $value);
+            } else {
+                $query->where($key, $value);
+            }
+        }
+
+        return $query;
     }
 }

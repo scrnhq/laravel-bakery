@@ -4,20 +4,25 @@ namespace Scrn\Bakery\Types;
 
 class EntityType extends Type
 {
+    protected $name;
+
     protected $model;
 
-    public function fields()
+    public function __construct(string $class)
     {
-        return $this->model->fields();
+        $this->name = class_basename($class);
+        $this->model = app($class);
     }
 
-    public function __construct(string $class, array $attributes = [])
+    public function attributes(): array
     {
-        $name = class_basename($class);
-        $this->model = app($class);
+        return [
+            'name' => $this->name,
+        ];
+    }
 
-        parent::__construct(array_merge([
-            'name' => $name,
-        ], $attributes));
+    public function fields(): array
+    {
+        return $this->model->fields();
     }
 }

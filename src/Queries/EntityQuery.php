@@ -6,7 +6,6 @@ use Illuminate\Support\Fluent;
 use GraphQL\Type\Definition\Type;
 use Scrn\Bakery\Support\Facades\Bakery;
 use Illuminate\Database\Eloquent\Model;
-use GraphQL\Type\Definition\ObjectType;
 
 class EntityQuery extends Fluent
 {

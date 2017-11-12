@@ -2,16 +2,19 @@
 
 namespace Scrn\Bakery;
 
-use GraphQL\Executor\ExecutionResult;
 use GraphQL\GraphQL;
-use GraphQL\Type\Definition\ObjectType;
-use GraphQL\Type\Definition\Type;
 use GraphQL\Type\Schema;
+use GraphQL\Executor\ExecutionResult;
+
+use GraphQL\Type\Definition\Type;
+use GraphQL\Type\Definition\ObjectType;
+
+use Scrn\Bakery\Types\EntityType;
+use Scrn\Bakery\Queries\EntityQuery;
 use Scrn\Bakery\Exceptions\TypeNotFound;
 use Scrn\Bakery\Queries\CollectionQuery;
-use Scrn\Bakery\Queries\EntityQuery;
 use Scrn\Bakery\Types\EntityCollectionType;
-use Scrn\Bakery\Types\EntityType;
+use Scrn\Bakery\Types\CollectionFilterType;
 
 class Bakery
 {
@@ -46,7 +49,7 @@ class Bakery
     public function addModel($class)
     {
         $this->models[] = $class;
-        $this->registerEntityType($class);
+        $this->registerEntityTypes($class);
         $this->registerEntityQuery($class);
         $this->registerCollectionQuery($class);
         return $this;
@@ -81,13 +84,16 @@ class Bakery
         $this->queries[$collectionQuery->name] = $collectionQuery;
     }
 
-    protected function registerEntityType($class)
+    protected function registerEntityTypes($class)
     {
         $entityType = new EntityType($class);
         $this->types[$entityType->name] = $entityType;
 
         $entityCollectionType = new EntityCollectionType($class);
         $this->types[$entityCollectionType->name] = $entityCollectionType;
+
+        $collectionFilterType = new CollectionFilterType($class);
+        $this->types[$collectionFilterType->name] = $collectionFilterType; 
     }
 
     /**
