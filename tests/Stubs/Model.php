@@ -23,6 +23,7 @@ class Model extends BaseModel
             'field' => Type::string(),
             'title' => Type::string(),
             'body' => Type::string(),
+            'comments' => Type::int(),
         ];
     }
 

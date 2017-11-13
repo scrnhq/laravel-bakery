@@ -87,7 +87,7 @@ class CollectionQuery extends Field
         $query = $this->model->query();
 
         if (array_key_exists('filter', $args)) {
-            $query = $this->filter($query, $args['filter']);
+            $query = $this->applyFilters($query, $args['filter']);
         }
 
         return $query->paginate();
@@ -98,22 +98,91 @@ class CollectionQuery extends Field
      *
      * @param Builder $query
      * @param array $args
+     * @param string $type
      * @return Builder
      */
-    protected function filter(Builder $query, array $args)
+    protected function applyFilters(Builder $query, array $args)
     {
         foreach($args as $key => $value) {
-            if (ends_with($key, '_contains')) {
-                $key = str_before($key, '_contains');
-                $query->where($key, 'LIKE', '%' . $value . '%');
-            } else if(ends_with($key, '_not')) {
-                $key = str_before($key, '_not');
-                $query->where($key, '!=', $value);
+            if ($key === 'AND' || $key === 'OR') {
+                foreach($this->flatten($value) as $subKey => $subValue) {
+                    $this->filter($query, $subKey, $subValue, $key);
+                }
             } else {
-                $query->where($key, $value);
+                $this->filter($query, $key, $value, 'AND');
             }
         }
 
         return $query;
+    }
+
+    /**
+     * Filter the query by a key and value.
+     *
+     * @param Builder $query
+     * @param string $key
+     * @param mixed $value
+     * @param string $type
+     * @return Builder
+     */
+    protected function filter(Builder $query, string $key, $value, string $type = 'AND')
+    {
+        if (ends_with($key, '_not_contains')) {
+            $key = str_before($key, '_not_contains');
+            $query->where($key, 'NOT LIKE', '%' . $value . '%', $type);
+        } else if (ends_with($key, '_contains')) {
+            $key = str_before($key, '_contains');
+            $query->where($key, 'LIKE', '%' . $value . '%', $type);
+        } else if (ends_with($key, '_not_starts_with')) {
+            $key = str_before($key, '_not_starts_with');
+            $query->where($key, 'NOT LIKE', $value . '%', $type);
+        } else if (ends_with($key, '_starts_with')) {
+            $key = str_before($key, '_starts_with');
+            $query->where($key, 'LIKE', $value . '%', $type);
+        } else if (ends_with($key, '_not_ends_with')) {
+            $key = str_before($key, '_not_ends_with');
+            $query->where($key, 'NOT LIKE', '%'. $value, $type);
+        } else if (ends_with($key, '_ends_with')) {
+            $key = str_before($key, '_ends_with');
+            $query->where($key, 'LIKE', '%' . $value, $type);
+        } else if(ends_with($key, '_not')) {
+            $key = str_before($key, '_not');
+            $query->where($key, '!=', $value, $type);
+        } else if(ends_with($key, '_not_in')) {
+            $key = str_before($key, '_not_in');
+            $query->whereNotIn($key, $value, $type);
+        } else if (ends_with($key, '_in')) {
+            $key = str_before($key, '_in');
+            $query->whereIn($key, $value, $type);
+        } else if (ends_with($key, '_lt')) {
+            $key = str_before($key, '_lt');
+            $query->where($key, '<', $value, $type);
+        } else if (ends_with($key, '_lte')) {
+            $key = str_before($key, '_lte');
+            $query->where($key, '<=', $value, $type);
+        } else if (ends_with($key, '_gt')) {
+            $key = str_before($key, '_gt');
+            $query->where($key, '>', $value, $type);
+        } else if (ends_with($key, '_gte')) {
+            $key = str_before($key, '_gte');
+            $query->where($key, '>=', $value, $type);
+        } else {
+            $query->where($key, '=', $value, $type);
+        }
+
+        return $query;
+    }
+
+    /**
+     * Flat the nested filter args array.
+     *
+     * @param  array $args
+     * @return array
+     */
+    protected function flatten(array $args)
+    {
+        return collect($args)->flatMap(function ($values) {
+            return $values;
+        })->toArray();
     }
 }

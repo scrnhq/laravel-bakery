@@ -63,7 +63,11 @@ class CollectionFilterType extends Type
         foreach($fields as $name => $type) {
             $fields[$name . '_contains'] = $type;
             $fields[$name . '_not'] = $type;
+            $fields[$name . '_in'] = Bakery::listOf($type);
         }
+
+        $fields['AND'] = Bakery::listOf(Bakery::getType($this->name));
+        $fields['OR'] = Bakery::listOf(Bakery::getType($this->name));
 
         return $fields;
     }

@@ -29,6 +29,7 @@ class CollectionQueryTest extends TestCase
         Schema::create('models', function ($table) {
             $table->increments('id');
             $table->string('title')->nullable();
+            $table->string('body')->nullable();
             $table->timestamps();
         });
 
@@ -123,5 +124,56 @@ class CollectionQueryTest extends TestCase
         $response->assertStatus(200);
         $result = json_decode($response->getContent())->data->models;
         $this->assertCount(2, $result->items);
+    }
+
+    /** @test */
+    public function it_can_filter_with_AND_filters()
+    {
+        Stubs\Model::create(['title' => 'Hello world', 'body' => 'Dummy content']);
+        Stubs\Model::create(['title' => 'Hello mars']);
+        Stubs\Model::create(['title' => 'Goodbye world']);
+
+        $query = '
+            query {
+                models(filter: {
+                    AND: [{title_contains: "hello"}, {body: "Dummy content"}]
+                }) {
+                    items {
+                        id
+                    }
+                }
+            }
+        ';
+
+        $response = $this->json('GET', '/graphql', ['query' => $query]);
+        $response->assertStatus(200);
+        $result = json_decode($response->getContent())->data->models;
+        $this->assertCount(1, $result->items);
+    }
+
+    /** @test */
+    public function it_can_filter_with_OR_filters()
+    {
+        Stubs\Model::create(['title' => 'Hello world']);
+        Stubs\Model::create(['title' => 'Hello mars']);
+        Stubs\Model::create(['title' => 'Goodbye world', 'body' => 'Lorem ipsum']);
+        Stubs\Model::create(['title' => 'Something completly different']);
+
+        $query = '
+            query {
+                models(filter: {
+                    OR: [{title_contains: "hello"}, {body: "Lorem ipsum"}]
+                }) {
+                    items {
+                        id
+                    }
+                }
+            }
+        ';
+
+        $response = $this->json('GET', '/graphql', ['query' => $query]);
+        $response->assertStatus(200);
+        $result = json_decode($response->getContent())->data->models;
+        $this->assertCount(3, $result->items);
     }
 }
