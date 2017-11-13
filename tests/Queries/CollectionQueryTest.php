@@ -239,4 +239,34 @@ class CollectionQueryTest extends TestCase
 
         $this->assertCount(1, $result->items());
     }
+
+    /** @test */
+    public function it_orders_by_a_field_in_ascending_order()
+    {
+        $first = Model::create(['title' => 'Hello mars']); 
+        $second = Model::create(['title' => 'Hello world']);
+        $third = Model::create(['title' => 'Goodbye world']); 
+
+        $query = new CollectionQuery(Model::class);
+        $result = $query->resolve(null, ['orderBy' => 'title_ASC']);
+
+        $this->assertTrue($result->items()[0]->is($third));
+        $this->assertTrue($result->items()[1]->is($first));
+        $this->assertTrue($result->items()[2]->is($second));
+    }
+
+    /** @test */
+    public function it_orders_by_a_field_in_descending_order()
+    {
+        $first = Model::create(['title' => 'Hello mars']); 
+        $second = Model::create(['title' => 'Hello world']);
+        $third = Model::create(['title' => 'Goodbye world']); 
+
+        $query = new CollectionQuery(Model::class);
+        $result = $query->resolve(null, ['orderBy' => 'title_DESC']);
+
+        $this->assertTrue($result->items()[0]->is($second));
+        $this->assertTrue($result->items()[1]->is($first));
+        $this->assertTrue($result->items()[2]->is($third));
+    }
 }

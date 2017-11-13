@@ -15,6 +15,7 @@ use Scrn\Bakery\Exceptions\TypeNotFound;
 use Scrn\Bakery\Queries\CollectionQuery;
 use Scrn\Bakery\Types\EntityCollectionType;
 use Scrn\Bakery\Types\CollectionFilterType;
+use Scrn\Bakery\Types\CollectionOrderByType;
 
 class Bakery
 {
@@ -94,6 +95,9 @@ class Bakery
 
         $collectionFilterType = new CollectionFilterType($class);
         $this->types[$collectionFilterType->name] = $collectionFilterType; 
+
+        $collectionOrderByType = new CollectionOrderByType($class);
+        $this->types[$collectionOrderByType->name] = $collectionOrderByType; 
     }
 
     /**

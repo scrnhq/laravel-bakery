@@ -176,4 +176,29 @@ class CollectionQueryTest extends TestCase
         $result = json_decode($response->getContent())->data->models;
         $this->assertCount(3, $result->items);
     }
+
+    /** @test */
+    public function it_can_order_by_field()
+    {
+        $first = Stubs\Model::create(['title' => 'Hello mars']);
+        $second = Stubs\Model::create(['title' => 'Hello world']);
+        $third = Stubs\Model::create(['title' => 'Goodbye world']);
+
+        $query = '
+            query {
+                models(orderBy: title_ASC) {
+                    items {
+                        id
+                    }
+                }
+            }
+        ';
+
+        $response = $this->json('GET', '/graphql', ['query' => $query]);
+        $response->assertStatus(200);
+        $result = json_decode($response->getContent())->data->models;
+        $this->assertEquals($result->items[0]->id, $third->id);
+        $this->assertEquals($result->items[1]->id, $first->id);
+        $this->assertEquals($result->items[2]->id, $second->id);
+    }
 }

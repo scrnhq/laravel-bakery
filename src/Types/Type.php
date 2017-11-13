@@ -5,18 +5,10 @@ namespace Scrn\Bakery\Types;
 use Illuminate\Support\Fluent;
 
 use GraphQL\Type\Definition\ObjectType;
-use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\Type as BaseType;
 
 class Type extends Fluent
 {
-    /**
-     * Define if the type is an input type or not.
-     *
-     * @var boolean
-     */
-    protected $input = false;
-
     /**
      * Return the default fields.
      *
@@ -120,10 +112,6 @@ class Type extends Fluent
      */
     public function toGraphQLType(): BaseType
     {
-        if ($this->input) {
-            return new InputObjectType($this->toArray());
-        }
-
         return new ObjectType($this->toArray());
     }
 

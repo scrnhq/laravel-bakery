@@ -2,10 +2,11 @@
 
 namespace Scrn\Bakery\Types;
 
+use Scrn\Bakery\Types\EnumType;
 use Illuminate\Database\Eloquent\Model;
 use Scrn\Bakery\Support\Facades\Bakery;
 
-class CollectionFilterType extends InputType
+class CollectionOrderByType extends EnumType
 {
     /**
      * The name of the type.
@@ -22,20 +23,13 @@ class CollectionFilterType extends InputType
     protected $model;
 
     /**
-     * Define the collection filter type as an input type.
-     *
-     * @var boolean
-     */
-    protected $input = true;
-
-    /**
-     * Construct a new collection filter type.
+     * Construct a new collection orderby type.
      *
      * @param string $class
      */
     public function __construct(string $class)
     {
-        $this->name = class_basename($class) . 'Filter';
+        $this->name = class_basename($class) . 'OrderBy';
         $this->model = app($class);
     }
 
@@ -56,19 +50,15 @@ class CollectionFilterType extends InputType
      *
      * @return array
      */
-    public function fields(): array
+    protected function values(): array
     {
-        $fields = $this->model->fields();
+        $values = [];
 
-        foreach($fields as $name => $type) {
-            $fields[$name . '_contains'] = $type;
-            $fields[$name . '_not'] = $type;
-            $fields[$name . '_in'] = Bakery::listOf($type);
+        foreach($this->model->fields() as $name => $type) {
+            $values[] = $name . '_ASC';
+            $values[] = $name . '_DESC';
         }
 
-        $fields['AND'] = Bakery::listOf(Bakery::getType($this->name));
-        $fields['OR'] = Bakery::listOf(Bakery::getType($this->name));
-
-        return $fields;
+        return $values; 
     }
 }

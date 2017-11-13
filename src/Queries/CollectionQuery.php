@@ -63,6 +63,7 @@ class CollectionQuery extends Field
             'page' => Bakery::int(),
             'count' => Bakery::int(),
             'filter' => Bakery::getType(class_basename($this->class) . 'Filter'),
+            'orderBy' => Bakery::getType(class_basename($this->class) . 'OrderBy'),
         ];
     }
 
@@ -88,6 +89,10 @@ class CollectionQuery extends Field
 
         if (array_key_exists('filter', $args)) {
             $query = $this->applyFilters($query, $args['filter']);
+        }
+
+        if (array_key_exists('orderBy', $args)) {
+            $query = $this->applyOrderBy($query, $args['orderBy']);
         }
 
         return $query->paginate();
@@ -169,6 +174,23 @@ class CollectionQuery extends Field
         } else {
             $query->where($key, '=', $value, $type);
         }
+
+        return $query;
+    }
+
+    /**
+     * Apply ordering on the query.
+     *
+     * @param Builder $query
+     * @param string $orderBy
+     * @return Builder
+     */
+    protected function applyOrderBy(Builder $query, $orderBy)
+    {
+        $column = str_before($orderBy, '_');
+        $ordering = str_after($orderBy, '_');
+
+        $query->orderBy($column, $ordering);
 
         return $query;
     }
