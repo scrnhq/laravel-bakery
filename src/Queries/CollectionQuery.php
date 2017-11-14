@@ -2,6 +2,7 @@
 
 namespace Scrn\Bakery\Queries;
 
+use GraphQL\Type\Definition\Type;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
 
@@ -21,39 +22,32 @@ class CollectionQuery extends Field
     protected $class;
 
     /**
-     * The name of the query.
-     *
-     * @var string 
-     */
-    protected $name;
-
-    /**
      * Construct a new collection query.
      *
      * @param string $class
+     * @param array $arguments
      */
-    public function __construct(string $class)
+    public function __construct(string $class, array $arguments = [])
     {
-        $this->class = $class;
         $this->name = $this->formatName($class);
         $this->model = app()->make($class);
+        $this->class = $class;
+
+        parent::__construct($arguments);
     }
 
     /**
-     * Get the attributes of the collection query.
+     * The type of the CollectionQuery.
      *
-     * @return array
+     * @return mixed
      */
-    public function attributes(): array
+    public function type(): Type
     {
-        return [
-            'name' => $this->name,
-            'type' => Bakery::getType(class_basename($this->class) . 'Collection'),
-        ];
+        return Bakery::getType(class_basename($this->class) . 'Collection');
     }
 
     /**
-     * Get the args of the query.
+     * The arguments for the CollectionQuery.
      *
      * @return array
      */
@@ -79,8 +73,10 @@ class CollectionQuery extends Field
     }
 
     /**
-     * Resolve the entity query.
+     * Resolve the CollectionQuery.
      *
+     * @param $root
+     * @param $args
      * @return LengthAwarePaginator
      */
     public function resolve($root, $args)
@@ -103,7 +99,6 @@ class CollectionQuery extends Field
      *
      * @param Builder $query
      * @param array $args
-     * @param string $type
      * @return Builder
      */
     protected function applyFilters(Builder $query, array $args)

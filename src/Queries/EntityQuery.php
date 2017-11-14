@@ -2,12 +2,13 @@
 
 namespace Scrn\Bakery\Queries;
 
-use Illuminate\Support\Fluent;
 use GraphQL\Type\Definition\Type;
-use Scrn\Bakery\Support\Facades\Bakery;
 use Illuminate\Database\Eloquent\Model;
 
-class EntityQuery extends Fluent
+use Scrn\Bakery\Types\Field;
+use Scrn\Bakery\Support\Facades\Bakery;
+
+class EntityQuery extends Field
 {
     /**
      * A reference to the model.
@@ -18,32 +19,36 @@ class EntityQuery extends Fluent
      * Construct a new entity query.
      *
      * @param string $class
-     * @param string $name
+     * @param array $attributes
      */
-    public function __construct(string $class)
+    public function __construct(string $class, array $attributes = [])
     {
         $this->name = $this->formatName($class);
         $this->model = app()->make($class);
 
-        parent::__construct([]);
+        parent::__construct($attributes);
     }
 
     /**
-     * Get the attributes of the entity query.
+     * The type of the query.
+     *
+     * @return Type
+     */
+    public function type()
+    {
+        return Bakery::getType(title_case($this->name));
+    }
+
+    /**
+     * The arguments for the query.
      *
      * @return array
      */
-    public function getAttributes()
+    public function args(): array
     {
-        return [
-            'name' => $this->name,
-            'resolve' => [$this, 'resolve'],
-            'type' => Bakery::getType(title_case($this->name)), 
-            'args' => array_merge([
-                $this->model->getKeyName() => Type::ID(),
-            ], $this->model->lookupFields()),
-            'fields' => [],
-        ];
+        return array_merge([
+            $this->model->getKeyName() => Type::ID(),
+        ], $this->model->lookupFields());
     }
 
     /**
@@ -58,7 +63,7 @@ class EntityQuery extends Fluent
     }
 
     /**
-     * Resolve the entity query.
+     * Resolve the EntityQuery.
      *
      * @param mixed $root
      * @param array $args
@@ -79,10 +84,5 @@ class EntityQuery extends Fluent
         }
 
         return $query->firstOrFail();
-    }
-
-    public function toArray()
-    {
-        return $this->getAttributes();
     }
 }
