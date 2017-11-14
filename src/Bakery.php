@@ -11,8 +11,10 @@ use GraphQL\Type\Definition\ObjectType;
 
 use Scrn\Bakery\Types\EntityType;
 use Scrn\Bakery\Queries\EntityQuery;
+use Scrn\Bakery\Types\CreateInputType;
 use Scrn\Bakery\Exceptions\TypeNotFound;
 use Scrn\Bakery\Queries\CollectionQuery;
+use Scrn\Bakery\Mutations\CreateMutation;
 use Scrn\Bakery\Types\EntityCollectionType;
 use Scrn\Bakery\Types\CollectionFilterType;
 use Scrn\Bakery\Types\CollectionOrderByType;
@@ -47,11 +49,19 @@ class Bakery
      */
     protected $queries = [];
 
+    /**
+     * The mutations.
+     *
+     * @var array
+     */
+    protected $mutations = [];
+
     public function addModel($class)
     {
         $this->models[] = $class;
         $this->registerEntityTypes($class);
         $this->registerEntityQuery($class);
+        $this->registerMutations($class);
         $this->registerCollectionQuery($class);
         return $this;
     }
@@ -73,6 +83,13 @@ class Bakery
         }, $this->queries);
     }
 
+    public function getMutations()
+    {
+        return array_map(function ($mutation) {
+            return $mutation->toArray();
+        }, $this->mutations);
+    }
+
     protected function registerEntityQuery($class)
     {
         $entityQuery = new EntityQuery($class);
@@ -83,6 +100,12 @@ class Bakery
     {
         $collectionQuery = new CollectionQuery($class);
         $this->queries[$collectionQuery->name] = $collectionQuery;
+    }
+
+    protected function registerMutations($class)
+    {
+        $createMutation = new CreateMutation($class);
+        $this->mutations[$createMutation->name] = $createMutation;
     }
 
     protected function registerEntityTypes($class)
@@ -97,7 +120,10 @@ class Bakery
         $this->types[$collectionFilterType->name] = $collectionFilterType; 
 
         $collectionOrderByType = new CollectionOrderByType($class);
-        $this->types[$collectionOrderByType->name] = $collectionOrderByType; 
+        $this->types[$collectionOrderByType->name] = $collectionOrderByType;
+
+        $createInputType = new CreateInputType($class);
+        $this->types[$createInputType->name] = $createInputType;
     }
 
     /**
@@ -108,6 +134,7 @@ class Bakery
     public function schema()
     {
         $types = [];
+
         foreach ($this->types as $name => $type) {
             $types[] = $this->getType($name);
         }
@@ -116,7 +143,7 @@ class Bakery
             'name' => 'Query',
         ]);
 
-        $mutation = $this->makeObjectType(['mutation' => Type::boolean()], [
+        $mutation = $this->makeObjectType($this->getMutations(), [
             'name' => 'Mutation',
         ]);
 

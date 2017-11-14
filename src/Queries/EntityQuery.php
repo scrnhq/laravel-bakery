@@ -60,6 +60,7 @@ class EntityQuery extends Fluent
     /**
      * Resolve the entity query.
      *
+     * @param mixed $root
      * @param array $args
      * @return Model
      */

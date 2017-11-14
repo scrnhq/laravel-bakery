@@ -11,6 +11,15 @@ class Model extends BaseModel
     use GraphQLResource;
 
     /**
+     * Define the fillable fields.
+     *
+     * @var array
+     */
+    protected $fillable = [
+        'title'
+    ];
+
+    /**
      * The fields exposed in GraphQL.
      *
      * @return array
