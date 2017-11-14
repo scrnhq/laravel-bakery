@@ -5,7 +5,7 @@ namespace Scrn\Bakery\Queries;
 use GraphQL\Type\Definition\Type;
 use Illuminate\Database\Eloquent\Model;
 
-use Scrn\Bakery\Types\Field;
+use Scrn\Bakery\Support\Field;
 use Scrn\Bakery\Support\Facades\Bakery;
 
 class EntityQuery extends Field

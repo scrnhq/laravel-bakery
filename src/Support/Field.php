@@ -7,17 +7,17 @@ use Illuminate\Support\Fluent;
 class Field extends Fluent
 {
     /**
-     * Return the default attributes.
+     * The attributes of the Field.
      *
      * @return array
      */
-    public function attributes(): array
+    public function attributes()
     {
         return [];
     }
 
     /**
-     * Return the default types.
+     * The type of the Field.
      *
      * @return null
      */
@@ -27,43 +27,57 @@ class Field extends Fluent
     }
 
     /**
-     * Return the default args.
+     * The arguments for the Field.
      *
      * @return array
      */
-    public function args(): array
+    public function args()
     {
         return [];
     }
 
     /**
-     * Get the attributes for the field. 
+     * Retrieve the resolver for the Field.
+     *
+     * @return Callback|null
+     */
+    protected function getResolver()
+    {
+        if (!method_exists($this, 'resolve')) {
+            return null;
+        }
+
+        return [$this, 'resolve'];
+    }
+
+    /**
+     * Get the attributes from the container.
      *
      * @return array
      */
     public function getAttributes()
     {
-        $args = $this->args();
-        $type = $this->type();
         $attributes = $this->attributes();
 
         $attributes = array_merge($this->attributes, [
-            'args' => $args
+            'args' => $this->args(),
         ], $attributes);
 
+        $type = $this->type();
         if (isset($type)) {
             $attributes['type'] = $type;
         }
 
-        if (method_exists($this, 'resolve')) {
-            $attributes['resolve'] = [$this, 'resolve'];
+        $resolver = $this->getResolver();
+        if ($resolver) {
+            $attributes['resolve'] = $resolver;
         }
 
         return $attributes;
     }
 
     /**
-     * Convert the field to an array. 
+     * Convert the Field instance to an array.
      *
      * @return array
      */
