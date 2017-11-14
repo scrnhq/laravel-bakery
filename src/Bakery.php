@@ -2,25 +2,25 @@
 
 namespace Scrn\Bakery;
 
-use GraphQL\GraphQL;
-use GraphQL\Type\Schema;
 use GraphQL\Executor\ExecutionResult;
-
-use GraphQL\Type\Definition\Type;
+use GraphQL\GraphQL;
 use GraphQL\Type\Definition\ObjectType;
-
-use Scrn\Bakery\Types\EntityType;
-use Scrn\Bakery\Queries\EntityQuery;
-use Scrn\Bakery\Types\CreateInputType;
+use GraphQL\Type\Schema;
 use Scrn\Bakery\Exceptions\TypeNotFound;
-use Scrn\Bakery\Queries\CollectionQuery;
 use Scrn\Bakery\Mutations\CreateMutation;
-use Scrn\Bakery\Types\EntityCollectionType;
+use Scrn\Bakery\Queries\CollectionQuery;
+use Scrn\Bakery\Queries\EntityQuery;
+use Scrn\Bakery\Traits\BakeryTypes;
 use Scrn\Bakery\Types\CollectionFilterType;
 use Scrn\Bakery\Types\CollectionOrderByType;
+use Scrn\Bakery\Types\CreateInputType;
+use Scrn\Bakery\Types\EntityCollectionType;
+use Scrn\Bakery\Types\EntityType;
 
 class Bakery
 {
+    use BakeryTypes;
+
     /**
      * The registered models.
      *
@@ -71,9 +71,32 @@ class Bakery
         return $this->models;
     }
 
-    public function addType($type, $name)
+    /**
+     * Add a type to the registry.
+     *
+     * @param $class
+     * @param string|null $name
+     */
+    public function addType($class, string $name = null)
     {
-        $this->types[$name] = $type;
+        $name = $this->getTypeName($class, $name);
+        $this->types[$name] = $class;
+    }
+
+    /**
+     * Return the name of the type.
+     *
+     * @param $class
+     * @param null|string $name
+     * @return string
+     */
+    protected function getTypeName($class, string $name = null): string
+    {
+        return $name
+            ? $name
+            : (is_object($class)
+                ? $class
+                : resolve($class))->name;
     }
 
     public function getQueries()
@@ -110,20 +133,11 @@ class Bakery
 
     protected function registerEntityTypes($class)
     {
-        $entityType = new EntityType($class);
-        $this->types[$entityType->name] = $entityType;
-
-        $entityCollectionType = new EntityCollectionType($class);
-        $this->types[$entityCollectionType->name] = $entityCollectionType;
-
-        $collectionFilterType = new CollectionFilterType($class);
-        $this->types[$collectionFilterType->name] = $collectionFilterType; 
-
-        $collectionOrderByType = new CollectionOrderByType($class);
-        $this->types[$collectionOrderByType->name] = $collectionOrderByType;
-
-        $createInputType = new CreateInputType($class);
-        $this->types[$createInputType->name] = $createInputType;
+        $this->addType(new EntityType($class));
+        $this->addType(new EntityCollectionType($class));
+        $this->addType(new CollectionFilterType($class));
+        $this->addType(new CollectionOrderByType($class));
+        $this->addType(new CreateInputType($class));
     }
 
     /**
@@ -143,15 +157,21 @@ class Bakery
             'name' => 'Query',
         ]);
 
+        $this->addType($query);
+
         $mutation = $this->makeObjectType($this->getMutations(), [
             'name' => 'Mutation',
         ]);
+
+        $this->addType($mutation);
 
         $schema = new Schema([
             'query' => $query,
             'mutation' => $mutation,
             'subscription' => null,
-            'types' => $types,
+            'typeLoader' => function ($name) {
+                return $this->type($name);
+            },
         ]);
 
         $schema->assertValid();
@@ -179,7 +199,9 @@ class Bakery
     public function makeObjectType($type, $options = [])
     {
         $objectType = null;
-        if (is_array($type)) {
+        if ($type instanceof ObjectType) {
+            $objectType = $type;
+        } elseif (is_array($type)) {
             $objectType = $this->makeObjectTypeFromFields($type, $options);
         } else {
             $objectType = $this->makeObjectTypeFromClass($type, $options);
@@ -216,41 +238,6 @@ class Bakery
         $operationName = array_get($input, 'operationName');
 
         return GraphQL::executeQuery($schema, $query, $root, $context, $variables, $operationName);
-    }
-
-    public function id()
-    {
-        return Type::ID();
-    }
-
-    public function string()
-    {
-        return Type::string();
-    }
-
-    public function int()
-    {
-        return Type::int();
-    }
-
-    public function boolean()
-    {
-        return Type::boolean();
-    }
-
-    public function float()
-    {
-        return Type::float();
-    }
-
-    public function listOf($wrappedType)
-    {
-        return Type::listOf($wrappedType);
-    }
-
-    public function nonNull($wrappedType)
-    {
-        return Type::nonNull($wrappedType);
     }
 
     public function type($name)
