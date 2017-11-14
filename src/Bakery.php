@@ -174,8 +174,6 @@ class Bakery
             },
         ]);
 
-        $schema->assertValid();
-
         return $schema;
     }
 
