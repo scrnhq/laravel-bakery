@@ -2,7 +2,7 @@
 
 namespace Scrn\Bakery\Tests\Stubs;
 
-use GraphQL\Type\Definition\Type;
+use Scrn\Bakery\Support\Facades\Bakery;
 use Illuminate\Database\Eloquent\Model as BaseModel;
 use Scrn\Bakery\Traits\GraphQLResource;
 
@@ -16,7 +16,7 @@ class Model extends BaseModel
      * @var array
      */
     protected $fillable = [
-        'title'
+        'title',
     ];
 
     /**
@@ -27,12 +27,11 @@ class Model extends BaseModel
     public function fields()
     {
         return [
-            'id' => Type::ID(),
-            'slug' => Type::string(),
-            'field' => Type::string(),
-            'title' => Type::string(),
-            'body' => Type::string(),
-            'comments' => Type::int(),
+            'id' => Bakery::ID(),
+            'slug' => Bakery::string(),
+            'field' => Bakery::string(),
+            'title' => Bakery::string(),
+            'body' => Bakery::string(),
         ];
     }
 
@@ -44,7 +43,7 @@ class Model extends BaseModel
     public function lookupFields()
     {
         return [
-            'slug' => Type::string(),
+            'slug' => Bakery::string(),
         ];
     }
 }

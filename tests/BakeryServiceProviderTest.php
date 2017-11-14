@@ -2,6 +2,8 @@
 
 namespace Scrn\Bakery\Tests;
 
+use Scrn\Bakery\Tests\Stubs\Model;
+
 class BakeryServiceProviderTest extends TestCase
 {
     /** @test */
@@ -16,5 +18,6 @@ class BakeryServiceProviderTest extends TestCase
         $config = app()->config['bakery'];
         $this->assertNotEmpty($config);
         $this->assertArrayHasKey('models', $config);
+        $this->assertContains(Model::class, $config['models']);
     }
 }

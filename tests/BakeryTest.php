@@ -21,11 +21,11 @@ class BakeryTest extends TestCase
     /** @test */
     public function it_returns_the_object_type_for_a_model()
     {
-        $type = Bakery::getType('Model');
+        $type = Bakery::type('Model');
 
         $this->assertInstanceOf(ObjectType::class, $type);
 
-        $typeOther = Bakery::getType('Model');
+        $typeOther = Bakery::type('Model');
 
         $this->assertSame($type, $typeOther);
     }
@@ -35,7 +35,7 @@ class BakeryTest extends TestCase
     {
         $this->expectException(TypeNotFound::class);
 
-        Bakery::getType('WrongType');
+        Bakery::type('WrongType');
     }
 
     /** @test */

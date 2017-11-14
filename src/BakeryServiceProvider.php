@@ -3,7 +3,6 @@
 namespace Scrn\Bakery;
 
 use Illuminate\Support\ServiceProvider;
-use Scrn\Bakery\Types\PaginationType;
 
 class BakeryServiceProvider extends ServiceProvider
 {
@@ -47,10 +46,6 @@ class BakeryServiceProvider extends ServiceProvider
         $this->app->singleton(static::$abstract, function ($app) {
             $bakery = new Bakery();
 
-            $this->addModels($bakery);
-
-            $bakery->addType(new PaginationType(), 'Pagination');
-
             return $bakery;
         });
     }
@@ -67,27 +62,40 @@ class BakeryServiceProvider extends ServiceProvider
     }
 
     /**
-     * Register the models
-     *
-     * @param Bakery $bakery
-     */
-    protected function addModels(Bakery $bakery)
-    {
-        $models = $this->app['config']->get('bakery.models');
-
-        foreach ($models as $model) {
-            $bakery->addModel($model);
-        }
-    }
-
-    /**
      * Perform post-registration booting of services.
      *
      * @return void
      */
     public function boot()
     {
-        $this->publishes([$this->getConfigPath() => config_path('bakery.php')], 'bakery');
+        $this->bootBakery();
+        $this->bootPublishes();
+    }
+
+    public function bootPublishes()
+    {
+        $this->publishes([
+            $this->getConfigPath() => config_path('bakery.php')
+        ], 'bakery');
+    }
+
+    public function bootBakery()
+    {
+        $this->addModels(app('bakery'));
+    }
+
+    /**
+     * Register the models
+     *
+     * @param Bakery $bakery
+     */
+    protected function addModels(Bakery $bakery)
+    {
+        $models = $this->app['config']->get('bakery.models', []);
+
+        foreach ($models as $model) {
+            $bakery->addModel($model);
+        }
     }
 
     /**
