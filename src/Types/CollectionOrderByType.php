@@ -2,23 +2,21 @@
 
 namespace Scrn\Bakery\Types;
 
-use Scrn\Bakery\Types\EnumType;
 use Illuminate\Database\Eloquent\Model;
-use Scrn\Bakery\Support\Facades\Bakery;
 
 class CollectionOrderByType extends EnumType
 {
     /**
      * The name of the type.
      *
-     * @var string 
+     * @var string
      */
     protected $name;
 
     /**
      * A reference to the model.
      *
-     * @var Model 
+     * @var Model
      */
     protected $model;
 
@@ -34,7 +32,7 @@ class CollectionOrderByType extends EnumType
     }
 
     /**
-     * Return the attributes for the filter collection type. 
+     * Return the attributes for the filter collection type.
      *
      * @return array
      */
@@ -50,7 +48,7 @@ class CollectionOrderByType extends EnumType
      *
      * @return array
      */
-    protected function values(): array
+    public function values(): array
     {
         $values = [];
 

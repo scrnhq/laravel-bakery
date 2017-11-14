@@ -2,11 +2,33 @@
 
 namespace Scrn\Bakery\Types;
 
-use GraphQL\Type\Definition\Type as BaseType;
 use GraphQL\Type\Definition\EnumType as BaseEnumType;
+use GraphQL\Type\Definition\Type as BaseType;
 
 class EnumType extends Type
 {
+    /**
+     * Return the values for the enum.
+     *
+     * @return array
+     */
+    public function values(): array
+    {
+        return [];
+    }
+
+    /**
+     * Get the values from the container.
+     *
+     * @return array
+     */
+    public function getValues()
+    {
+        $values = $this->values();
+        $attributesValues = array_get($this->attributes, 'values', []);
+        return sizeof($attributesValues) ? $attributesValues : $values;
+    }
+
     /**
      * Get the attributes for the type.
      *
@@ -14,29 +36,20 @@ class EnumType extends Type
      */
     public function getAttributes(): array
     {
-        $attributes = $this->attributes();
+        $attributes = parent::getAttributes();
 
-        $attributes = array_merge($this->attributes, [
-            'values' => $this->values(), 
-        ], $attributes);
+        $values = $this->getValues();
+        if ($values) {
+            $attributes['values'] = $values;
+        }
 
         return $attributes;
     }
 
     /**
-     * Return the values for the enum.
-     *
-     * @return array
-     */
-    protected function values(): array
-    {
-        return [];
-    }
-
-    /**
      * Convert the Bakery type to a GraphQL type.
      *
-     * @return ObjectType
+     * @return BaseType
      */
     public function toGraphQLType(): BaseType
     {

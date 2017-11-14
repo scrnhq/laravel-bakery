@@ -2,10 +2,9 @@
 
 namespace Scrn\Bakery\Types;
 
-use Illuminate\Support\Fluent;
-
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type as BaseType;
+use Illuminate\Support\Fluent;
 
 class Type extends Fluent
 {
@@ -30,6 +29,28 @@ class Type extends Fluent
     }
 
     /**
+     * Get a dynamic field resolver.
+     *
+     * @param string $name
+     * @param mixed $field
+     * @return mixed
+     */
+    protected function getFieldResolver(string $name, $field)
+    {
+        $resolveMethod = 'resolve' . studly_case($name) . 'Field';
+
+        if (method_exists($this, $resolveMethod)) {
+            $resolver = [$this, $resolveMethod];
+            return function () use ($resolver) {
+                $args = func_get_args();
+                return call_user_func_array($resolver, $args);
+            };
+        }
+
+        return null;
+    }
+
+    /**
      * Get the fields for the type.
      *
      * @return array
@@ -38,7 +59,7 @@ class Type extends Fluent
     {
         $fields = collect($this->fields());
 
-        return collect($this->fields())->map(function ($field, $name) {
+        return $fields->map(function ($field, $name) {
             $resolver = $this->getFieldResolver($name, $field);
 
             if (is_array($field)) {
@@ -72,28 +93,6 @@ class Type extends Fluent
         return $attributes;
     }
 
-    /**
-     * Get a dynamic field resolver.
-     *
-     * @param string $name
-     * @param mixed $field
-     * @return mixed
-     */
-    protected function getFieldResolver(string $name, $field)
-    {
-        $resolveMethod = 'resolve' . studly_case($name) . 'Field';
-
-        if (method_exists($this, $resolveMethod)) {
-            $resolver = array($this, $resolveMethod);
-
-            return function () use ($resolver) {
-                $args = func_get_args();
-                return call_user_func_array($resolver, $args);
-            };
-        }
-        
-        return null;
-    }
 
     /**
      * Convert the type to array.
@@ -107,8 +106,7 @@ class Type extends Fluent
 
     /**
      * Conver the Bakery type to a GraphQL type.
-     *
-     * @return ObjectType
+     * @return BaseType
      */
     public function toGraphQLType(): BaseType
     {
@@ -118,7 +116,7 @@ class Type extends Fluent
     /**
      * Dynamically retrieve the value of an attribute.
      *
-     * @param  string  $key
+     * @param  string $key
      * @return mixed
      */
     public function __get($key)
@@ -126,11 +124,12 @@ class Type extends Fluent
         $attributes = $this->getAttributes();
         return isset($attributes[$key]) ? $attributes[$key] : null;
     }
+
     /**
      * Dynamically check if an attribute is set.
      *
-     * @param  string  $key
-     * @return void
+     * @param  string $key
+     * @return bool
      */
     public function __isset($key)
     {
