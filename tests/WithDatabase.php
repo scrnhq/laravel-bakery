@@ -30,7 +30,13 @@ trait WithDatabase {
      */
     protected function migrateDatabase()
     {
-        $this->loadLaravelMigrations([]);
+        Schema::create('users', function ($table) {
+            $table->increments('id');
+            $table->string('email');
+            $table->string('name');
+            $table->string('password');
+            $table->timestamps();
+        });
 
         Schema::create('models', function ($table) {
             $table->increments('id');
@@ -38,6 +44,41 @@ trait WithDatabase {
             $table->string('title')->nullable();
             $table->string('body')->nullable();
             $table->integer('comments')->nullable();
+            $table->timestamps();
+        });
+
+        Schema::create('posts', function ($table) {
+            $table->increments('id');
+            $table->string('slug')->nullable();
+            $table->string('title')->nullable();
+            $table->string('body')->nullable();
+            $table->timestamps();
+        });
+
+        Schema::create('comments', function ($table) {
+            $table->increments('id');
+            $table->string('body')->nullable();
+            $table->integer('post_id');
+            $table->timestamps();
+        });
+
+        Schema::create('phones', function ($table) {
+            $table->increments('id');
+            $table->integer('user_id')->nullable();
+            $table->string('number')->nullable();
+            $table->timestamps();
+        });
+
+        Schema::create('roles', function ($table) {
+            $table->increments('id');
+            $table->string('name');
+            $table->timestamps();
+        });
+
+        Schema::create('role_user', function ($table) {
+            $table->increments('id');
+            $table->integer('user_id')->nullable();
+            $table->integer('role_id')->nullable();
             $table->timestamps();
         });
     }
@@ -51,7 +92,7 @@ trait WithDatabase {
     {
         $user = new User();
         $user->name = 'John Doe';
-        $user->email = '.j.doe@example.com';
+        $user->email = 'j.doe@example.com';
         $user->password = 'secret';
         return $user;
     }

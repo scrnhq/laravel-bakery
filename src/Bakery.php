@@ -72,6 +72,16 @@ class Bakery
     }
 
     /**
+     * Get all the registered types.
+     *
+     * @return array
+     */
+    public function getTypes(): array
+    {
+        return $this->types;
+    }
+
+    /**
      * Add a type to the registry.
      *
      * @param $class
@@ -84,6 +94,17 @@ class Bakery
     }
 
     /**
+     * Return if the name is registered as a type.
+     *
+     * @param string $name
+     * @return boolean
+     */
+    public function hasType(string $name): bool
+    {
+        return array_key_exists($name, $this->types);
+    }
+
+    /**
      * Return the name of the type.
      *
      * @param $class
@@ -92,11 +113,7 @@ class Bakery
      */
     protected function getTypeName($class, string $name = null): string
     {
-        return $name
-            ? $name
-            : (is_object($class)
-                ? $class
-                : resolve($class))->name;
+        return $name ? $name : (is_object($class) ? $class : resolve($class))->name;
     }
 
     public function getQueries()

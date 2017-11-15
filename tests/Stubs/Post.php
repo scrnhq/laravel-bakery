@@ -1,0 +1,75 @@
+<?php
+
+namespace Scrn\Bakery\Tests\Stubs;
+
+use Bakery;
+use GraphQL\Type\Definition\Type;
+use Scrn\Bakery\Tests\Stubs\Comment;
+use Scrn\Bakery\Traits\GraphQLResource;
+use Illuminate\Database\Eloquent\Relations;
+use Illuminate\Database\Eloquent\Model as BaseModel;
+
+class Post extends BaseModel
+{
+    use GraphQLResource;
+
+    /**
+     * Define the fillable fields.
+     *
+     * @var array
+     */
+    protected $fillable = [
+        'title',
+        'body',
+        'comments',
+    ];
+
+    /**
+     * The fields exposed in GraphQL.
+     *
+     * @return array
+     */
+    public function fields(): array
+    {
+        return [
+            'id' => Type::ID(),
+            'slug' => Type::string(),
+            'title' => Type::string(),
+            'body' => Type::string(),
+        ];
+    }
+
+    /**
+     * The relations exposed in GraphQL.
+     *
+     * @return array
+     */
+    public function relations(): array
+    {
+        return [
+            'comments' => Bakery::listOf(Bakery::getType('Comment')),
+        ];
+    }
+
+    /**
+     * The fields that can be used to look up the resource.
+     *
+     * @return array
+     */
+    public function lookupFields()
+    {
+        return [
+            'slug' => Type::string(),
+        ];
+    }
+
+    /**
+     * Get the comments for the post.
+     * 
+     * @return Relations\HasMany;
+     */
+    public function comments(): Relations\HasMany
+    {
+        return $this->hasMany(Comment::class);
+    }
+}

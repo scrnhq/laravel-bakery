@@ -2,12 +2,12 @@
 
 namespace Scrn\Bakery\Tests\Queries;
 
+use Gate;
 use Schema;
 use Eloquent;
 use Scrn\Bakery\Tests\TestCase;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
-use Gate;
 use Scrn\Bakery\Tests\Stubs;
 use Scrn\Bakery\Tests\WithDatabase;
 use Scrn\Bakery\Mutations\CreateMutation;
@@ -24,6 +24,8 @@ class CreateMutationTest extends TestCase
     public function setUp()
     {
         parent::setUp();
+
+        Eloquent::reguard();
         $this->migrateDatabase();
     }
 
@@ -31,12 +33,11 @@ class CreateMutationTest extends TestCase
     public function it_creates_an_entity()
     {
         $this->actingAs($this->createUser());
-        Gate::policy(Stubs\Model::class, Stubs\Policies\ModelPolicy::class);
+        Gate::policy(Stubs\Post::class, Stubs\Policies\PostPolicy::class);
 
-        $query = new CreateMutation(Stubs\Model::class);
-        $result = $query->resolve(null, ['input' => ['title' => 'foo']]);
+        $query = new CreateMutation(Stubs\Post::class);
+        $result = $query->resolve(null, ['input' => ['title' => 'Hello world!']]);
 
-        $this->assertDatabaseHas('models', ['title' => 'foo']);
+        $this->assertDatabaseHas('posts', ['title' => 'Hello world!']);
     }
-
 }

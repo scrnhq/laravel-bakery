@@ -2,6 +2,10 @@
 
 namespace Scrn\Bakery\Traits;
 
+use ErrorException;
+use ReflectionClass;
+use ReflectionMethod;
+
 trait GraphQLResource
 {
     /**
@@ -15,6 +19,11 @@ trait GraphQLResource
     }
 
     public function lookupFields(): array
+    {
+        return [];
+    }
+
+    public function relations(): array
     {
         return [];
     }

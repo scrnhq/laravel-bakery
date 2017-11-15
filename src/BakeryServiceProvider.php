@@ -2,6 +2,7 @@
 
 namespace Scrn\Bakery;
 
+use Scrn\Bakery\Types\PaginationType;
 use Illuminate\Support\ServiceProvider;
 
 class BakeryServiceProvider extends ServiceProvider
@@ -44,9 +45,7 @@ class BakeryServiceProvider extends ServiceProvider
     public function registerBakery()
     {
         $this->app->singleton(static::$abstract, function ($app) {
-            $bakery = new Bakery();
-
-            return $bakery;
+            return new Bakery();
         });
     }
 
@@ -81,21 +80,32 @@ class BakeryServiceProvider extends ServiceProvider
 
     public function bootBakery()
     {
-        $this->addModels(app('bakery'));
+        $this->registerModels();
+        $this->registerMetaTypes();
     }
 
     /**
      * Register the models
-     *
-     * @param Bakery $bakery
+     * 
+     * @return void 
      */
-    protected function addModels(Bakery $bakery)
+    protected function registerModels()
     {
         $models = $this->app['config']->get('bakery.models', []);
 
         foreach ($models as $model) {
-            $bakery->addModel($model);
+            $this->app['bakery']->addModel($model);
         }
+    }
+
+    /**
+     * Register the meta types.
+     *
+     * @return void
+     */
+    protected function registerMetaTypes()
+    {
+        $this->app['bakery']->addType(new PaginationType(), 'Pagination');
     }
 
     /**

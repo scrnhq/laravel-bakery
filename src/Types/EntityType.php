@@ -23,6 +23,9 @@ class EntityType extends Type
 
     public function fields(): array
     {
-        return $this->model->fields();
+        return array_merge(
+            $this->model->fields(),
+            $this->model->relations()
+        );
     }
 }
