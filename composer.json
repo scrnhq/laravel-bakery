@@ -34,5 +34,13 @@
   "scripts": {
     "test": "vendor/bin/phpunit",
     "test:watch": "vendor/bin/phpunit-watcher watch"
+  },
+  "extra": {
+    "laravel": {
+      "providers": ["Scrn\\Bakery\\BakeryServiceProvider"],
+      "aliases": {
+        "Bakery": "Scrn\\Bakery\\Support\\Facades\\Bakery"
+      }
+    }
   }
 }
