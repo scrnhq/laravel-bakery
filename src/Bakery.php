@@ -259,7 +259,10 @@ class Bakery
         $root = null;
         $context = null;
         $query = array_get($input, 'query');
-        $variables = json_decode(array_get($input, 'variables'));
+        $variables = array_get($input, 'variables');
+        if (is_string($variables)) {
+            $variables = json_decode($variables, true);
+        }
         $operationName = array_get($input, 'operationName');
 
         return GraphQL::executeQuery($schema, $query, $root, $context, $variables, $operationName);

@@ -34,4 +34,9 @@ class BakeryController extends Controller
 
         return response()->json($data, 200, []);
     }
+
+    public function graphiql()
+    {
+        return view('bakery::graphiql', ['endpoint' => config('bakery.route')]);
+    }
 }

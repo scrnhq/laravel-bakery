@@ -28,4 +28,14 @@ return [
      | handle the GraphQL requests. 
      */
     'controller' => '\Scrn\Bakery\Http\Controller\BakeryController@query',
+
+    /*
+     |--------------------------------------------------------------------------
+     | GraphiQL Controller
+     |--------------------------------------------------------------------------
+     |
+     | Here you can define the controller that should
+     | render the GraphiQL view. 
+     */
+    'graphiqlController' => '\Scrn\Bakery\Http\Controller\BakeryController@graphiql',
 ];

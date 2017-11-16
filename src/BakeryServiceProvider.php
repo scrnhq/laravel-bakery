@@ -58,6 +58,7 @@ class BakeryServiceProvider extends ServiceProvider
     {
         $router = $this->app['router'];
         $router->any($this->app['config']->get('bakery.route'), $this->app['config']->get('bakery.controller'));
+        $router->get('/graphiql', $this->app['config']->get('bakery.graphiqlController'));
     }
 
     /**
@@ -80,9 +81,21 @@ class BakeryServiceProvider extends ServiceProvider
 
     public function bootBakery()
     {
+        $this->registerViews();
         $this->registerModels();
         $this->registerMetaTypes();
     }
+
+    /**
+     * Register the views.
+     *
+     * @return void
+     */
+    public function registerViews()
+    {
+        $this->loadViewsFrom(__DIR__ . '/views', static::$abstract);
+    }
+
 
     /**
      * Register the models
