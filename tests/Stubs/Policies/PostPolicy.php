@@ -28,4 +28,15 @@ class PostPolicy
     {
         return true;
     }
+
+    /**
+     * Determine if a post can be updated by the user.
+     *
+     * @param  User  $user
+     * @return bool
+     */
+    public function delete(User $user): bool
+    {
+        return true;
+    }
 }

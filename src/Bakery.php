@@ -13,6 +13,7 @@ use Scrn\Bakery\Queries\EntityQuery;
 use Scrn\Bakery\Queries\CollectionQuery;
 use Scrn\Bakery\Mutations\CreateMutation;
 use Scrn\Bakery\Mutations\UpdateMutation;
+use Scrn\Bakery\Mutations\DeleteMutation;
 
 use Scrn\Bakery\Types\EntityType;
 use Scrn\Bakery\Types\CreateInputType;
@@ -152,6 +153,8 @@ class Bakery
         $this->mutations[$createMutation->name] = $createMutation;
         $updateMutation = new UpdateMutation($class);
         $this->mutations[$updateMutation->name] = $updateMutation;
+        $deleteMutation = new DeleteMutation($class);
+        $this->mutations[$deleteMutation->name] = $deleteMutation;
     }
 
     protected function registerEntityTypes($class)

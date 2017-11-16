@@ -11,7 +11,7 @@ use Scrn\Bakery\Exceptions\TooManyResultsException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
-class UpdateMutation extends Field
+class DeleteMutation extends Field
 {
     use AuthorizesRequests;
 
@@ -55,7 +55,7 @@ class UpdateMutation extends Field
      */
     protected function formatName(string $class): string
     {
-        return 'update' . title_case(str_singular(class_basename($class)));
+        return 'delete' . title_case(str_singular(class_basename($class)));
     }
 
     /**
@@ -65,7 +65,7 @@ class UpdateMutation extends Field
      */
     public function type()
     {
-        return Bakery::getType(title_case(class_basename($this->class)));
+        return Bakery::boolean();
     }
 
     /**
@@ -75,11 +75,8 @@ class UpdateMutation extends Field
      */
     public function args()
     {
-        $name = 'Update' . title_case(str_singular(class_basename($this->class))) . 'Input';
-
         return array_merge([
             $this->model->getKeyName() => Type::ID(),
-            'input' => Bakery::nonNull(Bakery::getType($name)),
         ], $this->model->lookupFields());
     }
 
@@ -88,17 +85,14 @@ class UpdateMutation extends Field
      *
      * @param  mixed $root
      * @param  array $args
-     * @return Model
+     * @return bool
      */
-    public function resolve($root, $args = []): Model
+    public function resolve($root, $args = []): bool
     {
         $model = $this->getModel($args);
-        $this->authorize('update', $model);
+        $this->authorize('delete', $model);
 
-        $input = $args['input']; 
-        $model->updateWithGraphQLInput($input);
-
-        return $model;
+        return $model->delete();
     }
 
     /**
@@ -116,9 +110,8 @@ class UpdateMutation extends Field
         }
 
         $query = $this->model->query();
-        $fields = array_except($args, ['input']);
 
-        foreach($fields as $key => $value) {
+        foreach($args as $key => $value) {
             $query->where($key, $value);
         }
 
