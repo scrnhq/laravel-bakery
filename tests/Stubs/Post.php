@@ -21,6 +21,7 @@ class Post extends BaseModel
     protected $fillable = [
         'title',
         'body',
+        'slug',
         'comments',
         'user',
     ];

@@ -113,7 +113,7 @@ class CreateMutationTest extends TestCase
         ';
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $this->assertDatabaseHas('phones', ['number' => '+31612345678', 'user_id' => '1']);
+        $this->assertDatabaseHas('phones', ['number' => '+31612345678', 'user_id' => '2']);
     }
 
     /** @test */
@@ -138,7 +138,7 @@ class CreateMutationTest extends TestCase
         ';
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $this->assertDatabaseHas('phones', ['user_id' => '1']);
+        $this->assertDatabaseHas('phones', ['user_id' => '2']);
     }
 
     /** @test */
@@ -163,7 +163,7 @@ class CreateMutationTest extends TestCase
         ';
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $this->assertDatabaseHas('phones', ['number' => '+31612345678', 'user_id' => '1']);
+        $this->assertDatabaseHas('phones', ['number' => '+31612345678', 'user_id' => '2']);
         $this->assertDatabaseHas('users', ['name' => 'Jane Doe']);
     }
 
@@ -225,8 +225,8 @@ class CreateMutationTest extends TestCase
         ';
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $this->assertDatabaseHas('role_user', ['role_id' => '1', 'user_id' => '1']);
-        $this->assertDatabaseHas('role_user', ['role_id' => '2', 'user_id' => '1']);
+        $this->assertDatabaseHas('role_user', ['role_id' => '1', 'user_id' => '2']);
+        $this->assertDatabaseHas('role_user', ['role_id' => '2', 'user_id' => '2']);
     }
 
     /** @test */
@@ -282,7 +282,7 @@ class CreateMutationTest extends TestCase
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
         $this->assertDatabaseHas('users', ['email' => 'jane.doe@example.com', 'name' => 'Jane Doe']);
-        $this->assertDatabaseHas('posts', ['title' => 'Hello World!', 'user_id' => '1']);
+        $this->assertDatabaseHas('posts', ['title' => 'Hello World!', 'user_id' => '2']);
         $this->assertDatabaseHas('comments', ['body' => 'First!', 'post_id' => '1']);
         $this->assertDatabaseHas('comments', ['body' => 'Great post!', 'post_id' => '1']);
     }

@@ -16,4 +16,15 @@ class UserPolicy
     {
         return true;
     }
+
+    /**
+     * Determine if a user can be updated by the user.
+     *
+     * @param  User  $user
+     * @return bool
+     */
+    public function update(User $user): bool
+    {
+        return true;
+    }
 }

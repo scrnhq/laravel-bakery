@@ -7,15 +7,19 @@ use GraphQL\GraphQL;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Schema;
 use Scrn\Bakery\Exceptions\TypeNotFound;
-use Scrn\Bakery\Mutations\CreateMutation;
-use Scrn\Bakery\Queries\CollectionQuery;
-use Scrn\Bakery\Queries\EntityQuery;
 use Scrn\Bakery\Traits\BakeryTypes;
+
+use Scrn\Bakery\Queries\EntityQuery;
+use Scrn\Bakery\Queries\CollectionQuery;
+use Scrn\Bakery\Mutations\CreateMutation;
+use Scrn\Bakery\Mutations\UpdateMutation;
+
+use Scrn\Bakery\Types\EntityType;
+use Scrn\Bakery\Types\CreateInputType;
+use Scrn\Bakery\Types\UpdateInputType;
+use Scrn\Bakery\Types\EntityCollectionType;
 use Scrn\Bakery\Types\CollectionFilterType;
 use Scrn\Bakery\Types\CollectionOrderByType;
-use Scrn\Bakery\Types\CreateInputType;
-use Scrn\Bakery\Types\EntityCollectionType;
-use Scrn\Bakery\Types\EntityType;
 
 class Bakery
 {
@@ -146,6 +150,8 @@ class Bakery
     {
         $createMutation = new CreateMutation($class);
         $this->mutations[$createMutation->name] = $createMutation;
+        $updateMutation = new UpdateMutation($class);
+        $this->mutations[$updateMutation->name] = $updateMutation;
     }
 
     protected function registerEntityTypes($class)
@@ -155,6 +161,7 @@ class Bakery
         $this->addType(new CollectionFilterType($class));
         $this->addType(new CollectionOrderByType($class));
         $this->addType(new CreateInputType($class));
+        $this->addType(new UpdateInputType($class));
     }
 
     /**

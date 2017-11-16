@@ -86,22 +86,29 @@ trait GraphQLResource
     public function createWithGraphQLInput(array $input)
     {
         $model = new static();
-        $scalars = $model->getFillableScalars($input);
-        $relations = $model->getFillableRelations($input);
-        $connections = $model->getFillableConnections($input);
-
-        $model->fill($scalars);
-        $model->fillRelations($relations);
-        $model->fillConnections($connections);
+        $model->fillWithGraphQLInput($input);
         $model->save();
         return $model;
+    }
+
+    /**
+     * Update the model with GraphQL input 
+     *
+     * @param array $input
+     * @return self
+     */
+    public function updateWithGraphQLInput(array $input)
+    {
+        $this->fillWithGraphQLInput($input);
+        $this->save();
+        return $this;
     }
 
     /**
      * Fill the current model with GraphQL input.
      *
      * @param array $input
-     * @return this
+     * @return self
      */
     public function fillWithGraphQLInput(array $input)
     {
