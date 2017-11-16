@@ -22,6 +22,7 @@ class Post extends BaseModel
         'title',
         'body',
         'comments',
+        'user',
     ];
 
     /**
@@ -48,6 +49,7 @@ class Post extends BaseModel
     {
         return [
             'comments' => Bakery::listOf(Bakery::getType('Comment')),
+            'user' => Bakery::type('User'),
         ];
     }
 
@@ -71,5 +73,15 @@ class Post extends BaseModel
     public function comments(): Relations\HasMany
     {
         return $this->hasMany(Comment::class);
+    }
+
+    /**
+     * A post belongs to a user. 
+     * 
+     * @return Relations\HasMany;
+     */
+    public function user(): Relations\BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 }

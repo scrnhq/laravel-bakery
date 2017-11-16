@@ -24,6 +24,7 @@ class User extends Authenticatable
         'password',
         'phone',
         'roles',
+        'posts',
     ];
 
     /**
@@ -49,6 +50,7 @@ class User extends Authenticatable
     public function relations()
     {
         return [
+            'posts' => Bakery::listOf(Bakery::getType('Post')),
             'roles' => Bakery::listOf(Bakery::getType('Role')),
             'phone' => Bakery::getType('Phone'),
         ];
@@ -83,6 +85,16 @@ class User extends Authenticatable
     public function roles(): Relations\BelongsToMany
     {
         return $this->belongsToMany(Role::class);
+    }
+
+    /**
+     * A user has many posts. 
+     * 
+     * @return Relations\HasMany;
+     */
+    public function posts(): Relations\HasMany
+    {
+        return $this->hasMany(Post::class);
     }
         
 }

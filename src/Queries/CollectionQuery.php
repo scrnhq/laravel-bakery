@@ -32,8 +32,6 @@ class CollectionQuery extends Field
         $this->name = $this->formatName($class);
         $this->model = app()->make($class);
         $this->class = $class;
-
-        parent::__construct($arguments);
     }
 
     /**

@@ -2,6 +2,7 @@
 
 namespace Scrn\Bakery\Tests\Stubs;
 
+use Bakery;
 use GraphQL\Type\Definition\Type;
 use Scrn\Bakery\Tests\Stubs\Post;
 use Scrn\Bakery\Traits\GraphQLResource;
@@ -20,6 +21,7 @@ class Comment extends BaseModel
     protected $fillable = [
         'body',
         'post',
+        'user',
     ];
 
     /**
@@ -36,12 +38,35 @@ class Comment extends BaseModel
     }
 
     /**
-     * Get the comments for the post.
+     * The relations of the GraphQL object.
+     * 
+     * @return array
+     */
+    public function relations()
+    {
+        return [
+            'post' => Bakery::type('Post'),
+            'user' => Bakery::type('User'),
+        ];
+    }
+
+    /**
+     * A comment belongs to a post. 
      * 
      * @return Relations\BelongsTo;
      */
     public function post(): Relations\BelongsTo
     {
         return $this->belongsTo(Post::class);
+    }
+
+    /**
+     * A comment belongs to a user.
+     * 
+     * @return Relations\BelongsTo;
+     */
+    public function user(): Relations\BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 }

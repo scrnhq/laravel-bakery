@@ -52,6 +52,7 @@ trait WithDatabase {
             $table->string('slug')->nullable();
             $table->string('title')->nullable();
             $table->string('body')->nullable();
+            $table->integer('user_id');
             $table->timestamps();
         });
 
@@ -59,6 +60,7 @@ trait WithDatabase {
             $table->increments('id');
             $table->string('body')->nullable();
             $table->integer('post_id');
+            $table->integer('user_id');
             $table->timestamps();
         });
 

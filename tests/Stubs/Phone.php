@@ -37,6 +37,18 @@ class Phone extends BaseModel
     }
 
     /**
+     * The relations of the GraphQL resource.
+     *
+     * @return array
+     */
+    public function relations()
+    {
+        return [
+            'user' => Bakery::type('User'),
+        ];
+    }
+
+    /**
      * The fields that can be used to look up the resource.
      *
      * @return array
@@ -49,12 +61,12 @@ class Phone extends BaseModel
     }
 
     /**
-     * Get the comments for the post.
+     * A phone belongs to a user.
      * 
-     * @return Relations\HasOne;
+     * @return Relations\BelongsTo;
      */
-    public function user(): Relations\HasOne
+    public function user(): Relations\BelongsTo
     {
-        return $this->hasOne(User::class);
+        return $this->belongsTo(User::class);
     }
 }

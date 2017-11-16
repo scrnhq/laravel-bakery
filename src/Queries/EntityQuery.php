@@ -25,8 +25,6 @@ class EntityQuery extends Field
     {
         $this->name = $this->formatName($class);
         $this->model = app()->make($class);
-
-        parent::__construct($attributes);
     }
 
     /**

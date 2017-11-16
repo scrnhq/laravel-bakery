@@ -4,10 +4,16 @@ namespace Scrn\Bakery\Types;
 
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type as BaseType;
-use Illuminate\Support\Fluent;
 
-class Type extends Fluent
+class Type
 {
+    /**
+     * The attibutes of the type.
+     *
+     * @var array
+     */
+    protected $attributes = [];
+
     /**
      * Return the default fields.
      *
@@ -90,6 +96,10 @@ class Type extends Fluent
             },
         ], $attributes);
 
+        if (method_exists($this, 'resolveField')) {
+            $attributes['resolveField'] = [$this, 'resolveField']; 
+        }
+
         return $attributes;
     }
 
@@ -105,12 +115,13 @@ class Type extends Fluent
     }
 
     /**
-     * Conver the Bakery type to a GraphQL type.
+     * Convert the Bakery type to a GraphQL type.
+     * 
      * @return BaseType
      */
     public function toGraphQLType(): BaseType
     {
-        return new ObjectType($this->toArray());
+        return $this->type = new ObjectType($this->toArray());
     }
 
     /**

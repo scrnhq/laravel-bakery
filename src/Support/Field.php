@@ -2,10 +2,15 @@
 
 namespace Scrn\Bakery\Support;
 
-use Illuminate\Support\Fluent;
-
-class Field extends Fluent
+class Field
 {
+    /**
+     * The attributes of the field.
+     *
+     * @var array
+     */
+    protected $attributes = [];
+
     /**
      * The attributes of the Field.
      *
@@ -60,6 +65,7 @@ class Field extends Fluent
         $attributes = $this->attributes();
 
         $attributes = array_merge($this->attributes, [
+            'name' => $this->name,
             'args' => $this->args(),
         ], $attributes);
 
