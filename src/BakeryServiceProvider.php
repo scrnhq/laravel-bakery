@@ -82,8 +82,6 @@ class BakeryServiceProvider extends ServiceProvider
     public function bootBakery()
     {
         $this->registerViews();
-        $this->registerModels();
-        $this->registerMetaTypes();
     }
 
     /**
@@ -94,31 +92,6 @@ class BakeryServiceProvider extends ServiceProvider
     public function registerViews()
     {
         $this->loadViewsFrom(__DIR__ . '/views', static::$abstract);
-    }
-
-
-    /**
-     * Register the models
-     * 
-     * @return void 
-     */
-    protected function registerModels()
-    {
-        $models = $this->app['config']->get('bakery.models', []);
-
-        foreach ($models as $model) {
-            $this->app['bakery']->addModel($model);
-        }
-    }
-
-    /**
-     * Register the meta types.
-     *
-     * @return void
-     */
-    protected function registerMetaTypes()
-    {
-        $this->app['bakery']->addType(new PaginationType(), 'Pagination');
     }
 
     /**

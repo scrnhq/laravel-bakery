@@ -15,6 +15,7 @@ class TestCase extends OrchestraTestCase
     {
         parent::setUp();
         $this->withoutExceptionHandling();
+        Bakery::schema();
     }
 
     protected function getEnvironmentSetUp($app)

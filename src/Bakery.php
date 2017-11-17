@@ -2,40 +2,24 @@
 
 namespace Scrn\Bakery;
 
-use GraphQL\GraphQL;
-use GraphQL\Type\Schema;
 use GraphQL\Executor\ExecutionResult;
+use GraphQL\GraphQL;
 use GraphQL\Type\Definition\ObjectType;
-
-use Scrn\Bakery\Traits\BakeryTypes;
-use Scrn\Bakery\Traits\GraphQLResource;
-
-use Scrn\Bakery\Queries\EntityQuery;
-use Scrn\Bakery\Queries\CollectionQuery;
-use Scrn\Bakery\Mutations\CreateMutation;
-use Scrn\Bakery\Mutations\UpdateMutation;
-use Scrn\Bakery\Mutations\DeleteMutation;
-
-use Scrn\Bakery\Types\EntityType;
-use Scrn\Bakery\Types\CreateInputType;
-use Scrn\Bakery\Types\UpdateInputType;
-use Scrn\Bakery\Types\EntityCollectionType;
-use Scrn\Bakery\Types\CollectionFilterType;
-use Scrn\Bakery\Types\CollectionOrderByType;
-
+use GraphQL\Type\Schema;
 use Scrn\Bakery\Exceptions\TypeNotFound;
-use Scrn\Bakery\Exceptions\ModelNotGraphQLResourceException;
+use Scrn\Bakery\Traits\BakeryTypes;
+use Scrn\Bakery\Types;
 
 class Bakery
 {
     use BakeryTypes;
 
     /**
-     * The registered models.
+     * The schemas
      *
      * @var array
      */
-    protected $models = [];
+    protected $schemas = [];
 
     /**
      * The registered types.
@@ -51,37 +35,11 @@ class Bakery
      */
     protected $typeInstances = [];
 
-    /**
-     * The queries.
-     *
-     * @var array
-     */
-    protected $queries = [];
-
-    /**
-     * The mutations.
-     *
-     * @var array
-     */
-    protected $mutations = [];
-
-    public function addModel($class)
+    public function registerModelTypes($classes)
     {
-        if (!in_array(GraphQLResource::class, class_uses($class))) {
-            throw (new ModelNotGraphQLResourceException())->setModel($class);
+        foreach ($classes as $class) {
+            $this->registerEntityTypes($class);
         }
-
-        $this->models[] = $class;
-        $this->registerEntityTypes($class);
-        $this->registerEntityQuery($class);
-        $this->registerMutations($class);
-        $this->registerCollectionQuery($class);
-        return $this;
-    }
-
-    public function getModels()
-    {
-        return $this->models;
     }
 
     /**
@@ -92,6 +50,13 @@ class Bakery
     public function getTypes(): array
     {
         return $this->types;
+    }
+
+    public function addTypes(array $classes)
+    {
+        foreach ($classes as $class) {
+            $this->addType($class);
+        }
     }
 
     /**
@@ -107,17 +72,6 @@ class Bakery
     }
 
     /**
-     * Return if the name is registered as a type.
-     *
-     * @param string $name
-     * @return boolean
-     */
-    public function hasType(string $name): bool
-    {
-        return array_key_exists($name, $this->types);
-    }
-
-    /**
      * Return the name of the type.
      *
      * @param $class
@@ -129,87 +83,34 @@ class Bakery
         return $name ? $name : (is_object($class) ? $class : resolve($class))->name;
     }
 
-    public function getQueries()
+    /**
+     * Return if the name is registered as a type.
+     *
+     * @param string $name
+     * @return boolean
+     */
+    public function hasType(string $name): bool
     {
-        return array_map(function ($query) {
-            return $query->toArray();
-        }, $this->queries);
+        return array_key_exists($name, $this->types);
     }
 
-    public function getMutations()
-    {
-        return array_map(function ($mutation) {
-            return $mutation->toArray();
-        }, $this->mutations);
-    }
 
-    protected function registerEntityQuery($class)
+    public function getStandardTypes()
     {
-        $entityQuery = new EntityQuery($class);
-        $this->queries[$entityQuery->name] = $entityQuery;
-    }
-
-    protected function registerCollectionQuery($class)
-    {
-        $collectionQuery = new CollectionQuery($class);
-        $this->queries[$collectionQuery->name] = $collectionQuery;
-    }
-
-    protected function registerMutations($class)
-    {
-        $createMutation = new CreateMutation($class);
-        $this->mutations[$createMutation->name] = $createMutation;
-        $updateMutation = new UpdateMutation($class);
-        $this->mutations[$updateMutation->name] = $updateMutation;
-        $deleteMutation = new DeleteMutation($class);
-        $this->mutations[$deleteMutation->name] = $deleteMutation;
-    }
-
-    protected function registerEntityTypes($class)
-    {
-        $this->addType(new EntityType($class));
-        $this->addType(new EntityCollectionType($class));
-        $this->addType(new CollectionFilterType($class));
-        $this->addType(new CollectionOrderByType($class));
-        $this->addType(new CreateInputType($class));
-        $this->addType(new UpdateInputType($class));
+        return [
+            new Types\PaginationType(),
+        ];
     }
 
     /**
-     * Get the GraphQL schema
+     * Get the default GraphQL schema
      *
      * @return Schema
      */
     public function schema()
     {
-        $types = [];
-
-        foreach ($this->types as $name => $type) {
-            $types[] = $this->getType($name);
-        }
-
-        $query = $this->makeObjectType($this->getQueries(), [
-            'name' => 'Query',
-        ]);
-
-        $this->addType($query);
-
-        $mutation = $this->makeObjectType($this->getMutations(), [
-            'name' => 'Mutation',
-        ]);
-
-        $this->addType($mutation);
-
-        $schema = new Schema([
-            'query' => $query,
-            'mutation' => $mutation,
-            'subscription' => null,
-            'typeLoader' => function ($name) {
-                return $this->type($name);
-            },
-        ]);
-
-        return $schema;
+        $schema = new Support\DefaultSchema();
+        return $schema->toGraphQLSchema();
     }
 
     public function getType($name)
@@ -229,7 +130,37 @@ class Bakery
         return $type;
     }
 
-    public function makeObjectType($type, $options = [])
+    public function type($name)
+    {
+        return $this->getType($name);
+    }
+
+    /**
+     * Execute the GraphQL query.
+     *
+     * @param array $input
+     * @param Schema $schema
+     * @return ExecutionResult
+     */
+    public function executeQuery($input, $schema = null): ExecutionResult
+    {
+        if (!$schema) {
+            $schema = $this->schema();
+        }
+
+        $root = null;
+        $context = null;
+        $query = array_get($input, 'query');
+        $variables = array_get($input, 'variables');
+        if (is_string($variables)) {
+            $variables = json_decode($variables, true);
+        }
+        $operationName = array_get($input, 'operationName');
+
+        return GraphQL::executeQuery($schema, $query, $root, $context, $variables, $operationName);
+    }
+
+    protected function makeObjectType($type, $options = [])
     {
         $objectType = null;
         if ($type instanceof ObjectType) {
@@ -254,30 +185,4 @@ class Bakery
         return $class->toGraphQLType();
     }
 
-    /**
-     * Execute the GraphQL query.
-     *
-     * @param array $input
-     * @return ExecutionResult
-     */
-    public function executeQuery($input): ExecutionResult
-    {
-        $schema = $this->schema();
-
-        $root = null;
-        $context = null;
-        $query = array_get($input, 'query');
-        $variables = array_get($input, 'variables');
-        if (is_string($variables)) {
-            $variables = json_decode($variables, true);
-        }
-        $operationName = array_get($input, 'operationName');
-
-        return GraphQL::executeQuery($schema, $query, $root, $context, $variables, $operationName);
-    }
-
-    public function type($name)
-    {
-        return $this->getType($name);
-    }
 }
