@@ -6,6 +6,8 @@ use GraphQL\Type\Definition\ObjectType;
 use Scrn\Bakery\Exceptions\TypeNotFound;
 use Scrn\Bakery\Support\Facades\Bakery;
 use Scrn\Bakery\Tests\Stubs;
+use Scrn\Bakery\Exceptions\ModelNotGraphQLResourceException;
+use Scrn\Bakery\Tests\Stubs\NotResourceModel;
 
 class BakeryTest extends TestCase
 {
@@ -51,9 +53,9 @@ class BakeryTest extends TestCase
     {
         $queries = app('bakery')->getQueries();
 
-        $results = array_values(array_filter($queries, function($query) {
-            return $query['name'] === 'model'; 
-        })); 
+        $results = array_values(array_filter($queries, function ($query) {
+            return $query['name'] === 'model';
+        }));
 
         $this->assertCount(1, $results);
     }
@@ -64,9 +66,16 @@ class BakeryTest extends TestCase
         $queries = app('bakery')->getQueries();
 
         $results = array_values(array_filter($queries, function ($query) {
-            return $query['name'] === 'models'; 
+            return $query['name'] === 'models';
         }));
 
         $this->assertCount(1, $results);
+    }
+
+    /** @test */
+    public function throw_exception_if_the_model_does_not_have_the_trait()
+    {
+        $this->expectException(ModelNotGraphQLResourceException::class);
+        app('bakery')->addModel(NotResourceModel::class);
     }
 }

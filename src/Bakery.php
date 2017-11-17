@@ -2,12 +2,13 @@
 
 namespace Scrn\Bakery;
 
-use GraphQL\Executor\ExecutionResult;
 use GraphQL\GraphQL;
-use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Schema;
-use Scrn\Bakery\Exceptions\TypeNotFound;
+use GraphQL\Executor\ExecutionResult;
+use GraphQL\Type\Definition\ObjectType;
+
 use Scrn\Bakery\Traits\BakeryTypes;
+use Scrn\Bakery\Traits\GraphQLResource;
 
 use Scrn\Bakery\Queries\EntityQuery;
 use Scrn\Bakery\Queries\CollectionQuery;
@@ -21,6 +22,9 @@ use Scrn\Bakery\Types\UpdateInputType;
 use Scrn\Bakery\Types\EntityCollectionType;
 use Scrn\Bakery\Types\CollectionFilterType;
 use Scrn\Bakery\Types\CollectionOrderByType;
+
+use Scrn\Bakery\Exceptions\TypeNotFound;
+use Scrn\Bakery\Exceptions\ModelNotGraphQLResourceException;
 
 class Bakery
 {
@@ -63,6 +67,10 @@ class Bakery
 
     public function addModel($class)
     {
+        if (!in_array(GraphQLResource::class, class_uses($class))) {
+            throw (new ModelNotGraphQLResourceException())->setModel($class);
+        }
+
         $this->models[] = $class;
         $this->registerEntityTypes($class);
         $this->registerEntityQuery($class);
