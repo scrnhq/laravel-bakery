@@ -7,6 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 
 use Bakery\Support\Field;
 use Bakery\Support\Facades\Bakery;
+use GraphQL\Type\Definition\ListOfType;
+use Bakery\Exceptions\TooManyResultsException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class EntityQuery extends Field
 {
@@ -23,6 +26,7 @@ class EntityQuery extends Field
      */
     public function __construct(string $class, array $attributes = [])
     {
+        $this->class = $class;
         $this->name = $this->formatName($class);
         $this->model = app()->make($class);
     }
@@ -44,9 +48,20 @@ class EntityQuery extends Field
      */
     public function args(): array
     {
-        return array_merge([
-            $this->model->getKeyName() => Type::ID(),
-        ], $this->model->lookupFields());
+        $args = array_merge(
+            [$this->model->getKeyName() => Bakery::ID()],
+            $this->model->lookupFields()
+        );
+
+        foreach ($this->model->relations() as $relation => $type) {
+            if ($type instanceof ListofType) {
+                continue;
+            }
+
+            $args[$relation] = Bakery::type(studly_case($relation) . 'LookupType');
+        }
+
+        return $args;
     }
 
     /**
@@ -78,9 +93,27 @@ class EntityQuery extends Field
         $query = $this->model->query();
 
         foreach ($args as $key => $value) {
-            $query->where($key, $value);
+            if (is_array($value)) {
+                $query->whereHas($key, function ($subQuery) use ($value) {
+                    foreach ($value as $key => $value) {
+                        $subQuery->where($key, $value);
+                    }
+                });
+            } else {
+                $query->where($key, $value);
+            }
         }
 
-        return $query->firstOrFail();
+        $results = $query->get();
+        
+        if ($results->count() < 1) {
+            throw (new ModelNotFoundException)->setModel($this->class);
+        }
+        
+        if ($results->count() > 1) {
+            throw (new TooManyResultsException)->setModel($this->class, $results->pluck($this->model->getKeyName()));
+        }
+
+        return $results->first();
     }
 }

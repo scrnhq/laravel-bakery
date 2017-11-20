@@ -43,6 +43,18 @@ class User extends Authenticatable
     }
 
     /**
+     * The fields that can be used to lookup this model.
+     *
+     * @return array
+     */
+    public function lookupFields()
+    {
+        return [
+            'email' => Type::string(),
+        ];
+    }
+
+    /**
      * The relationships exposed in GraphQL.
      *
      * @return array

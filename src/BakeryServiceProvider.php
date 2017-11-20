@@ -33,6 +33,7 @@ class BakeryServiceProvider extends ServiceProvider
     {
         $this->mergeConfigFrom($this->getConfigPath(), static::$abstract);
 
+        $this->loadHelpers();
         $this->registerBakery();
         $this->registerRoute();
     }
@@ -100,6 +101,11 @@ class BakeryServiceProvider extends ServiceProvider
     public function registerViews()
     {
         $this->loadViewsFrom(__DIR__ . '/views', static::$abstract);
+    }
+
+    protected function loadHelpers()
+    {
+        require(__DIR__ .'/helpers.php');
     }
 
     /**

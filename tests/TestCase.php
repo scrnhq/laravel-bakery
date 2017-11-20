@@ -2,26 +2,35 @@
 
 namespace Bakery\Tests;
 
-use Orchestra\Testbench\TestCase as OrchestraTestCase;
-use Bakery\Support\Facades\Bakery;
+use Bakery\Tests\Stubs;
 use Bakery\BakeryServiceProvider;
-use Bakery\Tests\Stubs\Model;
+use Bakery\Support\Facades\Bakery;
+use Orchestra\Testbench\TestCase as OrchestraTestCase;
 
 class TestCase extends OrchestraTestCase
 {
-    use WithDatabase;
+    use WithDatabase, InteractsWithExceptionHandling;
 
     protected function setUp()
     {
         parent::setUp();
+
+        // Disable exception handling for easer testing.
         $this->withoutExceptionHandling();
+
+        // Set up default schema.
         Bakery::schema();
     }
 
     protected function getEnvironmentSetUp($app)
     {
         $app['config']->set('bakery.models', [
-            Model::class,
+            Stubs\Model::class,
+            Stubs\Comment::class,
+            Stubs\Post::class,
+            Stubs\User::class,
+            Stubs\Phone::class,
+            Stubs\Role::class,
         ]);
     }
 
