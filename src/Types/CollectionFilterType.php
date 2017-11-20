@@ -2,8 +2,10 @@
 
 namespace Bakery\Types;
 
-use Illuminate\Database\Eloquent\Model;
+use GraphQL\Type\Definition\Type;
 use Bakery\Support\Facades\Bakery;
+use Illuminate\Database\Eloquent\Model;
+use GraphQL\Type\Definition\ListOfType;
 
 class CollectionFilterType extends InputType
 {
@@ -46,26 +48,49 @@ class CollectionFilterType extends InputType
      */
     public function fields(): array
     {
-        $fields = $this->model->fields();
+        $fields = [];
 
-        foreach ($fields as $name => $type) {
-            $fields[$name . '_contains'] = $type;
-            $fields[$name . '_not_contains'] = $type;
-            $fields[$name . '_starts_with'] = $type;
-            $fields[$name . '_not_starts_with'] = $type;
-            $fields[$name . '_ends_with'] = $type;
-            $fields[$name . '_not_ends_with'] = $type;
-            $fields[$name . '_not'] = $type;
-            $fields[$name . '_not_in'] = Bakery::listOf($type);
-            $fields[$name . '_in'] = Bakery::listOf($type);
-            $fields[$name . '_lt'] = $type;
-            $fields[$name . '_lte'] = $type;
-            $fields[$name . '_gt'] = $type;
-            $fields[$name . '_gte'] = $type;
+        foreach ($this->model->fields() as $name => $type) {
+            $fields = array_merge($fields, $this->getFilters($name, $type));
+        }
+
+        foreach ($this->model->relations() as $relation => $type) {
+            $type = Type::getNamedType($type);
+            $fields[$relation] = Bakery::getType($type->name . 'Filter');
         }
 
         $fields['AND'] = Bakery::listOf(Bakery::getType($this->name));
         $fields['OR'] = Bakery::listOf(Bakery::getType($this->name));
+
+        return $fields;
+    }
+
+    /**
+     * Return the filters for a field.
+     *
+     * @param string $name
+     * @param string $type
+     * @return array
+     */
+    public function getFilters(string $name, $type): array
+    {
+        $type = Type::getNamedType($type);
+        $fields = [];
+
+        $fields[$name] = $type;
+        $fields[$name . '_contains'] = $type;
+        $fields[$name . '_not_contains'] = $type;
+        $fields[$name . '_starts_with'] = $type;
+        $fields[$name . '_not_starts_with'] = $type;
+        $fields[$name . '_ends_with'] = $type;
+        $fields[$name . '_not_ends_with'] = $type;
+        $fields[$name . '_not'] = $type;
+        $fields[$name . '_not_in'] = Bakery::listOf($type);
+        $fields[$name . '_in'] = Bakery::listOf($type);
+        $fields[$name . '_lt'] = $type;
+        $fields[$name . '_lte'] = $type;
+        $fields[$name . '_gt'] = $type;
+        $fields[$name . '_gte'] = $type;
 
         return $fields;
     }

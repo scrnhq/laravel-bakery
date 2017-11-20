@@ -7,6 +7,8 @@ use Eloquent;
 use Bakery\Tests\TestCase;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
+use Bakery\Tests\Stubs\User;
+use Bakery\Tests\Stubs\Post;
 use Bakery\Tests\Stubs\Model;
 use Bakery\Tests\WithDatabase;
 use Bakery\Queries\CollectionQuery;
@@ -23,17 +25,8 @@ class CollectionQueryTest extends TestCase
     public function setUp()
     {
         parent::setUp();
-
+        $this->migrateDatabase();
         Eloquent::Unguard();
-
-        Schema::create('models', function ($table) {
-            $table->increments('id');
-            $table->string('slug')->nullable();
-            $table->string('title')->nullable();
-            $table->string('body')->nullable();
-            $table->integer('comments')->nullable();
-            $table->timestamps();
-        });
     }
 
     /** @test */
@@ -79,8 +72,8 @@ class CollectionQueryTest extends TestCase
     public function it_filters_by_field_contain_matches()
     {
         Model::create(['title' => 'Hello world']);
-        Model::create(['title' => 'Hello mars']); 
-        Model::create(['title' => 'Goodbye world']); 
+        Model::create(['title' => 'Hello mars']);
+        Model::create(['title' => 'Goodbye world']);
 
         $query = new CollectionQuery(Model::class);
         $result = $query->resolve(null, ['filter' => ['title_contains' => 'hello']]);
@@ -92,8 +85,8 @@ class CollectionQueryTest extends TestCase
     public function it_filters_by_field_not_contain_matches()
     {
         Model::create(['title' => 'Hello world']);
-        Model::create(['title' => 'Hello mars']); 
-        Model::create(['title' => 'Goodbye world']); 
+        Model::create(['title' => 'Hello mars']);
+        Model::create(['title' => 'Goodbye world']);
 
         $query = new CollectionQuery(Model::class);
         $result = $query->resolve(null, ['filter' => ['title_not_contains' => 'hello']]);
@@ -105,8 +98,8 @@ class CollectionQueryTest extends TestCase
     public function it_filters_by_not_matching_field()
     {
         Model::create(['title' => 'foo']);
-        Model::create(['title' => 'foo']); 
-        Model::create(['title' => 'bar']); 
+        Model::create(['title' => 'foo']);
+        Model::create(['title' => 'bar']);
 
         $query = new CollectionQuery(Model::class);
         $result = $query->resolve(null, ['filter' => ['title_not' => 'foo']]);
@@ -118,8 +111,8 @@ class CollectionQueryTest extends TestCase
     public function it_filters_by_a_list_of_possible_values_for_a_field()
     {
         Model::create(['title' => 'foo']);
-        Model::create(['title' => 'bar']); 
-        Model::create(['title' => 'baz']); 
+        Model::create(['title' => 'bar']);
+        Model::create(['title' => 'baz']);
 
         $query = new CollectionQuery(Model::class);
         $result = $query->resolve(null, ['filter' => ['title_in' => ['foo', 'bar']]]);
@@ -131,8 +124,8 @@ class CollectionQueryTest extends TestCase
     public function it_filters_by_a_list_of_excluded_values_for_a_field()
     {
         Model::create(['title' => 'foo']);
-        Model::create(['title' => 'bar']); 
-        Model::create(['title' => 'baz']); 
+        Model::create(['title' => 'bar']);
+        Model::create(['title' => 'baz']);
 
         $query = new CollectionQuery(Model::class);
         $result = $query->resolve(null, ['filter' => ['title_not_in' => ['foo', 'bar']]]);
@@ -144,7 +137,7 @@ class CollectionQueryTest extends TestCase
     public function it_filters_by_less_then_a_certain_value()
     {
         Model::create(['comments' => 5]);
-        Model::create(['comments' => 10]); 
+        Model::create(['comments' => 10]);
 
         $query = new CollectionQuery(Model::class);
         $result = $query->resolve(null, ['filter' => ['comments_lt' => 6]]);
@@ -156,7 +149,7 @@ class CollectionQueryTest extends TestCase
     public function it_filters_by_less_then_or_equal_a_certain_value()
     {
         Model::create(['comments' => 5]);
-        Model::create(['comments' => 10]); 
+        Model::create(['comments' => 10]);
 
         $query = new CollectionQuery(Model::class);
         $result = $query->resolve(null, ['filter' => ['comments_lte' => 5]]);
@@ -168,7 +161,7 @@ class CollectionQueryTest extends TestCase
     public function it_filters_by_greater_then_a_certain_value()
     {
         Model::create(['comments' => 5]);
-        Model::create(['comments' => 10]); 
+        Model::create(['comments' => 10]);
 
         $query = new CollectionQuery(Model::class);
         $result = $query->resolve(null, ['filter' => ['comments_gt' => 5]]);
@@ -180,7 +173,7 @@ class CollectionQueryTest extends TestCase
     public function it_filters_by_greater_then_or_equal_a_certain_value()
     {
         Model::create(['comments' => 5]);
-        Model::create(['comments' => 10]); 
+        Model::create(['comments' => 10]);
 
         $query = new CollectionQuery(Model::class);
         $result = $query->resolve(null, ['filter' => ['comments_gte' => 5]]);
@@ -192,8 +185,8 @@ class CollectionQueryTest extends TestCase
     public function it_filters_by_starts_with_a_certain_value()
     {
         Model::create(['title' => 'Hello world']);
-        Model::create(['title' => 'Hello mars']); 
-        Model::create(['title' => 'Goodbye world']); 
+        Model::create(['title' => 'Hello mars']);
+        Model::create(['title' => 'Goodbye world']);
 
         $query = new CollectionQuery(Model::class);
         $result = $query->resolve(null, ['filter' => ['title_starts_with' => 'hel']]);
@@ -205,8 +198,8 @@ class CollectionQueryTest extends TestCase
     public function it_filters_by_starts_not_with_a_certain_value()
     {
         Model::create(['title' => 'Hello world']);
-        Model::create(['title' => 'Hello mars']); 
-        Model::create(['title' => 'Goodbye world']); 
+        Model::create(['title' => 'Hello mars']);
+        Model::create(['title' => 'Goodbye world']);
 
         $query = new CollectionQuery(Model::class);
         $result = $query->resolve(null, ['filter' => ['title_not_starts_with' => 'hel']]);
@@ -218,8 +211,8 @@ class CollectionQueryTest extends TestCase
     public function it_filters_by_ends_with_a_certain_value()
     {
         Model::create(['title' => 'Hello world']);
-        Model::create(['title' => 'Hello mars']); 
-        Model::create(['title' => 'Goodbye world']); 
+        Model::create(['title' => 'Hello mars']);
+        Model::create(['title' => 'Goodbye world']);
 
         $query = new CollectionQuery(Model::class);
         $result = $query->resolve(null, ['filter' => ['title_ends_with' => 'world']]);
@@ -231,8 +224,8 @@ class CollectionQueryTest extends TestCase
     public function it_filters_by_ends_not_with_a_certain_value()
     {
         Model::create(['title' => 'Hello world']);
-        Model::create(['title' => 'Hello mars']); 
-        Model::create(['title' => 'Goodbye world']); 
+        Model::create(['title' => 'Hello mars']);
+        Model::create(['title' => 'Goodbye world']);
 
         $query = new CollectionQuery(Model::class);
         $result = $query->resolve(null, ['filter' => ['title_not_ends_with' => 'world']]);
@@ -243,9 +236,9 @@ class CollectionQueryTest extends TestCase
     /** @test */
     public function it_orders_by_a_field_in_ascending_order()
     {
-        $first = Model::create(['title' => 'Hello mars']); 
+        $first = Model::create(['title' => 'Hello mars']);
         $second = Model::create(['title' => 'Hello world']);
-        $third = Model::create(['title' => 'Goodbye world']); 
+        $third = Model::create(['title' => 'Goodbye world']);
 
         $query = new CollectionQuery(Model::class);
         $result = $query->resolve(null, ['orderBy' => 'title_ASC']);
@@ -258,9 +251,9 @@ class CollectionQueryTest extends TestCase
     /** @test */
     public function it_orders_by_a_field_in_descending_order()
     {
-        $first = Model::create(['title' => 'Hello mars']); 
+        $first = Model::create(['title' => 'Hello mars']);
         $second = Model::create(['title' => 'Hello world']);
-        $third = Model::create(['title' => 'Goodbye world']); 
+        $third = Model::create(['title' => 'Goodbye world']);
 
         $query = new CollectionQuery(Model::class);
         $result = $query->resolve(null, ['orderBy' => 'title_DESC']);

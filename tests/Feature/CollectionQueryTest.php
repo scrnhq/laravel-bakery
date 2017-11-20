@@ -17,21 +17,19 @@ class CollectionQueryTest extends TestCase
 
         $app['config']->set('bakery.models', [
             Stubs\Model::class,
+            Stubs\User::class,
+            Stubs\Post::class,
+            Stubs\Comment::class,
+            Stubs\Role::class,
+            Stubs\Phone::class,
         ]);
     }
 
     protected function setUp()
     {
         parent::setUp();
-
+        $this->migrateDatabase();
         Eloquent::unguard();
-
-        Schema::create('models', function ($table) {
-            $table->increments('id');
-            $table->string('title')->nullable();
-            $table->string('body')->nullable();
-            $table->timestamps();
-        });
     }
 
     /** @test */
@@ -199,5 +197,50 @@ class CollectionQueryTest extends TestCase
         $this->assertEquals($result->items[0]->id, $third->id);
         $this->assertEquals($result->items[1]->id, $first->id);
         $this->assertEquals($result->items[2]->id, $second->id);
+    }
+
+    /** @test */
+    public function it_can_filter_by_nested_relations()
+    {
+        $firstUser = Stubs\User::create([
+            'name' => 'John Doe',
+            'email' => 'john.doe@example.com',
+            'password' => 'secret',
+        ]);
+
+        $firstUser->phone()->create([
+            'number' => '+31612345678'
+        ]);
+
+        $secondUser = Stubs\User::create([
+            'name' => 'Jane Doe',
+            'email' => 'jane.doe@example.com',
+            'password' => 'secret',
+        ]);
+
+        $firstUser->posts()->create(['title' => 'Hello world!']);
+        $firstUser->posts()->create(['title' => 'Hello mars!']);
+        $secondUser->posts()->create(['title' => 'Howdy!']);
+
+        $query = '
+            query {
+                posts(filter: {
+                    user: {
+                        name: "' . $firstUser->name . '"
+                        phone: {
+                            number: "' . $firstUser->phone->number . '"
+                        }
+                    }
+                }) {
+                    items {
+                        id
+                    }
+                }
+            }
+        ';
+
+        $response = $this->json('GET', '/graphql', ['query' => $query]);
+        $result = json_decode($response->getContent())->data->posts;
+        $this->assertCount(2, $result->items);
     }
 }

@@ -41,6 +41,7 @@ class Schema
         foreach ($this->getModels() as $model) {
             $types[] = new Types\EntityType($model);
             $types[] = new Types\EntityCollectionType($model);
+            $types[] = new Types\EntityLookupType($model);
             $types[] = new Types\CollectionFilterType($model);
             $types[] = new Types\CollectionOrderByType($model);
             $types[] = new Types\CreateInputType($model);

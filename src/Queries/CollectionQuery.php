@@ -3,6 +3,7 @@
 namespace Bakery\Queries;
 
 use GraphQL\Type\Definition\Type;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
 
@@ -95,23 +96,37 @@ class CollectionQuery extends Field
     /**
      * Filter the query based on the filter argument.
      *
-     * @param Builder $query
+     * @param Model $model
      * @param array $args
      * @return Builder
      */
-    protected function applyFilters(Builder $query, array $args)
+    protected function applyFilters(Builder $query, array $args): Builder
     {
         foreach ($args as $key => $value) {
             if ($key === 'AND' || $key === 'OR') {
                 foreach ($this->flatten($value) as $subKey => $subValue) {
                     $this->filter($query, $subKey, $subValue, $key);
                 }
+            } elseif (in_array($key, array_keys($query->getModel()->relations()))) {
+                $this->applyRelationFilter($query, $key, $value);
             } else {
                 $this->filter($query, $key, $value, 'AND');
             }
         }
 
         return $query;
+    }
+    
+    /**
+     * Filter the query based on the filter argument that contain relations.
+     *
+     * @return Builder
+     */
+    protected function applyRelationFilter(Builder $query, string $relation, array $args): Builder
+    {
+        return $query->whereHas($relation, function ($subQuery) use ($args) {
+            return $this->applyFilters($subQuery, $args);
+        });
     }
 
     /**
