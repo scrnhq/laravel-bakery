@@ -10,8 +10,7 @@ env:
 
 install:
   - composer self-update
-  - composer require orchestra/testbench:${TESTBENCH_VERSION}
-  - composer require phpunit/phpunit:${PHPUNIT_VERSION}
+  - composer require orchestra/testbench:${TESTBENCH_VERSION} phpunit/phpunit:${PHPUNIT_VERSION}
   - composer install --no-interaction
 
 script:
