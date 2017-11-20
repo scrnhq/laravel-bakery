@@ -4,9 +4,14 @@ php:
   - 7.0 
   - 7.1
 
-before_script:
+env:
+  - TESTBENCH_VERSION="3.4.*" # Laravel 5.4
+  - TESTBENCH_VERSION="3.5.*" # Laravel 5.5
+
+install:
   - composer self-update
   - composer install --no-interaction
+  - composer require orchestra/testbench:${TESTBENCH_VERSION}
 
 script:
   - vendor/bin/phpunit --coverage-clover=coverage.xml
