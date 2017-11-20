@@ -10,8 +10,8 @@ env:
 
 install:
   - composer self-update
-  - composer install --no-interaction
   - composer require orchestra/testbench:${TESTBENCH_VERSION}
+  - composer install --no-interaction
 
 script:
   - vendor/bin/phpunit --coverage-clover=coverage.xml
