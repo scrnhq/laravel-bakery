@@ -5,12 +5,13 @@ php:
   - 7.1
 
 env:
-  - TESTBENCH_VERSION="3.4.*" # Laravel 5.4
-  - TESTBENCH_VERSION="3.5.*" # Laravel 5.5
+  - TESTBENCH_VERSION="3.4.*" PHPUNIT_VERSION="5.7.*" # Laravel 5.4
+  - TESTBENCH_VERSION="3.5.*" PHPUNIT_VERSION="6.0.*" # Laravel 5.5
 
 install:
   - composer self-update
   - composer require orchestra/testbench:${TESTBENCH_VERSION}
+  - composer require phpunit/phpunit:${PHPUNIT_VERSION}
   - composer install --no-interaction
 
 script:

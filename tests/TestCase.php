@@ -15,12 +15,10 @@ class TestCase extends OrchestraTestCase
     {
         parent::setUp();
 
-        // Only supported in Laravel 5.5+
-        // if (method_exists($this, 'withoutExceptionHandling')) {
+        // Disable exception handling for easer testing.
         $this->withoutExceptionHandling();
-        // }
 
-        // Set up default schema
+        // Set up default schema.
         Bakery::schema();
     }
 
