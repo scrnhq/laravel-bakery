@@ -14,7 +14,13 @@ class TestCase extends OrchestraTestCase
     protected function setUp()
     {
         parent::setUp();
-        $this->withoutExceptionHandling();
+
+        // Only supported in Laravel 5.5+
+        if (method_exists($this, 'withoutExceptionHandling')) {
+            $this->withoutExceptionHandling();
+        }
+
+        // Set up default schema
         Bakery::schema();
     }
 
