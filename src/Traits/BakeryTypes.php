@@ -1,6 +1,6 @@
 <?php
 
-namespace Scrn\Bakery\Traits;
+namespace Bakery\Traits;
 
 use GraphQL\Type\Definition\Type;
 

@@ -1,15 +1,15 @@
 <?php
 
-namespace Scrn\Bakery\Tests\Feature;
+namespace Bakery\Tests\Feature;
 
 use Gate;
 use Eloquent;
-use Scrn\Bakery\Tests\Stubs;
-use Scrn\Bakery\Tests\TestCase;
-use Scrn\Bakery\Tests\WithDatabase;
-use Scrn\Bakery\Http\Controller\BakeryController;
+use Bakery\Tests\Stubs;
+use Bakery\Tests\TestCase;
+use Bakery\Tests\WithDatabase;
+use Bakery\Http\Controller\BakeryController;
 use Illuminate\Auth\Access\AuthorizationException;
-use Scrn\Bakery\Exceptions\TooManyResultsException;
+use Bakery\Exceptions\TooManyResultsException;
 
 class DeleteMutationTest extends TestCase
 {
@@ -35,12 +35,12 @@ class DeleteMutationTest extends TestCase
     }
 
     /** @test */
-    public function it_does_not_allow_deleting_entity_as_guest() 
+    public function it_does_not_allow_deleting_entity_as_guest()
     {
         $this->expectException(AuthorizationException::class);
 
         $user = $this->createUser();
-        $post = new Stubs\Post(['title' => 'Hello world!']); 
+        $post = new Stubs\Post(['title' => 'Hello world!']);
         $post->user()->associate($user);
         $post->save();
 
@@ -54,12 +54,12 @@ class DeleteMutationTest extends TestCase
     }
 
     /** @test */
-    public function it_does_not_allow_deleting_entity_as_user_when_there_is_no_policy() 
+    public function it_does_not_allow_deleting_entity_as_user_when_there_is_no_policy()
     {
         $this->expectException(AuthorizationException::class);
 
         $user = $this->createUser();
-        $post = new Stubs\Post(['title' => 'Hello world!']); 
+        $post = new Stubs\Post(['title' => 'Hello world!']);
         $post->user()->associate($user);
         $post->save();
 
@@ -75,12 +75,12 @@ class DeleteMutationTest extends TestCase
     }
 
     /** @test */
-    public function it_does_allow_deleting_entity_as_user_when_it_is_allowed_by_policy() 
+    public function it_does_allow_deleting_entity_as_user_when_it_is_allowed_by_policy()
     {
         Gate::policy(Stubs\Post::class, Stubs\Policies\PostPolicy::class);
 
         $user = $this->createUser();
-        $post = new Stubs\Post(['title' => 'Hello world!']); 
+        $post = new Stubs\Post(['title' => 'Hello world!']);
         $post->user()->associate($user);
         $post->save();
 
@@ -103,11 +103,11 @@ class DeleteMutationTest extends TestCase
         Gate::policy(Stubs\Post::class, Stubs\Policies\PostPolicy::class);
 
         $user = $this->createUser();
-        $post = new Stubs\Post(['title' => 'Hello world!', 'slug' => 'hello-world']); 
+        $post = new Stubs\Post(['title' => 'Hello world!', 'slug' => 'hello-world']);
         $post->user()->associate($user);
         $post->save();
 
-        $post2 = new Stubs\Post(['title' => 'Hello world! (part two)', 'slug' => 'hello-world']); 
+        $post2 = new Stubs\Post(['title' => 'Hello world! (part two)', 'slug' => 'hello-world']);
         $post2->user()->associate($user);
         $post2->save();
 

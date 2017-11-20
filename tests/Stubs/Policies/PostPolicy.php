@@ -1,9 +1,9 @@
 <?php
 
-namespace Scrn\Bakery\Tests\Stubs\Policies;
+namespace Bakery\Tests\Stubs\Policies;
 
-use Scrn\Bakery\Tests\Stubs\User;
-use Scrn\Bakery\Test\Stubs\Post;
+use Bakery\Tests\Stubs\User;
+use Bakery\Test\Stubs\Post;
 
 class PostPolicy
 {

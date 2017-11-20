@@ -1,6 +1,6 @@
 <?php
 
-namespace Scrn\Bakery\Types;
+namespace Bakery\Types;
 
 use Illuminate\Database\Eloquent\Model;
 
@@ -32,18 +32,6 @@ class CollectionOrderByType extends EnumType
     }
 
     /**
-     * Return the attributes for the filter collection type.
-     *
-     * @return array
-     */
-    public function attributes(): array
-    {
-        return [
-            'name' => $this->name,
-        ];
-    }
-
-    /**
      * Return the fields for the collection filter type.
      *
      * @return array
@@ -52,11 +40,11 @@ class CollectionOrderByType extends EnumType
     {
         $values = [];
 
-        foreach($this->model->fields() as $name => $type) {
+        foreach ($this->model->fields() as $name => $type) {
             $values[] = $name . '_ASC';
             $values[] = $name . '_DESC';
         }
 
-        return $values; 
+        return $values;
     }
 }

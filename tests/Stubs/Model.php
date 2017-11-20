@@ -1,10 +1,10 @@
 <?php
 
-namespace Scrn\Bakery\Tests\Stubs;
+namespace Bakery\Tests\Stubs;
 
-use Scrn\Bakery\Support\Facades\Bakery;
+use Bakery\Support\Facades\Bakery;
 use Illuminate\Database\Eloquent\Model as BaseModel;
-use Scrn\Bakery\Traits\GraphQLResource;
+use Bakery\Traits\GraphQLResource;
 
 class Model extends BaseModel
 {

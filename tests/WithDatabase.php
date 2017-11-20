@@ -1,13 +1,14 @@
 <?php
 
-namespace Scrn\Bakery\Tests;
+namespace Bakery\Tests;
 
 use Schema;
-use Scrn\Bakery\Tests\Stubs\User;
+use Bakery\Tests\Stubs\User;
 
-trait WithDatabase {
+trait WithDatabase
+{
     /**
-     * Set up a test database. 
+     * Set up a test database.
      *
      * @param  \Illuminate\Foundation\Application  $app
      * @return void

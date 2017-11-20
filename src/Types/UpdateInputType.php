@@ -1,9 +1,9 @@
 <?php
 
-namespace Scrn\Bakery\Types;
+namespace Bakery\Types;
 
 use Illuminate\Database\Eloquent\Model;
-use Scrn\Bakery\Support\Facades\Bakery;
+use Bakery\Support\Facades\Bakery;
 use Illuminate\Database\Eloquent\Relations;
 
 class UpdateInputType extends InputType
@@ -11,14 +11,14 @@ class UpdateInputType extends InputType
     /**
      * The name of the type.
      *
-     * @var string 
+     * @var string
      */
     protected $name;
 
     /**
      * A reference to the model.
      *
-     * @var Model 
+     * @var Model
      */
     protected $model;
 
@@ -34,19 +34,7 @@ class UpdateInputType extends InputType
     }
 
     /**
-     * Return the attributes for the filter collection type. 
-     *
-     * @return array
-     */
-    public function attributes(): array
-    {
-        return [
-            'name' => $this->name,
-        ];
-    }
-
-    /**
-     * Return the fields for the update input type. 
+     * Return the fields for the update input type.
      *
      * @return array
      */
@@ -54,7 +42,7 @@ class UpdateInputType extends InputType
     {
         $fields = $this->model->fields();
 
-        foreach($this->model->getFillable() as $fillable) {
+        foreach ($this->model->getFillable() as $fillable) {
             if (method_exists($this->model, $fillable)) {
                 $relationship = $this->model->{$fillable}();
                 $type = get_class($relationship);

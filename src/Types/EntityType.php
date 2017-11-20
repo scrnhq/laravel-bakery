@@ -1,6 +1,6 @@
 <?php
 
-namespace Scrn\Bakery\Types;
+namespace Bakery\Types;
 
 class EntityType extends Type
 {
@@ -12,13 +12,6 @@ class EntityType extends Type
     {
         $this->name = class_basename($class);
         $this->model = app($class);
-    }
-
-    public function attributes(): array
-    {
-        return [
-            'name' => $this->name,
-        ];
     }
 
     public function fields(): array

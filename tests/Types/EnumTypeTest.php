@@ -1,10 +1,10 @@
 <?php
 
-namespace Scrn\Bakery\Tests\Types;
+namespace Bakery\Tests\Types;
 
 use GraphQL\Type\Definition\EnumType;
-use Scrn\Bakery\Tests\Stubs\EnumTypeStub;
-use Scrn\Bakery\Tests\TestCase;
+use Bakery\Tests\Stubs\EnumTypeStub;
+use Bakery\Tests\TestCase;
 
 class EnumTypeTest extends TestCase
 {

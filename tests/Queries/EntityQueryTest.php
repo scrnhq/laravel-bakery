@@ -1,14 +1,14 @@
 <?php
 
-namespace Scrn\Bakery\Tests;
+namespace Bakery\Tests;
 
 use Schema;
 use Eloquent;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
-use Scrn\Bakery\Tests\Stubs\Model;
-use Scrn\Bakery\Tests\WithDatabase;
-use Scrn\Bakery\Queries\EntityQuery;
+use Bakery\Tests\Stubs\Model;
+use Bakery\Tests\WithDatabase;
+use Bakery\Queries\EntityQuery;
 
 class EntityQueryTest extends TestCase
 {

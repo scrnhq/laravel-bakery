@@ -23,12 +23,12 @@
   },
   "autoload": {
     "psr-4": {
-      "Scrn\\Bakery\\": "src"
+      "Bakery\\": "src"
     }
   },
   "autoload-dev": {
     "psr-4": {
-      "Scrn\\Bakery\\Tests\\": "tests/"
+      "Bakery\\Tests\\": "tests/"
     }
   },
   "scripts": {
@@ -37,9 +37,9 @@
   },
   "extra": {
     "laravel": {
-      "providers": ["Scrn\\Bakery\\BakeryServiceProvider"],
+      "providers": ["Bakery\\BakeryServiceProvider"],
       "aliases": {
-        "Bakery": "Scrn\\Bakery\\Support\\Facades\\Bakery"
+        "Bakery": "Bakery\\Support\\Facades\\Bakery"
       }
     }
   }

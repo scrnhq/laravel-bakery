@@ -1,9 +1,9 @@
 <?php
 
-namespace Scrn\Bakery\Types;
+namespace Bakery\Types;
 
 use Illuminate\Database\Eloquent\Model;
-use Scrn\Bakery\Support\Facades\Bakery;
+use Bakery\Support\Facades\Bakery;
 
 class CollectionFilterType extends InputType
 {
@@ -37,18 +37,6 @@ class CollectionFilterType extends InputType
     {
         $this->name = class_basename($class) . 'Filter';
         $this->model = app($class);
-    }
-
-    /**
-     * Return the attributes for the filter collection type.
-     *
-     * @return array
-     */
-    public function attributes(): array
-    {
-        return [
-            'name' => $this->name,
-        ];
     }
 
     /**

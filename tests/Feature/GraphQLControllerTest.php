@@ -1,8 +1,8 @@
 <?php
 
-namespace Scrn\Bakery\Tests\Feature;
+namespace Bakery\Tests\Feature;
 
-use Scrn\Bakery\Tests\TestCase;
+use Bakery\Tests\TestCase;
 
 class BakeryControllerTest extends TestCase
 {

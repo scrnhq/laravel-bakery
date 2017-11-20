@@ -1,8 +1,11 @@
 <?php
 
-namespace Scrn\Bakery\Support;
+namespace Bakery\Support;
 
-class Field
+use Bakery\Contracts\FieldContract;
+use Bakery\Exceptions\InvalidFieldException;
+
+abstract class Field implements FieldContract
 {
     /**
      * The attributes of the field.
@@ -46,7 +49,7 @@ class Field
      *
      * @return Callback|null
      */
-    protected function getResolver()
+    private function getResolver()
     {
         if (!method_exists($this, 'resolve')) {
             return null;
@@ -62,24 +65,20 @@ class Field
      */
     public function getAttributes()
     {
-        $attributes = $this->attributes();
+        $name = $this->name;
 
-        $attributes = array_merge($this->attributes, [
+        if (!$this->name) {
+            throw new InvalidFieldException('Required property name missing for field.');
+        }
+
+        return [
             'name' => $this->name,
-            'args' => $this->args(),
-        ], $attributes);
-
-        $type = $this->type();
-        if (isset($type)) {
-            $attributes['type'] = $type;
-        }
-
-        $resolver = $this->getResolver();
-        if ($resolver) {
-            $attributes['resolve'] = $resolver;
-        }
-
-        return $attributes;
+            'args' => $this->args,
+            'type' => $this->type,
+            'fields' => $this->fields,
+            'description' => $this->description,
+            'resolve' => $this->getResolver(),
+        ];
     }
 
     /**
@@ -90,5 +89,22 @@ class Field
     public function toArray()
     {
         return $this->getAttributes();
+    }
+
+    /**
+     * Dynamically get properties on the object.
+     *
+     * @param string $key
+     * @return mixed
+     */
+    public function __get($key)
+    {
+        if (method_exists($this, $key)) {
+            return $this->{$key}();
+        } elseif (property_exists($this, $key)) {
+            return $this->{$key};
+        }
+
+        return null;
     }
 }

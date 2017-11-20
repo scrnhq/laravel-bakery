@@ -1,10 +1,10 @@
 <?php
 
-namespace Scrn\Bakery\Tests\Stubs;
+namespace Bakery\Tests\Stubs;
 
 use GraphQL\Type\Definition\Type;
-use Scrn\Bakery\Tests\Stubs\User;
-use Scrn\Bakery\Traits\GraphQLResource;
+use Bakery\Tests\Stubs\User;
+use Bakery\Traits\GraphQLResource;
 use Illuminate\Database\Eloquent\Relations;
 use Illuminate\Database\Eloquent\Model as BaseModel;
 
@@ -35,8 +35,8 @@ class Role extends BaseModel
     }
 
     /**
-     * A role belongs to many users. 
-     * 
+     * A role belongs to many users.
+     *
      * @return Relations\BelongsToMany;
      */
     public function users(): Relations\BelongsToMany

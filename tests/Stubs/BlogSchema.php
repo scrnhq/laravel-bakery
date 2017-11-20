@@ -1,8 +1,8 @@
 <?php
 
-namespace Scrn\Bakery\Tests\Stubs;
+namespace Bakery\Tests\Stubs;
 
-use Scrn\Bakery\Support\Schema;
+use Bakery\Support\Schema;
 
 class BlogSchema extends Schema
 {

@@ -1,19 +1,12 @@
 <?php
 
-namespace Scrn\Bakery\Types;
+namespace Bakery\Types;
 
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type as BaseType;
 
 class Type
 {
-    /**
-     * The attibutes of the type.
-     *
-     * @var array
-     */
-    protected $attributes = [];
-
     /**
      * Return the default fields.
      *
@@ -88,16 +81,15 @@ class Type
      */
     public function getAttributes(): array
     {
-        $attributes = $this->attributes();
-
-        $attributes = array_merge($this->attributes, [
+        $attributes = [
+            'name' => $this->name,
             'fields' => function () {
                 return $this->getFields();
-            },
-        ], $attributes);
+            }
+        ];
 
         if (method_exists($this, 'resolveField')) {
-            $attributes['resolveField'] = [$this, 'resolveField']; 
+            $attributes['resolveField'] = [$this, 'resolveField'];
         }
 
         return $attributes;
@@ -116,7 +108,7 @@ class Type
 
     /**
      * Convert the Bakery type to a GraphQL type.
-     * 
+     *
      * @return BaseType
      */
     public function toGraphQLType(): BaseType
@@ -125,26 +117,19 @@ class Type
     }
 
     /**
-     * Dynamically retrieve the value of an attribute.
+     * Dynamically get properties on the object.
      *
-     * @param  string $key
+     * @param string $key
      * @return mixed
      */
     public function __get($key)
     {
-        $attributes = $this->getAttributes();
-        return isset($attributes[$key]) ? $attributes[$key] : null;
-    }
+        if (method_exists($this, $key)) {
+            return $this->{$key}();
+        } elseif (property_exists($this, $key)) {
+            return $this->{$key};
+        }
 
-    /**
-     * Dynamically check if an attribute is set.
-     *
-     * @param  string $key
-     * @return bool
-     */
-    public function __isset($key)
-    {
-        $attributes = $this->getAttributes();
-        return isset($attributes[$key]);
+        return null;
     }
 }

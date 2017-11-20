@@ -1,11 +1,11 @@
 <?php
 
-namespace Scrn\Bakery\Types;
+namespace Bakery\Types;
 
 use ReflectionMethod;
 use ReflectionException;
 use Illuminate\Database\Eloquent\Model;
-use Scrn\Bakery\Support\Facades\Bakery;
+use Bakery\Support\Facades\Bakery;
 use Illuminate\Database\Eloquent\Relations;
 
 class CreateInputType extends InputType
@@ -13,14 +13,14 @@ class CreateInputType extends InputType
     /**
      * The name of the type.
      *
-     * @var string 
+     * @var string
      */
     protected $name;
 
     /**
      * A reference to the model.
      *
-     * @var Model 
+     * @var Model
      */
     protected $model;
 
@@ -36,18 +36,6 @@ class CreateInputType extends InputType
     }
 
     /**
-     * Return the attributes for the filter collection type. 
-     *
-     * @return array
-     */
-    public function attributes(): array
-    {
-        return [
-            'name' => $this->name,
-        ];
-    }
-
-    /**
      * Return the fields for the collection filter type.
      *
      * @return array
@@ -56,7 +44,7 @@ class CreateInputType extends InputType
     {
         $fields = $this->model->fields();
 
-        foreach($this->model->getFillable() as $fillable) {
+        foreach ($this->model->getFillable() as $fillable) {
             if (method_exists($this->model, $fillable)) {
                 $relationship = $this->model->{$fillable}();
                 $type = get_class($relationship);

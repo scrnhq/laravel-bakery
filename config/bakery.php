@@ -6,7 +6,7 @@ return [
      | Bakery Models
      |--------------------------------------------------------------------------
      |
-     | Here you can define the models that should be baked by Bakery. 
+     | Here you can define the models that should be baked by Bakery.
      */
     'models' => [],
 
@@ -25,9 +25,9 @@ return [
      |--------------------------------------------------------------------------
      |
      | Here you can define the controller that should
-     | handle the GraphQL requests. 
+     | handle the GraphQL requests.
      */
-    'controller' => '\Scrn\Bakery\Http\Controller\BakeryController@query',
+    'controller' => '\Bakery\Http\Controller\BakeryController@query',
 
     /*
      |--------------------------------------------------------------------------
@@ -35,7 +35,7 @@ return [
      |--------------------------------------------------------------------------
      |
      | Here you can define the controller that should
-     | render the GraphiQL view. 
+     | render the GraphiQL view.
      */
-    'graphiqlController' => '\Scrn\Bakery\Http\Controller\BakeryController@graphiql',
+    'graphiqlController' => '\Bakery\Http\Controller\BakeryController@graphiql',
 ];

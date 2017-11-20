@@ -1,11 +1,11 @@
 <?php
 
-namespace Scrn\Bakery\Tests;
+namespace Bakery\Tests;
 
 use GraphQL\Type\Definition\ObjectType;
-use Scrn\Bakery\Exceptions\TypeNotFound;
-use Scrn\Bakery\Support\Facades\Bakery;
-use Scrn\Bakery\Tests\Stubs;
+use Bakery\Exceptions\TypeNotFound;
+use Bakery\Support\Facades\Bakery;
+use Bakery\Tests\Stubs;
 
 class BakeryTest extends TestCase
 {

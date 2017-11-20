@@ -1,6 +1,6 @@
 <?php
 
-namespace Scrn\Bakery\Support;
+namespace Bakery\Support;
 
 class DefaultSchema extends Schema
 {

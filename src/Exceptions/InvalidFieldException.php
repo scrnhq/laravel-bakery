@@ -4,6 +4,6 @@ namespace Bakery\Exceptions;
 
 use Exception;
 
-class ModelNotRegistered extends Exception
+class InvalidFieldException extends Exception
 {
 }

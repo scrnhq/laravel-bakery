@@ -1,12 +1,12 @@
 <?php
 
-namespace Scrn\Bakery\Tests;
+namespace Bakery\Tests;
 
 use Closure;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;
-use Scrn\Bakery\Types\EntityType;
-use Scrn\Bakery\Tests\Stubs;
+use Bakery\Types\EntityType;
+use Bakery\Tests\Stubs;
 
 class EntityTypeTest extends TestCase
 {

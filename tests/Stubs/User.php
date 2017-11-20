@@ -1,10 +1,10 @@
 <?php
 
-namespace Scrn\Bakery\Tests\Stubs;
+namespace Bakery\Tests\Stubs;
 
 use Bakery;
 use GraphQL\Type\Definition\Type;
-use Scrn\Bakery\Traits\GraphQLResource;
+use Bakery\Traits\GraphQLResource;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -43,7 +43,7 @@ class User extends Authenticatable
     }
 
     /**
-     * The relationships exposed in GraphQL. 
+     * The relationships exposed in GraphQL.
      *
      * @return array
      */
@@ -68,8 +68,8 @@ class User extends Authenticatable
     }
 
     /**
-     * A user has a phone. 
-     * 
+     * A user has a phone.
+     *
      * @return Relations\HasOne
      */
     public function phone(): Relations\HasOne
@@ -78,8 +78,8 @@ class User extends Authenticatable
     }
 
     /**
-     * A role belongs to many users. 
-     * 
+     * A role belongs to many users.
+     *
      * @return Relations\BelongsToMany;
      */
     public function roles(): Relations\BelongsToMany
@@ -88,13 +88,12 @@ class User extends Authenticatable
     }
 
     /**
-     * A user has many posts. 
-     * 
+     * A user has many posts.
+     *
      * @return Relations\HasMany;
      */
     public function posts(): Relations\HasMany
     {
         return $this->hasMany(Post::class);
     }
-        
 }

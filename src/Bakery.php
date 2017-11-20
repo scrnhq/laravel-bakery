@@ -1,14 +1,16 @@
 <?php
 
-namespace Scrn\Bakery;
+namespace Bakery;
 
-use GraphQL\Executor\ExecutionResult;
 use GraphQL\GraphQL;
-use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Schema;
-use Scrn\Bakery\Exceptions\TypeNotFound;
-use Scrn\Bakery\Traits\BakeryTypes;
-use Scrn\Bakery\Types;
+use GraphQL\Type\Definition\ObjectType;
+use GraphQL\Executor\ExecutionResult;
+
+use Bakery\Types;
+use Bakery\Traits\BakeryTypes;
+use Bakery\Exceptions\TypeNotFound;
+use Bakery\Support\Schema as BakerySchema;
 
 class Bakery
 {
@@ -55,6 +57,7 @@ class Bakery
     public function addTypes(array $classes)
     {
         foreach ($classes as $class) {
+            $class = is_object($class) ? $class : resolve($class);
             $this->addType($class);
         }
     }
@@ -146,6 +149,8 @@ class Bakery
     {
         if (!$schema) {
             $schema = $this->schema();
+        } elseif ($schema instanceof BakerySchema) {
+            $schema = $schema->toGraphQLSchema();
         }
 
         $root = null;
@@ -158,6 +163,11 @@ class Bakery
         $operationName = array_get($input, 'operationName');
 
         return GraphQL::executeQuery($schema, $query, $root, $context, $variables, $operationName);
+    }
+
+    public function graphiql($route)
+    {
+        return view('bakery::graphiql', ['endpoint' => route($route)]);
     }
 
     protected function makeObjectType($type, $options = [])
@@ -184,5 +194,4 @@ class Bakery
     {
         return $class->toGraphQLType();
     }
-
 }

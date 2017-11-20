@@ -1,10 +1,10 @@
 <?php
 
-namespace Scrn\Bakery\Tests\Support;
+namespace Bakery\Tests\Support;
 
 use GraphQL\Type\Schema;
-use Scrn\Bakery\Tests\Stubs\BlogSchema;
-use Scrn\Bakery\Tests\TestCase;
+use Bakery\Tests\Stubs\BlogSchema;
+use Bakery\Tests\TestCase;
 
 class SchemaTest extends TestCase
 {

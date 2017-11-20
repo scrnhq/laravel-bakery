@@ -1,6 +1,6 @@
 <?php
 
-namespace Scrn\Bakery\Types;
+namespace Bakery\Types;
 
 use GraphQL\Type\Definition\EnumType as BaseEnumType;
 use GraphQL\Type\Definition\Type as BaseType;
@@ -38,10 +38,7 @@ class EnumType extends Type
     {
         $attributes = parent::getAttributes();
 
-        $values = $this->getValues();
-        if ($values) {
-            $attributes['values'] = $values;
-        }
+        $attributes['values'] = $this->getValues();
 
         return $attributes;
     }

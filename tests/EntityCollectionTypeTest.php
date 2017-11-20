@@ -1,9 +1,9 @@
 <?php
 
-namespace Scrn\Bakery\Tests;
+namespace Bakery\Tests;
 
-use Scrn\Bakery\Types\EntityCollectionType;
-use Scrn\Bakery\Tests\Stubs;
+use Bakery\Types\EntityCollectionType;
+use Bakery\Tests\Stubs;
 
 class EntityCollectionTypeTest extends TestCase
 {

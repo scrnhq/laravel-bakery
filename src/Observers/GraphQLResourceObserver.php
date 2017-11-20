@@ -1,12 +1,12 @@
 <?php
 
-namespace Scrn\Bakery\Observers;
+namespace Bakery\Observers;
 
-use Illuminate\Database\Eloquent\Model; 
+use Illuminate\Database\Eloquent\Model;
 
 class GraphQLResourceObserver
 {
-    public function saved(Model $model) 
+    public function saved(Model $model)
     {
         $model->persistQueuedModels();
     }

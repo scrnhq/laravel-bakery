@@ -1,6 +1,6 @@
 <?php
 
-namespace Scrn\Bakery\Http\Controller;
+namespace Bakery\Http\Controller;
 
 use GraphQL\Error\Debug;
 use Illuminate\Http\JsonResponse;
@@ -25,7 +25,7 @@ class BakeryController extends Controller
      * @param Request $request
      * @return JsonResponse
      */
-    public function query(Request $request): JsonResponse
+    public function graphql(Request $request): JsonResponse
     {
         $input = $request->all();
 

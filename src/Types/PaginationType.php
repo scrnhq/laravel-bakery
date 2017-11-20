@@ -1,14 +1,12 @@
 <?php
 
-namespace Scrn\Bakery\Types;
+namespace Bakery\Types;
 
-use Scrn\Bakery\Support\Facades\Bakery;
+use Bakery\Support\Facades\Bakery;
 
 class PaginationType extends Type
 {
-    protected $attributes = [
-        'name' => 'Pagination',
-    ];
+    protected $name = 'Pagination';
 
     public function fields(): array
     {
@@ -40,4 +38,3 @@ class PaginationType extends Type
         ];
     }
 }
-

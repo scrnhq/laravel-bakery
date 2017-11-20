@@ -1,8 +1,8 @@
 <?php
 
-namespace Scrn\Bakery\Types;
+namespace Bakery\Types;
 
-use Scrn\Bakery\Support\Facades\Bakery;
+use Bakery\Support\Facades\Bakery;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class EntityCollectionType extends Type
@@ -22,27 +22,15 @@ class EntityCollectionType extends Type
     }
 
     /**
-     * Return the fields for the entity collection type. 
+     * Return the fields for the entity collection type.
      *
      * @return array
      */
     public function fields(): array
     {
         return [
-            'pagination' => Bakery::getType('Pagination'), 
+            'pagination' => Bakery::getType('Pagination'),
             'items' => Bakery::listOf(Bakery::getType(class_basename($this->model))),
-        ];
-    }
-
-    /**
-     * Return the attributes for the entity collection type. 
-     *
-     * @return array
-     */
-    public function attributes(): array
-    {
-        return [
-            'name' => $this->name,
         ];
     }
 

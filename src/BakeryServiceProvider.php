@@ -1,8 +1,8 @@
 <?php
 
-namespace Scrn\Bakery;
+namespace Bakery;
 
-use Scrn\Bakery\Types\PaginationType;
+use Bakery\Types\PaginationType;
 use Illuminate\Support\ServiceProvider;
 
 class BakeryServiceProvider extends ServiceProvider
@@ -57,8 +57,16 @@ class BakeryServiceProvider extends ServiceProvider
     protected function registerRoute()
     {
         $router = $this->app['router'];
-        $router->any($this->app['config']->get('bakery.route'), $this->app['config']->get('bakery.controller'));
-        $router->get('/graphiql', $this->app['config']->get('bakery.graphiqlController'));
+
+        $router->any(
+            $this->app['config']->get('bakery.route'),
+            '\Bakery\Http\Controller\BakeryController@graphql'
+        );
+
+        $router->get(
+            $this->app['config']->get('bakery.graphiql'),
+            '\Bakery\Http\Controller\BakeryController@graphiql'
+        );
     }
 
     /**

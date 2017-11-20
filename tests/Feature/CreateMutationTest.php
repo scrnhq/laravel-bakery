@@ -1,13 +1,13 @@
 <?php
 
-namespace Scrn\Bakery\Tests\Feature;
+namespace Bakery\Tests\Feature;
 
 use Gate;
 use Eloquent;
-use Scrn\Bakery\Tests\Stubs;
-use Scrn\Bakery\Tests\TestCase;
-use Scrn\Bakery\Tests\WithDatabase;
-use Scrn\Bakery\Http\Controller\BakeryController;
+use Bakery\Tests\Stubs;
+use Bakery\Tests\TestCase;
+use Bakery\Tests\WithDatabase;
+use Bakery\Http\Controller\BakeryController;
 use Illuminate\Auth\Access\AuthorizationException;
 
 class CreateMutationTest extends TestCase
@@ -34,7 +34,7 @@ class CreateMutationTest extends TestCase
     }
 
     /** @test */
-    public function it_does_not_allow_creating_entity_as_guest() 
+    public function it_does_not_allow_creating_entity_as_guest()
     {
         $this->expectException(AuthorizationException::class);
 
@@ -52,7 +52,7 @@ class CreateMutationTest extends TestCase
     }
 
     /** @test */
-    public function it_does_not_allow_creating_entity_as_user_when_there_is_no_policy() 
+    public function it_does_not_allow_creating_entity_as_user_when_there_is_no_policy()
     {
         $this->expectException(AuthorizationException::class);
         $this->actingAs($this->createUser());
@@ -71,7 +71,7 @@ class CreateMutationTest extends TestCase
     }
 
     /** @test */
-    public function it_does_allow_creating_entity_as_user_when_it_is_allowed_by_policy() 
+    public function it_does_allow_creating_entity_as_user_when_it_is_allowed_by_policy()
     {
         $this->actingAs($this->createUser());
 
@@ -117,7 +117,7 @@ class CreateMutationTest extends TestCase
     }
 
     /** @test */
-    public function it_lets_you_save_a_has_one_relationship() 
+    public function it_lets_you_save_a_has_one_relationship()
     {
         $this->actingAs($this->createUser());
         Gate::policy(Stubs\User::class, Stubs\Policies\UserPolicy::class);
@@ -142,7 +142,7 @@ class CreateMutationTest extends TestCase
     }
 
     /** @test */
-    public function it_lets_you_create_a_belongs_to_relationship() 
+    public function it_lets_you_create_a_belongs_to_relationship()
     {
         $this->actingAs($this->createUser());
         Gate::policy(Stubs\Phone::class, Stubs\Policies\PhonePolicy::class);

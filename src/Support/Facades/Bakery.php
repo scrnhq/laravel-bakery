@@ -1,6 +1,6 @@
 <?php
 
-namespace Scrn\Bakery\Support\Facades;
+namespace Bakery\Support\Facades;
 
 use Illuminate\Support\Facades\Facade;
 

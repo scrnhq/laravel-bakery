@@ -1,6 +1,6 @@
 <?php
 
-namespace Scrn\Bakery\Traits;
+namespace Bakery\Traits;
 
 use ErrorException;
 use ReflectionClass;
@@ -8,7 +8,7 @@ use ReflectionObject;
 use RuntimeException;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations;
-use Scrn\Bakery\Observers\GraphQLResourceObserver;
+use Bakery\Observers\GraphQLResourceObserver;
 
 trait GraphQLResource
 {

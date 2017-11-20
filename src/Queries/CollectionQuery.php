@@ -1,15 +1,15 @@
 <?php
 
-namespace Scrn\Bakery\Queries;
+namespace Bakery\Queries;
 
 use GraphQL\Type\Definition\Type;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
 
-use Scrn\Bakery\Support\Field;
-use Scrn\Bakery\Support\Facades\Bakery;
+use Bakery\Support\Field;
+use Bakery\Support\Facades\Bakery;
 
-class CollectionQuery extends Field 
+class CollectionQuery extends Field
 {
     /**
      * A reference to the model.
@@ -101,9 +101,9 @@ class CollectionQuery extends Field
      */
     protected function applyFilters(Builder $query, array $args)
     {
-        foreach($args as $key => $value) {
+        foreach ($args as $key => $value) {
             if ($key === 'AND' || $key === 'OR') {
-                foreach($this->flatten($value) as $subKey => $subValue) {
+                foreach ($this->flatten($value) as $subKey => $subValue) {
                     $this->filter($query, $subKey, $subValue, $key);
                 }
             } else {
@@ -128,40 +128,40 @@ class CollectionQuery extends Field
         if (ends_with($key, '_not_contains')) {
             $key = str_before($key, '_not_contains');
             $query->where($key, 'NOT LIKE', '%' . $value . '%', $type);
-        } else if (ends_with($key, '_contains')) {
+        } elseif (ends_with($key, '_contains')) {
             $key = str_before($key, '_contains');
             $query->where($key, 'LIKE', '%' . $value . '%', $type);
-        } else if (ends_with($key, '_not_starts_with')) {
+        } elseif (ends_with($key, '_not_starts_with')) {
             $key = str_before($key, '_not_starts_with');
             $query->where($key, 'NOT LIKE', $value . '%', $type);
-        } else if (ends_with($key, '_starts_with')) {
+        } elseif (ends_with($key, '_starts_with')) {
             $key = str_before($key, '_starts_with');
             $query->where($key, 'LIKE', $value . '%', $type);
-        } else if (ends_with($key, '_not_ends_with')) {
+        } elseif (ends_with($key, '_not_ends_with')) {
             $key = str_before($key, '_not_ends_with');
             $query->where($key, 'NOT LIKE', '%'. $value, $type);
-        } else if (ends_with($key, '_ends_with')) {
+        } elseif (ends_with($key, '_ends_with')) {
             $key = str_before($key, '_ends_with');
             $query->where($key, 'LIKE', '%' . $value, $type);
-        } else if(ends_with($key, '_not')) {
+        } elseif (ends_with($key, '_not')) {
             $key = str_before($key, '_not');
             $query->where($key, '!=', $value, $type);
-        } else if(ends_with($key, '_not_in')) {
+        } elseif (ends_with($key, '_not_in')) {
             $key = str_before($key, '_not_in');
             $query->whereNotIn($key, $value, $type);
-        } else if (ends_with($key, '_in')) {
+        } elseif (ends_with($key, '_in')) {
             $key = str_before($key, '_in');
             $query->whereIn($key, $value, $type);
-        } else if (ends_with($key, '_lt')) {
+        } elseif (ends_with($key, '_lt')) {
             $key = str_before($key, '_lt');
             $query->where($key, '<', $value, $type);
-        } else if (ends_with($key, '_lte')) {
+        } elseif (ends_with($key, '_lte')) {
             $key = str_before($key, '_lte');
             $query->where($key, '<=', $value, $type);
-        } else if (ends_with($key, '_gt')) {
+        } elseif (ends_with($key, '_gt')) {
             $key = str_before($key, '_gt');
             $query->where($key, '>', $value, $type);
-        } else if (ends_with($key, '_gte')) {
+        } elseif (ends_with($key, '_gte')) {
             $key = str_before($key, '_gte');
             $query->where($key, '>=', $value, $type);
         } else {

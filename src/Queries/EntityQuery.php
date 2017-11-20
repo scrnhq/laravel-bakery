@@ -1,12 +1,12 @@
 <?php
 
-namespace Scrn\Bakery\Queries;
+namespace Bakery\Queries;
 
 use GraphQL\Type\Definition\Type;
 use Illuminate\Database\Eloquent\Model;
 
-use Scrn\Bakery\Support\Field;
-use Scrn\Bakery\Support\Facades\Bakery;
+use Bakery\Support\Field;
+use Bakery\Support\Facades\Bakery;
 
 class EntityQuery extends Field
 {
@@ -77,7 +77,7 @@ class EntityQuery extends Field
 
         $query = $this->model->query();
 
-        foreach($args as $key => $value) {
+        foreach ($args as $key => $value) {
             $query->where($key, $value);
         }
 

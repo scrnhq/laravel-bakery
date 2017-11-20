@@ -1,6 +1,6 @@
 <?php
 
-namespace Scrn\Bakery\Exceptions;
+namespace Bakery\Exceptions;
 
 use RuntimeException;
 

@@ -1,13 +1,13 @@
 <?php
 
-namespace Scrn\Bakery\Mutations;
+namespace Bakery\Mutations;
 
-use Scrn\Bakery\Support\Field;
+use Bakery\Support\Field;
 use GraphQL\Type\Definition\Type;
-use Scrn\Bakery\Support\Facades\Bakery;
+use Bakery\Support\Facades\Bakery;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations;
-use Scrn\Bakery\Exceptions\TooManyResultsException;
+use Bakery\Exceptions\TooManyResultsException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
@@ -21,16 +21,16 @@ class UpdateMutation extends Field
     protected $model;
 
     /**
-     * The class of the model. 
+     * The class of the model.
      *
-     * @var string 
+     * @var string
      */
     protected $class;
 
     /**
      * The name of the mutation.
      *
-     * @var string 
+     * @var string
      */
     public $name;
 
@@ -95,7 +95,7 @@ class UpdateMutation extends Field
         $model = $this->getModel($args);
         $this->authorize('update', $model);
 
-        $input = $args['input']; 
+        $input = $args['input'];
         $model->updateWithGraphQLInput($input);
 
         return $model;
@@ -118,7 +118,7 @@ class UpdateMutation extends Field
         $query = $this->model->query();
         $fields = array_except($args, ['input']);
 
-        foreach($fields as $key => $value) {
+        foreach ($fields as $key => $value) {
             $query->where($key, $value);
         }
 

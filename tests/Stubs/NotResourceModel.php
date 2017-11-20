@@ -1,6 +1,6 @@
 <?php
 
-namespace Scrn\Bakery\Tests\Stubs;
+namespace Bakery\Tests\Stubs;
 
 use Illuminate\Database\Eloquent\Model;
 

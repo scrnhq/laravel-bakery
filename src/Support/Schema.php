@@ -1,17 +1,17 @@
 <?php
 
-namespace Scrn\Bakery\Support;
+namespace Bakery\Support;
 
 use GraphQL\Type\Definition\ObjectType;
-use GraphQL\Type\Schema as GraphSchema;
+use GraphQL\Type\Schema as GraphQLSchema;
 use GraphQL\Type\SchemaConfig;
-use Scrn\Bakery\Mutations\CreateMutation;
-use Scrn\Bakery\Mutations\DeleteMutation;
-use Scrn\Bakery\Mutations\UpdateMutation;
-use Scrn\Bakery\Queries\CollectionQuery;
-use Scrn\Bakery\Queries\EntityQuery;
-use Scrn\Bakery\Support\Facades\Bakery;
-use Scrn\Bakery\Types;
+use Bakery\Mutations\CreateMutation;
+use Bakery\Mutations\DeleteMutation;
+use Bakery\Mutations\UpdateMutation;
+use Bakery\Queries\CollectionQuery;
+use Bakery\Queries\EntityQuery;
+use Bakery\Support\Facades\Bakery;
+use Bakery\Types;
 
 class Schema
 {
@@ -51,7 +51,12 @@ class Schema
 
     public function getTypes()
     {
-        return array_merge($this->getModelTypes(), $this->types, $this->types(), Bakery::getStandardTypes());
+        return array_merge(
+            $this->getModelTypes(),
+            $this->types,
+            $this->types(),
+            Bakery::getStandardTypes()
+        );
     }
 
     public function getModelQueries()
@@ -88,7 +93,6 @@ class Schema
 
     public function getModelMutations()
     {
-
         $mutations = [];
         foreach ($this->getModels() as $model) {
             $createMutation = new CreateMutation($model);
@@ -107,9 +111,9 @@ class Schema
     {
         $mutations = [];
         foreach ($this->mutations as $name => $mutation) {
-            $mutations = is_object($mutation) ?: resolve($mutation);
-            $name = is_string($name) ?: $mutations->name;
-            $mutations[$name] = $mutations;
+            $mutation = is_object($mutation) ?: resolve($mutation);
+            $name = is_string($name) ?: $mutation->name;
+            $mutations[$name] = $mutation;
         }
 
         $mutations = array_merge(
@@ -122,7 +126,7 @@ class Schema
         }, $mutations);
     }
 
-    public function toGraphQLSchema(): GraphSchema
+    public function toGraphQLSchema(): GraphQLSchema
     {
         Bakery::addTypes($this->getTypes());
 
@@ -140,7 +144,7 @@ class Schema
                 }
                 return Bakery::type($name);
             });
-        return new GraphSchema($config);
+        return new GraphQLSchema($config);
     }
 
     protected function makeObjectType($type, $options = []): ObjectType

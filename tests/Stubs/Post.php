@@ -1,11 +1,11 @@
 <?php
 
-namespace Scrn\Bakery\Tests\Stubs;
+namespace Bakery\Tests\Stubs;
 
 use Bakery;
 use GraphQL\Type\Definition\Type;
-use Scrn\Bakery\Tests\Stubs\Comment;
-use Scrn\Bakery\Traits\GraphQLResource;
+use Bakery\Tests\Stubs\Comment;
+use Bakery\Traits\GraphQLResource;
 use Illuminate\Database\Eloquent\Relations;
 use Illuminate\Database\Eloquent\Model as BaseModel;
 
@@ -68,7 +68,7 @@ class Post extends BaseModel
 
     /**
      * Get the comments for the post.
-     * 
+     *
      * @return Relations\HasMany;
      */
     public function comments(): Relations\HasMany
@@ -77,8 +77,8 @@ class Post extends BaseModel
     }
 
     /**
-     * A post belongs to a user. 
-     * 
+     * A post belongs to a user.
+     *
      * @return Relations\HasMany;
      */
     public function user(): Relations\BelongsTo

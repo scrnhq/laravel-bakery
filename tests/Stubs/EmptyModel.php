@@ -1,9 +1,9 @@
 <?php
 
-namespace Scrn\Bakery\Tests\Stubs;
+namespace Bakery\Tests\Stubs;
 
 use Illuminate\Database\Eloquent\Model;
-use Scrn\Bakery\Traits\GraphQLResource;
+use Bakery\Traits\GraphQLResource;
 
 class EmptyModel extends Model
 {

@@ -1,10 +1,10 @@
 <?php
 
-namespace Scrn\Bakery\Tests\Traits;
+namespace Bakery\Tests\Traits;
 
-use Scrn\Bakery\Tests\Stubs;
-use Scrn\Bakery\Tests\TestCase;
-use Scrn\Bakery\Tests\WithDatabase;
+use Bakery\Tests\Stubs;
+use Bakery\Tests\TestCase;
+use Bakery\Tests\WithDatabase;
 
 class GraphQLResourceTest extends TestCase
 {

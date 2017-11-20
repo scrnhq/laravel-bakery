@@ -1,15 +1,13 @@
 <?php
 
-namespace Scrn\Bakery\Tests\Stubs;
+namespace Bakery\Tests\Stubs;
 
 use GraphQL\Type\Definition\Type;
-use Scrn\Bakery\Types\EnumType;
+use Bakery\Types\EnumType;
 
 class EnumTypeStub extends EnumType
 {
-    protected $attributes = [
-        'name' => 'EnumStub',
-    ];
+    protected $name = 'EnumStub';
 
     public function values(): array
     {

@@ -1,8 +1,8 @@
 <?php
 
-namespace Scrn\Bakery\Tests\Stubs\Policies;
+namespace Bakery\Tests\Stubs\Policies;
 
-use Scrn\Bakery\Tests\Stubs\User;
+use Bakery\Tests\Stubs\User;
 
 class UserPolicy
 {

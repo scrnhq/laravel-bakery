@@ -1,13 +1,13 @@
 <?php
 
-namespace Scrn\Bakery\Tests\Feature;
+namespace Bakery\Tests\Feature;
 
 use Schema;
 use Eloquent;
-use Scrn\Bakery\Tests\Stubs;
-use Scrn\Bakery\Tests\TestCase;
-use Scrn\Bakery\Tests\WithDatabase;
-use Scrn\Bakery\Http\Controller\BakeryController;
+use Bakery\Tests\Stubs;
+use Bakery\Tests\TestCase;
+use Bakery\Tests\WithDatabase;
+use Bakery\Http\Controller\BakeryController;
 
 class CollectionQueryTest extends TestCase
 {
@@ -32,11 +32,10 @@ class CollectionQueryTest extends TestCase
             $table->string('body')->nullable();
             $table->timestamps();
         });
-
     }
 
     /** @test */
-    public function it_returns_collection_of_entities_with_pagination() 
+    public function it_returns_collection_of_entities_with_pagination()
     {
         Stubs\Model::create();
 

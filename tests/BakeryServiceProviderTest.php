@@ -1,8 +1,8 @@
 <?php
 
-namespace Scrn\Bakery\Tests;
+namespace Bakery\Tests;
 
-use Scrn\Bakery\Tests\Stubs\Model;
+use Bakery\Tests\Stubs\Model;
 
 class BakeryServiceProviderTest extends TestCase
 {

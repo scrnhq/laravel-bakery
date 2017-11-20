@@ -1,6 +1,6 @@
 <?php
 
-namespace Scrn\Bakery\Types;
+namespace Bakery\Types;
 
 use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\Type as BaseType;

@@ -1,11 +1,11 @@
 <?php
 
-namespace Scrn\Bakery\Tests;
+namespace Bakery\Tests;
 
 use Orchestra\Testbench\TestCase as OrchestraTestCase;
-use Scrn\Bakery\Support\Facades\Bakery;
-use Scrn\Bakery\BakeryServiceProvider;
-use Scrn\Bakery\Tests\Stubs\Model;
+use Bakery\Support\Facades\Bakery;
+use Bakery\BakeryServiceProvider;
+use Bakery\Tests\Stubs\Model;
 
 class TestCase extends OrchestraTestCase
 {
