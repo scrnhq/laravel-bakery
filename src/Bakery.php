@@ -2,6 +2,7 @@
 
 namespace Bakery;
 
+use Auth;
 use GraphQL\GraphQL;
 use GraphQL\Type\Schema;
 use GraphQL\Type\Definition\ObjectType;
@@ -154,7 +155,7 @@ class Bakery
         }
 
         $root = null;
-        $context = null;
+        $context = Auth::user();
         $query = array_get($input, 'query');
         $variables = array_get($input, 'variables');
         if (is_string($variables)) {
@@ -165,9 +166,12 @@ class Bakery
         return GraphQL::executeQuery($schema, $query, $root, $context, $variables, $operationName);
     }
 
-    public function graphiql($route)
+    public function graphiql($route, $headers = [])
     {
-        return view('bakery::graphiql', ['endpoint' => route($route)]);
+        return view(
+            'bakery::graphiql',
+            ['endpoint' => route($route), 'headers' => $headers]
+        );
     }
 
     protected function makeObjectType($type, $options = [])

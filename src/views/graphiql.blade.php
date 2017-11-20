@@ -86,6 +86,9 @@
                     headers: {
                         'Accept': 'application/json',
                         'Content-Type': 'application/json',
+                        @foreach($headers as $key => $value)
+                            '{{ $key }}': '{{ $value }}',
+                        @endforeach
                     },
                     body: JSON.stringify(graphQLParams),
                     credentials: 'include',
