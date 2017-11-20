@@ -2,23 +2,23 @@
 
 namespace Bakery\Tests;
 
-use Orchestra\Testbench\TestCase as OrchestraTestCase;
-use Bakery\Support\Facades\Bakery;
-use Bakery\BakeryServiceProvider;
 use Bakery\Tests\Stubs\Model;
+use Bakery\BakeryServiceProvider;
+use Bakery\Support\Facades\Bakery;
+use Orchestra\Testbench\TestCase as OrchestraTestCase;
 
 class TestCase extends OrchestraTestCase
 {
-    use WithDatabase;
+    use WithDatabase, InteractsWithExceptionHandling;
 
     protected function setUp()
     {
         parent::setUp();
 
         // Only supported in Laravel 5.5+
-        if (method_exists($this, 'withoutExceptionHandling')) {
-            $this->withoutExceptionHandling();
-        }
+        // if (method_exists($this, 'withoutExceptionHandling')) {
+        $this->withoutExceptionHandling();
+        // }
 
         // Set up default schema
         Bakery::schema();
