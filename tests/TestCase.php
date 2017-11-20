@@ -2,7 +2,7 @@
 
 namespace Bakery\Tests;
 
-use Bakery\Tests\Stubs\Model;
+use Bakery\Tests\Stubs;
 use Bakery\BakeryServiceProvider;
 use Bakery\Support\Facades\Bakery;
 use Orchestra\Testbench\TestCase as OrchestraTestCase;
@@ -25,7 +25,12 @@ class TestCase extends OrchestraTestCase
     protected function getEnvironmentSetUp($app)
     {
         $app['config']->set('bakery.models', [
-            Model::class,
+            Stubs\Model::class,
+            Stubs\Comment::class,
+            Stubs\Post::class,
+            Stubs\User::class,
+            Stubs\Phone::class,
+            Stubs\Role::class,
         ]);
     }
 
