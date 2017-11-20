@@ -2,8 +2,9 @@
 
 namespace Bakery\Types;
 
-use Illuminate\Database\Eloquent\Model;
+use GraphQL\Type\Definition\Type;
 use Bakery\Support\Facades\Bakery;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations;
 
 class UpdateInputType extends InputType
@@ -34,13 +35,38 @@ class UpdateInputType extends InputType
     }
 
     /**
-     * Return the fields for the update input type.
+     * Return the fields for the collection filter type.
      *
      * @return array
      */
     public function fields(): array
     {
-        $fields = $this->model->fields();
+        return array_merge($this->getFillableFields(), $this->getRelationFields());
+    }
+
+    /**
+     * Get the fillable fields of the model.
+     *
+     * @return array
+     */
+    private function getFillableFields(): array
+    {
+        return array_filter($this->model->fields(), function ($value, $key) {
+            $type = Type::getNamedType($value);
+            $fillable = array_keys($this->model->getFillable());
+
+            return in_array($key, $fillable) && Type::isLeafType($type);
+        }, ARRAY_FILTER_USE_BOTH);
+    }
+
+    /**
+     * Get the fields for the relations of the model.
+     *
+     * @return array
+     */
+    private function getRelationFields(): array
+    {
+        $fields = [];
 
         foreach ($this->model->getFillable() as $fillable) {
             if (method_exists($this->model, $fillable)) {
@@ -50,7 +76,7 @@ class UpdateInputType extends InputType
                     $name = str_singular($fillable) . 'Ids';
                     $fields[$name] = Bakery::listOf(Bakery::ID());
 
-                    $inputType = 'Create' . title_case(str_singular($fillable)) . 'Input';
+                    $inputType = 'Update' . title_case(str_singular($fillable)) . 'Input';
                     if (Bakery::hasType($inputType)) {
                         $fields[$fillable] = Bakery::listOf(Bakery::type($inputType));
                     }
@@ -60,7 +86,7 @@ class UpdateInputType extends InputType
                     $name = str_singular($fillable) . 'Id';
                     $fields[$name] = Bakery::ID();
 
-                    $inputType = 'Create' . title_case(str_singular($fillable)) . 'Input';
+                    $inputType = 'Update' . title_case(str_singular($fillable)) . 'Input';
                     if (Bakery::hasType($inputType)) {
                         $fields[$fillable] = Bakery::type($inputType);
                     }

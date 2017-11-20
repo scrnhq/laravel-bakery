@@ -77,6 +77,10 @@ class CollectionFilterType extends InputType
         $type = Type::getNamedType($type);
         $fields = [];
 
+        if (!Type::isLeafType($type)) {
+            return $fields;
+        }
+
         $fields[$name] = $type;
         $fields[$name . '_contains'] = $type;
         $fields[$name . '_not_contains'] = $type;

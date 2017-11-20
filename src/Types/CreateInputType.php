@@ -2,10 +2,9 @@
 
 namespace Bakery\Types;
 
-use ReflectionMethod;
-use ReflectionException;
-use Illuminate\Database\Eloquent\Model;
+use GraphQL\Type\Definition\Type;
 use Bakery\Support\Facades\Bakery;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations;
 
 class CreateInputType extends InputType
@@ -42,7 +41,32 @@ class CreateInputType extends InputType
      */
     public function fields(): array
     {
-        $fields = $this->model->fields();
+        return array_merge($this->getFillableFields(), $this->getRelationFields());
+    }
+
+    /**
+     * Get the fillable fields of the model.
+     *
+     * @return array
+     */
+    private function getFillableFields(): array
+    {
+        return array_filter($this->model->fields(), function ($value, $key) {
+            $type = Type::getNamedType($value);
+            $fillable = array_keys($this->model->getFillable());
+
+            return in_array($key, $fillable) && Type::isLeafType($type);
+        }, ARRAY_FILTER_USE_BOTH);
+    }
+
+    /**
+     * Get the fields for the relations of the model.
+     *
+     * @return array
+     */
+    private function getRelationFields(): array
+    {
+        $fields = [];
 
         foreach ($this->model->getFillable() as $fillable) {
             if (method_exists($this->model, $fillable)) {
