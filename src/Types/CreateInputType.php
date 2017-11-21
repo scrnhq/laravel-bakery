@@ -53,7 +53,7 @@ class CreateInputType extends InputType
     {
         return array_filter($this->model->fields(), function ($value, $key) {
             $type = Type::getNamedType($value);
-            $fillable = array_keys($this->model->getFillable());
+            $fillable = array_values($this->model->getFillable());
 
             return in_array($key, $fillable) && Type::isLeafType($type);
         }, ARRAY_FILTER_USE_BOTH);
