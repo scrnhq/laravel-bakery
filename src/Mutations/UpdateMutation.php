@@ -2,71 +2,19 @@
 
 namespace Bakery\Mutations;
 
-use Bakery\Support\Field;
-use GraphQL\Type\Definition\Type;
-use Bakery\Support\Facades\Bakery;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations;
 use Bakery\Exceptions\TooManyResultsException;
+use GraphQL\Type\Definition\Type;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
-class UpdateMutation extends Field
+class UpdateMutation extends EntityMutation
 {
-    use AuthorizesRequests;
-
     /**
-     * A reference to the model.
-     */
-    protected $model;
-
-    /**
-     * The class of the model.
+     * The action name used for building the Mutation name.
      *
      * @var string
      */
-    protected $class;
-
-    /**
-     * The name of the mutation.
-     *
-     * @var string
-     */
-    public $name;
-
-    /**
-     * Construct a new update mutation.
-     *
-     * @param string $class
-     * @param string $name
-     */
-    public function __construct(string $class)
-    {
-        $this->class = $class;
-        $this->name = $this->formatName($class);
-        $this->model = app()->make($class);
-    }
-
-    /**
-     * Format the class name to the name for the update mutation.
-     *
-     * @param string $class
-     * @return string
-     */
-    protected function formatName(string $class): string
-    {
-        return 'update' . title_case(str_singular(class_basename($class)));
-    }
-
-    /**
-     * Get the return type of the mutation.
-     *
-     * @return Type
-     */
-    public function type()
-    {
-        return Bakery::getType(title_case(class_basename($this->class)));
-    }
+    protected $action = 'update';
 
     /**
      * Get the arguments of the mutation.
@@ -75,11 +23,8 @@ class UpdateMutation extends Field
      */
     public function args()
     {
-        $name = 'Update' . title_case(str_singular(class_basename($this->class))) . 'Input';
-
-        return array_merge([
+        return array_merge(parent::args(), [
             $this->model->getKeyName() => Type::ID(),
-            'input' => Bakery::nonNull(Bakery::getType($name)),
         ], $this->model->lookupFields());
     }
 
@@ -93,7 +38,7 @@ class UpdateMutation extends Field
     public function resolve($root, $args = []): Model
     {
         $model = $this->getModel($args);
-        $this->authorize('update', $model);
+        $this->authorize($this->action, $model);
 
         $input = $args['input'];
         $model->updateWithGraphQLInput($input);
@@ -110,7 +55,7 @@ class UpdateMutation extends Field
     protected function getModel(array $args): Model
     {
         $primaryKey = $this->model->getKeyName();
-        
+
         if (array_key_exists($primaryKey, $args)) {
             return $this->model->findOrFail($args[$primaryKey]);
         }
@@ -127,7 +72,7 @@ class UpdateMutation extends Field
         if ($results->count() < 1) {
             throw (new ModelNotFoundException)->setModel($this->class);
         }
-        
+
         if ($results->count() > 1) {
             throw (new TooManyResultsException)->setModel($this->class, $results->pluck($this->model->getKeyName()));
         }

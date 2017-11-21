@@ -2,61 +2,21 @@
 
 namespace Bakery\Mutations;
 
-use Bakery\Support\Field;
 use GraphQL\Type\Definition\Type;
-use Bakery\Support\Facades\Bakery;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations;
-use Bakery\Exceptions\TooManyResultsException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
-class DeleteMutation extends Field
+use Bakery\Exceptions\TooManyResultsException;
+use Bakery\Support\Facades\Bakery;
+
+class DeleteMutation extends EntityMutation
 {
-    use AuthorizesRequests;
-
     /**
-     * A reference to the model.
-     */
-    protected $model;
-
-    /**
-     * The class of the model.
+     * The action name used for building the Mutation name.
      *
      * @var string
      */
-    protected $class;
-
-    /**
-     * The name of the mutation.
-     *
-     * @var string
-     */
-    public $name;
-
-    /**
-     * Construct a new update mutation.
-     *
-     * @param string $class
-     * @param string $name
-     */
-    public function __construct(string $class)
-    {
-        $this->class = $class;
-        $this->name = $this->formatName($class);
-        $this->model = app()->make($class);
-    }
-
-    /**
-     * Format the class name to the name for the update mutation.
-     *
-     * @param string $class
-     * @return string
-     */
-    protected function formatName(string $class): string
-    {
-        return 'delete' . title_case(str_singular(class_basename($class)));
-    }
+    protected $action = 'delete';
 
     /**
      * Get the return type of the mutation.
@@ -76,7 +36,7 @@ class DeleteMutation extends Field
     public function args()
     {
         return array_merge([
-            $this->model->getKeyName() => Type::ID(),
+            $this->model->getKeyName() => Bakery::ID(),
         ], $this->model->lookupFields());
     }
 
@@ -104,7 +64,7 @@ class DeleteMutation extends Field
     protected function getModel(array $args): Model
     {
         $primaryKey = $this->model->getKeyName();
-        
+
         if (array_key_exists($primaryKey, $args)) {
             return $this->model->findOrFail($args[$primaryKey]);
         }
@@ -120,7 +80,7 @@ class DeleteMutation extends Field
         if ($results->count() < 1) {
             throw (new ModelNotFoundException)->setModel($this->class);
         }
-        
+
         if ($results->count() > 1) {
             throw (new TooManyResultsException)->setModel($this->class, $results->pluck($this->model->getKeyName()));
         }
