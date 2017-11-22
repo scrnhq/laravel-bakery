@@ -23,7 +23,6 @@ class UpdateMutationTest extends TestCase
             Stubs\User::class,
             Stubs\Role::class,
         ]);
-
     }
 
     protected function setUp()

@@ -11,7 +11,7 @@ class CommentPolicy
         return true;
     }
 
-    public function setPostId(User $user): bool
+    public function setPost(User $user): bool
     {
         return true;
     }
@@ -21,7 +21,7 @@ class CommentPolicy
         return true;
     }
 
-    public function setUserId(User $user): bool
+    public function setUser(User $user): bool
     {
         return true;
     }

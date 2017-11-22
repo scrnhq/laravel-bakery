@@ -45,7 +45,7 @@ class PostPolicy
         return true;
     }
 
-    public function setUserId(User $user): bool
+    public function setUser(User $user): bool
     {
         return true;
     }

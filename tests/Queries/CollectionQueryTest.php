@@ -36,7 +36,7 @@ class CollectionQueryTest extends TestCase
         Model::create();
 
         $query = new CollectionQuery(Model::class);
-        $result = $query->resolve(null, []);
+        $result = $query->resolve(null, [], null);
 
         $this->assertCount(2, $result->items());
     }
@@ -48,7 +48,7 @@ class CollectionQueryTest extends TestCase
         Model::create(['title' => 'bar']);
 
         $query = new CollectionQuery(Model::class);
-        $result = $query->resolve(null, ['filter' => ['title' => 'foo']]);
+        $result = $query->resolve(null, ['filter' => ['title' => 'foo']], null);
 
         $this->assertCount(1, $result->items());
     }
@@ -63,7 +63,7 @@ class CollectionQueryTest extends TestCase
         $result = $query->resolve(null, ['filter' => [
             'title' => 'foo',
             'body'  => 'bar'
-        ]]);
+        ]], null);
 
         $this->assertCount(1, $result->items());
     }
@@ -76,7 +76,7 @@ class CollectionQueryTest extends TestCase
         Model::create(['title' => 'Goodbye world']);
 
         $query = new CollectionQuery(Model::class);
-        $result = $query->resolve(null, ['filter' => ['title_contains' => 'hello']]);
+        $result = $query->resolve(null, ['filter' => ['title_contains' => 'hello']], null);
 
         $this->assertCount(2, $result->items());
     }
@@ -89,7 +89,7 @@ class CollectionQueryTest extends TestCase
         Model::create(['title' => 'Goodbye world']);
 
         $query = new CollectionQuery(Model::class);
-        $result = $query->resolve(null, ['filter' => ['title_not_contains' => 'hello']]);
+        $result = $query->resolve(null, ['filter' => ['title_not_contains' => 'hello']], null);
 
         $this->assertCount(1, $result->items());
     }
@@ -102,7 +102,7 @@ class CollectionQueryTest extends TestCase
         Model::create(['title' => 'bar']);
 
         $query = new CollectionQuery(Model::class);
-        $result = $query->resolve(null, ['filter' => ['title_not' => 'foo']]);
+        $result = $query->resolve(null, ['filter' => ['title_not' => 'foo']], null);
 
         $this->assertCount(1, $result->items());
     }
@@ -115,7 +115,7 @@ class CollectionQueryTest extends TestCase
         Model::create(['title' => 'baz']);
 
         $query = new CollectionQuery(Model::class);
-        $result = $query->resolve(null, ['filter' => ['title_in' => ['foo', 'bar']]]);
+        $result = $query->resolve(null, ['filter' => ['title_in' => ['foo', 'bar']]], null);
 
         $this->assertCount(2, $result->items());
     }
@@ -128,7 +128,7 @@ class CollectionQueryTest extends TestCase
         Model::create(['title' => 'baz']);
 
         $query = new CollectionQuery(Model::class);
-        $result = $query->resolve(null, ['filter' => ['title_not_in' => ['foo', 'bar']]]);
+        $result = $query->resolve(null, ['filter' => ['title_not_in' => ['foo', 'bar']]], null);
 
         $this->assertCount(1, $result->items());
     }
@@ -140,7 +140,7 @@ class CollectionQueryTest extends TestCase
         Model::create(['comments' => 10]);
 
         $query = new CollectionQuery(Model::class);
-        $result = $query->resolve(null, ['filter' => ['comments_lt' => 6]]);
+        $result = $query->resolve(null, ['filter' => ['comments_lt' => 6]], null);
 
         $this->assertCount(1, $result->items());
     }
@@ -152,7 +152,7 @@ class CollectionQueryTest extends TestCase
         Model::create(['comments' => 10]);
 
         $query = new CollectionQuery(Model::class);
-        $result = $query->resolve(null, ['filter' => ['comments_lte' => 5]]);
+        $result = $query->resolve(null, ['filter' => ['comments_lte' => 5]], null);
 
         $this->assertCount(1, $result->items());
     }
@@ -164,7 +164,7 @@ class CollectionQueryTest extends TestCase
         Model::create(['comments' => 10]);
 
         $query = new CollectionQuery(Model::class);
-        $result = $query->resolve(null, ['filter' => ['comments_gt' => 5]]);
+        $result = $query->resolve(null, ['filter' => ['comments_gt' => 5]], null);
 
         $this->assertCount(1, $result->items());
     }
@@ -176,7 +176,7 @@ class CollectionQueryTest extends TestCase
         Model::create(['comments' => 10]);
 
         $query = new CollectionQuery(Model::class);
-        $result = $query->resolve(null, ['filter' => ['comments_gte' => 5]]);
+        $result = $query->resolve(null, ['filter' => ['comments_gte' => 5]], null);
 
         $this->assertCount(2, $result->items());
     }
@@ -189,7 +189,7 @@ class CollectionQueryTest extends TestCase
         Model::create(['title' => 'Goodbye world']);
 
         $query = new CollectionQuery(Model::class);
-        $result = $query->resolve(null, ['filter' => ['title_starts_with' => 'hel']]);
+        $result = $query->resolve(null, ['filter' => ['title_starts_with' => 'hel']], null);
 
         $this->assertCount(2, $result->items());
     }
@@ -202,7 +202,7 @@ class CollectionQueryTest extends TestCase
         Model::create(['title' => 'Goodbye world']);
 
         $query = new CollectionQuery(Model::class);
-        $result = $query->resolve(null, ['filter' => ['title_not_starts_with' => 'hel']]);
+        $result = $query->resolve(null, ['filter' => ['title_not_starts_with' => 'hel']], null);
 
         $this->assertCount(1, $result->items());
     }
@@ -215,7 +215,7 @@ class CollectionQueryTest extends TestCase
         Model::create(['title' => 'Goodbye world']);
 
         $query = new CollectionQuery(Model::class);
-        $result = $query->resolve(null, ['filter' => ['title_ends_with' => 'world']]);
+        $result = $query->resolve(null, ['filter' => ['title_ends_with' => 'world']], null);
 
         $this->assertCount(2, $result->items());
     }
@@ -228,7 +228,7 @@ class CollectionQueryTest extends TestCase
         Model::create(['title' => 'Goodbye world']);
 
         $query = new CollectionQuery(Model::class);
-        $result = $query->resolve(null, ['filter' => ['title_not_ends_with' => 'world']]);
+        $result = $query->resolve(null, ['filter' => ['title_not_ends_with' => 'world']], null);
 
         $this->assertCount(1, $result->items());
     }
@@ -241,7 +241,7 @@ class CollectionQueryTest extends TestCase
         $third = Model::create(['title' => 'Goodbye world']);
 
         $query = new CollectionQuery(Model::class);
-        $result = $query->resolve(null, ['orderBy' => 'title_ASC']);
+        $result = $query->resolve(null, ['orderBy' => 'title_ASC'], null);
 
         $this->assertTrue($result->items()[0]->is($third));
         $this->assertTrue($result->items()[1]->is($first));
@@ -256,7 +256,7 @@ class CollectionQueryTest extends TestCase
         $third = Model::create(['title' => 'Goodbye world']);
 
         $query = new CollectionQuery(Model::class);
-        $result = $query->resolve(null, ['orderBy' => 'title_DESC']);
+        $result = $query->resolve(null, ['orderBy' => 'title_DESC'], null);
 
         $this->assertTrue($result->items()[0]->is($second));
         $this->assertTrue($result->items()[1]->is($first));

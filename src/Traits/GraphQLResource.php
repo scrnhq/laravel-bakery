@@ -217,7 +217,7 @@ trait GraphQLResource
             $relation = $this->resolveRelationOfConnection($key);
             $relationType = class_basename($relation);
             $method = "connect{$relationType}Relation";
-            $policyMethod = 'set' . studly_case(str_before($key, 'Id'));
+            $policyMethod = 'set' . studly_case($this->getRelationOfConnection($key));
 
             if (!method_exists($this, $method)) {
                 throw new RuntimeException("Unknown or unfillable connection type: {$key} of type ${relationType}");

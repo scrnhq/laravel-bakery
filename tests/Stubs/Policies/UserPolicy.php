@@ -39,7 +39,7 @@ class UserPolicy
         return true;
     }
 
-    public function setPhoneId(User $user): bool
+    public function setPhone(User $user): bool
     {
         return true;
     }
@@ -49,7 +49,7 @@ class UserPolicy
         return true;
     }
 
-    public function setRoleIds(User $user): bool
+    public function setRoles(User $user): bool
     {
         return true;
     }
