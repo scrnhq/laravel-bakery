@@ -86,7 +86,7 @@ class CreateInputType extends InputType
                     $name = str_singular($fillable) . 'Id';
                     $fields[$name] = Bakery::ID();
 
-                    $inputType = 'Create' . title_case(str_singular($fillable)) . 'Input';
+                    $inputType = 'Create' . class_basename($relationship->getRelated()) . 'Input';
                     if (Bakery::hasType($inputType)) {
                         $fields[$fillable] = Bakery::type($inputType);
                     }

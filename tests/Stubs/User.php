@@ -13,6 +13,15 @@ class User extends Authenticatable
     use GraphQLResource;
 
     /**
+     * The default attributes for the user model.
+     *
+     * @var array
+     */
+    protected $attributes = [
+        'password' => 'secret'
+    ];
+
+    /**
      * The attributes that are mass assignable.
      *
      * @var array

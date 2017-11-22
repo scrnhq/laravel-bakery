@@ -6,6 +6,7 @@ use Bakery\Tests\Stubs;
 use Bakery\Tests\TestCase;
 use Bakery\Tests\WithDatabase;
 use Illuminate\Contracts\Auth\Access\Gate;
+use Illuminate\Auth\Access\AuthorizationException;
 
 class GraphQLResourceTest extends TestCase
 {
@@ -31,6 +32,7 @@ class GraphQLResourceTest extends TestCase
         app(Gate::class)->policy(Stubs\Post::class, Stubs\Policies\PostPolicy::class);
         app(Gate::class)->policy(Stubs\Comment::class, Stubs\Policies\CommentPolicy::class);
         app(Gate::class)->policy(Stubs\Phone::class, Stubs\Policies\PhonePolicy::class);
+        app(Gate::class)->policy(Stubs\Role::class, Stubs\Policies\RolePolicy::class);
         $this->migrateDatabase();
     }
 
@@ -51,7 +53,6 @@ class GraphQLResourceTest extends TestCase
             'user' => [
                 'name' => 'John Doe',
                 'email' => 'j.doe@example.com',
-                'password' => 'secret',
             ],
             'comments' => [
                 [
@@ -59,7 +60,6 @@ class GraphQLResourceTest extends TestCase
                     'user' => [
                         'name' => 'Henk Green',
                         'email' => 'h.green@example.com',
-                        'password' => 'secret',
                     ],
                 ],
                 [
@@ -67,7 +67,6 @@ class GraphQLResourceTest extends TestCase
                     'user' => [
                         'name' => 'John Stone',
                         'email' => 'j.stone@example.com',
-                        'password' => 'secret',
                     ],
                 ],
             ],
@@ -88,7 +87,6 @@ class GraphQLResourceTest extends TestCase
             'user' => [
                 'name' => 'John Doe',
                 'email' => 'j.doe@example.com',
-                'password' => 'secret',
                 'posts' => [
                     ['title' => 'Post one'],
                     ['title' => 'Post two'],
@@ -110,7 +108,6 @@ class GraphQLResourceTest extends TestCase
         $input = [
             'name' => 'John Doe',
             'email' => 'j.doe@example.com',
-            'password' => 'secret',
             'phone' => [
                 'number' => '+31612345678',
             ],
@@ -130,6 +127,7 @@ class GraphQLResourceTest extends TestCase
     /** @test */
     public function it_aborts_the_transaction_when_nested_relations_not_allowed_through_gate()
     {
+        $this->expectException(AuthorizationException::class);
         $this->actingAs($this->createUser());
         $input = [
             'name' => 'admin',
@@ -138,6 +136,7 @@ class GraphQLResourceTest extends TestCase
             ]
         ];
 
+        app(Gate::class)->policy(Stubs\Role::class, null);
         app(Stubs\Role::class)->createWithGraphQLInput($input);
         $this->assertDatabaseMissing('roles', ['name' => 'admin']);
         $this->assertDatabaseMissing('users', ['name' => 'Jane Doe']);

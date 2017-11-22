@@ -17,7 +17,7 @@ trait GraphQLResource
      *
      * @var array
      */
-    protected $persistQueue = [];
+    protected $bakeryTransactionQueue = [];
 
     /**
      * Fired when the model is booted.
@@ -173,7 +173,7 @@ trait GraphQLResource
      * @param array $relations
      * @return void
      */
-    public function fillRelations(array $relations)
+    protected function fillRelations(array $relations)
     {
         foreach ($relations as $key => $attributes) {
             $relation = $this->resolveRelation($key);
@@ -249,7 +249,7 @@ trait GraphQLResource
      */
     protected function connectHasOneRelation(Relations\HasOne $relation, $id)
     {
-        $this->persistQueue[] = function (Model $model) use ($relation, $id) {
+        $this->bakeryTransactionQueue[] = function (Model $model) use ($relation, $id) {
             $connection = $relation->getRelated()->findOrFail($id);
             $relation->save($connection);
         };
@@ -268,7 +268,7 @@ trait GraphQLResource
         $instance = $related->newInstance();
         $instance->fillWithGraphQLInput($attributes);
 
-        $this->persistQueue[] = function (Model $model) use ($instance, $relation) {
+        $this->bakeryTransactionQueue[] = function (Model $model) use ($instance, $relation) {
             $relation->save($instance);
         };
     }
@@ -282,7 +282,7 @@ trait GraphQLResource
      */
     protected function connectHasManyRelation(Relations\HasMany $relation, array $ids)
     {
-        $this->persistQueue[] = function (Model $model) use ($relation, $ids) {
+        $this->bakeryTransactionQueue[] = function (Model $model) use ($relation, $ids) {
             $relation->attach($ids);
         };
     }
@@ -296,7 +296,7 @@ trait GraphQLResource
      */
     protected function fillHasManyRelation(Relations\HasMany $relation, array $values)
     {
-        $this->persistQueue[] = function (Model $model) use ($relation, $values) {
+        $this->bakeryTransactionQueue[] = function (Model $model) use ($relation, $values) {
             $related = $relation->getRelated();
 
             foreach ($values as $attributes) {
@@ -316,7 +316,7 @@ trait GraphQLResource
      */
     protected function connectBelongsToManyRelation(Relations\BelongsToMany $relation, array $ids)
     {
-        $this->persistQueue[] = function () use ($relation, $ids) {
+        $this->bakeryTransactionQueue[] = function () use ($relation, $ids) {
             $relation->attach($ids);
         };
     }
@@ -337,7 +337,7 @@ trait GraphQLResource
             $instances[] = $related->createWithGraphQLInput($attributes);
         }
 
-        $this->persistQueue[] = function (Model $model) use ($relation, $instances) {
+        $this->bakeryTransactionQueue[] = function (Model $model) use ($relation, $instances) {
             $relation->attach($instances->pluck('id')->all());
         };
     }
@@ -420,9 +420,14 @@ trait GraphQLResource
         return $class === Relations\BelongsTo::class || $class === Relations\HasOne::class;
     }
 
-    public function persistQueuedModels()
+    /**
+     * Persist the DB transactions that are queued.
+     *
+     * @return void
+     */
+    public function persistQueuedGraphQLDatabaseTranssactions()
     {
-        foreach ($this->persistQueue as $closure) {
+        foreach ($this->bakeryTransactionQueue as $closure) {
             $closure($this);
         }
     }

@@ -3,10 +3,12 @@
 namespace Bakery\Tests\Stubs;
 
 use GraphQL\Type\Definition\Type;
-use Bakery\Tests\Stubs\User;
-use Bakery\Traits\GraphQLResource;
 use Illuminate\Database\Eloquent\Relations;
 use Illuminate\Database\Eloquent\Model as BaseModel;
+
+use Bakery\Tests\Stubs\User;
+use Bakery\Support\Facades\Bakery;
+use Bakery\Traits\GraphQLResource;
 
 class Role extends BaseModel
 {
@@ -19,6 +21,7 @@ class Role extends BaseModel
      */
     protected $fillable = [
         'name',
+        'users',
     ];
 
     /**
@@ -31,6 +34,18 @@ class Role extends BaseModel
         return [
             'id' => Type::ID(),
             'name' => Type::string(),
+        ];
+    }
+
+    /**
+     * The relations of the role.
+     *
+     * @return array
+     */
+    public function relations()
+    {
+        return [
+            'users' => Bakery::listOf(Bakery::type('User')),
         ];
     }
 

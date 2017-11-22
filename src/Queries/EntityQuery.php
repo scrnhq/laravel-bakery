@@ -58,7 +58,8 @@ class EntityQuery extends Field
                 continue;
             }
 
-            $args[$relation] = Bakery::type(studly_case($relation) . 'LookupType');
+            $lookupTypeName = Type::getNamedType($type)->name . 'LookupType';
+            $args[$relation] = Bakery::type($lookupTypeName);
         }
 
         return $args;

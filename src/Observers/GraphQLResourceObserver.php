@@ -8,6 +8,6 @@ class GraphQLResourceObserver
 {
     public function saved(Model $model)
     {
-        $model->persistQueuedModels();
+        $model->persistQueuedGraphQLDatabaseTranssactions();
     }
 }
