@@ -28,11 +28,27 @@ class CollectionQuery extends Field
      * @param string $class
      * @param array $arguments
      */
-    public function __construct(string $class, array $arguments = [])
+    public function __construct(string $class = null, array $arguments = [])
     {
-        $this->name = $this->formatName($class);
-        $this->model = app()->make($class);
-        $this->class = $class;
+        if (isset($class)) {
+            $this->class = $class;
+        }
+
+        if (!isset($this->class)) {
+            throw new \Exception('No class defined for the collection query.');
+        }
+
+        $this->model = app()->make($this->class);
+    }
+
+    /**
+     * Return a name based on the class of the model.
+     *
+     * @return string
+     */
+    protected function name(): string
+    {
+        return camel_case(str_plural(class_basename($this->class)));
     }
 
     /**
@@ -61,26 +77,16 @@ class CollectionQuery extends Field
     }
 
     /**
-     * Format the class name to the name for the collection query.
-     *
-     * @param string $class
-     * @return string
-     */
-    protected function formatName(string $class): string
-    {
-        return camel_case(str_plural(class_basename($class)));
-    }
-
-    /**
      * Resolve the CollectionQuery.
      *
-     * @param $root
-     * @param $args
+     * @param mixed $root
+     * @param array $args
+     * @param mixed $viewer
      * @return LengthAwarePaginator
      */
-    public function resolve($root, $args)
+    public function resolve($root, array $args, $viewer)
     {
-        $query = $this->model->query();
+        $query = $this->scopeQuery($this->model->authorizedForReading($viewer), $args, $viewer);
 
         if (array_key_exists('filter', $args)) {
             $query = $this->applyFilters($query, $args['filter']);
@@ -91,6 +97,17 @@ class CollectionQuery extends Field
         }
 
         return $query->paginate();
+    }
+
+    /**
+     * Scope the query.
+     * This can be overwritten to make your own collection queries.
+     *
+     * @return Builder
+     */
+    protected function scopeQuery(Builder $query, array $args, $viewer): Builder
+    {
+        return $query;
     }
 
     /**

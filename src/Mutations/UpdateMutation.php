@@ -33,9 +33,9 @@ class UpdateMutation extends EntityMutation
      *
      * @param  mixed $root
      * @param  array $args
-     * @return Model
+     * @return array
      */
-    public function resolve($root, $args = []): Model
+    public function resolve($root, $args = []): array
     {
         $model = $this->getModel($args);
         $this->authorize($this->action, $model);
@@ -43,7 +43,7 @@ class UpdateMutation extends EntityMutation
         $input = $args['input'];
         $model->updateWithGraphQLInput($input);
 
-        return $model;
+        return $model->toArray();
     }
 
     /**

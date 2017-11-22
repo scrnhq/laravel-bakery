@@ -38,7 +38,7 @@ class EntityQuery extends Field
      */
     public function type()
     {
-        return Bakery::getType(title_case($this->name));
+        return Bakery::getType(studly_case($this->name));
     }
 
     /**
@@ -81,17 +81,18 @@ class EntityQuery extends Field
      *
      * @param mixed $root
      * @param array $args
+     * @param mixed $viewer
      * @return Model
      */
-    public function resolve($root, $args = []): Model
+    public function resolve($root, $args = [], $viewer)
     {
         $primaryKey = $this->model->getKeyName();
 
-        if (array_key_exists($primaryKey, $args)) {
-            return $this->model->findOrFail($args[$primaryKey]);
-        }
+        $query = $this->model->authorizedForReading($viewer);
 
-        $query = $this->model->query();
+        if (array_key_exists($primaryKey, $args)) {
+            return $query->findOrFail($args[$primaryKey])->toArray();
+        }
 
         foreach ($args as $key => $value) {
             if (is_array($value)) {
@@ -115,6 +116,6 @@ class EntityQuery extends Field
             throw (new TooManyResultsException)->setModel($this->class, $results->pluck($this->model->getKeyName()));
         }
 
-        return $results->first();
+        return $results->first()->toArray();
     }
 }

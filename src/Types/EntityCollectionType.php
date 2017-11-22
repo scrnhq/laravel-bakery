@@ -42,7 +42,9 @@ class EntityCollectionType extends Type
      */
     protected function resolveItemsField(LengthAwarePaginator $paginator): array
     {
-        return $paginator->items();
+        return array_map(function ($model) {
+            return $model->toArray();
+        }, $paginator->items());
     }
 
     /**

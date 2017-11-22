@@ -18,15 +18,14 @@ class CreateMutation extends EntityMutation
      *
      * @param  mixed $root
      * @param  array $args
-     * @return Model
+     * @return array
      */
-    public function resolve($root, $args = []): Model
+    public function resolve($root, $args = []): array
     {
         $this->authorize($this->action, $this->class);
 
         $input = $args['input'];
         $model = $this->model->createWithGraphQLInput($input);
-        return $model;
+        return $model->toArray();
     }
-
 }

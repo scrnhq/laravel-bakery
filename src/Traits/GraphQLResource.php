@@ -2,12 +2,14 @@
 
 namespace Bakery\Traits;
 
-use Bakery\Observers\GraphQLResourceObserver;
-use Illuminate\Contracts\Auth\Access\Gate;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations;
-use Illuminate\Support\Facades\DB;
 use RuntimeException;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Contracts\Auth\Access\Gate;
+use Illuminate\Database\Eloquent\Relations;
+
+use Bakery\Observers\GraphQLResourceObserver;
 
 trait GraphQLResource
 {
@@ -57,6 +59,18 @@ trait GraphQLResource
     public function relations(): array
     {
         return [];
+    }
+
+    /**
+     * Scope the query by who is authorized to read it.
+     *
+     * @param Builder $query
+     * @param mixed $viewer
+     * @return Builder
+     */
+    public function scopeAuthorizedForReading(Builder $query, $viewer): Builder
+    {
+        return $query;
     }
 
     /**
@@ -179,13 +193,13 @@ trait GraphQLResource
             $relation = $this->resolveRelation($key);
             $relationType = class_basename($relation);
             $method = "fill{$relationType}Relation";
-            $policyMethod = "create" . studly_case($key);
+            $policyMethod = 'create' . studly_case($key);
 
             if (!method_exists($this, $method)) {
                 throw new RuntimeException("Unknown or unfillable relation type: {$key} of type ${relationType}");
             }
 
-            app(Gate::class)->authorize($policyMethod, $this);
+            app(Gate::class)->authorize($policyMethod, [$this, $attributes]);
 
             $this->{$method}($relation, $attributes);
         }
@@ -203,13 +217,13 @@ trait GraphQLResource
             $relation = $this->resolveRelationOfConnection($key);
             $relationType = class_basename($relation);
             $method = "connect{$relationType}Relation";
-            $policyMethod = "set" . studly_case($key);
+            $policyMethod = 'set' . studly_case(str_before($key, 'Id'));
 
             if (!method_exists($this, $method)) {
                 throw new RuntimeException("Unknown or unfillable connection type: {$key} of type ${relationType}");
             }
 
-            app(Gate::class)->authorize($policyMethod, $this);
+            app(Gate::class)->authorize($policyMethod, [$this, $attributes]);
 
             $this->{$method}($relation, $attributes);
         }
