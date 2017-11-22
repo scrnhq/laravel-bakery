@@ -39,4 +39,19 @@ class PostPolicy
     {
         return true;
     }
+
+    public function createUser(User $user): bool
+    {
+        return true;
+    }
+
+    public function setUserId(User $user): bool
+    {
+        return true;
+    }
+
+    public function createComments(User $user): bool
+    {
+        return true;
+    }
 }

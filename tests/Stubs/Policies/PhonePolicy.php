@@ -17,4 +17,9 @@ class PhonePolicy
     {
         return true;
     }
+
+    public function createUser(User $user): bool
+    {
+        return true;
+    }
 }

@@ -2,13 +2,11 @@
 
 namespace Bakery\Tests\Feature;
 
-use Gate;
-use Eloquent;
 use Bakery\Tests\Stubs;
 use Bakery\Tests\TestCase;
-use Bakery\Tests\WithDatabase;
-use Bakery\Http\Controller\BakeryController;
+use Eloquent;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Contracts\Auth\Access\Gate;
 
 class CreateMutationTest extends TestCase
 {
@@ -30,6 +28,10 @@ class CreateMutationTest extends TestCase
     {
         parent::setUp();
         Eloquent::reguard();
+        app(Gate::class)->policy(Stubs\User::class, Stubs\Policies\UserPolicy::class);
+        app(Gate::class)->policy(Stubs\Post::class, Stubs\Policies\PostPolicy::class);
+        app(Gate::class)->policy(Stubs\Comment::class, Stubs\Policies\CommentPolicy::class);
+        app(Gate::class)->policy(Stubs\Phone::class, Stubs\Policies\PhonePolicy::class);
         $this->migrateDatabase();
     }
 
@@ -49,6 +51,7 @@ class CreateMutationTest extends TestCase
         ';
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
+        $this->assertDatabaseMissing('post', ['title' => 'Hello world!']);
     }
 
     /** @test */
@@ -59,8 +62,8 @@ class CreateMutationTest extends TestCase
 
         $query = '
             mutation {
-                createPost(input: {
-                    title: "Hello world!"
+                createRole(input: {
+                    name: "admin"
                 }) {
                     id
                 }
@@ -68,14 +71,13 @@ class CreateMutationTest extends TestCase
         ';
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
+        $this->assertDatabaseMissing('roles', ['name' => 'admin']);
     }
 
     /** @test */
     public function it_does_allow_creating_entity_as_user_when_it_is_allowed_by_policy()
     {
         $this->actingAs($this->createUser());
-
-        Gate::policy(Stubs\Post::class, Stubs\Policies\PostPolicy::class);
 
         $query = '
             mutation {
@@ -96,8 +98,6 @@ class CreateMutationTest extends TestCase
     public function it_lets_you_create_a_has_one_relationship()
     {
         $this->actingAs($this->createUser());
-        Gate::policy(Stubs\User::class, Stubs\Policies\UserPolicy::class);
-
 
         $query = '
             mutation {
@@ -120,7 +120,6 @@ class CreateMutationTest extends TestCase
     public function it_lets_you_save_a_has_one_relationship()
     {
         $this->actingAs($this->createUser());
-        Gate::policy(Stubs\User::class, Stubs\Policies\UserPolicy::class);
 
         $phone = Stubs\Phone::create(['number' => '+31612345678']);
 
@@ -145,7 +144,6 @@ class CreateMutationTest extends TestCase
     public function it_lets_you_create_a_belongs_to_relationship()
     {
         $this->actingAs($this->createUser());
-        Gate::policy(Stubs\Phone::class, Stubs\Policies\PhonePolicy::class);
 
         $query = '
             mutation {
@@ -182,8 +180,6 @@ class CreateMutationTest extends TestCase
             'email' => 'jane.doe@example.com',
         ]);
 
-        Gate::policy(Stubs\Comment::class, Stubs\Policies\CommentPolicy::class);
-
         $query = '
             mutation {
                 createComment(input: {
@@ -204,7 +200,6 @@ class CreateMutationTest extends TestCase
     public function it_lets_you_assign_a_many_to_many_relationship()
     {
         $this->actingAs($this->createUser());
-        Gate::policy(Stubs\User::class, Stubs\Policies\UserPolicy::class);
 
         $roles = [
             Stubs\Role::create(['name' => 'moderator']),
@@ -233,7 +228,6 @@ class CreateMutationTest extends TestCase
     public function it_lets_you_insert_a_has_many_relationship()
     {
         $this->actingAs($this->createUser());
-        Gate::policy(Stubs\Post::class, Stubs\Policies\PostPolicy::class);
 
         $query = '
             mutation {
@@ -259,7 +253,6 @@ class CreateMutationTest extends TestCase
     public function it_lets_you_do_deep_nested_create_mutations()
     {
         $this->actingAs($this->createUser());
-        Gate::policy(Stubs\User::class, Stubs\Policies\UserPolicy::class);
 
         $query = '
             mutation {

@@ -3,9 +3,8 @@
 namespace Bakery\Tests\Stubs;
 
 use Bakery;
-use GraphQL\Type\Definition\Type;
 use Bakery\Traits\GraphQLResource;
-use Illuminate\Database\Eloquent\Model;
+use GraphQL\Type\Definition\Type;
 use Illuminate\Database\Eloquent\Relations;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 

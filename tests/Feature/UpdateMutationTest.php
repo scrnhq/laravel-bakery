@@ -2,14 +2,12 @@
 
 namespace Bakery\Tests\Feature;
 
-use Gate;
-use Eloquent;
+use Bakery\Exceptions\TooManyResultsException;
 use Bakery\Tests\Stubs;
 use Bakery\Tests\TestCase;
-use Bakery\Tests\WithDatabase;
-use Bakery\Http\Controller\BakeryController;
+use Eloquent;
 use Illuminate\Auth\Access\AuthorizationException;
-use Bakery\Exceptions\TooManyResultsException;
+use Illuminate\Contracts\Auth\Access\Gate;
 
 class UpdateMutationTest extends TestCase
 {
@@ -25,12 +23,16 @@ class UpdateMutationTest extends TestCase
             Stubs\User::class,
             Stubs\Role::class,
         ]);
+
     }
 
     protected function setUp()
     {
         parent::setUp();
         Eloquent::reguard();
+        app(Gate::class)->policy(Stubs\User::class, Stubs\Policies\UserPolicy::class);
+        app(Gate::class)->policy(Stubs\Post::class, Stubs\Policies\PostPolicy::class);
+        app(Gate::class)->policy(Stubs\Comment::class, Stubs\Policies\CommentPolicy::class);
         $this->migrateDatabase();
     }
 
@@ -63,18 +65,16 @@ class UpdateMutationTest extends TestCase
     {
         $this->expectException(AuthorizationException::class);
 
-        $user = $this->createUser();
-        $post = new Stubs\Post(['title' => 'Hello world!']);
-        $post->user()->associate($user);
-        $post->save();
+        $role = new Stubs\Role(['name' => 'admin']);
+        $role->save();
 
-        $this->actingAs($user);
+        $this->actingAs($this->createUser());
 
         $query = '
             mutation {
-                updatePost(
-                    id: 1,
-                    input: { title: "Hello world! (updated)" }
+                updateRole(
+                    id: ' . $role->id . ',
+                    input: { name: "moderator" }
                 ) {
                     id
                 }
@@ -87,8 +87,6 @@ class UpdateMutationTest extends TestCase
     /** @test */
     public function it_does_allow_updating_entity_as_user_when_it_is_allowed_by_policy()
     {
-        Gate::policy(Stubs\Post::class, Stubs\Policies\PostPolicy::class);
-
         $user = $this->createUser();
         $post = new Stubs\Post(['title' => 'Hello world!']);
         $post->user()->associate($user);
@@ -99,7 +97,7 @@ class UpdateMutationTest extends TestCase
         $query = '
             mutation {
                 updatePost(
-                    id: 1,
+                    id: ' . $post->id . ',
                     input: { title: "Hello world! (updated)" }
                 ) {
                     id
@@ -115,7 +113,6 @@ class UpdateMutationTest extends TestCase
     public function it_throws_too_many_results_exception_when_lookup_is_not_specific_enough()
     {
         $this->expectException(TooManyResultsException::class);
-        Gate::policy(Stubs\Post::class, Stubs\Policies\PostPolicy::class);
 
         $user = $this->createUser();
         $post = new Stubs\Post(['title' => 'Hello world!', 'slug' => 'hello-world']);
@@ -145,7 +142,6 @@ class UpdateMutationTest extends TestCase
     /** @test */
     public function it_lets_you_do_deep_nested_update_mutations()
     {
-        Gate::policy(Stubs\User::class, Stubs\Policies\UserPolicy::class);
         $user = $this->createUser();
         $this->actingAs($user);
 
@@ -163,7 +159,7 @@ class UpdateMutationTest extends TestCase
                             title: "This is my second post!",
                             comments: [
                                 { body: "First!", userId: ' . $user->id . ' },
-                                { body: "Great post!", userId: ' . $user->id  . '},
+                                { body: "Great post!", userId: ' . $user->id . '},
                             ]
                         }]
                     }

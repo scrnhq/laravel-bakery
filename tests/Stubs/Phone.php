@@ -3,11 +3,10 @@
 namespace Bakery\Tests\Stubs;
 
 use Bakery;
-use GraphQL\Type\Definition\Type;
-use Bakery\Tests\Stubs\Comment;
 use Bakery\Traits\GraphQLResource;
-use Illuminate\Database\Eloquent\Relations;
+use GraphQL\Type\Definition\Type;
 use Illuminate\Database\Eloquent\Model as BaseModel;
+use Illuminate\Database\Eloquent\Relations;
 
 class Phone extends BaseModel
 {

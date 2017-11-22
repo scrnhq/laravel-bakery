@@ -2,13 +2,12 @@
 
 namespace Bakery\Traits;
 
-use ErrorException;
-use ReflectionClass;
-use ReflectionObject;
-use RuntimeException;
+use Bakery\Observers\GraphQLResourceObserver;
+use Illuminate\Contracts\Auth\Access\Gate;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations;
-use Bakery\Observers\GraphQLResourceObserver;
+use Illuminate\Support\Facades\DB;
+use RuntimeException;
 
 trait GraphQLResource
 {
@@ -85,23 +84,27 @@ trait GraphQLResource
      */
     public function createWithGraphQLInput(array $input)
     {
-        $model = new static();
-        $model->fillWithGraphQLInput($input);
-        $model->save();
-        return $model;
+        return DB::transaction(function () use ($input) {
+            $model = new static();
+            $model->fillWithGraphQLInput($input);
+            $model->save();
+            return $model;
+        });
     }
 
     /**
-     * Update the model with GraphQL input 
+     * Update the model with GraphQL input
      *
      * @param array $input
      * @return self
      */
     public function updateWithGraphQLInput(array $input)
     {
-        $this->fillWithGraphQLInput($input);
-        $this->save();
-        return $this;
+        return DB::transaction(function () use ($input) {
+            $this->fillWithGraphQLInput($input);
+            $this->save();
+            return $this;
+        });
     }
 
     /**
@@ -121,7 +124,7 @@ trait GraphQLResource
         $this->fillConnections($connections);
         return $this;
     }
-    
+
     /**
      * Get the attributes that are mass assignable by
      * cross referencing the attributes with the GraphQL fields.
@@ -131,7 +134,7 @@ trait GraphQLResource
      */
     protected function getFillableScalars(array $attributes): array
     {
-        return collect($attributes)->filter(function($value, $key) {
+        return collect($attributes)->filter(function ($value, $key) {
             return in_array($key, array_keys($this->fields()));
         })->toArray();
     }
@@ -145,7 +148,7 @@ trait GraphQLResource
      */
     protected function getFillableRelations(array $attributes): array
     {
-        return collect($attributes)->filter(function($value, $key) {
+        return collect($attributes)->filter(function ($value, $key) {
             return in_array($key, array_keys($this->relations()));
         })->toArray();
     }
@@ -159,7 +162,7 @@ trait GraphQLResource
      */
     protected function getFillableConnections(array $attributes): array
     {
-        return collect($attributes)->filter(function($value, $key) {
+        return collect($attributes)->filter(function ($value, $key) {
             return in_array($key, $this->connections());
         })->toArray();
     }
@@ -173,13 +176,16 @@ trait GraphQLResource
     public function fillRelations(array $relations)
     {
         foreach ($relations as $key => $attributes) {
-            $relation = $this->resolveRelation($key); 
+            $relation = $this->resolveRelation($key);
             $relationType = class_basename($relation);
             $method = "fill{$relationType}Relation";
+            $policyMethod = "create" . studly_case($key);
 
             if (!method_exists($this, $method)) {
                 throw new RuntimeException("Unknown or unfillable relation type: {$key} of type ${relationType}");
             }
+
+            app(Gate::class)->authorize($policyMethod, $this);
 
             $this->{$method}($relation, $attributes);
         }
@@ -197,10 +203,13 @@ trait GraphQLResource
             $relation = $this->resolveRelationOfConnection($key);
             $relationType = class_basename($relation);
             $method = "connect{$relationType}Relation";
+            $policyMethod = "set" . studly_case($key);
 
             if (!method_exists($this, $method)) {
                 throw new RuntimeException("Unknown or unfillable connection type: {$key} of type ${relationType}");
             }
+
+            app(Gate::class)->authorize($policyMethod, $this);
 
             $this->{$method}($relation, $attributes);
         }
@@ -232,7 +241,7 @@ trait GraphQLResource
     }
 
     /**
-     * Connect a has one relation. 
+     * Connect a has one relation.
      *
      * @param Relations\HasOne $relation
      * @param string $id
@@ -240,7 +249,7 @@ trait GraphQLResource
      */
     protected function connectHasOneRelation(Relations\HasOne $relation, $id)
     {
-        $this->persistQueue[] = function(Model $model) use($relation, $id) {
+        $this->persistQueue[] = function (Model $model) use ($relation, $id) {
             $connection = $relation->getRelated()->findOrFail($id);
             $relation->save($connection);
         };
@@ -259,7 +268,7 @@ trait GraphQLResource
         $instance = $related->newInstance();
         $instance->fillWithGraphQLInput($attributes);
 
-        $this->persistQueue[] = function(Model $model) use($instance, $relation) {
+        $this->persistQueue[] = function (Model $model) use ($instance, $relation) {
             $relation->save($instance);
         };
     }
@@ -273,7 +282,7 @@ trait GraphQLResource
      */
     protected function connectHasManyRelation(Relations\HasMany $relation, array $ids)
     {
-        $this->persistQueue[] = function(Model $model) use($relation, $ids) {
+        $this->persistQueue[] = function (Model $model) use ($relation, $ids) {
             $relation->attach($ids);
         };
     }
@@ -287,10 +296,10 @@ trait GraphQLResource
      */
     protected function fillHasManyRelation(Relations\HasMany $relation, array $values)
     {
-        $this->persistQueue[] = function(Model $model) use($relation, $values) {
+        $this->persistQueue[] = function (Model $model) use ($relation, $values) {
             $related = $relation->getRelated();
 
-            foreach($values as $attributes) {
+            foreach ($values as $attributes) {
                 $instance = $related->newInstance();
                 $instance->fillWithGraphQLInput($attributes);
                 $relation->save($instance);
@@ -307,7 +316,7 @@ trait GraphQLResource
      */
     protected function connectBelongsToManyRelation(Relations\BelongsToMany $relation, array $ids)
     {
-        $this->persistQueue[] = function() use ($relation, $ids) {
+        $this->persistQueue[] = function () use ($relation, $ids) {
             $relation->attach($ids);
         };
     }
@@ -324,11 +333,11 @@ trait GraphQLResource
         $instances = collect();
         $related = $relation->getRelated();
 
-        foreach($value as $attributes) {
+        foreach ($value as $attributes) {
             $instances[] = $related->createWithGraphQLInput($attributes);
         }
 
-        $this->persistQueue[] = function(Model $model) use($relation, $instances) {
+        $this->persistQueue[] = function (Model $model) use ($relation, $instances) {
             $relation->attach($instances->pluck('id')->all());
         };
     }
@@ -365,19 +374,19 @@ trait GraphQLResource
      * @param string $connection
      * @return Relations\Relation
      */
-    protected function getRelationOfConnection(string $connection): string 
+    protected function getRelationOfConnection(string $connection): string
     {
         if (ends_with($connection, 'Ids')) {
             return str_plural(str_before($connection, 'Ids'));
         }
-        
+
         if (ends_with($connection, 'Id')) {
             return str_singular(str_before($connection, 'Id'));
         }
     }
 
     /**
-     * Resolve the relation class of a connection. 
+     * Resolve the relation class of a connection.
      *
      * @param string $connection
      * @return Relations\Relation
@@ -409,11 +418,11 @@ trait GraphQLResource
     {
         $class = get_class($relation);
         return $class === Relations\BelongsTo::class || $class === Relations\HasOne::class;
-    } 
+    }
 
     public function persistQueuedModels()
     {
-        foreach($this->persistQueue as $closure) {
+        foreach ($this->persistQueue as $closure) {
             $closure($this);
         }
     }
