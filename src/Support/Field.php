@@ -8,7 +8,7 @@ use Bakery\Exceptions\InvalidFieldException;
 abstract class Field implements FieldContract
 {
     /**
-     * The attributes of the field.
+     * The attributes of the Field.
      *
      * @var array
      */
@@ -27,7 +27,7 @@ abstract class Field implements FieldContract
     /**
      * The type of the Field.
      *
-     * @return null
+     * @return mixed
      */
     public function type()
     {
@@ -62,13 +62,12 @@ abstract class Field implements FieldContract
      * Get the attributes from the container.
      *
      * @return array
+     * @throws InvalidFieldException
      */
     public function getAttributes()
     {
-        $name = $this->name;
-
         if (!$this->name) {
-            throw new InvalidFieldException('Required property name missing for field.');
+            throw new InvalidFieldException('Required property name missing for Field.');
         }
 
         return [
