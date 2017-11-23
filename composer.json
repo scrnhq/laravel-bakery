@@ -1,5 +1,6 @@
 {
   "name": "scrnhq/laravel-bakery",
+  "license": "MIT",
   "keywords": ["laravel", "graphql"],
   "authors": [
     {
