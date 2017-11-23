@@ -91,7 +91,7 @@ class EntityQuery extends Field
         $query = $this->model->authorizedForReading($viewer);
 
         if (array_key_exists($primaryKey, $args)) {
-            return $query->findOrFail($args[$primaryKey])->toArray();
+            return $query->findOrFail($args[$primaryKey]);
         }
 
         foreach ($args as $key => $value) {
@@ -116,6 +116,6 @@ class EntityQuery extends Field
             throw (new TooManyResultsException)->setModel($this->class, $results->pluck($this->model->getKeyName()));
         }
 
-        return $results->first()->toArray();
+        return $results->first();
     }
 }
