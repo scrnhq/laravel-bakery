@@ -38,23 +38,6 @@ class Bakery
      */
     protected $typeInstances = [];
 
-    public function registerModelTypes($classes)
-    {
-        foreach ($classes as $class) {
-            $this->registerEntityTypes($class);
-        }
-    }
-
-    /**
-     * Get all the registered types.
-     *
-     * @return array
-     */
-    public function getTypes(): array
-    {
-        return $this->types;
-    }
-
     public function addTypes(array $classes)
     {
         foreach ($classes as $class) {
@@ -128,7 +111,7 @@ class Bakery
         }
 
         $class = $this->types[$name];
-        $type = $this->makeObjectType($class);
+        $type = $class->toGraphQLType();
         $this->typeInstances[$name] = $type;
 
         return $type;
@@ -172,30 +155,5 @@ class Bakery
             'bakery::graphiql',
             ['endpoint' => route($route), 'headers' => $headers]
         );
-    }
-
-    protected function makeObjectType($type, $options = [])
-    {
-        $objectType = null;
-        if ($type instanceof ObjectType) {
-            $objectType = $type;
-        } elseif (is_array($type)) {
-            $objectType = $this->makeObjectTypeFromFields($type, $options);
-        } else {
-            $objectType = $this->makeObjectTypeFromClass($type, $options);
-        }
-        return $objectType;
-    }
-
-    protected function makeObjectTypeFromFields($fields, $options = [])
-    {
-        return new ObjectType(array_merge([
-            'fields' => $fields,
-        ], $options));
-    }
-
-    protected function makeObjectTypeFromClass($class, $options = [])
-    {
-        return $class->toGraphQLType();
     }
 }

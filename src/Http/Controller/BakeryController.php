@@ -2,6 +2,7 @@
 
 namespace Bakery\Http\Controller;
 
+use App;
 use GraphQL\Error\Debug;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -37,6 +38,10 @@ class BakeryController extends Controller
 
     public function graphiql()
     {
-        return view('bakery::graphiql', ['endpoint' => config('bakery.route')]);
+        if (!app()->isLocal()) {
+            abort(404);
+        }
+
+        return app('bakery')->graphiql('graphql');
     }
 }

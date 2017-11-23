@@ -17,7 +17,9 @@ return [
      |
      | Here you can define the route where Bakery should serve GraphQL.
      */
-    'route' => '/graphql',
+    'route' => 'graphql',
+
+    'graphiqlRoute' => 'graphql/explore',
 
     /*
      |--------------------------------------------------------------------------
