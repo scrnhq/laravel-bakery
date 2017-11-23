@@ -2,7 +2,7 @@
 
 namespace Bakery\Tests;
 
-use Bakery\Mutation;
+use Bakery\Mutations\Mutation;
 
 class CreateCustomMutation extends Mutation
 {

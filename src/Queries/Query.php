@@ -1,18 +1,18 @@
 <?php
 
-namespace Bakery;
+namespace Bakery\Queries;
 
 use Bakery\Support\Field;
 
 class Query extends Field
 {
     /**
-     * If no name is specified fall back on an
-     * automatically generated name based on the class name.
+     * Get the name of the Query, if no name is specified fall back
+     * on a name based on the class name.
      *
-     * @return void
+     * @return string
      */
-    protected function name()
+    protected function name(): string
     {
         if (property_exists($this, 'name')) {
             return $this->name;

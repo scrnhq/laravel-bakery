@@ -4,7 +4,7 @@ namespace Bakery\Exceptions;
 
 use RuntimeException;
 
-class ModelNotGraphQLResourceException extends RuntimeException
+class ModelNotGraphQLResource extends RuntimeException
 {
     /**
      * Name of the affected Eloquent model.

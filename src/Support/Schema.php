@@ -2,16 +2,18 @@
 
 namespace Bakery\Support;
 
-use GraphQL\Type\Definition\ObjectType;
-use GraphQL\Type\Schema as GraphQLSchema;
-use GraphQL\Type\SchemaConfig;
+use Bakery\Exceptions\ModelNotGraphQLResource;
 use Bakery\Mutations\CreateMutation;
 use Bakery\Mutations\DeleteMutation;
 use Bakery\Mutations\UpdateMutation;
 use Bakery\Queries\CollectionQuery;
 use Bakery\Queries\EntityQuery;
 use Bakery\Support\Facades\Bakery;
+use Bakery\Traits\GraphQLResource;
 use Bakery\Types;
+use GraphQL\Type\Definition\ObjectType;
+use GraphQL\Type\Schema as GraphQLSchema;
+use GraphQL\Type\SchemaConfig;
 
 class Schema
 {
@@ -39,6 +41,10 @@ class Schema
     {
         $types = [];
         foreach ($this->getModels() as $model) {
+            if (!in_array(GraphQLResource::class, class_uses($model))) {
+                throw (new ModelNotGraphQLResource($model));
+            }
+
             $types[] = new Types\EntityType($model);
             $types[] = new Types\EntityCollectionType($model);
             $types[] = new Types\EntityLookupType($model);
@@ -78,18 +84,21 @@ class Schema
         $queries = [];
         foreach ($this->queries as $name => $query) {
             $query = is_object($query) ?: resolve($query);
-            $name = is_string($name) ?: $query->name;
+            $name = is_string($name) ? $name : $query->name;
             $queries[$name] = $query;
         }
 
-        $queries = array_merge(
+        return array_merge(
             $this->getModelQueries(),
             $queries
         );
+    }
 
-        return array_map(function ($query) {
-            return $query->toArray();
-        }, $queries);
+    public function fieldsToArray($fields)
+    {
+        return array_map(function ($field) {
+            return $field->toArray();
+        }, $fields);
     }
 
     public function getModelMutations()
@@ -113,26 +122,22 @@ class Schema
         $mutations = [];
         foreach ($this->mutations as $name => $mutation) {
             $mutation = is_object($mutation) ?: resolve($mutation);
-            $name = is_string($name) ?: $mutation->name;
+            $name = is_string($name) ? $name : $mutation->name;
             $mutations[$name] = $mutation;
         }
 
-        $mutations = array_merge(
+        return array_merge(
             $this->getModelMutations(),
             $mutations
         );
-
-        return array_map(function ($mutation) {
-            return $mutation->toArray();
-        }, $mutations);
     }
 
     public function toGraphQLSchema(): GraphQLSchema
     {
         Bakery::addTypes($this->getTypes());
 
-        $query = $this->makeObjectType($this->getQueries(), ['name' => 'Query']);
-        $mutation = $this->makeObjectType($this->getMutations(), ['name' => 'Mutation']);
+        $query = $this->makeObjectType($this->fieldsToArray($this->getQueries()), ['name' => 'Query']);
+        $mutation = $this->makeObjectType($this->fieldsToArray($this->getMutations()), ['name' => 'Mutation']);
         $config = SchemaConfig::create()
             ->setQuery($query)
             ->setMutation($mutation)
