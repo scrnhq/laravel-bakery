@@ -2,12 +2,14 @@
 
 namespace Bakery\Support;
 
+use Bakery\Exceptions\ModelNotGraphQLResource;
 use Bakery\Mutations\CreateMutation;
 use Bakery\Mutations\DeleteMutation;
 use Bakery\Mutations\UpdateMutation;
 use Bakery\Queries\CollectionQuery;
 use Bakery\Queries\EntityQuery;
 use Bakery\Support\Facades\Bakery;
+use Bakery\Traits\GraphQLResource;
 use Bakery\Types;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Schema as GraphQLSchema;
@@ -39,6 +41,10 @@ class Schema
     {
         $types = [];
         foreach ($this->getModels() as $model) {
+            if (!in_array(GraphQLResource::class, class_uses($model))) {
+                throw (new ModelNotGraphQLResource($model));
+            }
+
             $types[] = new Types\EntityType($model);
             $types[] = new Types\EntityCollectionType($model);
             $types[] = new Types\EntityLookupType($model);
