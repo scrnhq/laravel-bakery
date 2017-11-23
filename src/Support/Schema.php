@@ -41,7 +41,7 @@ class Schema
     {
         $types = [];
         foreach ($this->getModels() as $model) {
-            if (!in_array(GraphQLResource::class, class_uses($model))) {
+            if (!in_array(GraphQLResource::class, class_uses_deep($model))) {
                 throw (new ModelNotGraphQLResource($model));
             }
 
