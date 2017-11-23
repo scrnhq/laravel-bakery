@@ -2,12 +2,14 @@
 
 namespace Bakery\Mutations;
 
-use GraphQL\Type\Definition\Type;
-
 use Bakery\Support\Facades\Bakery;
+use GraphQL\Type\Definition\Type;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 abstract class EntityMutation extends Mutation
 {
+    use AuthorizesRequests;
+
     /**
      * The class of the Entity.
      *
@@ -28,7 +30,7 @@ abstract class EntityMutation extends Mutation
     protected $action;
 
     /**
-     * The type of the Field.
+     * The type of the Mutation.
      *
      * @return Type
      */
@@ -38,7 +40,7 @@ abstract class EntityMutation extends Mutation
     }
 
     /**
-     * The arguments for the Field.
+     * The arguments for the Mutation.
      *
      * @return array
      */
@@ -67,7 +69,7 @@ abstract class EntityMutation extends Mutation
      *
      * @return string
      */
-    public function name()
+    protected function name(): string
     {
         return $this->action . studly_case(str_singular(class_basename($this->class)));
     }

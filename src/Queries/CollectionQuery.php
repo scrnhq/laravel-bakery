@@ -2,47 +2,15 @@
 
 namespace Bakery\Queries;
 
-use GraphQL\Type\Definition\Type;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Pagination\LengthAwarePaginator;
-
-use Bakery\Support\Field;
 use Bakery\Support\Facades\Bakery;
+use GraphQL\Type\Definition\Type;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
 
-class CollectionQuery extends Field
+class CollectionQuery extends EntityQuery
 {
     /**
-     * A reference to the model.
-     */
-    protected $model;
-
-    /**
-     * A reference to the class.
-     */
-    protected $class;
-
-    /**
-     * Construct a new collection query.
-     *
-     * @param string $class
-     * @param array $arguments
-     */
-    public function __construct(string $class = null, array $arguments = [])
-    {
-        if (isset($class)) {
-            $this->class = $class;
-        }
-
-        if (!isset($this->class)) {
-            throw new \Exception('No class defined for the collection query.');
-        }
-
-        $this->model = app()->make($this->class);
-    }
-
-    /**
-     * Return a name based on the class of the model.
+     * Get the name of the CollectionQuery.
      *
      * @return string
      */
@@ -52,13 +20,23 @@ class CollectionQuery extends Field
     }
 
     /**
+     * Get the basename for the types.
+     *
+     * @return string
+     */
+    protected function typeName(): string
+    {
+        return studly_case(str_singular(class_basename($this->class)));
+    }
+
+    /**
      * The type of the CollectionQuery.
      *
      * @return mixed
      */
     public function type(): Type
     {
-        return Bakery::getType(class_basename($this->class) . 'Collection');
+        return Bakery::type($this->typeName() . 'Collection');
     }
 
     /**
@@ -71,8 +49,8 @@ class CollectionQuery extends Field
         return [
             'page' => Bakery::int(),
             'count' => Bakery::int(),
-            'filter' => Bakery::getType(class_basename($this->class) . 'Filter'),
-            'orderBy' => Bakery::getType(class_basename($this->class) . 'OrderBy'),
+            'filter' => Bakery::type($this->typeName() . 'Filter'),
+            'orderBy' => Bakery::type($this->typeName() . 'OrderBy'),
         ];
     }
 
@@ -84,7 +62,7 @@ class CollectionQuery extends Field
      * @param mixed $viewer
      * @return LengthAwarePaginator
      */
-    public function resolve($root, array $args, $viewer)
+    public function resolve($root, array $args = [], $viewer)
     {
         $query = $this->scopeQuery($this->model->authorizedForReading($viewer), $args, $viewer);
 
@@ -103,6 +81,9 @@ class CollectionQuery extends Field
      * Scope the query.
      * This can be overwritten to make your own collection queries.
      *
+     * @param Builder $query
+     * @param array $args
+     * @param $viewer
      * @return Builder
      */
     protected function scopeQuery(Builder $query, array $args, $viewer): Builder
@@ -113,7 +94,7 @@ class CollectionQuery extends Field
     /**
      * Filter the query based on the filter argument.
      *
-     * @param Model $model
+     * @param Builder $query
      * @param array $args
      * @return Builder
      */
@@ -133,10 +114,13 @@ class CollectionQuery extends Field
 
         return $query;
     }
-    
+
     /**
      * Filter the query based on the filter argument that contain relations.
      *
+     * @param Builder $query
+     * @param string $relation
+     * @param array $args
      * @return Builder
      */
     protected function applyRelationFilter(Builder $query, string $relation, array $args): Builder
@@ -171,7 +155,7 @@ class CollectionQuery extends Field
             $query->where($key, 'LIKE', $value . '%', $type);
         } elseif (ends_with($key, '_not_ends_with')) {
             $key = str_before($key, '_not_ends_with');
-            $query->where($key, 'NOT LIKE', '%'. $value, $type);
+            $query->where($key, 'NOT LIKE', '%' . $value, $type);
         } elseif (ends_with($key, '_ends_with')) {
             $key = str_before($key, '_ends_with');
             $query->where($key, 'LIKE', '%' . $value, $type);

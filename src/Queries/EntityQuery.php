@@ -2,47 +2,49 @@
 
 namespace Bakery\Queries;
 
-use GraphQL\Type\Definition\Type;
-use Illuminate\Database\Eloquent\Model;
-
-use Bakery\Support\Field;
+use Bakery\Exceptions\TooManyResultsException;
 use Bakery\Support\Facades\Bakery;
 use GraphQL\Type\Definition\ListOfType;
-use Bakery\Exceptions\TooManyResultsException;
+use GraphQL\Type\Definition\Type;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
-class EntityQuery extends Field
+class EntityQuery extends Query
 {
     /**
-     * A reference to the model.
+     * The class of the Entity.
+     *
+     * @var string
      */
-    protected $model = null;
+    protected $class;
 
     /**
-     * Construct a new entity query.
-     *
-     * @param string $class
-     * @param array $attributes
+     * The reference to the Entity.
      */
-    public function __construct(string $class, array $attributes = [])
+    protected $model;
+
+    /**
+     * Get the name of the EntityQuery.
+     *
+     * @return string
+     */
+    protected function name(): string
     {
-        $this->class = $class;
-        $this->name = $this->formatName($class);
-        $this->model = app()->make($class);
+        return camel_case(str_singular(class_basename($this->class)));
     }
 
     /**
-     * The type of the query.
+     * The type of the Query.
      *
      * @return Type
      */
     public function type()
     {
-        return Bakery::getType(studly_case($this->name));
+        return Bakery::type(studly_case($this->name));
     }
 
     /**
-     * The arguments for the query.
+     * The arguments for the Query.
      *
      * @return array
      */
@@ -66,14 +68,14 @@ class EntityQuery extends Field
     }
 
     /**
-     * Format a class name to the name for the entity query.
+     * EntityQuery constructor.
      *
      * @param string $class
-     * @return string
      */
-    protected function formatName(string $class): string
+    public function __construct(string $class)
     {
-        return camel_case(str_singular(class_basename($class)));
+        $this->class = $class;
+        $this->model = resolve($class);
     }
 
     /**
@@ -84,7 +86,7 @@ class EntityQuery extends Field
      * @param mixed $viewer
      * @return Model
      */
-    public function resolve($root, $args = [], $viewer)
+    public function resolve($root, array $args = [], $viewer)
     {
         $primaryKey = $this->model->getKeyName();
 
@@ -107,11 +109,11 @@ class EntityQuery extends Field
         }
 
         $results = $query->get();
-        
+
         if ($results->count() < 1) {
             throw (new ModelNotFoundException)->setModel($this->class);
         }
-        
+
         if ($results->count() > 1) {
             throw (new TooManyResultsException)->setModel($this->class, $results->pluck($this->model->getKeyName()));
         }
