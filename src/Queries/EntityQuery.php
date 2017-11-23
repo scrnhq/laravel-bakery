@@ -3,6 +3,7 @@
 namespace Bakery\Queries;
 
 use Bakery\Exceptions\TooManyResultsException;
+use Bakery\Query;
 use Bakery\Support\Facades\Bakery;
 use GraphQL\Type\Definition\ListOfType;
 use GraphQL\Type\Definition\Type;

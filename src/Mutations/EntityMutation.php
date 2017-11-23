@@ -2,6 +2,7 @@
 
 namespace Bakery\Mutations;
 
+use Bakery\Mutation;
 use Bakery\Support\Facades\Bakery;
 use GraphQL\Type\Definition\Type;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;

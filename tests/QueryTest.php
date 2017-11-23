@@ -2,7 +2,7 @@
 
 namespace Bakery\Tests;
 
-use Bakery\Queries\Query;
+use Bakery\Query;
 
 class CustomQuery extends Query
 {

@@ -1,6 +1,6 @@
 <?php
 
-namespace Bakery\Mutations;
+namespace Bakery;
 
 use Bakery\Support\Field;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
