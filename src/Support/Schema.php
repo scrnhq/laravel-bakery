@@ -7,7 +7,7 @@ use Bakery\Mutations\CreateMutation;
 use Bakery\Mutations\DeleteMutation;
 use Bakery\Mutations\UpdateMutation;
 use Bakery\Queries\CollectionQuery;
-use Bakery\Queries\EntityQuery;
+use Bakery\Queries\SingleEntityQuery;
 use Bakery\Support\Facades\Bakery;
 use Bakery\Traits\GraphQLResource;
 use Bakery\Types;
@@ -70,7 +70,7 @@ class Schema
     {
         $queries = [];
         foreach ($this->getModels() as $model) {
-            $entityQuery = new EntityQuery($model);
+            $entityQuery = new SingleEntityQuery($model);
             $queries[$entityQuery->name] = $entityQuery;
 
             $collectionQuery = new CollectionQuery($model);

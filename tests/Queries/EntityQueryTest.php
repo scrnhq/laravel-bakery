@@ -8,9 +8,9 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 use Bakery\Tests\Stubs\Model;
 use Bakery\Tests\WithDatabase;
-use Bakery\Queries\EntityQuery;
+use Bakery\Queries\SingleEntityQuery;
 
-class EntityQueryTest extends TestCase
+class SingleEntityQueryTest extends TestCase
 {
     use WithDatabase;
 
@@ -29,7 +29,7 @@ class EntityQueryTest extends TestCase
 
         $model = Model::create();
 
-        $query = new EntityQuery(Model::class);
+        $query = new SingleEntityQuery(Model::class);
         $result = $query->resolve(null, ['id' => 1], null);
 
         $this->assertEquals($model->id, $result['id']);
@@ -48,7 +48,7 @@ class EntityQueryTest extends TestCase
 
         $model = Model::create(['slug' => 'test-model']);
 
-        $query = new EntityQuery(Model::class);
+        $query = new SingleEntityQuery(Model::class);
         $result = $query->resolve(null, ['slug' => 'test-model'], null);
 
         $this->assertEquals($model->id, $result['id']);
@@ -68,7 +68,7 @@ class EntityQueryTest extends TestCase
 
         $model = Model::create(['slug' => 'test-model', 'category' => 'foo']);
 
-        $query = new EntityQuery(Model::class);
+        $query = new SingleEntityQuery(Model::class);
         $result = $query->resolve(null, ['slug' => 'test-model', 'category' => 'foo'], null);
 
         $this->assertEquals($model->id, $result['id']);
@@ -86,7 +86,7 @@ class EntityQueryTest extends TestCase
 
         Model::create(['id' => '2']);
 
-        $query = new EntityQuery(Model::class);
+        $query = new SingleEntityQuery(Model::class);
         $result = $query->resolve(null, ['id' => 1], null);
     }
 
@@ -106,7 +106,7 @@ class EntityQueryTest extends TestCase
 
         $model = Model::create(['slug' => 'test-model', 'category' => 'bar']);
 
-        $query = new EntityQuery(Model::class);
+        $query = new SingleEntityQuery(Model::class);
         $result = $query->resolve(null, ['slug' => 'test-model', 'category' => 'foo'], null);
     }
 }

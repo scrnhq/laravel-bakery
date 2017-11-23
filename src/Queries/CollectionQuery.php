@@ -78,6 +78,25 @@ class CollectionQuery extends EntityQuery
     }
 
     /**
+     * CollectionQuery constructor.
+     *
+     * @param string|null $class
+     * @throws \Exception
+     */
+    public function __construct(string $class = null)
+    {
+        if (isset($class)) {
+            $this->class = $class;
+        }
+
+        if (!isset($this->class)) {
+            throw new \Exception('No class defined for the collection query.');
+        }
+
+        $this->model = resolve($this->class);
+    }
+
+    /**
      * Scope the query.
      * This can be overwritten to make your own collection queries.
      *
