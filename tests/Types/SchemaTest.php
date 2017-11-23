@@ -2,19 +2,28 @@
 
 namespace Bakery\Tests\Support;
 
-use Bakery\Exceptions\ModelNotGraphQLResource;
+use GraphQL\Type\Schema as GraphSchema;
+
 use Bakery\Support\Schema;
+use Bakery\Tests\TestCase;
 use Bakery\Tests\Stubs\NotResourceModel;
 use Bakery\Tests\Stubs\Schemas\BlogSchema;
-use Bakery\Tests\Stubs\Schemas\OverrideCreatePhoneMutation;
+use Bakery\Tests\Stubs\InheritedTraitModel;
+use Bakery\Exceptions\ModelNotGraphQLResource;
 use Bakery\Tests\Stubs\Schemas\OverridePhoneQuery;
-use Bakery\Tests\TestCase;
-use GraphQL\Type\Schema as GraphSchema;
+use Bakery\Tests\Stubs\Schemas\OverrideCreatePhoneMutation;
 
 class NotResourceSchema extends Schema
 {
     protected $models = [
         NotResourceModel::class,
+    ];
+}
+
+class InheritedResourceSchema extends Schema
+{
+    protected $models = [
+        InheritedTraitModel::class,
     ];
 }
 
@@ -28,6 +37,17 @@ class SchemaTest extends TestCase
         $schema = new NotResourceSchema();
         $schema->toGraphQLSchema();
     }
+
+    /** @test */
+    public function it_registers_model_that_inherits_the_trait()
+    {
+        $schema = new InheritedResourceSchema();
+        $schema->toGraphQLSchema();
+        $queries = $schema->getQueries();
+
+        $this->assertArrayHasKey('inheritedTraitModel', $queries);
+    }
+
 
     /** @test */
     public function it_builds_the_entity_queries()

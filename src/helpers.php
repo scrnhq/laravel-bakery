@@ -20,8 +20,8 @@ if (!function_exists('class_uses_deep')) {
      * Credits to:
      * https://stackoverflow.com/questions/46218000/how-to-check-if-a-class-uses-a-trait-in-php
      *
-     * @param  string  $subject
-     * @param  string  $search
+     * @param  string   $class
+     * @param  boolean  $autoload
      * @return string
      */
     function class_uses_deep($class, $autoload = true)
@@ -32,6 +32,7 @@ if (!function_exists('class_uses_deep')) {
         do {
             $traits = array_merge(class_uses($class, $autoload), $traits);
         } while ($class = get_parent_class($class));
+
 
         // Get traits of all parent traits
         $traitsToSearch = $traits;
@@ -46,6 +47,6 @@ if (!function_exists('class_uses_deep')) {
             $traits = array_merge(class_uses($trait, $autoload), $traits);
         }
 
-        return array_unique($traits);
+        return array_values(array_unique($traits));
     }
 }
