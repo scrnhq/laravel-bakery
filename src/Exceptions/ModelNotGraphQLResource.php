@@ -2,40 +2,17 @@
 
 namespace Bakery\Exceptions;
 
-use RuntimeException;
-
-class ModelNotGraphQLResource extends RuntimeException
+/**
+ * Thrown when a Model adding to the Bakery Schema does not have the
+ * GraphQLResource trait.
+ */
+class ModelNotGraphQLResource extends \RuntimeException
 {
     /**
-     * Name of the affected Eloquent model.
-     *
-     * @var string
+     * @param string $model The Model that does not have the trait
      */
-    protected $model;
-
-    /**
-     * Set the affected Eloquent model and instance ids.
-     *
-     * @param  string  $model
-     * @param  int|array  $ids
-     * @return $this
-     */
-    public function setModel($model, $ids = [])
+    public function __construct(string $model)
     {
-        $this->model = $model;
-
-        $this->message = "You are trying to register {$model} as a GraphQL resource, but it does not have the GraphQLResource trait.";
-
-        return $this;
-    }
-
-    /**
-     * Get the affected Eloquent model.
-     *
-     * @return string
-     */
-    public function getModel()
-    {
-        return $this->model;
+        parent::__construct("{$model} does not have the required GraphQLResource trait to register it as a GraphQL resource.");
     }
 }

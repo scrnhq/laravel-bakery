@@ -43,24 +43,4 @@ class TooManyResultsException extends RuntimeException
 
         return $this;
     }
-
-    /**
-     * Get the affected Eloquent model.
-     *
-     * @return string
-     */
-    public function getModel()
-    {
-        return $this->model;
-    }
-
-    /**
-     * Get the affected Eloquent model IDs.
-     *
-     * @return int|array
-     */
-    public function getIds()
-    {
-        return $this->ids;
-    }
 }
