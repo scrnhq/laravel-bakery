@@ -38,7 +38,7 @@ class BakeryController extends Controller
 
     public function graphiql()
     {
-        if (!app()->isLocal()) {
+        if (!App::isLocal()) {
             abort(404);
         }
 
