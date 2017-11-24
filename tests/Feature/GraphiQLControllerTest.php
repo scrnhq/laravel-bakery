@@ -16,14 +16,4 @@ class GraphiQLControllerTest extends TestCase
         $response = $this->get('graphql/explore');
         $response->assertStatus(404);
     }
-
-    public function it_is_only_visible_when_local()
-    {
-        app()->shouldReceive('isLocal')
-            ->once()
-            ->andReturn(true);
-
-        $response = $this->get('/graphql/explore');
-        $response->assertStatus(200);
-    }
 }
