@@ -2,6 +2,7 @@
 
 namespace Bakery\Tests\Support;
 
+use Bakery\Tests\Stubs\Schemas\OverridePhoneType;
 use GraphQL\Type\Schema as GraphSchema;
 
 use Bakery\Support\Schema;
@@ -90,6 +91,15 @@ class SchemaTest extends TestCase
         $mutations = $schema->getMutations();
 
         $this->assertInstanceOf(OverrideCreatePhoneMutation::class, $mutations['createPhone']);
+    }
+
+    /** @test */
+    public function it_can_override_types()
+    {
+        $schema = new BlogSchema();
+        $types = $schema->getTypes();
+
+        $this->assertEquals(OverridePhoneType::class, $types['Phone']);
     }
 
     /** @test */

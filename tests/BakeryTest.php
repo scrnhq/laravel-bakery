@@ -2,23 +2,21 @@
 
 namespace Bakery\Tests;
 
-use GraphQL\Type\Definition\ObjectType;
 use Bakery\Exceptions\TypeNotFound;
 use Bakery\Support\Facades\Bakery;
-use Bakery\Tests\Stubs;
+use Bakery\Types\Type;
+use GraphQL\Type\Definition\ObjectType;
 
 class BakeryTest extends TestCase
 {
     /** @test */
-    public function it_returns_the_object_type_for_a_model()
+    public function it_returns_the_type()
     {
-        $type = Bakery::type('Model');
+        Bakery::addType(new Type(), 'Type');
+
+        $type = Bakery::type('Type');
 
         $this->assertInstanceOf(ObjectType::class, $type);
-
-        $typeOther = Bakery::type('Model');
-
-        $this->assertSame($type, $typeOther);
     }
 
     /** @test */

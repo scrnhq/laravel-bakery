@@ -10,9 +10,10 @@ class InputType extends Type
     /**
      * Convert the Bakery type to a GraphQL type.
      *
-     * @return ObjectType
+     * @param array $options
+     * @return BaseType
      */
-    public function toGraphQLType(): BaseType
+    public function toGraphQLType(array $options = []): BaseType
     {
         return new InputObjectType($this->toArray());
     }

@@ -22,7 +22,7 @@ class Schema
     protected $mutations = [];
     protected $types = [];
 
-    public function models()
+    protected function models()
     {
         return [];
     }
@@ -32,12 +32,12 @@ class Schema
         return array_merge($this->models, $this->models());
     }
 
-    public function types()
+    protected function types()
     {
         return [];
     }
 
-    public function getModelTypes()
+    protected function getModelTypes()
     {
         $types = [];
         foreach ($this->getModels() as $model) {
@@ -56,13 +56,20 @@ class Schema
         return $types;
     }
 
+    public function getStandardTypes()
+    {
+        return [
+            Types\PaginationType::class,
+        ];
+    }
+
     public function getTypes()
     {
         return array_merge(
             $this->getModelTypes(),
             $this->types,
             $this->types(),
-            Bakery::getStandardTypes()
+            $this->getStandardTypes()
         );
     }
 
@@ -101,7 +108,7 @@ class Schema
         }, $fields);
     }
 
-    public function getModelMutations()
+    protected function getModelMutations()
     {
         $mutations = [];
         foreach ($this->getModels() as $model) {

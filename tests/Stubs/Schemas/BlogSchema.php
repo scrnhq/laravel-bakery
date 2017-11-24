@@ -6,6 +6,7 @@ use Bakery\Mutations\CreateMutation;
 use Bakery\Queries\EntityQuery;
 use Bakery\Support\Schema;
 use Bakery\Tests\Stubs;
+use Bakery\Type;
 
 class BlogSchema extends Schema
 {
@@ -24,6 +25,10 @@ class BlogSchema extends Schema
     protected $mutations = [
         'createPhone' => OverrideCreatePhoneMutation::class,
     ];
+
+    protected $types = [
+        'Phone' => OverridePhoneType::class,
+    ];
 }
 
 class OverridePhoneQuery extends EntityQuery
@@ -40,4 +45,8 @@ class OverrideCreatePhoneMutation extends CreateMutation
     {
         parent::__construct(Stubs\Phone::class);
     }
+}
+
+class OverridePhoneType extends Type
+{
 }

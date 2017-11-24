@@ -46,9 +46,10 @@ class EnumType extends Type
     /**
      * Convert the Bakery type to a GraphQL type.
      *
+     * @param array $options
      * @return BaseType
      */
-    public function toGraphQLType(): BaseType
+    public function toGraphQLType(array $options = []): BaseType
     {
         return new BaseEnumType($this->toArray());
     }

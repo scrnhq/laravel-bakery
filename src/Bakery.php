@@ -3,15 +3,14 @@
 namespace Bakery;
 
 use Auth;
-use GraphQL\GraphQL;
-use GraphQL\Type\Schema;
-use GraphQL\Type\Definition\ObjectType;
-use GraphQL\Executor\ExecutionResult;
-
-use Bakery\Types;
-use Bakery\Traits\BakeryTypes;
 use Bakery\Exceptions\TypeNotFound;
 use Bakery\Support\Schema as BakerySchema;
+use Bakery\Traits\BakeryTypes;
+use Bakery\Types;
+use GraphQL\Executor\ExecutionResult;
+use GraphQL\GraphQL;
+use GraphQL\Type\Definition\ObjectType;
+use GraphQL\Type\Schema;
 
 class Bakery
 {
@@ -38,6 +37,11 @@ class Bakery
      */
     protected $typeInstances = [];
 
+    /**
+     * Add types to the registry.
+     *
+     * @param array $classes
+     */
     public function addTypes(array $classes)
     {
         foreach ($classes as $class) {
@@ -81,7 +85,11 @@ class Bakery
         return array_key_exists($name, $this->types);
     }
 
-
+    /**
+     * Return the types that should be included in all schemas.
+     *
+     * @return array
+     */
     public function getStandardTypes()
     {
         return [
@@ -100,6 +108,13 @@ class Bakery
         return $schema->toGraphQLSchema();
     }
 
+    /**
+     * Get the GraphQL type.
+     *
+     * @param $name
+     * @return ObjectType
+     * @throws TypeNotFound
+     */
     public function getType($name)
     {
         if (!isset($this->types[$name])) {
@@ -111,12 +126,19 @@ class Bakery
         }
 
         $class = $this->types[$name];
-        $type = $class->toGraphQLType();
+        $type = $this->makeObjectType($class, ['name' => $name]);
         $this->typeInstances[$name] = $type;
 
         return $type;
     }
 
+    /**
+     * Get the GraphQL type, alias for getType().
+     *
+     * @api
+     * @param $name
+     * @return ObjectType
+     */
     public function type($name)
     {
         return $this->getType($name);
@@ -126,7 +148,7 @@ class Bakery
      * Execute the GraphQL query.
      *
      * @param array $input
-     * @param Schema $schema
+     * @param Schema|BakerySchema $schema
      * @return ExecutionResult
      */
     public function executeQuery($input, $schema = null): ExecutionResult
@@ -155,5 +177,25 @@ class Bakery
             'bakery::graphiql',
             ['endpoint' => route($route), 'headers' => $headers]
         );
+    }
+
+    protected function makeObjectType($type, $options = [])
+    {
+        $objectType = null;
+        if ($type instanceof \GraphQL\Type\Definition\Type) {
+            $objectType = $type;
+        } elseif (is_array($type)) {
+            $objectType = $this->makeObjectTypeFromFields($type, $options);
+        } else {
+            $objectType = $type->toGraphQLType($options);
+        }
+        return $objectType;
+    }
+
+    protected function makeObjectTypeFromFields($fields, $options = [])
+    {
+        return new ObjectType(array_merge([
+            'fields' => $fields,
+        ], $options));
     }
 }

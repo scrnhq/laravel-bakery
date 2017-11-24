@@ -109,11 +109,12 @@ class Type
     /**
      * Convert the Bakery type to a GraphQL type.
      *
+     * @param array $options
      * @return BaseType
      */
-    public function toGraphQLType(): BaseType
+    public function toGraphQLType(array $options = []): BaseType
     {
-        return $this->type = new ObjectType($this->toArray());
+        return $this->type = new ObjectType(array_merge($this->toArray(), $options));
     }
 
     /**
