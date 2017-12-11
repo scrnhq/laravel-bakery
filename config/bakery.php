@@ -40,4 +40,16 @@ return [
      | render the GraphiQL view.
      */
     'graphiqlController' => '\Bakery\Http\Controller\BakeryController@graphiql',
+
+    'pagination' => [
+        /*
+        |--------------------------------------------------------------------------
+        | Pagination max count
+        |--------------------------------------------------------------------------
+        |
+        | Here you can define the maximum number of items that you can query
+        | on a paginated collection.
+        */
+        'maxCount' => 1000,
+    ]
 ];

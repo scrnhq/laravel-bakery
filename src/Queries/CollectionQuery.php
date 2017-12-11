@@ -2,10 +2,12 @@
 
 namespace Bakery\Queries;
 
-use Bakery\Support\Facades\Bakery;
 use GraphQL\Type\Definition\Type;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+
+use Bakery\Support\Facades\Bakery;
+use Bakery\Exceptions\PaginationMaxCountExceededException;
 
 class CollectionQuery extends EntityQuery
 {
@@ -64,8 +66,14 @@ class CollectionQuery extends EntityQuery
      */
     public function resolve($root, array $args = [], $viewer)
     {
-        $count = array_get($args, 'count', 25);
         $page = array_get($args, 'page', 1);
+        $count = array_get($args, 'count', 15);
+
+        $maxCount = config('bakery.pagination.maxCount');
+
+        if ($count > $maxCount) {
+            throw new PaginationMaxCountExceededException($maxCount);
+        }
 
         $query = $this->scopeQuery($this->model->authorizedForReading($viewer), $args, $viewer);
 

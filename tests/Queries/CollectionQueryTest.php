@@ -5,6 +5,7 @@ namespace Bakery\Tests\Queries;
 use Schema;
 use Eloquent;
 use Bakery\Tests\TestCase;
+use Bakery\Exceptions\PaginationMaxCountExceededException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 use Bakery\Tests\Stubs\User;
@@ -261,5 +262,14 @@ class CollectionQueryTest extends TestCase
         $this->assertTrue($result->items()[0]->is($second));
         $this->assertTrue($result->items()[1]->is($first));
         $this->assertTrue($result->items()[2]->is($third));
+    }
+
+    /** @test */
+    public function it_throws_an_exception_if_pagination_max_count_is_exceeded()
+    {
+        $this->expectException(PaginationMaxCountExceededException::class);
+
+        $query = new CollectionQuery(Model::class);
+        $result = $query->resolve(null, ['count' => 1001], null);
     }
 }
