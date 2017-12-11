@@ -64,6 +64,9 @@ class CollectionQuery extends EntityQuery
      */
     public function resolve($root, array $args = [], $viewer)
     {
+        $count = array_get($args, 'count', 25);
+        $page = array_get($args, 'page', 1);
+
         $query = $this->scopeQuery($this->model->authorizedForReading($viewer), $args, $viewer);
 
         if (array_key_exists('filter', $args)) {
@@ -74,7 +77,7 @@ class CollectionQuery extends EntityQuery
             $query = $this->applyOrderBy($query, $args['orderBy']);
         }
 
-        return $query->paginate();
+        return $query->paginate($count, ['*'], 'page', $page);
     }
 
     /**

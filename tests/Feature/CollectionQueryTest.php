@@ -75,6 +75,34 @@ class CollectionQueryTest extends TestCase
     }
 
     /** @test */
+    public function it_can_fetch_the_next_page()
+    {
+        Stubs\Model::create();
+        
+        $query = '
+            query {
+                models(page: 2) {
+                    items {
+                        id
+                    }
+                    pagination {
+                        total
+                        per_page
+                        current_page
+                        previous_page
+                        next_page
+                        last_page
+                    }
+                }
+            }
+        ';
+
+        $response = $this->json('GET', '/graphql', ['query' => $query]);
+        $response->assertStatus(200);
+        $response->assertJsonFragment(['current_page' => 2]);
+    }
+
+    /** @test */
     public function it_can_filter_by_its_fields()
     {
         Stubs\Model::create(['title' => 'foo']);
