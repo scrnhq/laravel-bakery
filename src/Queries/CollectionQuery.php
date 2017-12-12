@@ -130,19 +130,23 @@ class CollectionQuery extends EntityQuery
      */
     protected function applyFilters(Builder $query, array $args): Builder
     {
-        foreach ($args as $key => $value) {
-            if ($key === 'AND' || $key === 'OR') {
-                foreach ($this->flatten($value) as $subKey => $subValue) {
-                    $this->filter($query, $subKey, $subValue, $key);
+        // We wrap the query in a closure to make sure it
+        // does not clash with other (scoped) queries that are on the builder.
+        return $query->where(function ($query) use ($args) {
+            foreach ($args as $key => $value) {
+                if ($key === 'AND' || $key === 'OR') {
+                    foreach ($this->flatten($value) as $subKey => $subValue) {
+                        $this->filter($query, $subKey, $subValue, $key);
+                    }
+                } elseif (in_array($key, array_keys($query->getModel()->relations()))) {
+                    $this->applyRelationFilter($query, $key, $value);
+                } else {
+                    $this->filter($query, $key, $value, 'AND');
                 }
-            } elseif (in_array($key, array_keys($query->getModel()->relations()))) {
-                $this->applyRelationFilter($query, $key, $value);
-            } else {
-                $this->filter($query, $key, $value, 'AND');
             }
-        }
-
-        return $query;
+    
+            return $query;
+        });
     }
 
     /**
