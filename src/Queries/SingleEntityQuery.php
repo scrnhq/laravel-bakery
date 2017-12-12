@@ -72,7 +72,7 @@ class SingleEntityQuery extends EntityQuery
         $query = $this->model->authorizedForReading($viewer);
 
         if (array_key_exists($primaryKey, $args)) {
-            return $query->findOrFail($args[$primaryKey]);
+            return $query->find($args[$primaryKey]);
         }
 
         foreach ($args as $key => $value) {
@@ -90,7 +90,7 @@ class SingleEntityQuery extends EntityQuery
         $results = $query->get();
 
         if ($results->count() < 1) {
-            throw (new ModelNotFoundException)->setModel($this->class);
+            return null;
         }
 
         if ($results->count() > 1) {

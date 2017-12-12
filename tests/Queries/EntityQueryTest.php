@@ -75,10 +75,8 @@ class SingleEntityQueryTest extends TestCase
     }
 
     /** @test */
-    public function it_throws_model_not_found_exception_when_model_with_primary_key_cannot_be_found()
+    public function it_returns_null_when_model_with_primary_key_cannot_be_found()
     {
-        $this->expectException(ModelNotFoundException::class);
-
         Schema::create('models', function ($table) {
             $table->increments('id');
             $table->timestamps();
@@ -88,13 +86,13 @@ class SingleEntityQueryTest extends TestCase
 
         $query = new SingleEntityQuery(Model::class);
         $result = $query->resolve(null, ['id' => 1], null);
+
+        $this->assertNull($result);
     }
 
     /** @test */
-    public function it_throws_model_not_found_exception_when_model_with_provided_columns_cannot_be_found()
+    public function it_returns_null_when_model_with_provided_columns_cannot_be_found()
     {
-        $this->expectException(ModelNotFoundException::class);
-
         Eloquent::unguard();
         
         Schema::create('models', function ($table) {
@@ -108,5 +106,7 @@ class SingleEntityQueryTest extends TestCase
 
         $query = new SingleEntityQuery(Model::class);
         $result = $query->resolve(null, ['slug' => 'test-model', 'category' => 'foo'], null);
+
+        $this->assertNull($result);
     }
 }

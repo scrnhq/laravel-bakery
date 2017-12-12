@@ -67,10 +67,8 @@ class EntityQueryTest extends TestCase
     }
 
     /** @test */
-    public function it_throws_model_not_found_exception_when_there_are_no_results()
+    public function it_returns_null_when_there_are_no_results()
     {
-        $this->expectException(ModelNotFoundException::class);
-
         Stubs\Model::create(['slug' => 'test-model']);
 
         $query = '
@@ -82,6 +80,7 @@ class EntityQueryTest extends TestCase
         ';
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
+        $response->assertJsonFragment(['model' => null]);
     }
 
     /** @test */
