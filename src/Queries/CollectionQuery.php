@@ -137,7 +137,7 @@ class CollectionQuery extends EntityQuery
                 if ($key === 'AND' || $key === 'OR') {
                     foreach ($this->flatten($value) as $subKey => $subValue) {
                         if (in_array($subKey, array_keys($query->getModel()->relations()))) {
-                            $this->applyRelationFilter($query, $key, $value);
+                            $this->applyRelationFilter($query, $subKey, $value);
                         } else {
                             $this->filter($query, $subKey, $subValue, $key);
                         }
