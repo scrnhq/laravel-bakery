@@ -203,6 +203,36 @@ class CollectionQueryTest extends TestCase
     }
 
     /** @test */
+    public function it_can_filter_with_AND_and_OR_filters()
+    {
+        $userOne = $this->createUser();
+        $userTwo = $this->createUser();
+        Stubs\Post::create(['title' => 'Hello world', 'user_id' => $userOne->id]);
+        Stubs\Post::create(['title' => 'Hello world', 'body' => 'Lorem ipsum', 'user_id' => $userOne->id]);
+        Stubs\Post::create(['title' => 'Hello world', 'body' => 'Lorem ipsum', 'user_id' => $userTwo->id]);
+
+        $query = '
+            query {
+                posts(filter: {
+                    AND: [
+                        { user: { id: "' . $userOne->id  . '" } }, 
+                        { OR: [{title_contains: "hello"}, {body: "Lorem Ipsum"}] },
+                    ]
+                }) {
+                    items {
+                        id
+                    }
+                }
+            }
+        ';
+
+        $response = $this->json('GET', '/graphql', ['query' => $query]);
+        $response->assertStatus(200);
+        $result = json_decode($response->getContent())->data->posts;
+        $this->assertCount(2, $result->items);
+    }
+
+    /** @test */
     public function it_can_order_by_field()
     {
         $first = Stubs\Model::create(['title' => 'Hello mars']);

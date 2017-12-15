@@ -133,24 +133,33 @@ class CollectionQuery extends EntityQuery
         // We wrap the query in a closure to make sure it
         // does not clash with other (scoped) queries that are on the builder.
         return $query->where(function ($query) use ($args) {
-            foreach ($args as $key => $value) {
-                if ($key === 'AND' || $key === 'OR') {
-                    foreach ($this->flatten($value) as $subKey => $subValue) {
-                        if (in_array($subKey, array_keys($query->getModel()->relations()))) {
-                            $this->applyRelationFilter($query, $subKey, $value);
-                        } else {
-                            $this->filter($query, $subKey, $subValue, $key);
-                        }
-                    }
-                } elseif (in_array($key, array_keys($query->getModel()->relations()))) {
+            return $this->applyFiltersRecursively($query, $args);
+        });
+    }
+
+    /**
+     * Apply filters recursively.
+     *
+     * @param Builder $query
+     * @param array $args
+     * @param mixed $type
+     * @return void
+     */
+    protected function applyFiltersRecursively(Builder $query, array $args, $type = null)
+    {
+        foreach ($args as $key => $value) {
+            if ($key === 'AND' || $key === 'OR') {
+                $query->where(function ($query) use ($value, $key) {
+                    return $this->applyFiltersRecursively($query, $this->flatten($value), $key);
+                });
+            } else {
+                if (in_array($key, array_keys($query->getModel()->relations()))) {
                     $this->applyRelationFilter($query, $key, $value);
                 } else {
-                    $this->filter($query, $key, $value, 'AND');
+                    $this->filter($query, $key, $value, $type);
                 }
             }
-    
-            return $query;
-        });
+        }
     }
 
     /**
@@ -177,8 +186,10 @@ class CollectionQuery extends EntityQuery
      * @param string $type
      * @return Builder
      */
-    protected function filter(Builder $query, string $key, $value, string $type = 'AND')
+    protected function filter(Builder $query, string $key, $value, $type)
     {
+        $type = $type ?: 'AND';
+
         if (ends_with($key, '_not_contains')) {
             $key = str_before($key, '_not_contains');
             $query->where($key, 'NOT LIKE', '%' . $value . '%', $type);
