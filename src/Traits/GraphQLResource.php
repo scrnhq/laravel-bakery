@@ -297,7 +297,7 @@ trait GraphQLResource
     protected function connectHasManyRelation(Relations\HasMany $relation, array $ids)
     {
         $this->bakeryTransactionQueue[] = function (Model $model) use ($relation, $ids) {
-            $relation->attach($ids);
+            $relation->sync($ids);
         };
     }
 
@@ -331,7 +331,7 @@ trait GraphQLResource
     protected function connectBelongsToManyRelation(Relations\BelongsToMany $relation, array $ids)
     {
         $this->bakeryTransactionQueue[] = function () use ($relation, $ids) {
-            $relation->attach($ids);
+            $relation->sync($ids);
         };
     }
 
@@ -352,7 +352,7 @@ trait GraphQLResource
         }
 
         $this->bakeryTransactionQueue[] = function (Model $model) use ($relation, $instances) {
-            $relation->attach($instances->pluck('id')->all());
+            $relation->sync($instances->pluck('id')->all());
         };
     }
 
