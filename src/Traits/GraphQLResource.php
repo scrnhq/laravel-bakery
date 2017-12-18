@@ -312,6 +312,7 @@ trait GraphQLResource
     {
         $this->bakeryTransactionQueue[] = function (Model $model) use ($relation, $values) {
             $related = $relation->getRelated();
+            $relation->delete();
 
             foreach ($values as $attributes) {
                 $instance = $related->newInstance();

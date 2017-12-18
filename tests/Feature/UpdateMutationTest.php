@@ -170,7 +170,7 @@ class UpdateMutationTest extends TestCase
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
         $this->assertDatabaseHas('users', ['name' => 'Jona Doe']);
-        $this->assertDatabaseHas('posts', ['title' => 'Hello World!', 'user_id' => $user->id]);
+        $this->assertDatabaseMissing('posts', ['title' => 'Hello World!', 'user_id' => $user->id]);
         $this->assertDatabaseHas('posts', ['title' => 'This is my second post!', 'user_id' => $user->id]);
         $this->assertDatabaseHas('comments', ['body' => 'First!', 'post_id' => '2']);
         $this->assertDatabaseHas('comments', ['body' => 'Great post!', 'post_id' => '2']);
