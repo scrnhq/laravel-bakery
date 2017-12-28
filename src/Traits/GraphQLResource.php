@@ -102,7 +102,7 @@ trait GraphQLResource
             $model = new static();
             $model->fillWithGraphQLInput($input);
             $model->save();
-            return $model;
+            return $model->fresh();
         });
     }
 
