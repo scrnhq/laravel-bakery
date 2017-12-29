@@ -301,4 +301,54 @@ class CollectionQueryTest extends TestCase
         $result = json_decode($response->getContent())->data->posts;
         $this->assertCount(2, $result->items);
     }
+
+    /** @test */
+    public function it_can_filter_with_AND_and_OR_filters_on_relationships()
+    {
+        $firstUser = Stubs\User::create([
+            'name' => 'John Doe',
+            'email' => 'john.doe@example.com',
+            'password' => 'secret',
+        ]);
+
+        $firstUser->phone()->create([
+            'number' => '+31612345678'
+        ]);
+
+        $secondUser = Stubs\User::create([
+            'name' => 'Jane Doe',
+            'email' => 'jane.doe@example.com',
+            'password' => 'secret',
+        ]);
+
+        $secondUser->posts()->create([
+            'title' => 'Hello world!'
+        ]);
+
+        $thirdUser = Stubs\User::create([
+            'name' => 'Jone Doe',
+            'email' => 'jone.doe@example.com',
+            'password' => 'secret',
+        ]);
+
+        $thirdUser->phone()->create([
+            'number' => '+3161212121'
+        ]);
+
+        $query = '
+            query {
+                users(filter: {
+                    OR: [{ phone: { number: "+31612345678", id: "1" }}, { posts: { title: "Hello world!" } }]
+                }) {
+                    items {
+                        id
+                    }
+                }
+            }
+        ';
+
+        $response = $this->json('GET', '/graphql', ['query' => $query]);
+        $result = json_decode($response->getContent())->data->users;
+        $this->assertCount(2, $result->items);
+    }
 }

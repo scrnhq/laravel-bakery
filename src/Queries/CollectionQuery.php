@@ -154,7 +154,7 @@ class CollectionQuery extends EntityQuery
                 });
             } else {
                 if (in_array($key, array_keys($query->getModel()->relations()))) {
-                    $this->applyRelationFilter($query, $key, $value);
+                    $this->applyRelationFilter($query, $key, $value, $type);
                 } else {
                     $this->filter($query, $key, $value, $type);
                 }
@@ -168,12 +168,17 @@ class CollectionQuery extends EntityQuery
      * @param Builder $query
      * @param string $relation
      * @param array $args
+     * @param string $type
      * @return Builder
      */
-    protected function applyRelationFilter(Builder $query, string $relation, array $args): Builder
+    protected function applyRelationFilter(Builder $query, string $relation, array $args, $type): Builder
     {
-        return $query->whereHas($relation, function ($subQuery) use ($args) {
-            return $this->applyFilters($subQuery, $args);
+        $count = 1;
+        $operator = '>=';
+        $type = $type ?: 'and';
+
+        return $query->has($relation, $operator, $count, $type, function ($subQuery) use ($args) {
+            return $this->applyFiltersRecursively($subQuery, $args);
         });
     }
 
@@ -183,7 +188,7 @@ class CollectionQuery extends EntityQuery
      * @param Builder $query
      * @param string $key
      * @param mixed $value
-     * @param string $type
+     * @param string $type (AND or OR)
      * @return Builder
      */
     protected function filter(Builder $query, string $key, $value, $type)
