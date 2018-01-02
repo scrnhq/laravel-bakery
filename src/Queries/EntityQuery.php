@@ -3,9 +3,9 @@
 namespace Bakery\Queries;
 
 use Bakery\Query;
+use GraphQL\Type\Definition\Type;
 use Bakery\Support\Facades\Bakery;
 use GraphQL\Type\Definition\ListOfType;
-use GraphQL\Type\Definition\Type;
 
 abstract class EntityQuery extends Query
 {

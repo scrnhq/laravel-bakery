@@ -2,12 +2,14 @@
 
 namespace Bakery\Queries;
 
-use Bakery\Exceptions\TooManyResultsException;
-use Bakery\Support\Facades\Bakery;
-use GraphQL\Type\Definition\ListOfType;
 use GraphQL\Type\Definition\Type;
 use Illuminate\Database\Eloquent\Model;
+use GraphQL\Type\Definition\ListOfType;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+
+use Bakery\Support\Facades\Bakery;
+use Bakery\Exceptions\TooManyResultsException;
 
 class SingleEntityQuery extends EntityQuery
 {
@@ -69,7 +71,7 @@ class SingleEntityQuery extends EntityQuery
     {
         $primaryKey = $this->model->getKeyName();
 
-        $query = $this->model->authorizedForReading($viewer);
+        $query = $this->scopeQuery($this->model->authorizedForReading($viewer), $args, $viewer);
 
         if (array_key_exists($primaryKey, $args)) {
             return $query->find($args[$primaryKey]);
@@ -98,5 +100,19 @@ class SingleEntityQuery extends EntityQuery
         }
 
         return $results->first();
+    }
+
+    /**
+     * Scope the query.
+     * This can be overwritten to make your own collection queries.
+     *
+     * @param Builder $query
+     * @param array $args
+     * @param $viewer
+     * @return Builder
+     */
+    protected function scopeQuery(Builder $query, array $args, $viewer): Builder
+    {
+        return $query;
     }
 }
