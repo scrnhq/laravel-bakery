@@ -26,10 +26,17 @@ abstract class EntityQuery extends Query
      *
      * @param string $class
      */
-    public function __construct(string $class)
+    public function __construct(string $class = null)
     {
-        $this->class = $class;
-        $this->model = resolve($class);
+        if (isset($class)) {
+            $this->class = $class;
+        }
+
+        if (!isset($this->class)) {
+            throw new \Exception('No class defined for the collection query.');
+        }
+
+        $this->model = resolve($this->class);
     }
 
     /**
