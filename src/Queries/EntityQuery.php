@@ -22,6 +22,17 @@ abstract class EntityQuery extends Query
     protected $model;
 
     /**
+     * EntityQuery constructor.
+     *
+     * @param string $class
+     */
+    public function __construct(string $class)
+    {
+        $this->class = $class;
+        $this->model = resolve($class);
+    }
+
+    /**
      * Get the name of the EntityQuery.
      *
      * @return string
@@ -63,16 +74,5 @@ abstract class EntityQuery extends Query
         }
 
         return $args;
-    }
-
-    /**
-     * EntityQuery constructor.
-     *
-     * @param string $class
-     */
-    public function __construct(string $class)
-    {
-        $this->class = $class;
-        $this->model = resolve($class);
     }
 }
