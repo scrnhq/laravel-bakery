@@ -233,10 +233,10 @@ trait GraphQLResource
      * Connect a belongs to relation.
      *
      * @param Relations\BelongsTo $relation
-     * @param string $id
+     * @param mixed $id
      * @return void
      */
-    protected function connectBelongsToRelation(Relations\BelongsTo $relation, string $id)
+    protected function connectBelongsToRelation(Relations\BelongsTo $relation, $id)
     {
         $relation->associate($id);
     }
@@ -248,7 +248,7 @@ trait GraphQLResource
      * @param array $attributes
      * @return void
      */
-    protected function fillBelongsToRelation(Relations\BelongsTo $relation, array $attributes)
+    protected function fillBelongsToRelation(Relations\BelongsTo $relation, $attributes = [])
     {
         $related = $relation->getRelated()->createWithGraphQLInput($attributes);
         $relation->associate($related);
