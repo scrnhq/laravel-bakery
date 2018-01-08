@@ -2,6 +2,7 @@
 
 namespace Bakery\Tests\Support;
 
+use Bakery\Tests\Stubs\ReadOnlyModel;
 use Bakery\Tests\Stubs\Schemas\OverridePhoneType;
 use GraphQL\Type\Schema as GraphSchema;
 
@@ -28,6 +29,13 @@ class InheritedResourceSchema extends Schema
     ];
 }
 
+class ReadOnlySchema extends Schema
+{
+    protected $models = [
+        ReadOnlyModel::class,
+    ];
+}
+
 class SchemaTest extends TestCase
 {
     /** @test */
@@ -49,6 +57,17 @@ class SchemaTest extends TestCase
         $this->assertArrayHasKey('inheritedTraitModel', $queries);
     }
 
+    /** @test */
+    public function it_ignores_mutations_for_read_only_models()
+    {
+        $schema = new ReadOnlySchema();
+        $schema->toGraphQLSchema();
+        $mutations = $schema->getMutations();
+        $queries = $schema->getQueries();
+
+        $this->assertArrayHasKey('readOnlyModel', $queries);
+        $this->assertEmpty($mutations);
+    }
 
     /** @test */
     public function it_builds_the_entity_queries()

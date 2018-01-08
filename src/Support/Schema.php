@@ -50,8 +50,11 @@ class Schema
             $types[] = new Types\EntityLookupType($model);
             $types[] = new Types\CollectionFilterType($model);
             $types[] = new Types\CollectionOrderByType($model);
-            $types[] = new Types\CreateInputType($model);
-            $types[] = new Types\UpdateInputType($model);
+
+            if (!empty(app($model)->getFillable())) {
+                $types[] = new Types\CreateInputType($model);
+                $types[] = new Types\UpdateInputType($model);
+            }
         }
         return $types;
     }
@@ -112,14 +115,16 @@ class Schema
     {
         $mutations = [];
         foreach ($this->getModels() as $model) {
-            $createMutation = new CreateMutation($model);
-            $mutations[$createMutation->name] = $createMutation;
+            if (!empty(app($model)->getFillable())) {
+                $createMutation = new CreateMutation($model);
+                $mutations[$createMutation->name] = $createMutation;
 
-            $updateMutation = new UpdateMutation($model);
-            $mutations[$updateMutation->name] = $updateMutation;
+                $updateMutation = new UpdateMutation($model);
+                $mutations[$updateMutation->name] = $updateMutation;
 
-            $deleteMutation = new DeleteMutation($model);
-            $mutations[$deleteMutation->name] = $deleteMutation;
+                $deleteMutation = new DeleteMutation($model);
+                $mutations[$deleteMutation->name] = $deleteMutation;
+            }
         }
         return $mutations;
     }
