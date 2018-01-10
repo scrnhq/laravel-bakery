@@ -48,12 +48,17 @@ class CollectionQuery extends EntityQuery
      */
     public function args(): array
     {
-        return [
+        $args = [
             'page' => Bakery::int(),
             'count' => Bakery::int(),
             'filter' => Bakery::type($this->typeName() . 'Filter'),
-            'orderBy' => Bakery::type($this->typeName() . 'OrderBy'),
         ];
+
+        if (!empty($this->model->fields())) {
+            $args['orderBy'] = Bakery::type($this->typeName() . 'OrderBy');
+        }
+
+        return $args;
     }
 
     /**

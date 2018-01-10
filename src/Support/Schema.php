@@ -49,7 +49,10 @@ class Schema
             $types[] = new Types\EntityCollectionType($model);
             $types[] = new Types\EntityLookupType($model);
             $types[] = new Types\CollectionFilterType($model);
-            $types[] = new Types\CollectionOrderByType($model);
+
+            if (!empty(app($model)->fields())) {
+                $types[] = new Types\CollectionOrderByType($model);
+            }
 
             if (!empty(app($model)->getFillable())) {
                 $types[] = new Types\CreateInputType($model);
