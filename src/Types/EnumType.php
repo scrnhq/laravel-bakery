@@ -37,8 +37,9 @@ class EnumType extends Type
     public function getAttributes(): array
     {
         $attributes = parent::getAttributes();
+        $values = $this->getValues();
 
-        $attributes['values'] = $this->getValues();
+        $attributes['values'] = empty($values) ? null : $values;
 
         return $attributes;
     }
