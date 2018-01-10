@@ -150,7 +150,9 @@ class CollectionQuery extends EntityQuery
         foreach ($args as $key => $value) {
             if ($key === 'AND' || $key === 'OR') {
                 $query->where(function ($query) use ($value, $key) {
-                    return $this->applyFiltersRecursively($query, $this->flatten($value), $key);
+                    foreach($value as $set) {
+                        $this->applyFiltersRecursively($query, $set, $key);
+                    }
                 });
             } else {
                 if (in_array($key, array_keys($query->getModel()->relations()))) {
