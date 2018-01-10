@@ -45,6 +45,6 @@ class CollectionOrderByType extends EnumType
             $values[] = $name . '_DESC';
         }
 
-        return count($values) > 0 ? $values : null;
+        return $values;
     }
 }
