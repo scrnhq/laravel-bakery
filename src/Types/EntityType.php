@@ -16,9 +16,13 @@ class EntityType extends Type
 
     public function fields(): array
     {
-        return array_merge(
+        $fields = array_merge(
             $this->model->fields(),
             $this->model->relations()
         );
+
+        return array_filter($fields, function ($key) {
+            return !in_array($key, $this->model->getHidden());
+        }, ARRAY_FILTER_USE_KEY);
     }
 }
