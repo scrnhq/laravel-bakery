@@ -2,7 +2,9 @@
 
 namespace Bakery;
 
-use Bakery\Types\PaginationType;
+use Bakery\Events\GraphQLResourceSaved;
+use Bakery\Listeners\PersistQueuedGraphQLDatabaseTransactions;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 
 class BakeryServiceProvider extends ServiceProvider
@@ -84,13 +86,14 @@ class BakeryServiceProvider extends ServiceProvider
     public function bootPublishes()
     {
         $this->publishes([
-            $this->getConfigPath() => config_path('bakery.php')
+            $this->getConfigPath() => config_path('bakery.php'),
         ], 'bakery');
     }
 
     public function bootBakery()
     {
         $this->registerViews();
+        $this->registerListeners();
     }
 
     /**
@@ -103,9 +106,19 @@ class BakeryServiceProvider extends ServiceProvider
         $this->loadViewsFrom(__DIR__ . '/views', static::$abstract);
     }
 
+    /**
+     * Register the listeners.
+     *
+     * @return void
+     */
+    protected function registerListeners()
+    {
+        Event::listen(GraphQLResourceSaved::class, PersistQueuedGraphQLDatabaseTransactions::class);
+    }
+
     protected function loadHelpers()
     {
-        require(__DIR__ .'/helpers.php');
+        require(__DIR__ . '/helpers.php');
     }
 
     /**

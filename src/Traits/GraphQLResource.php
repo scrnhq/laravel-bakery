@@ -2,14 +2,13 @@
 
 namespace Bakery\Traits;
 
-use RuntimeException;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Builder;
+use Bakery\Events\GraphQLResourceSaved;
 use Illuminate\Contracts\Auth\Access\Gate;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations;
-
-use Bakery\Observers\GraphQLResourceObserver;
+use Illuminate\Support\Facades\DB;
+use RuntimeException;
 
 trait GraphQLResource
 {
@@ -21,14 +20,17 @@ trait GraphQLResource
      */
     protected $bakeryTransactionQueue = [];
 
-    /**
-     * Fired when the model is booted.
-     *
-     * @return void
-     */
-    public static function bootGraphQLResource()
+    protected function fireCustomModelEvent($event, $method)
     {
-        static::observe(new GraphQLResourceObserver);
+        if ($event === 'saved') {
+            $result = static::$dispatcher->$method(new GraphQLResourceSaved($this));
+        } else {
+            $result = parent::fireCustomModelEvent($event, $method);
+        }
+
+        if (! is_null($result)) {
+            return $result;
+        }
     }
 
     /**
@@ -440,7 +442,7 @@ trait GraphQLResource
      *
      * @return void
      */
-    public function persistQueuedGraphQLDatabaseTranssactions()
+    public function persistQueuedGraphQLDatabaseTransactions()
     {
         foreach ($this->bakeryTransactionQueue as $closure) {
             $closure($this);
