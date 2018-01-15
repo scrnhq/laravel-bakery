@@ -26,7 +26,15 @@ class EntityType extends Type
         );
 
         foreach ($this->model->relations() as $key => $type) {
-            if (!$type instanceof ListOfType) {
+            if ($type instanceof ListOfType) {
+                $singularKey = str_singular($key);
+                $fields[$singularKey . 'Ids'] = [
+                    'type' => Bakery::listOf(Bakery::ID()),
+                    'resolve' => function ($model) use ($key) {
+                        return $model->{$key}->pluck('id')->toArray();
+                    },
+                ];
+            } else {
                 $fields[$key . 'Id'] = [
                     'type' => $type instanceof NonNullType ? Bakery::nonNull(Bakery::ID()) : Bakery::ID(),
                     'resolve' => function ($model) use ($key) {
