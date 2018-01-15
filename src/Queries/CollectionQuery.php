@@ -178,11 +178,15 @@ class CollectionQuery extends EntityQuery
      * @param string $type
      * @return Builder
      */
-    protected function applyRelationFilter(Builder $query, string $relation, array $args, $type): Builder
+    protected function applyRelationFilter(Builder $query, string $relation, $args, $type): Builder
     {
         $count = 1;
         $operator = '>=';
         $type = $type ?: 'and';
+
+        if (!$args) {
+            return $query->doesntHave($relation, $type);
+        }
 
         return $query->has($relation, $operator, $count, $type, function ($subQuery) use ($args) {
             return $this->applyFiltersRecursively($subQuery, $args);
