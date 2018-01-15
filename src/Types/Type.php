@@ -62,7 +62,10 @@ class Type
             $resolver = $this->getFieldResolver($name, $field);
 
             if (is_array($field)) {
-                $field['resolve'] = $resolver;
+                if (!array_key_exists('resolve', $field)) {
+                    $field['resolve'] = $resolver;
+                }
+
                 return $field;
             }
 

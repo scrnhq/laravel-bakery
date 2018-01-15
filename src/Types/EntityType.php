@@ -2,6 +2,10 @@
 
 namespace Bakery\Types;
 
+use Bakery\Support\Facades\Bakery;
+use GraphQL\Type\Definition\ListOfType;
+use GraphQL\Type\Definition\NonNullType;
+
 class EntityType extends Type
 {
     protected $name;
@@ -20,6 +24,18 @@ class EntityType extends Type
             $this->model->fields(),
             $this->model->relations()
         );
+
+        foreach ($this->model->relations() as $key => $type) {
+            if (!$type instanceof ListOfType) {
+                $fields[$key . 'Id'] = [
+                    'type' => $type instanceof NonNullType ? Bakery::nonNull(Bakery::ID()) : Bakery::ID(),
+                    'resolve' => function ($model) use ($key) {
+                        $instance = $model->{$key};
+                        return $instance ? $instance->getKey() : null;
+                    }
+                ];
+            }
+        }
 
         return array_filter($fields, function ($key) {
             return !in_array($key, $this->model->getHidden());
