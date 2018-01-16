@@ -20,10 +20,7 @@ class EntityType extends Type
 
     public function fields(): array
     {
-        $fields = array_merge(
-            $this->model->fields(),
-            $this->model->relations()
-        );
+        $fields = $this->model->relations();
 
         foreach ($this->model->relations() as $key => $type) {
             if ($type instanceof ListOfType) {
@@ -43,6 +40,25 @@ class EntityType extends Type
                         return $instance ? $instance->getKey() : null;
                     }
                 ];
+            }
+        }
+
+        foreach ($this->model->fields() as $key => $field) {
+            if (!is_array($field)) {
+                $fields[$key] = $field;
+            } else {
+                if (array_key_exists('readable', $field)) {
+                    $fields[$key] = [
+                        'type' => $field['type'],
+                        'resolve' => function ($source, $args, $viewer) use ($key, $field) {
+                            return $field['readable']($source, $args, $viewer)
+                                ? $source->getAttribute($key)
+                                : null;
+                        }
+                    ];
+                } else {
+                    $fields[$key] = $field;
+                }
             }
         }
 

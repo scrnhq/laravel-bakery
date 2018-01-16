@@ -47,6 +47,12 @@ class User extends Authenticatable
             'name' => Type::string(),
             'email' => Type::string(),
             'password' => Type::string(),
+            'secret_information' => [
+                'type' => Type::string(),
+                'readable' => function ($user, $args, $viewer) {
+                    return $user->is($viewer);
+                }
+            ]
         ];
     }
 
