@@ -80,7 +80,9 @@ class CollectionQuery extends EntityQuery
             throw new PaginationMaxCountExceededException($maxCount);
         }
 
-        $query = $this->scopeQuery($this->model->authorizedForReading($viewer), $args, $viewer);
+        $query = $this->model->where(function ($query) use ($viewer, $args) {
+            return $this->scopeQuery($query->authorizedForReading($viewer), $args, $viewer);
+        });
 
         if (array_key_exists('filter', $args)) {
             $query = $this->applyFilters($query, $args['filter']);
