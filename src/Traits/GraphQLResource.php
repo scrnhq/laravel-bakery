@@ -444,8 +444,9 @@ trait GraphQLResource
      */
     public function persistQueuedGraphQLDatabaseTransactions()
     {
-        foreach ($this->bakeryTransactionQueue as $closure) {
+        foreach ($this->bakeryTransactionQueue as $key => $closure) {
             $closure($this);
+            unset($this->bakeryTransactionQueue[$key]);
         }
     }
 }
