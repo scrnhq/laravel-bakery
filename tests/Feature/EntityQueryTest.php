@@ -127,4 +127,52 @@ class EntityQueryTest extends TestCase
         $response = $this->json('GET', '/graphql', ['query' => $query]);
         $this->assertEquals(json_decode($response->getContent())->data->post->id, '1');
     }
+
+    /** @test */
+    public function it_checks_if_the_viewer_is_not_allowed_to_read_a_field()
+    {
+        $user = Stubs\User::create([
+            'name' => 'John Doe',
+            'email' => 'john.doe@example.com',
+            'password' => 'secret',
+            'secret_information' => 'topsecret',
+        ]);
+        
+        $query = '
+            query {
+                user(email: "john.doe@example.com") {
+                    id
+                    secret_information
+                }
+            }
+        ';
+
+        $response = $this->json('GET', '/graphql', ['query' => $query]);
+        $response->assertJsonFragment(['secret_information' => null]);
+    }
+
+    /** @test */
+    public function it_checks_if_the_viewer_is_allowed_to_read_a_field()
+    {
+        $user = Stubs\User::create([
+            'name' => 'John Doe',
+            'email' => 'john.doe@example.com',
+            'password' => 'secret',
+            'secret_information' => 'topsecret',
+        ]);
+
+        \Auth::login($user);
+        
+        $query = '
+            query {
+                user(email: "john.doe@example.com") {
+                    id
+                    secret_information
+                }
+            }
+        ';
+
+        $response = $this->json('GET', '/graphql', ['query' => $query]);
+        $response->assertJsonFragment(['secret_information' => 'topsecret']);
+    }
 }

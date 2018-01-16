@@ -36,6 +36,7 @@ trait WithDatabase
             $table->string('email');
             $table->string('name');
             $table->string('password');
+            $table->string('secret_information')->nullable();
             $table->timestamps();
         });
 
