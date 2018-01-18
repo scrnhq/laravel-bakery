@@ -4,7 +4,9 @@ namespace Bakery\Types;
 
 use Bakery\Support\Facades\Bakery;
 use GraphQL\Type\Definition\ListOfType;
-use GraphQL\Type\Definition\NonNullType;
+use GraphQL\Type\Definition\NonNull;
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Contracts\Auth\Access\Gate;
 
 class EntityType extends Type
 {
@@ -34,11 +36,11 @@ class EntityType extends Type
                 ];
             } else {
                 $fields[$key . 'Id'] = [
-                    'type' => $type instanceof NonNullType ? Bakery::nonNull(Bakery::ID()) : Bakery::ID(),
+                    'type' => $type instanceof NonNull ? Bakery::nonNull(Bakery::ID()) : Bakery::ID(),
                     'resolve' => function ($model) use ($key) {
                         $instance = $model->{$key};
                         return $instance ? $instance->getKey() : null;
-                    }
+                    },
                 ];
             }
         }
@@ -51,10 +53,21 @@ class EntityType extends Type
                     $fields[$key] = [
                         'type' => $field['type'],
                         'resolve' => function ($source, $args, $viewer) use ($key, $field) {
-                            return $field['readable']($source, $args, $viewer)
-                                ? $source->getAttribute($key)
-                                : null;
-                        }
+                            if (!$field['readable']($source, $args, $viewer)) {
+                                throw new AuthorizationException('Cannot read property ' . $key . ' of ' . $this->name);
+                            }
+                            return $source->getAttribute($key);
+                        },
+                    ];
+                } elseif (array_key_exists('policy', $field)) {
+                    $fields[$key] = [
+                        'type' => $field['type'],
+                        'resolve' => function ($source, $args, $viewer) use ($key, $field) {
+                            if (!app(Gate::class)->forUser($viewer)->check($field['policy'], $source)) {
+                                throw new AuthorizationException('Cannot read property ' . $key . ' of ' . $this->name);
+                            }
+                            return $source->getAttribute($key);
+                        },
                     ];
                 } else {
                     $fields[$key] = $field;

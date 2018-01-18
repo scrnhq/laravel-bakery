@@ -18,7 +18,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $attributes = [
-        'password' => 'secret'
+        'password' => 'secret',
     ];
 
     /**
@@ -46,7 +46,10 @@ class User extends Authenticatable
             'id' => Type::ID(),
             'name' => Type::string(),
             'email' => Type::string(),
-            'password' => Type::string(),
+            'password' => [
+                'type' => Type::string(),
+                'policy' => 'readPassword',
+            ],
             'secret_information' => [
                 'type' => Type::string(),
                 'readable' => function ($user, $args, $viewer) {

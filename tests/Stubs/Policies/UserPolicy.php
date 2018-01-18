@@ -3,6 +3,7 @@
 namespace Bakery\Tests\Stubs\Policies;
 
 use Bakery\Tests\Stubs\User;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class UserPolicy
 {
@@ -57,5 +58,10 @@ class UserPolicy
     public function createPosts(User $user): bool
     {
         return true;
+    }
+
+    public function readPassword(Authenticatable $viewer, User $user): bool
+    {
+        return $user->is($viewer);
     }
 }
