@@ -53,7 +53,7 @@ class User extends Authenticatable
             'secret_information' => [
                 'type' => Type::string(),
                 'readable' => function ($user, $args, $viewer) {
-                    return $user->is($viewer);
+                    return $viewer && $user->is($viewer);
                 }
             ]
         ];

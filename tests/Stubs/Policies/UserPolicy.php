@@ -62,6 +62,6 @@ class UserPolicy
 
     public function readPassword(Authenticatable $viewer, User $user): bool
     {
-        return $user->is($viewer);
+        return $viewer && $user->is($viewer);
     }
 }
