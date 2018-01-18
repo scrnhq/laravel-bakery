@@ -31,7 +31,7 @@ class EntityType extends Type
                 $fields[$singularKey . 'Ids'] = [
                     'type' => Bakery::listOf(Bakery::ID()),
                     'resolve' => function ($model) use ($key) {
-                        return $model->{$key}->pluck('id')->toArray();
+                        return $model->{$key}->pluck($model->getKeyName())->toArray();
                     },
                 ];
             } else {
