@@ -48,6 +48,11 @@ class SingleEntityQuery extends EntityQuery
         );
 
         foreach ($this->model->relations() as $relation => $type) {
+            if (is_array($type)) {
+                $type = Type::getNamedType($type['type']);
+            } else {
+                $type = Type::getNamedType($type);
+            }
             if ($type instanceof ListofType) {
                 continue;
             }

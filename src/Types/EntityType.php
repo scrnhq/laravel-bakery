@@ -22,9 +22,13 @@ class EntityType extends Type
 
     public function fields(): array
     {
-        $fields = $this->model->relations();
+        $fields = $this->model->fields();
 
-        foreach ($this->model->relations() as $key => $type) {
+        $relations = array_filter($this->model->relations(), function ($key) {
+            return !in_array($key, $this->model->getHidden());
+        }, ARRAY_FILTER_USE_KEY);
+
+        foreach ($relations as $key => $type) {
             if ($type instanceof ListOfType) {
                 $singularKey = str_singular($key);
                 $fields[$singularKey . 'Ids'] = [
@@ -43,40 +47,46 @@ class EntityType extends Type
                     },
                 ];
             }
+            $fields[$key] = $type;
         }
 
-        foreach ($this->model->fields() as $key => $field) {
-            if (!is_array($field)) {
-                $fields[$key] = $field;
-            } else {
+        $fields = collect($fields)->filter(function ($field, $key) {
+            return !in_array($key, $this->model->getHidden());
+        });
+
+        return $fields->map(function ($field, $key) {
+            if (is_array($field)) {
                 if (array_key_exists('readable', $field)) {
-                    $fields[$key] = [
+                    return [
                         'type' => $field['type'],
                         'resolve' => function ($source, $args, $viewer) use ($key, $field) {
                             if (!$field['readable']($source, $args, $viewer)) {
                                 throw new AuthorizationException('Cannot read property ' . $key . ' of ' . $this->name);
                             }
-                            return $source->getAttribute($key);
+                            if (array_key_exists('resolve', $field)) {
+                                return $field['resolve']($source, $args, $viewer);
+                            } else {
+                                return $source->getAttribute($key);
+                            }
                         },
                     ];
                 } elseif (array_key_exists('policy', $field)) {
-                    $fields[$key] = [
+                    return [
                         'type' => $field['type'],
                         'resolve' => function ($source, $args, $viewer) use ($key, $field) {
                             if (!app(Gate::class)->forUser($viewer)->check($field['policy'], $source)) {
                                 throw new AuthorizationException('Cannot read property ' . $key . ' of ' . $this->name);
                             }
-                            return $source->getAttribute($key);
+                            if (array_key_exists('resolve', $field)) {
+                                return $field['resolve']($source, $args, $viewer);
+                            } else {
+                                return $source->getAttribute($key);
+                            }
                         },
                     ];
-                } else {
-                    $fields[$key] = $field;
                 }
             }
-        }
-
-        return array_filter($fields, function ($key) {
-            return !in_array($key, $this->model->getHidden());
-        }, ARRAY_FILTER_USE_KEY);
+            return $field;
+        })->toArray();
     }
 }

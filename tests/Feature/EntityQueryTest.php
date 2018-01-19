@@ -179,6 +179,62 @@ class EntityQueryTest extends TestCase
         $response->assertJsonFragment(['secret_information' => 'topsecret']);
     }
 
+
+    /** @test */
+    public function it_checks_if_the_viewer_is_not_allowed_to_read_a_relation()
+    {
+        $this->expectException(AuthorizationException::class);
+
+        $user = Stubs\User::create([
+            'name' => 'John Doe',
+            'email' => 'john.doe@example.com',
+            'password' => 'secret',
+            'secret_information' => 'topsecret',
+        ]);
+
+        $query = '
+            query {
+                user(email: "john.doe@example.com") {
+                    id
+                    phone {
+                        id
+                    }
+                }
+            }
+        ';
+
+        $response = $this->json('GET', '/graphql', ['query' => $query]);
+        $response->assertJsonFragment(['secret_information' => 'topsecret']);
+    }
+
+
+    /** @test */
+    public function it_checks_if_the_viewer_is_allowed_to_read_a_relation()
+    {
+        $user = Stubs\User::create([
+            'name' => 'John Doe',
+            'email' => 'john.doe@example.com',
+            'password' => 'secret',
+            'secret_information' => 'topsecret',
+        ]);
+
+        \Auth::login($user);
+
+        $query = '
+            query {
+                user(email: "john.doe@example.com") {
+                    id
+                    phone {
+                        id
+                    }
+                }
+            }
+        ';
+
+        $response = $this->json('GET', '/graphql', ['query' => $query]);
+        $response->assertJsonFragment(['phone' => null]);
+    }
+
     /** @test */
     public function it_checks_if_the_viewer_is_not_allowed_to_read_a_field_by_policy()
     {

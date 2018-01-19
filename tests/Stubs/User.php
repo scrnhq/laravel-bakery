@@ -54,8 +54,8 @@ class User extends Authenticatable
                 'type' => Type::string(),
                 'readable' => function ($user, $args, $viewer) {
                     return $viewer && $user->is($viewer);
-                }
-            ]
+                },
+            ],
         ];
     }
 
@@ -81,7 +81,12 @@ class User extends Authenticatable
         return [
             'posts' => Bakery::listOf(Bakery::getType('Post')),
             'roles' => Bakery::listOf(Bakery::getType('Role')),
-            'phone' => Bakery::getType('Phone'),
+            'phone' => [
+                'type' => Bakery::getType('Phone'),
+                'readable' => function ($user, $args, $viewer) {
+                    return $viewer && $user->is($viewer);
+                },
+            ],
         ];
     }
 
