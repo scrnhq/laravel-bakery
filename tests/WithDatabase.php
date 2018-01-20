@@ -45,6 +45,7 @@ trait WithDatabase
             $table->string('slug')->nullable();
             $table->string('title')->nullable();
             $table->string('body')->nullable();
+            $table->string('lower_case')->nullable();
             $table->integer('comments')->nullable();
             $table->timestamps();
         });

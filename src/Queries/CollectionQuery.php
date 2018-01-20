@@ -263,12 +263,11 @@ class CollectionQuery extends EntityQuery
      */
     protected function applyOrderBy(Builder $query, $orderBy)
     {
-        $column = str_before($orderBy, '_');
-        $ordering = str_after($orderBy, '_');
+        $orderBy = str_replace_last('_', '@seperator', $orderBy);
+        $column = str_before($orderBy, '@seperator');
+        $ordering = str_after($orderBy, '@seperator');
 
-        $query->orderBy($column, $ordering);
-
-        return $query;
+        return $query->orderBy($column, $ordering);
     }
 
     /**

@@ -17,6 +17,7 @@ class Model extends BaseModel
      */
     protected $fillable = [
         'title',
+        'lower_case',
     ];
 
     /**
@@ -32,6 +33,7 @@ class Model extends BaseModel
             'field' => Bakery::string(),
             'title' => Bakery::string(),
             'body' => Bakery::string(),
+            'lower_case' => Bakery::string(),
         ];
     }
 

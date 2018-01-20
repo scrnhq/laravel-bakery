@@ -258,6 +258,31 @@ class CollectionQueryTest extends TestCase
     }
 
     /** @test */
+    public function it_can_order_by_field_with_lower_case()
+    {
+        $first = Stubs\Model::create(['lower_case' => 'Hello mars']);
+        $second = Stubs\Model::create(['lower_case' => 'Hello world']);
+        $third = Stubs\Model::create(['lower_case' => 'Goodbye world']);
+
+        $query = '
+            query {
+                models(orderBy: lower_case_DESC) {
+                    items {
+                        id
+                    }
+                }
+            }
+        ';
+
+        $response = $this->json('GET', '/graphql', ['query' => $query]);
+        $response->assertStatus(200);
+        $result = json_decode($response->getContent())->data->models;
+        $this->assertEquals($result->items[0]->id, $second->id);
+        $this->assertEquals($result->items[1]->id, $first->id);
+        $this->assertEquals($result->items[2]->id, $third->id);
+    }
+
+    /** @test */
     public function it_can_filter_by_nested_relations()
     {
         $firstUser = Stubs\User::create([
