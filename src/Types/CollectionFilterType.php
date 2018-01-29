@@ -79,7 +79,11 @@ class CollectionFilterType extends InputType
      */
     public function getFilters(string $name, $type): array
     {
-        $type = Type::getNamedType($type);
+        if (is_array($type)) {
+            $type = Type::getNamedType($type['type']);
+        } else {
+            $type = Type::getNamedType($type);
+        }
         $fields = [];
 
         if (!Type::isLeafType($type)) {
