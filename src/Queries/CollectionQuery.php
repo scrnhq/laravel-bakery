@@ -8,6 +8,8 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 use Bakery\Support\Facades\Bakery;
 use Bakery\Exceptions\PaginationMaxCountExceededException;
+use Illuminate\Database\Query\Grammars\PostgresGrammar;
+use Illuminate\Support\Facades\DB;
 
 class CollectionQuery extends EntityQuery
 {
@@ -208,24 +210,26 @@ class CollectionQuery extends EntityQuery
     {
         $type = $type ?: 'AND';
 
+        $likeOperator = $this->getCaseInsensitiveLikeOperator();
+
         if (ends_with($key, '_not_contains')) {
             $key = str_before($key, '_not_contains');
-            $query->where($key, 'NOT LIKE', '%' . $value . '%', $type);
+            $query->where($key, 'NOT ' . $likeOperator, '%' . $value . '%', $type);
         } elseif (ends_with($key, '_contains')) {
             $key = str_before($key, '_contains');
-            $query->where($key, 'LIKE', '%' . $value . '%', $type);
+            $query->where($key, $likeOperator, '%' . $value . '%', $type);
         } elseif (ends_with($key, '_not_starts_with')) {
             $key = str_before($key, '_not_starts_with');
-            $query->where($key, 'NOT LIKE', $value . '%', $type);
+            $query->where($key, 'NOT ' . $likeOperator, $value . '%', $type);
         } elseif (ends_with($key, '_starts_with')) {
             $key = str_before($key, '_starts_with');
-            $query->where($key, 'LIKE', $value . '%', $type);
+            $query->where($key, $likeOperator, $value . '%', $type);
         } elseif (ends_with($key, '_not_ends_with')) {
             $key = str_before($key, '_not_ends_with');
-            $query->where($key, 'NOT LIKE', '%' . $value, $type);
+            $query->where($key, 'NOT ' . $likeOperator, '%' . $value, $type);
         } elseif (ends_with($key, '_ends_with')) {
             $key = str_before($key, '_ends_with');
-            $query->where($key, 'LIKE', '%' . $value, $type);
+            $query->where($key, $likeOperator, '%' . $value, $type);
         } elseif (ends_with($key, '_not')) {
             $key = str_before($key, '_not');
             $query->where($key, '!=', $value, $type);
@@ -281,5 +285,17 @@ class CollectionQuery extends EntityQuery
         return collect($args)->flatMap(function ($values) {
             return $values;
         })->toArray();
+    }
+
+    /**
+     * Check if the current database grammar supports the insensitive like operator.
+     *
+     * @return string
+     */
+    protected function getCaseInsensitiveLikeOperator()
+    {
+        return DB::connection()->getQueryGrammar() instanceof PostgresGrammar
+            ? 'ILIKE'
+            : 'LIKE';
     }
 }
