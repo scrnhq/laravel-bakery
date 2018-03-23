@@ -3,6 +3,7 @@
 namespace Bakery\Queries;
 
 use GraphQL\Type\Definition\Type;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
@@ -159,7 +160,7 @@ class CollectionQuery extends EntityQuery
         foreach ($args as $key => $value) {
             if ($key === 'AND' || $key === 'OR') {
                 $query->where(function ($query) use ($value, $key) {
-                    foreach($value as $set) {
+                    foreach ($value as $set) {
                         $this->applyFiltersRecursively($query, $set, $key);
                     }
                 });
@@ -265,26 +266,55 @@ class CollectionQuery extends EntityQuery
      * @param string $orderBy
      * @return Builder
      */
-    protected function applyOrderBy(Builder $query, $orderBy)
+    protected function applyOrderBy(Builder $query, array $args)
     {
-        $orderBy = str_replace_last('_', '@seperator', $orderBy);
-        $column = str_before($orderBy, '@seperator');
-        $ordering = str_after($orderBy, '@seperator');
+        foreach ($args as $key => $value) {
+            if (in_array($key, array_keys($query->getModel()->relations()))) {
+                $this->applyRelationalOrderBy($query, $this->model, $key, $value);
+            } else {
+                $this->orderBy($query, $key, $value);
+            }
+        }
 
-        return $query->orderBy($column, $ordering);
+        return $query;
+    }
+
+
+    protected function applyRelationalOrderBy(Builder $query, Model $model, string $relation, $args)
+    {
+        $relation = $model->$relation();
+        $related = $relation->getRelated();
+        $table = $related->getTable();
+        $one = $table . '.' . $related->getKeyName();
+        $two = $relation->getForeignKey();
+    
+        $query->join($table, $one, '=', $two);
+
+        foreach ($args as $key => $value) {
+            if (in_array($key, array_keys($related->relations()))) {
+                $this->applyRelationalOrderBy($query, $related, $key, $value);
+            } else {
+                $this->orderBy($query, $key, $value);
+            }
+        }
+    }
+
+    protected function orderByRelation(Builder $query, string $table, string $column, string $ordering)
+    {
+        $query->orderBy($table . '.' . $column, $ordering);
     }
 
     /**
-     * Flat the nested filter args array.
+     * Apply the ordening.
      *
-     * @param  array $args
-     * @return array
+     * @param Builder $query
+     * @param string $column
+     * @param string $ordering
+     * @return Builder
      */
-    protected function flatten(array $args)
+    protected function orderBy(Builder $query, string $column, string $ordering)
     {
-        return collect($args)->flatMap(function ($values) {
-            return $values;
-        })->toArray();
+        return $query->orderBy($column, $ordering);
     }
 
     /**

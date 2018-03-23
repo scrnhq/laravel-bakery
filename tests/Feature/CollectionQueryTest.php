@@ -241,7 +241,7 @@ class CollectionQueryTest extends TestCase
 
         $query = '
             query {
-                models(orderBy: title_ASC) {
+                models(orderBy: { title: ASC }) {
                     items {
                         id
                     }
@@ -258,15 +258,18 @@ class CollectionQueryTest extends TestCase
     }
 
     /** @test */
-    public function it_can_order_by_field_with_lower_case()
+    public function it_can_order_by_combination_of_nested_relations()
     {
-        $first = Stubs\Model::create(['lower_case' => 'Hello mars']);
-        $second = Stubs\Model::create(['lower_case' => 'Hello world']);
-        $third = Stubs\Model::create(['lower_case' => 'Goodbye world']);
+        $john = Stubs\User::create(['email' => 'john.doe@example.com', 'name' => 'John Doe']);
+        $jane = Stubs\User::create(['email' => 'jane.doe@example.com', 'name' => 'Jane Doe']);
+        $joe = Stubs\User::create(['email' => 'joe.doe@example.com', 'name' => 'Joe Doe']);
+        $postByJohn = Stubs\Post::create(['title' => 'Another post', 'user_id' => $john->id]);
+        $postByJane = Stubs\Post::create(['title' => 'Hello world', 'user_id' => $jane->id]);
+        $postByJoe = Stubs\Post::create(['title' => 'Hello world', 'user_id' => $joe->id]);
 
         $query = '
             query {
-                models(orderBy: lower_case_DESC) {
+                posts(orderBy: { title: ASC, user: { email: ASC } }) {
                     items {
                         id
                     }
@@ -276,10 +279,10 @@ class CollectionQueryTest extends TestCase
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
         $response->assertStatus(200);
-        $result = json_decode($response->getContent())->data->models;
-        $this->assertEquals($result->items[0]->id, $second->id);
-        $this->assertEquals($result->items[1]->id, $first->id);
-        $this->assertEquals($result->items[2]->id, $third->id);
+        $result = json_decode($response->getContent())->data->posts;
+        $this->assertEquals($result->items[0]->id, $postByJohn->id);
+        $this->assertEquals($result->items[1]->id, $postByJane->id);
+        $this->assertEquals($result->items[2]->id, $postByJoe->id);
     }
 
     /** @test */

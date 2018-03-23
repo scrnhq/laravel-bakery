@@ -63,6 +63,7 @@ class Schema
     {
         return [
             Types\PaginationType::class,
+            Types\OrderType::class,
         ];
     }
 

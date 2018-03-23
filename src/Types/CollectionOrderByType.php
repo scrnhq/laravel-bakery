@@ -2,9 +2,11 @@
 
 namespace Bakery\Types;
 
+use GraphQL\Type\Definition\Type;
+use Bakery\Support\Facades\Bakery;
 use Illuminate\Database\Eloquent\Model;
 
-class CollectionOrderByType extends EnumType
+class CollectionOrderByType extends InputType
 {
     /**
      * The name of the type.
@@ -21,6 +23,13 @@ class CollectionOrderByType extends EnumType
     protected $model;
 
     /**
+     * Define the collection order type as an input type.
+     *
+     * @var boolean
+     */
+    protected $input = true;
+
+    /**
      * Construct a new collection orderby type.
      *
      * @param string $class
@@ -32,19 +41,28 @@ class CollectionOrderByType extends EnumType
     }
 
     /**
-     * Return the fields for the collection filter type.
+     * Return the fields for the collection order by type.
      *
      * @return array
      */
-    public function values(): array
+    public function fields(): array
     {
-        $values = [];
+        $fields = [];
 
         foreach ($this->model->fields() as $name => $type) {
-            $values[] = $name . '_ASC';
-            $values[] = $name . '_DESC';
+            $fields[$name] = Bakery::getType('Order');
         }
 
-        return $values;
+        foreach ($this->model->relations() as $relation => $type) {
+            if (is_array($type)) {
+                $type = Type::getNamedType($type['type']);
+            } else {
+                $type = Type::getNamedType($type);
+            }
+            $type = Type::getNamedType($type);
+            $fields[$relation] = Bakery::getType($type->name . 'OrderBy');
+        }
+
+        return $fields;
     }
 }

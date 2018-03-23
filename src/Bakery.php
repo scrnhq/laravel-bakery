@@ -94,6 +94,7 @@ class Bakery
     {
         return [
             new Types\PaginationType(),
+            new Types\OrderType(),
         ];
     }
 

@@ -242,7 +242,7 @@ class CollectionQueryTest extends TestCase
         $third = Model::create(['title' => 'Goodbye world']);
 
         $query = new CollectionQuery(Model::class);
-        $result = $query->resolve(null, ['orderBy' => 'title_ASC'], null);
+        $result = $query->resolve(null, ['orderBy' => ['title' => 'ASC']], null);
 
         $this->assertTrue($result->items()[0]->is($third));
         $this->assertTrue($result->items()[1]->is($first));
@@ -257,7 +257,7 @@ class CollectionQueryTest extends TestCase
         $third = Model::create(['title' => 'Goodbye world']);
 
         $query = new CollectionQuery(Model::class);
-        $result = $query->resolve(null, ['orderBy' => 'title_DESC'], null);
+        $result = $query->resolve(null, ['orderBy' => ['title' => 'DESC']], null);
 
         $this->assertTrue($result->items()[0]->is($second));
         $this->assertTrue($result->items()[1]->is($first));
