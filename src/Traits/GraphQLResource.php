@@ -18,7 +18,19 @@ trait GraphQLResource
      *
      * @var array
      */
-    protected $bakeryTransactionQueue = [];
+    private $bakeryTransactionQueue = [];
+
+    /**
+     * The relationships that are supported by Bakery.
+     *
+     * @var array
+     */
+    private $bakeryRelationships = [
+        Relations\HasOne::class,
+        Relations\HasMany::class,
+        Relations\BelongsTo::class,
+        Relations\BelongsToMany::class,
+    ];
 
     protected function fireCustomModelEvent($event, $method)
     {
@@ -217,7 +229,7 @@ trait GraphQLResource
     {
         foreach ($connections as $key => $attributes) {
             $relation = $this->resolveRelationOfConnection($key);
-            $relationType = class_basename($relation);
+            $relationType = $this->getRelationTypeName($relation);
             $method = "connect{$relationType}Relation";
             $policyMethod = 'set' . studly_case($this->getRelationOfConnection($key));
 
@@ -328,7 +340,6 @@ trait GraphQLResource
      * Connect the belongs to many relation.
      *
      * @param Relations\BelongsToMany $relation
-     * @param array $ids
      * @return void
      */
     protected function connectBelongsToManyRelation(Relations\BelongsToMany $relation, array $ids)
@@ -421,8 +432,7 @@ trait GraphQLResource
      */
     protected function isPluralRelation(Relations\Relation $relation)
     {
-        $class = get_class($relation);
-        return $class === Relations\HasMany::class || $class === Relations\BelongsToMany::class;
+        return $relation instanceof Relations\HasMany || $relation instanceof Relations\BelongsToMany;
     }
 
     /**
@@ -433,8 +443,31 @@ trait GraphQLResource
      */
     protected function isSingularRelation(Relations\Relation $relation)
     {
-        $class = get_class($relation);
-        return $class === Relations\BelongsTo::class || $class === Relations\HasOne::class;
+        return $relation instanceof Relations\BelongsTo || $relation instanceof Relations\HasOne;
+    }
+
+    /**
+     * Get the basename of the relation.
+     *
+     * If the relation is extended from the actual
+     * Illuminate relationship we try to resolve the parent here.
+     *
+     * @param Relations\Relation $relation
+     * @return string
+     */
+    protected function getRelationTypeName(Relations\Relation $relation): string
+    {
+        if (in_array(get_class($relation), $this->bakeryRelationships)) {
+            return class_basename($relation);
+        } else {
+            foreach (class_parents($relation) as $parent) {
+                if (in_array($parent, $this->bakeryRelationships)) {
+                    return class_basename($parent);
+                }
+            }
+
+            throw new RuntimeException('Could not found a relationship name for relation ' . $relation);
+        }
     }
 
     /**
