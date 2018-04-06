@@ -205,7 +205,7 @@ trait GraphQLResource
     {
         foreach ($relations as $key => $attributes) {
             $relation = $this->resolveRelation($key);
-            $relationType = class_basename($relation);
+            $relationType = $this->getRelationTypeName($relation);
             $method = "fill{$relationType}Relation";
             $policyMethod = 'create' . studly_case($key);
 
