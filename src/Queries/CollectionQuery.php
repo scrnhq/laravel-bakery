@@ -54,6 +54,7 @@ class CollectionQuery extends EntityQuery
             'page' => Bakery::int(),
             'count' => Bakery::int(),
             'filter' => Bakery::type($this->typeName() . 'Filter'),
+            'search' => Bakery::type($this->typeName() . 'Search'),
         ];
 
         if (!empty($this->model->fields())) {

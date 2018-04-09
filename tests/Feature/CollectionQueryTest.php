@@ -2,12 +2,10 @@
 
 namespace Bakery\Tests\Feature;
 
-use Schema;
-use Eloquent;
 use Bakery\Tests\Stubs;
 use Bakery\Tests\TestCase;
-use Bakery\Tests\WithDatabase;
-use Bakery\Http\Controller\BakeryController;
+use Eloquent;
+use Schema;
 
 class CollectionQueryTest extends TestCase
 {
@@ -68,9 +66,9 @@ class CollectionQueryTest extends TestCase
                         'previous_page',
                         'last_page',
                         'next_page',
-                    ]
-                ]
-            ]
+                    ],
+                ],
+            ],
         ]);
     }
 
@@ -78,7 +76,7 @@ class CollectionQueryTest extends TestCase
     public function it_can_fetch_the_next_page()
     {
         Stubs\Model::create();
-        
+
         $query = '
             query {
                 models(page: 2) {
@@ -215,7 +213,7 @@ class CollectionQueryTest extends TestCase
             query {
                 posts(filter: {
                     AND: [
-                        { user: { id: "' . $userOne->id  . '" } }, 
+                        { user: { id: "' . $userOne->id . '" } }, 
                         { OR: [{title_contains: "hello"}, {body: "Lorem Ipsum"}] },
                     ]
                 }) {
@@ -292,7 +290,7 @@ class CollectionQueryTest extends TestCase
         ]);
 
         $firstUser->phone()->create([
-            'number' => '+31612345678'
+            'number' => '+31612345678',
         ]);
 
         $secondUser = Stubs\User::create([
@@ -337,7 +335,7 @@ class CollectionQueryTest extends TestCase
         ]);
 
         $firstUser->phone()->create([
-            'number' => '+31612345678'
+            'number' => '+31612345678',
         ]);
 
         $secondUser = Stubs\User::create([
@@ -347,7 +345,7 @@ class CollectionQueryTest extends TestCase
         ]);
 
         $secondUser->posts()->create([
-            'title' => 'Hello world!'
+            'title' => 'Hello world!',
         ]);
 
         $thirdUser = Stubs\User::create([
@@ -357,7 +355,7 @@ class CollectionQueryTest extends TestCase
         ]);
 
         $thirdUser->phone()->create([
-            'number' => '+3161212121'
+            'number' => '+3161212121',
         ]);
 
         $query = '
@@ -369,6 +367,26 @@ class CollectionQueryTest extends TestCase
                         id
                     }
                 }
+            }
+        ';
+
+        $response = $this->json('GET', '/graphql', ['query' => $query]);
+        $result = json_decode($response->getContent())->data->users;
+        $this->assertCount(2, $result->items);
+    }
+
+    /** @test */
+    public function it_can_do_text_search()
+    {
+        $first = Stubs\User::create(['name' => 'John Doe']);
+        $second = Stubs\User::create(['name' => 'Jane Boo']);
+
+        $query = '
+            query {
+                users(search: {
+                    query: "John Doe"
+                    fields: ["body"]
+                })
             }
         ';
 
