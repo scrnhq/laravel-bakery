@@ -2,17 +2,27 @@
 
 namespace Bakery\Queries;
 
-use GraphQL\Type\Definition\Type;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-
-use Bakery\Support\Facades\Bakery;
 use Bakery\Exceptions\PaginationMaxCountExceededException;
-use Illuminate\Database\Query\Grammars\PostgresGrammar;
+use Bakery\Support\Facades\Bakery;
+use GraphQL\Type\Definition\Type;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations;
+use Illuminate\Database\Query\Grammars;
 use Illuminate\Support\Facades\DB;
 
 class CollectionQuery extends EntityQuery
 {
+    /**
+     * The fields to be fulltext searched on.
+     *
+     * @var array
+     */
+    protected $tsFields;
+
+    protected $searchType;
+
     /**
      * Get the name of the CollectionQuery.
      *
@@ -54,7 +64,7 @@ class CollectionQuery extends EntityQuery
             'page' => Bakery::int(),
             'count' => Bakery::int(),
             'filter' => Bakery::type($this->typeName() . 'Filter'),
-            'search' => Bakery::type($this->typeName() . 'Search'),
+            'search' => Bakery::type($this->typeName() . 'RootSearch'),
         ];
 
         if (!empty($this->model->fields())) {
@@ -89,6 +99,10 @@ class CollectionQuery extends EntityQuery
 
         if (array_key_exists('filter', $args)) {
             $query = $this->applyFilters($query, $args['filter']);
+        }
+
+        if (array_key_exists('search', $args)) {
+            $query = $this->applySearch($query, $args['search']);
         }
 
         if (array_key_exists('orderBy', $args)) {
@@ -160,7 +174,7 @@ class CollectionQuery extends EntityQuery
         foreach ($args as $key => $value) {
             if ($key === 'AND' || $key === 'OR') {
                 $query->where(function ($query) use ($value, $key) {
-                    foreach($value as $set) {
+                    foreach ($value as $set) {
                         $this->applyFiltersRecursively($query, $set, $key);
                     }
                 });
@@ -260,6 +274,63 @@ class CollectionQuery extends EntityQuery
     }
 
     /**
+     * @param Builder $query
+     * @param array $search
+     * @return Builder
+     */
+    protected function applySearch(Builder $query, array $search)
+    {
+        $needle = $search['query'];
+        $fields = $search['fields'];
+
+        foreach ($fields as $key => $value) {
+            if (array_key_exists($key, $this->model->relations())) {
+                $this->applyRelationalSearch($query, $this->model, $key, $needle, $value);
+            } else {
+                $this->tsFields[] = $this->model->getTable() . '.' . $key;
+            }
+        }
+
+        $grammar = DB::connection()->getQueryGrammar();
+        if ($grammar instanceof Grammars\PostgresGrammar) {
+            $dictionary = config('bakery.postgresDictionary');
+            $fields = implode(', ', $this->tsFields);
+            $query->select($query->getModel()->getTable() . '.*');
+            $query->whereRaw("to_tsvector('${dictionary}', concat_ws(' ', " . $fields . ")) @@ to_tsquery('${dictionary}', ?)",
+                [implode(':* & ', explode(' ', $search['query'])) . ':*']);
+        }
+        return $query;
+    }
+
+    /**
+     * @param Builder $query
+     * @param Model $model
+     * @param string $relation
+     * @param string $needle
+     * @param array $fields
+     */
+    protected function applyRelationalSearch(Builder $query, Model $model, string $relation, string $needle, array $fields)
+    {
+        $rel = $model->$relation();
+        $parent = $rel->getParent();
+        $related = $rel->getRelated();
+
+        if ($rel instanceof Relations\HasMany) {
+            $query->join($related->getTable(), $parent->getTable() . '.' . $related->getKeyName(), '=', $related->getTable() . '.' . $parent->getForeignKey());
+        } else {
+            $query->join($related->getTable(), $model->getTable() . '.' . $related->getForeignKey(), '=', $related->getTable() . '.' . $related->getKeyName());
+        }
+
+        foreach ($fields as $key => $value) {
+            if (array_key_exists($key, $related->relations())) {
+                $this->applyRelationalSearch($query, $related, $key, $needle, $value);
+            } else {
+                $this->tsFields[] = $related->getTable() . '.' . $key;
+            }
+        }
+    }
+
+    /**
      * Apply ordering on the query.
      *
      * @param Builder $query
@@ -295,7 +366,7 @@ class CollectionQuery extends EntityQuery
      */
     protected function getCaseInsensitiveLikeOperator()
     {
-        return DB::connection()->getQueryGrammar() instanceof PostgresGrammar
+        return DB::connection()->getQueryGrammar() instanceof Grammars\PostgresGrammar
             ? 'ILIKE'
             : 'LIKE';
     }

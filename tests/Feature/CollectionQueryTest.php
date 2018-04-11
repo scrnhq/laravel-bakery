@@ -374,24 +374,4 @@ class CollectionQueryTest extends TestCase
         $result = json_decode($response->getContent())->data->users;
         $this->assertCount(2, $result->items);
     }
-
-    /** @test */
-    public function it_can_do_text_search()
-    {
-        $first = Stubs\User::create(['name' => 'John Doe']);
-        $second = Stubs\User::create(['name' => 'Jane Boo']);
-
-        $query = '
-            query {
-                users(search: {
-                    query: "John Doe"
-                    fields: ["body"]
-                })
-            }
-        ';
-
-        $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $result = json_decode($response->getContent())->data->users;
-        $this->assertCount(2, $result->items);
-    }
 }

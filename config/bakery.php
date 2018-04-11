@@ -53,5 +53,5 @@ return [
         'maxCount' => 1000,
     ],
 
-    'textsearch_dictionary' => 'simple',
+    'postgresDictionary' => 'simple',
 ];

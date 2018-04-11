@@ -2,12 +2,20 @@
 
 namespace Bakery\Types;
 
-use Bakery\Support\Facades\Bakery;
+use GraphQL\Type\Definition\StringType;
 use GraphQL\Type\Definition\Type;
+use Bakery\Support\Facades\Bakery;
 use Illuminate\Database\Eloquent\Model;
 
 class CollectionSearchType extends InputType
 {
+    /**
+     * The name of the type.
+     *
+     * @var string
+     */
+    protected $name;
+
     /**
      * A reference to the model.
      *
@@ -22,7 +30,7 @@ class CollectionSearchType extends InputType
      */
     public function __construct(string $class)
     {
-        $this->name = class_basename($class) . 'Filter';
+        $this->name = class_basename($class) . 'Search';
         $this->model = app($class);
     }
 
@@ -33,10 +41,27 @@ class CollectionSearchType extends InputType
      */
     public function fields(): array
     {
-        $fields = [
-            'query' => Bakery::nonNull(Bakery::string()),
-            'fields' => Bakery::listOf(Bakery::string()),
-        ];
+        $fields = [];
+
+        foreach ($this->model->fields() as $name => $type) {
+            if (is_array($type)) {
+                $type = Type::getNamedType($type['type']);
+            } else {
+                $type = Type::getNamedType($type);
+            }
+            if ($type instanceof StringType) {
+                $fields[$name] = Bakery::boolean();
+            }
+        }
+
+        foreach ($this->model->relations() as $relation => $type) {
+            if (is_array($type)) {
+                $type = Type::getNamedType($type['type']);
+            } else {
+                $type = Type::getNamedType($type);
+            }
+            $fields[$relation] = Bakery::type($type->name . 'Search');
+        }
 
         return $fields;
     }

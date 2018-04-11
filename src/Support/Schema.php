@@ -49,6 +49,7 @@ class Schema
             $types[] = new Types\EntityCollectionType($model);
             $types[] = new Types\EntityLookupType($model);
             $types[] = new Types\CollectionFilterType($model);
+            $types[] = new Types\CollectionRootSearchType($model);
             $types[] = new Types\CollectionSearchType($model);
             $types[] = new Types\CollectionOrderByType($model);
 
