@@ -51,5 +51,7 @@ return [
         | on a paginated collection.
         */
         'maxCount' => 1000,
-    ]
+    ],
+
+    'postgresDictionary' => 'simple',
 ];
