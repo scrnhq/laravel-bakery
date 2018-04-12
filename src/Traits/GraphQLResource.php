@@ -40,7 +40,7 @@ trait GraphQLResource
             $result = parent::fireCustomModelEvent($event, $method);
         }
 
-        if (! is_null($result)) {
+        if (!is_null($result)) {
             return $result;
         }
     }
@@ -147,7 +147,7 @@ trait GraphQLResource
         $relations = $this->getFillableRelations($input);
         $connections = $this->getFillableConnections($input);
 
-        $this->fill($scalars);
+        $this->fillScalars($scalars);
         $this->fillRelations($relations);
         $this->fillConnections($connections);
         return $this;
@@ -193,6 +193,25 @@ trait GraphQLResource
         return collect($attributes)->filter(function ($value, $key) {
             return in_array($key, $this->connections());
         })->toArray();
+    }
+
+    /**
+     * Fill the scalars in the model.
+     *
+     * @param array $scalars
+     */
+    protected function fillScalars(array $scalars)
+    {
+        $gate = app(Gate::class);
+        $policy = $gate->getPolicyFor($this);
+
+        foreach ($scalars as $key => $value) {
+            $policyMethod = 'set' . studly_case($key);
+            if (method_exists($policy, $policyMethod)) {
+                $gate->authorize($policyMethod, [$this, $value]);
+            }
+        }
+        $this->fill($scalars);
     }
 
     /**
