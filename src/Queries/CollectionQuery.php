@@ -4,24 +4,24 @@ namespace Bakery\Queries;
 
 use Bakery\Exceptions\PaginationMaxCountExceededException;
 use Bakery\Support\Facades\Bakery;
+use Bakery\Traits\JoinsRelationships;
 use GraphQL\Type\Definition\Type;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations;
 use Illuminate\Database\Query\Grammars;
 use Illuminate\Support\Facades\DB;
 
 class CollectionQuery extends EntityQuery
 {
+    use JoinsRelationships;
+
     /**
      * The fields to be fulltext searched on.
      *
      * @var array
      */
     protected $tsFields;
-
-    protected $searchType;
 
     /**
      * Get the name of the CollectionQuery.
@@ -280,6 +280,8 @@ class CollectionQuery extends EntityQuery
      */
     protected function applySearch(Builder $query, array $search)
     {
+        $this->tsFields = [];
+
         $needle = $search['query'];
         $fields = $search['fields'];
 
@@ -295,7 +297,6 @@ class CollectionQuery extends EntityQuery
         if ($grammar instanceof Grammars\PostgresGrammar) {
             $dictionary = config('bakery.postgresDictionary');
             $fields = implode(', ', $this->tsFields);
-            $query->select($query->getModel()->getTable() . '.*');
             $query->whereRaw("to_tsvector('${dictionary}', concat_ws(' ', " . $fields . ")) @@ to_tsquery('${dictionary}', ?)",
                 [implode(':* & ', explode(' ', $search['query'])) . ':*']);
         }
@@ -305,21 +306,16 @@ class CollectionQuery extends EntityQuery
     /**
      * @param Builder $query
      * @param Model $model
-     * @param string $relation
+     * @param string $relationName
      * @param string $needle
      * @param array $fields
      */
-    protected function applyRelationalSearch(Builder $query, Model $model, string $relation, string $needle, array $fields)
+    protected function applyRelationalSearch(Builder $query, Model $model, string $relationName, string $needle, array $fields)
     {
-        $rel = $model->$relation();
-        $parent = $rel->getParent();
-        $related = $rel->getRelated();
+        $relation = $model->$relationName();
+        $related = $relation->getRelated();
 
-        if ($rel instanceof Relations\HasMany) {
-            $query->join($related->getTable(), $parent->getTable() . '.' . $related->getKeyName(), '=', $related->getTable() . '.' . $parent->getForeignKey());
-        } else {
-            $query->join($related->getTable(), $model->getTable() . '.' . $related->getForeignKey(), '=', $related->getTable() . '.' . $related->getKeyName());
-        }
+        $this->joinRelation($query, $relationName, 'left');
 
         foreach ($fields as $key => $value) {
             if (array_key_exists($key, $related->relations())) {
