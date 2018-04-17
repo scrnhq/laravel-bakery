@@ -229,49 +229,49 @@ class CollectionQuery extends EntityQuery
 
         $likeOperator = $this->getCaseInsensitiveLikeOperator();
 
-        $table = $query->getModel()->getTable();
+        $table = $query->getModel()->getTable() . '.';
 
         if (ends_with($key, '_not_contains')) {
             $key = str_before($key, '_not_contains');
             $query->where($key, 'NOT ' . $likeOperator, '%' . $value . '%', $type);
-        } elseif (ends_with($table . '.' . $key, '_contains')) {
+        } elseif (ends_with($table . $key, '_contains')) {
             $key = str_before($key, '_contains');
-            $query->where($table . '.' . $key, $likeOperator, '%' . $value . '%', $type);
+            $query->where($table . $key, $likeOperator, '%' . $value . '%', $type);
         } elseif (ends_with($key, '_not_starts_with')) {
             $key = str_before($key, '_not_starts_with');
-            $query->where($table . '.' . $key, 'NOT ' . $likeOperator, $value . '%', $type);
+            $query->where($table . $key, 'NOT ' . $likeOperator, $value . '%', $type);
         } elseif (ends_with($key, '_starts_with')) {
             $key = str_before($key, '_starts_with');
-            $query->where($table . '.' . $key, $likeOperator, $value . '%', $type);
+            $query->where($table . $key, $likeOperator, $value . '%', $type);
         } elseif (ends_with($key, '_not_ends_with')) {
             $key = str_before($key, '_not_ends_with');
-            $query->where($table . '.' . $key, 'NOT ' . $likeOperator, '%' . $value, $type);
+            $query->where($table . $key, 'NOT ' . $likeOperator, '%' . $value, $type);
         } elseif (ends_with($key, '_ends_with')) {
             $key = str_before($key, '_ends_with');
-            $query->where($table . '.' . $key, $likeOperator, '%' . $value, $type);
+            $query->where($table . $key, $likeOperator, '%' . $value, $type);
         } elseif (ends_with($key, '_not')) {
             $key = str_before($key, '_not');
-            $query->where($table . '.' . $key, '!=', $value, $type);
+            $query->where($table . $key, '!=', $value, $type);
         } elseif (ends_with($key, '_not_in')) {
             $key = str_before($key, '_not_in');
-            $query->whereNotIn($table . '.' . $key, $value, $type);
+            $query->whereNotIn($table . $key, $value, $type);
         } elseif (ends_with($key, '_in')) {
             $key = str_before($key, '_in');
-            $query->whereIn($table . '.' . $key, $value, $type);
+            $query->whereIn($table . $key, $value, $type);
         } elseif (ends_with($key, '_lt')) {
             $key = str_before($key, '_lt');
-            $query->where($table . '.' . $key, '<', $value, $type);
+            $query->where($table . $key, '<', $value, $type);
         } elseif (ends_with($key, '_lte')) {
             $key = str_before($key, '_lte');
-            $query->where($table . '.' . $key, '<=', $value, $type);
+            $query->where($table . $key, '<=', $value, $type);
         } elseif (ends_with($key, '_gt')) {
             $key = str_before($key, '_gt');
-            $query->where($table . '.' . $key, '>', $value, $type);
+            $query->where($table . $key, '>', $value, $type);
         } elseif (ends_with($key, '_gte')) {
             $key = str_before($key, '_gte');
-            $query->where($table . '.' . $key, '>=', $value, $type);
+            $query->where($table . $key, '>=', $value, $type);
         } else {
-            $query->where($table . '.' . $key, '=', $value, $type);
+            $query->where($table . $key, '=', $value, $type);
         }
 
         return $query;
