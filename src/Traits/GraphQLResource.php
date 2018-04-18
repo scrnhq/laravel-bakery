@@ -397,7 +397,11 @@ trait GraphQLResource
      */
     protected function resolveRelation(string $relation): Relations\Relation
     {
-        return $this->{$relation}();
+        $resolvedRelation = $this->{$relation}();
+        // After we resolved it we unset it because we don't actually
+        // want to use the results of the relation.
+        unset($this->{$relation});
+        return $resolvedRelation;
     }
 
     /**
