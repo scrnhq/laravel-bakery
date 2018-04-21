@@ -308,6 +308,7 @@ class CollectionQuery extends EntityQuery
             $dictionary = config('bakery.postgresDictionary');
             $fields = implode(', ', $this->tsFields);
             $query->whereRaw("to_tsvector('${dictionary}', concat_ws(' ', " . $fields . ")) @@ to_tsquery('${dictionary}', ?)", ["'$qualifiedNeedle':*"]);
+            $query->groupBy($this->model->getQualifiedKeyName());
         }
         return $query;
     }
