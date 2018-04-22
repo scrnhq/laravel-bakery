@@ -150,6 +150,7 @@ trait GraphQLResource
         $this->fillScalars($scalars);
         $this->fillRelations($relations);
         $this->fillConnections($connections);
+        $this->relations = [];
         return $this;
     }
 
