@@ -2,6 +2,7 @@
 
 namespace Bakery\Types;
 
+use Closure;
 use Bakery\Utils\Utils;
 use Bakery\Support\Facades\Bakery;
 use GraphQL\Type\Definition\NonNull;
@@ -21,25 +22,18 @@ class EntityType extends ModelAwareType
         return Utils::typename($this->model->getModel());
     }
 
-    private function createFieldResolver($field, $key)
+    /**
+     * Create the field resolver.
+     *
+     * @param array $field
+     * @param string $key
+     * @return Closure
+     */
+    protected function createFieldResolver(array $field, string $key): Closure
     {
         return function ($source, $args, $viewer) use ($key, $field) {
             if (array_key_exists('policy', $field)) {
-                $policy = $field['policy'];
-                if (is_callable($policy)) {
-                    // Check if the policy method is callable
-                    if (! $policy($source, $args, $viewer)) {
-                        throw new AuthorizationException(
-                            'Cannot read property '.$key.' of '.$this->name
-                        );
-                    }
-                } elseif (is_string($policy)) {
-                    // Check if there is a policy with this name
-                    $gate = app(Gate::class)->forUser($viewer);
-                    if (! $gate->check($policy, $source)) {
-                        throw new AuthorizationException('Cannot read property '.$key.' of '.$this->name);
-                    }
-                }
+                $this->checkPolicy($field, $source, $args, $viewer);
             }
 
             if (array_key_exists('resolve', $field)) {
@@ -48,6 +42,32 @@ class EntityType extends ModelAwareType
                 return $source->getAttribute($key);
             }
         };
+    }
+
+    /**
+     * Check the policy of a field.
+     *
+     * @param array $field
+     * @return void
+     */
+    protected function checkPolicy(array $field, $source, $args, $viewer)
+    {
+        $policy = $field['policy'];
+
+        if (is_callable($policy)) {
+            // Check if the policy method is callable
+            if (! $policy($source, $args, $viewer)) {
+                throw new AuthorizationException(
+                    'Cannot read property '.$key.' of '.$this->name
+                );
+            }
+        } elseif (is_string($policy)) {
+            // Check if there is a policy with this name
+            $gate = app(Gate::class)->forUser($viewer);
+            if (! $gate->check($policy, $source)) {
+                throw new AuthorizationException('Cannot read property '.$key.' of '.$this->name);
+            }
+        }
     }
 
     public function fields(): array
