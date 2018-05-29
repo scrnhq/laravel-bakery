@@ -61,17 +61,38 @@ class SingleEntityQuery extends EntityQuery
     public function resolve($root, array $args, $viewer)
     {
         $primaryKey = $this->model->getModel()->getKeyName();
-
-        $query = $this->scopeQuery(
-            $this->model->query($viewer),
-            $args,
-            $viewer
-        );
+        $query = $this->scopeQuery($this->model->query($viewer), $args, $viewer);
 
         if (array_key_exists($primaryKey, $args)) {
             return $query->find($args[$primaryKey]);
         }
 
+        $results = $this->queryByArgs($query, $args)->get();
+
+        if ($results->count() < 1) {
+            return null;
+        }
+
+        if ($results->count() > 1) {
+            throw (new TooManyResultsException)
+                ->setModel(
+                    $this->class,
+                    $results->pluck($this->model->getModel()->getKeyName())
+                );
+        }
+
+        return $results->first();
+    }
+
+    /**
+     * Query by the arguments supplied to the query.
+     *
+     * @param Builder $query
+     * @param array $args
+     * @return Builder
+     */
+    protected function queryByArgs(Builder $query, array $args): Builder
+    {
         foreach ($args as $key => $value) {
             if (is_array($value)) {
                 $query->whereHas($key, function ($subQuery) use ($value) {
@@ -84,21 +105,7 @@ class SingleEntityQuery extends EntityQuery
             }
         }
 
-        $results = $query->get();
-
-        if ($results->count() < 1) {
-            return;
-        }
-
-        if ($results->count() > 1) {
-            throw (new TooManyResultsException)
-                ->setModel(
-                    $this->class,
-                    $results->pluck($this->model->getModel()->getKeyName())
-                );
-        }
-
-        return $results->first();
+        return $query;
     }
 
     /**
