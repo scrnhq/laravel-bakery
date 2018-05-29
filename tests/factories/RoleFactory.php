@@ -12,7 +12,7 @@ use Bakery\Tests\Models\Role;
 | database. Just tell the factory how a default model should look.
 |
 */
-/** @var \Illuminate\Database\Eloquent\Factory $factory */
+/* @var \Illuminate\Database\Eloquent\Factory $factory */
 $factory->define(Role::class, function (Faker\Generator $faker) {
     return [
         'name' => $faker->word,

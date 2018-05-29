@@ -2,7 +2,6 @@
 
 namespace Bakery\Tests\Feature;
 
-use App;
 use Bakery\Tests\FeatureTestCase;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 

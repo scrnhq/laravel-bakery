@@ -3,13 +3,7 @@
 namespace Bakery\Tests\Feature;
 
 use Bakery\Tests\Models;
-use Bakery\Tests\Stubs;
-use Bakery\Tests\WithDatabase;
 use Bakery\Tests\FeatureTestCase;
-
-use Schema;
-use Eloquent;
-use Illuminate\Contracts\Auth\Access\Gate;
 
 class EntityQueryTest extends FeatureTestCase
 {
@@ -20,7 +14,7 @@ class EntityQueryTest extends FeatureTestCase
 
         $query = '
             query {
-                article(id: "' . $article->id . '") {
+                article(id: "'.$article->id.'") {
                     id
                 }
             }
@@ -39,7 +33,7 @@ class EntityQueryTest extends FeatureTestCase
 
         $query = '
             query {
-                article(slug: "' . $article->slug . '") {
+                article(slug: "'.$article->slug.'") {
                     id
                 }
             }
@@ -94,7 +88,7 @@ class EntityQueryTest extends FeatureTestCase
 
         $query = '
             query {
-                article(user: { email: "' . $user->email . '"}) {
+                article(user: { email: "'.$user->email.'"}) {
                     id
                 }
             }
@@ -115,7 +109,7 @@ class EntityQueryTest extends FeatureTestCase
 
         $query = '
             query {
-                user(id: "' . $user->id .'") {
+                user(id: "'.$user->id.'") {
                     id
                     secret_information
                 }
@@ -138,7 +132,7 @@ class EntityQueryTest extends FeatureTestCase
 
         $query = '
             query {
-                user(id: "' . $user->id .'") {
+                user(id: "'.$user->id.'") {
                     id
                     secret_information
                 }
@@ -148,7 +142,6 @@ class EntityQueryTest extends FeatureTestCase
         $response = $this->json('GET', '/graphql', ['query' => $query]);
         $response->assertJsonFragment(['secret_information' => $secret]);
     }
-
 
     /** @test */
     public function it_checks_if_the_viewer_is_not_allowed_to_read_a_relation()
@@ -161,7 +154,7 @@ class EntityQueryTest extends FeatureTestCase
 
         $query = '
             query {
-                user(id: "' . $user->id . '") {
+                user(id: "'.$user->id.'") {
                     id
                     articles {
                         id
@@ -175,7 +168,6 @@ class EntityQueryTest extends FeatureTestCase
         $response->assertJsonFragment(['user' => null]);
     }
 
-
     /** @test */
     public function it_checks_if_the_viewer_is_allowed_to_read_a_relation()
     {
@@ -188,7 +180,7 @@ class EntityQueryTest extends FeatureTestCase
 
         $query = '
             query {
-                user(id: "' . $user->id . '") {
+                user(id: "'.$user->id.'") {
                     id
                     articles {
                         id
@@ -211,7 +203,7 @@ class EntityQueryTest extends FeatureTestCase
 
         $query = '
             query {
-                user(id: "' . $user->id . '") {
+                user(id: "'.$user->id.'") {
                     id
                     password
                 }
@@ -231,7 +223,7 @@ class EntityQueryTest extends FeatureTestCase
 
         $query = '
             query {
-                user(id: "' . $user->id . '") {
+                user(id: "'.$user->id.'") {
                     id
                     password
                 }

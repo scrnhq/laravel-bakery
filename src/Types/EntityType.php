@@ -3,7 +3,6 @@
 namespace Bakery\Types;
 
 use Bakery\Utils\Utils;
-use Bakery\Types\ModelType;
 use Bakery\Support\Facades\Bakery;
 use GraphQL\Type\Definition\NonNull;
 use GraphQL\Type\Definition\ListOfType;
@@ -29,16 +28,16 @@ class EntityType extends ModelAwareType
                 $policy = $field['policy'];
                 if (is_callable($policy)) {
                     // Check if the policy method is callable
-                    if (!$policy($source, $args, $viewer)) {
+                    if (! $policy($source, $args, $viewer)) {
                         throw new AuthorizationException(
-                            'Cannot read property ' . $key . ' of ' . $this->name
+                            'Cannot read property '.$key.' of '.$this->name
                         );
                     }
                 } elseif (is_string($policy)) {
                     // Check if there is a policy with this name
                     $gate = app(Gate::class)->forUser($viewer);
-                    if (!$gate->check($policy, $source)) {
-                        throw new AuthorizationException('Cannot read property ' . $key . ' of ' . $this->name);
+                    if (! $gate->check($policy, $source)) {
+                        throw new AuthorizationException('Cannot read property '.$key.' of '.$this->name);
                     }
                 }
             }
@@ -59,18 +58,20 @@ class EntityType extends ModelAwareType
         foreach ($relations as $key => $type) {
             if ($type instanceof ListOfType) {
                 $singularKey = str_singular($key);
-                $fields[$singularKey . 'Ids'] = [
+                $fields[$singularKey.'Ids'] = [
                     'type' => Bakery::listOf(Bakery::ID()),
                     'resolve' => function ($model) use ($key) {
                         $keyName = $model->getModel()->{$key}()->getRelated()->getKeyName();
+
                         return $model->{$key}->pluck($keyName)->toArray();
                     },
                 ];
             } else {
-                $fields[$key . 'Id'] = [
+                $fields[$key.'Id'] = [
                     'type' => $type instanceof NonNull ? Bakery::nonNull(Bakery::ID()) : Bakery::ID(),
                     'resolve' => function ($model) use ($key) {
                         $instance = $model->{$key};
+
                         return $instance ? $instance->getKey() : null;
                     },
                 ];
@@ -81,6 +82,7 @@ class EntityType extends ModelAwareType
         return collect($fields)->map(function ($field, $key) {
             $field = Utils::toFieldArray($field);
             $field['resolve'] = $this->createFieldResolver($field, $key);
+
             return $field;
         })->toArray();
     }

@@ -15,7 +15,7 @@ class EntityCollectionType extends ModelAwareType
      */
     protected function name(): string
     {
-        return Utils::typename($this->model->getModel()) . 'Collection';
+        return Utils::typename($this->model->getModel()).'Collection';
     }
 
     /**

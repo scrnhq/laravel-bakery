@@ -34,7 +34,7 @@ class PaginationType extends Type
             'previous_page' => [
                 'type' => Bakery::int(),
                 'description' => 'The previous page',
-            ]
+            ],
         ];
     }
 }

@@ -3,12 +3,10 @@
 namespace Bakery\Queries;
 
 use GraphQL\Type\Definition\Type;
-use Illuminate\Database\Eloquent\Model;
-use GraphQL\Type\Definition\ListOfType;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
-
 use Bakery\Support\Facades\Bakery;
+use GraphQL\Type\Definition\ListOfType;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
 use Bakery\Exceptions\TooManyResultsException;
 
 class SingleEntityQuery extends EntityQuery
@@ -45,7 +43,7 @@ class SingleEntityQuery extends EntityQuery
                 continue;
             }
 
-            $lookupTypeName = Type::getNamedType($type)->name . 'LookupType';
+            $lookupTypeName = Type::getNamedType($type)->name.'LookupType';
             $args[$relation] = Bakery::type($lookupTypeName);
         }
 
@@ -60,7 +58,7 @@ class SingleEntityQuery extends EntityQuery
      * @param mixed $viewer
      * @return Model
      */
-    public function resolve($root, array $args = [], $viewer)
+    public function resolve($root, array $args, $viewer)
     {
         $primaryKey = $this->model->getModel()->getKeyName();
 
@@ -89,7 +87,7 @@ class SingleEntityQuery extends EntityQuery
         $results = $query->get();
 
         if ($results->count() < 1) {
-            return null;
+            return;
         }
 
         if ($results->count() > 1) {

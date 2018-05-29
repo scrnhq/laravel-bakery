@@ -51,17 +51,17 @@ class Type
      */
     protected function getFieldResolver(string $name, $field)
     {
-        $resolveMethod = 'resolve' . studly_case($name) . 'Field';
+        $resolveMethod = 'resolve'.studly_case($name).'Field';
 
         if (method_exists($this, $resolveMethod)) {
             $resolver = [$this, $resolveMethod];
+
             return function () use ($resolver) {
                 $args = func_get_args();
+
                 return call_user_func_array($resolver, $args);
             };
         }
-
-        return null;
     }
 
     /**
@@ -77,7 +77,7 @@ class Type
             $resolver = $this->getFieldResolver($name, $field);
 
             if (is_array($field)) {
-                if (!array_key_exists('resolve', $field)) {
+                if (! array_key_exists('resolve', $field)) {
                     $field['resolve'] = $resolver;
                 }
 
@@ -103,7 +103,7 @@ class Type
             'name' => $this->name,
             'fields' => function () {
                 return $this->getFields();
-            }
+            },
         ];
 
         if (method_exists($this, 'resolveField')) {
@@ -112,7 +112,6 @@ class Type
 
         return $attributes;
     }
-
 
     /**
      * Convert the type to array.
@@ -148,7 +147,5 @@ class Type
         } elseif (property_exists($this, $key)) {
             return $this->{$key};
         }
-
-        return null;
     }
 }

@@ -4,7 +4,6 @@ namespace Bakery\Types;
 
 use Bakery\Utils\Utils;
 use Bakery\Support\Facades\Bakery;
-use Illuminate\Database\Eloquent\Model;
 
 class CollectionRootSearchType extends ModelAwareInputType
 {
@@ -15,7 +14,7 @@ class CollectionRootSearchType extends ModelAwareInputType
      */
     protected function name(): string
     {
-        return Utils::typename($this->model->getModel()) . 'RootSearch';
+        return Utils::typename($this->model->getModel()).'RootSearch';
     }
 
     /**
@@ -27,7 +26,7 @@ class CollectionRootSearchType extends ModelAwareInputType
     {
         return [
             'query' => Bakery::nonNull(Bakery::string()),
-            'fields' => Bakery::nonNull(Bakery::type(Utils::typename(class_basename($this->model->getModel()) . 'Search'))),
+            'fields' => Bakery::nonNull(Bakery::type(Utils::typename(class_basename($this->model->getModel()).'Search'))),
         ];
     }
 }

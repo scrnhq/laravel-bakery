@@ -2,8 +2,8 @@
 
 namespace Bakery\Tests\Stubs;
 
-use Illuminate\Database\Eloquent\Model;
 use Bakery\Traits\GraphQLResource;
+use Illuminate\Database\Eloquent\Model;
 
 class EmptyModel extends Model
 {

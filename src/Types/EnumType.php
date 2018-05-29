@@ -2,8 +2,8 @@
 
 namespace Bakery\Types;
 
-use GraphQL\Type\Definition\EnumType as BaseEnumType;
 use GraphQL\Type\Definition\Type as BaseType;
+use GraphQL\Type\Definition\EnumType as BaseEnumType;
 
 class EnumType extends Type
 {
@@ -26,7 +26,8 @@ class EnumType extends Type
     {
         $values = $this->values();
         $attributesValues = array_get($this->attributes, 'values', []);
-        return sizeof($attributesValues) ? $attributesValues : $values;
+
+        return count($attributesValues) ? $attributesValues : $values;
     }
 
     /**

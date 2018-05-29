@@ -31,7 +31,6 @@ abstract class Field implements FieldContract
      */
     public function type()
     {
-        return null;
     }
 
     /**
@@ -47,12 +46,12 @@ abstract class Field implements FieldContract
     /**
      * Retrieve the resolver for the Field.
      *
-     * @return Callback|null
+     * @return callable|null
      */
     private function getResolver()
     {
-        if (!method_exists($this, 'resolve')) {
-            return null;
+        if (! method_exists($this, 'resolve')) {
+            return;
         }
 
         return [$this, 'resolve'];
@@ -66,7 +65,7 @@ abstract class Field implements FieldContract
      */
     public function getAttributes()
     {
-        if (!$this->name) {
+        if (! $this->name) {
             throw new InvalidFieldException('Required property name missing for Field.');
         }
 
@@ -103,7 +102,5 @@ abstract class Field implements FieldContract
         } elseif (property_exists($this, $key)) {
             return $this->{$key};
         }
-
-        return null;
     }
 }

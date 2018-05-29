@@ -2,15 +2,8 @@
 
 namespace Bakery\Tests\Feature;
 
-use Gate;
-use Eloquent;
-use Bakery\Tests\Stubs;
 use Bakery\Tests\Models;
-use Bakery\Tests\WithDatabase;
 use Bakery\Tests\FeatureTestCase;
-use Bakery\Http\Controller\BakeryController;
-use Illuminate\Auth\Access\AuthorizationException;
-use Bakery\Exceptions\TooManyResultsException;
 
 class DeleteMutationTest extends FeatureTestCase
 {
@@ -23,7 +16,7 @@ class DeleteMutationTest extends FeatureTestCase
 
         $query = '
             mutation {
-                deleteArticle(id: ' . $article->id . ')
+                deleteArticle(id: '.$article->id.')
             }
         ';
 
@@ -41,7 +34,7 @@ class DeleteMutationTest extends FeatureTestCase
 
         $query = '
             mutation {
-                deleteRole(id: ' . $role->id . ')
+                deleteRole(id: '.$role->id.')
             }
         ';
 
@@ -60,7 +53,7 @@ class DeleteMutationTest extends FeatureTestCase
 
         $query = '
             mutation {
-                deleteArticle(id: ' . $article->id . ')
+                deleteArticle(id: '.$article->id.')
             }
         ';
 

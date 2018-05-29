@@ -2,13 +2,8 @@
 
 namespace Bakery\Tests\Feature;
 
-use Eloquent;
 use Bakery\Tests\Models;
-use Bakery\Exceptions\TooManyResultsException;
-use Bakery\Tests\Stubs;
 use Bakery\Tests\FeatureTestCase;
-use Illuminate\Auth\Access\AuthorizationException;
-use Illuminate\Contracts\Auth\Access\Gate;
 
 class UpdateMutationTest extends FeatureTestCase
 {
@@ -21,7 +16,7 @@ class UpdateMutationTest extends FeatureTestCase
         $query = '
             mutation {
                 updateArticle(
-                    id: ' . $article->id . '
+                    id: '.$article->id.'
                     input: { title: "Hello world! (updated)" }
                ) {
                     id
@@ -45,7 +40,7 @@ class UpdateMutationTest extends FeatureTestCase
         $query = '
             mutation {
                 updateRole(
-                    id: ' . $role->id . ',
+                    id: '.$role->id.',
                     input: { name: "moderator" }
                 ) {
                     id
@@ -69,7 +64,7 @@ class UpdateMutationTest extends FeatureTestCase
         $query = '
             mutation {
                 updateArticle(
-                    id: ' . $article->id . ',
+                    id: '.$article->id.',
                     input: { title: "Hello world! (updated)" }
                 ) {
                     id
@@ -118,7 +113,7 @@ class UpdateMutationTest extends FeatureTestCase
         $query = '
             mutation {
                 updateUser(
-                    id: ' . $user->id . '
+                    id: '.$user->id.'
                     input: {
                         name: "Jona Doe"
                         articles: [{
@@ -126,8 +121,8 @@ class UpdateMutationTest extends FeatureTestCase
                             slug: "second-post"
                             content: "Lorem ispum"
                             comments: [
-                                { body: "First!", userId: ' . $user->id . ' }
-                                { body: "Great post!", userId: ' . $user->id . '}
+                                { body: "First!", userId: '.$user->id.' }
+                                { body: "Great post!", userId: '.$user->id.'}
                             ]
                         }]
                     }

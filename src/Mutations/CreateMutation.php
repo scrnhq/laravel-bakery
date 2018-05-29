@@ -26,6 +26,7 @@ class CreateMutation extends EntityMutation
 
         $input = $args['input'];
         $model = $this->model->createWithGraphQLInput($input);
+
         return $model;
     }
 }

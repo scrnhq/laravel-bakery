@@ -3,15 +3,14 @@
 namespace Bakery\Traits;
 
 use Exception;
-use GraphQL\Error\Error;
-use Bakery\Exceptions\UserError;
-use Bakery\Events\BakeryModelSaved;
-use Illuminate\Contracts\Auth\Access\Gate;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations;
-use Illuminate\Support\Facades\DB;
 use RuntimeException;
+use Bakery\Exceptions\UserError;
+use Illuminate\Support\Facades\DB;
+use Bakery\Events\BakeryModelSaved;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Contracts\Auth\Access\Gate;
+use Illuminate\Database\Eloquent\Relations;
 
 trait GraphQLResource
 {
@@ -43,7 +42,7 @@ trait GraphQLResource
             $result = parent::fireCustomModelEvent($event, $method);
         }
 
-        if (!is_null($result)) {
+        if (! is_null($result)) {
             return $result;
         }
     }
@@ -100,10 +99,10 @@ trait GraphQLResource
         return collect($this->relations())->map(function ($value, $key) {
             $relationType = $this->resolveRelation($key);
             if ($this->isPluralRelation($relationType)) {
-                return str_singular($key) . 'Ids';
+                return str_singular($key).'Ids';
             }
 
-            return $key . 'Id';
+            return $key.'Id';
         })->all();
     }
 
@@ -119,12 +118,13 @@ trait GraphQLResource
             $model = new static();
             $model->fillWithGraphQLInput($input);
             $model->save();
+
             return $model->fresh();
         });
     }
 
     /**
-     * Update the model with GraphQL input
+     * Update the model with GraphQL input.
      *
      * @param array $input
      * @return self
@@ -134,6 +134,7 @@ trait GraphQLResource
         return DB::transaction(function () use ($input) {
             $this->fillWithGraphQLInput($input);
             $this->save();
+
             return $this;
         });
     }
@@ -154,6 +155,7 @@ trait GraphQLResource
         $this->fillRelations($relations);
         $this->fillConnections($connections);
         $this->relations = [];
+
         return $this;
     }
 
@@ -210,7 +212,7 @@ trait GraphQLResource
             try {
                 $this->fillScalar($key, $value);
             } catch (Exception $previous) {
-                throw new UserError('Could not set ' . $key, [
+                throw new UserError('Could not set '.$key, [
                     $key => $previous->getMessage(),
                 ]);
             }
@@ -223,7 +225,7 @@ trait GraphQLResource
         $gate = app(Gate::class);
         $policy = $gate->getPolicyFor($this);
 
-        $policyMethod = 'set' . studly_case($key);
+        $policyMethod = 'set'.studly_case($key);
 
         if (method_exists($policy, $policyMethod)) {
             $gate->authorize($policyMethod, [$this, $value]);
@@ -244,9 +246,9 @@ trait GraphQLResource
             $relation = $this->resolveRelation($key);
             $relationType = $this->getRelationTypeName($relation);
             $method = "fill{$relationType}Relation";
-            $policyMethod = 'create' . studly_case($key);
+            $policyMethod = 'create'.studly_case($key);
 
-            if (!method_exists($this, $method)) {
+            if (! method_exists($this, $method)) {
                 throw new RuntimeException("Unknown or unfillable relation type: {$key} of type ${relationType}");
             }
 
@@ -268,9 +270,9 @@ trait GraphQLResource
             $relation = $this->resolveRelationOfConnection($key);
             $relationType = $this->getRelationTypeName($relation);
             $method = "connect{$relationType}Relation";
-            $policyMethod = 'set' . studly_case($this->getRelationOfConnection($key));
+            $policyMethod = 'set'.studly_case($this->getRelationOfConnection($key));
 
-            if (!method_exists($this, $method)) {
+            if (! method_exists($this, $method)) {
                 throw new RuntimeException("Unknown or unfillable connection type: {$key} of type ${relationType}");
             }
 
@@ -369,7 +371,7 @@ trait GraphQLResource
                 $instance = $related->newInstance();
                 $instance->fillWithGraphQLInput($attributes);
                 $relation->save($instance);
-            };
+            }
         };
     }
 
@@ -419,6 +421,7 @@ trait GraphQLResource
         // After we resolved it we unset it because we don't actually
         // want to use the results of the relation.
         unset($this->{$relation});
+
         return $resolvedRelation;
     }
 
@@ -432,13 +435,14 @@ trait GraphQLResource
     protected function resolveRelationType(string $relation): string
     {
         $class = $this->resolveRelation($relation);
+
         return class_basename($class);
     }
 
     /**
      * Get the relation name of a connection.
      * e.g. userId => user
-     *      commentIds => comments
+     *      commentIds => comments.
      *
      * @param string $connection
      * @return Relations\Relation
@@ -469,7 +473,7 @@ trait GraphQLResource
      * Return if the relation is a plural relation.
      *
      * @param Relations\Relation $relation
-     * @return boolean
+     * @return bool
      */
     protected function isPluralRelation(Relations\Relation $relation)
     {
@@ -477,10 +481,10 @@ trait GraphQLResource
     }
 
     /**
-     * Return if the relation is a singular relation
+     * Return if the relation is a singular relation.
      *
      * @param Relations\Relation $relation
-     * @return boolean
+     * @return bool
      */
     protected function isSingularRelation(Relations\Relation $relation)
     {
@@ -507,7 +511,7 @@ trait GraphQLResource
                 }
             }
 
-            throw new RuntimeException('Could not found a relationship name for relation ' . $relation);
+            throw new RuntimeException('Could not found a relationship name for relation '.$relation);
         }
     }
 

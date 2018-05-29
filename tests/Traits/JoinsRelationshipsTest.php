@@ -2,12 +2,9 @@
 
 namespace Bakery\Tests\Traits;
 
-use Bakery\Tests\Stubs;
+use Bakery\Tests\TestCase;
 use Bakery\Tests\Models\User;
 use Bakery\Tests\Models\Article;
-
-use Bakery\Tests\TestCase;
-use Bakery\Tests\WithDatabase;
 use Bakery\Traits\JoinsRelationships;
 
 class JoinsRelationshipsTest extends TestCase

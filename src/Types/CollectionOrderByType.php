@@ -3,7 +3,6 @@
 namespace Bakery\Types;
 
 use Bakery\Utils\Utils;
-use Illuminate\Database\Eloquent\Model;
 
 class CollectionOrderByType extends ModelAwareEnumType
 {
@@ -14,7 +13,7 @@ class CollectionOrderByType extends ModelAwareEnumType
      */
     protected function name(): string
     {
-        return Utils::typename($this->model->getModel()) . 'OrderBy';
+        return Utils::typename($this->model->getModel()).'OrderBy';
     }
 
     /**
@@ -27,8 +26,8 @@ class CollectionOrderByType extends ModelAwareEnumType
         $values = [];
 
         foreach ($this->model->fields() as $name => $type) {
-            $values[] = $name . '_ASC';
-            $values[] = $name . '_DESC';
+            $values[] = $name.'_ASC';
+            $values[] = $name.'_DESC';
         }
 
         return $values;

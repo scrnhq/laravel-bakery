@@ -3,7 +3,6 @@
 namespace Bakery\Types;
 
 use Bakery\Utils\Utils;
-use Bakery\Support\Facades\Bakery;
 
 class EntityLookupType extends ModelAwareInputType
 {
@@ -14,7 +13,7 @@ class EntityLookupType extends ModelAwareInputType
      */
     protected function name(): string
     {
-        return Utils::typename($this->model->getModel()) . 'LookupType';
+        return Utils::typename($this->model->getModel()).'LookupType';
     }
 
     /**

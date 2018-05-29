@@ -18,7 +18,7 @@ class Utils
      */
     public static function invariant($test, $message = '')
     {
-        if (!$test) {
+        if (! $test) {
             if (func_num_args() > 2) {
                 $args = func_get_args();
                 array_shift($args);
@@ -76,6 +76,7 @@ class Utils
     {
         $field = self::toFieldArray($field);
         $field['type'] = Type::getNamedType($field['type']);
+
         return $field;
     }
 
@@ -83,6 +84,7 @@ class Utils
     {
         return collect($fields)->map(function ($field) {
             $field = self::nullifyField($field);
+
             return $field;
         });
     }

@@ -4,9 +4,8 @@ namespace Bakery\Tests\Stubs\BakeryModels;
 
 use Bakery;
 use Bakery\Eloquent\BakeryModel;
-use GraphQL\Type\Definition\Type;
-
 use Bakery\Tests\Models\Article;
+use GraphQL\Type\Definition\Type;
 
 class ArticleBakery extends BakeryModel
 {

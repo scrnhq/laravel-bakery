@@ -2,9 +2,9 @@
 
 namespace Bakery\Tests;
 
-use Bakery\Exceptions\TypeNotFound;
-use Bakery\Support\Facades\Bakery;
 use Bakery\Types\Type;
+use Bakery\Support\Facades\Bakery;
+use Bakery\Exceptions\TypeNotFound;
 use GraphQL\Type\Definition\ObjectType;
 
 class BakeryTest extends FeatureTestCase

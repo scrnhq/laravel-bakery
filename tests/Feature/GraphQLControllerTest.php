@@ -4,7 +4,7 @@ namespace Bakery\Tests\Feature;
 
 use Bakery\Tests\FeatureTestCase;
 
-class BakeryControllerTest extends FeatureTestCase
+class GraphQLControllerTest extends FeatureTestCase
 {
     /** @test */
     public function it_returns_a_200()
@@ -31,9 +31,9 @@ class BakeryControllerTest extends FeatureTestCase
         $response->assertJsonStructure([
             'data' => [
                 '__schema' => [
-                    'types'
-                ]
-            ]
+                    'types',
+                ],
+            ],
         ]);
     }
 }

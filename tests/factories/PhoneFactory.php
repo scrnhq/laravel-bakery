@@ -13,7 +13,7 @@ use Bakery\Tests\Models\Phone;
 | database. Just tell the factory how a default model should look.
 |
 */
-/** @var \Illuminate\Database\Eloquent\Factory $factory */
+/* @var \Illuminate\Database\Eloquent\Factory $factory */
 $factory->define(Phone::class, function (Faker\Generator $faker) {
     return [
         'number' => $faker->phoneNumber,

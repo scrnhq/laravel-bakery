@@ -7,21 +7,20 @@ use GraphQL\GraphQL;
 use Bakery\Utils\Utils;
 use GraphQL\Type\Schema;
 use Bakery\Types\ModelType;
-use Bakery\Types\EntityType;
 use Bakery\Traits\BakeryTypes;
 use Bakery\Eloquent\BakeryModel;
 use Bakery\Exceptions\TypeNotFound;
-use Bakery\Support\Schema as BakerySchema;
 use GraphQL\Executor\ExecutionResult;
 use GraphQL\Type\Definition\ObjectType;
 use Illuminate\Database\Eloquent\Model;
+use Bakery\Support\Schema as BakerySchema;
 
 class Bakery
 {
     use BakeryTypes;
 
     /**
-     * The schemas
+     * The schemas.
      *
      * @var array
      */
@@ -89,7 +88,7 @@ class Bakery
      * Return if the name is registered as a type.
      *
      * @param string $name
-     * @return boolean
+     * @return bool
      */
     public function hasType(string $name): bool
     {
@@ -109,13 +108,14 @@ class Bakery
     }
 
     /**
-     * Get the default GraphQL schema
+     * Get the default GraphQL schema.
      *
      * @return Schema
      */
     public function schema()
     {
         $schema = new Support\DefaultSchema();
+
         return $schema->toGraphQLSchema();
     }
 
@@ -128,8 +128,8 @@ class Bakery
      */
     public function getType($name)
     {
-        if (!isset($this->types[$name])) {
-            throw new TypeNotFound('Type ' . $name . ' not found.');
+        if (! isset($this->types[$name])) {
+            throw new TypeNotFound('Type '.$name.' not found.');
         }
 
         if (isset($this->typeInstances[$name])) {
@@ -165,10 +165,10 @@ class Bakery
     {
         $name = is_string($name) ? $name : class_basename($name);
 
-        if (!isset($this->types[$name])) {
-            throw new TypeNotFound('Type ' . $name . ' not found.');
+        if (! isset($this->types[$name])) {
+            throw new TypeNotFound('Type '.$name.' not found.');
         }
-        
+
         return $this->types[$name]->model;
     }
 
@@ -182,7 +182,7 @@ class Bakery
     {
         Utils::invariant(
             array_key_exists(get_class($model), $this->bakeryModels),
-            class_basename($model) . ' is not registered as Bakery model'
+            class_basename($model).' is not registered as Bakery model'
         );
 
         return new $this->bakeryModels[get_class($model)]($model);
@@ -198,7 +198,7 @@ class Bakery
     {
         Utils::invariant(
             array_key_exists(get_class($model), $this->bakeryModels),
-            class_basename($model) . ' is not registered as Bakery model'
+            class_basename($model).' is not registered as Bakery model'
         );
 
         return new $this->bakeryModels[get_class($model)]();
@@ -213,7 +213,7 @@ class Bakery
      */
     public function executeQuery($input, $schema = null): ExecutionResult
     {
-        if (!$schema) {
+        if (! $schema) {
             $schema = $this->schema();
         } elseif ($schema instanceof BakerySchema) {
             $schema = $schema->toGraphQLSchema();
@@ -249,6 +249,7 @@ class Bakery
         } else {
             $objectType = $type->toGraphQLType($options);
         }
+
         return $objectType;
     }
 

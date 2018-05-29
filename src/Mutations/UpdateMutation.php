@@ -4,7 +4,6 @@ namespace Bakery\Mutations;
 
 use Bakery\Utils\Utils;
 use Bakery\Eloquent\BakeryModel;
-use GraphQL\Type\Definition\Type;
 use Bakery\Support\Facades\Bakery;
 use Illuminate\Database\Eloquent\Model;
 use Bakery\Exceptions\TooManyResultsException;

@@ -2,8 +2,8 @@
 
 namespace Bakery\Tests\Stubs\Policies;
 
-use Bakery\Tests\Stubs\User;
 use Bakery\Test\Stubs\Model;
+use Bakery\Tests\Stubs\User;
 
 class ModelPolicy
 {

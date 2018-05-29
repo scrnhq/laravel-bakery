@@ -3,9 +3,9 @@
 namespace Bakery\Types;
 
 use Bakery\Utils\Utils;
+use GraphQL\Type\Definition\Type;
 use Bakery\Support\Facades\Bakery;
 use GraphQL\Type\Definition\NonNull;
-use GraphQL\Type\Definition\Type;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations;
 
@@ -18,7 +18,7 @@ class UpdateInputType extends ModelAwareInputType
      */
     protected function name(): string
     {
-        return 'Update' . Utils::typename($this->model->getModel()) . 'Input';
+        return 'Update'.Utils::typename($this->model->getModel()).'Input';
     }
 
     /**
@@ -35,7 +35,7 @@ class UpdateInputType extends ModelAwareInputType
 
         Utils::invariant(
             count($fields) > 0,
-            'There are no fields defined for ' . class_basename($this->model)
+            'There are no fields defined for '.class_basename($this->model)
         );
 
         return $fields;
@@ -68,10 +68,10 @@ class UpdateInputType extends ModelAwareInputType
         foreach ($model->getFillable() as $fillable) {
             if (method_exists($model, $fillable)) {
                 $relationship = $model->{$fillable}();
-                $inputType = 'Create' . class_basename($relationship->getRelated()) . 'Input';
+                $inputType = 'Create'.class_basename($relationship->getRelated()).'Input';
 
                 if ($relationship instanceof Relations\HasMany || $relationship instanceof Relations\BelongsToMany) {
-                    $name = str_singular($fillable) . 'Ids';
+                    $name = str_singular($fillable).'Ids';
                     $fields[$name] = Bakery::listOf(Bakery::ID());
 
                     if (Bakery::hasType($inputType)) {
@@ -80,7 +80,7 @@ class UpdateInputType extends ModelAwareInputType
                 }
 
                 if ($relationship instanceof Relations\BelongsTo || $relationship instanceof Relations\HasOne) {
-                    $name = str_singular($fillable) . 'Id';
+                    $name = str_singular($fillable).'Id';
                     $fields[$name] = Bakery::ID();
 
                     if (Bakery::hasType($inputType)) {
@@ -88,7 +88,7 @@ class UpdateInputType extends ModelAwareInputType
                     }
                 }
             }
-        };
+        }
 
         return $fields;
     }

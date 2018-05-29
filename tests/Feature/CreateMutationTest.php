@@ -2,12 +2,8 @@
 
 namespace Bakery\Tests\Feature;
 
-use Eloquent;
-use Bakery\Tests\Stubs;
 use Bakery\Tests\Models;
 use Bakery\Tests\FeatureTestCase;
-use Illuminate\Contracts\Auth\Access\Gate;
-use Illuminate\Auth\Access\AuthorizationException;
 
 class CreateMutationTest extends FeatureTestCase
 {
@@ -15,7 +11,7 @@ class CreateMutationTest extends FeatureTestCase
     public function it_does_not_allow_creating_entity_as_guest()
     {
         $this->withExceptionHandling();
-        
+
         $query = '
             mutation {
                 createArticle(input: {
@@ -116,7 +112,7 @@ class CreateMutationTest extends FeatureTestCase
                     email: "jane.doe@example.com",
                     name: "Jane Doe",
                     password: "secret",
-                    phoneId: "' . $phone->id . '",
+                    phoneId: "'.$phone->id.'",
                 }) {
                     id
                 }
@@ -170,8 +166,8 @@ class CreateMutationTest extends FeatureTestCase
             mutation {
                 createComment(input: {
                     body: "Cool story bro",
-                    userId: ' . $user->id . '
-                    articleId: ' . $article->id . '
+                    userId: '.$user->id.'
+                    articleId: '.$article->id.'
                 }) {
                     id
                 }
@@ -197,7 +193,7 @@ class CreateMutationTest extends FeatureTestCase
                     email: "jane.doe@example.com",
                     name: "Jane Doe",
                     password: "secret", 
-                    roleIds: ["' . $roles[0]->id  . '", "' . $roles[1]->id . '"]
+                    roleIds: ["'.$roles[0]->id.'", "'.$roles[1]->id.'"]
                 }) {
                     id
                 }

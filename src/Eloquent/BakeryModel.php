@@ -3,16 +3,15 @@
 namespace Bakery\Eloquent;
 
 use Bakery;
+use Bakery\Utils\Utils;
 use GraphQL\Type\Definition\Type;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Bakery\Events\BakeryModelSaved;
-use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Contracts\Auth\Access\Gate;
 use Bakery\Eloquent\Concerns\InteractsWithRelations;
-
-use Bakery\Utils\Utils;
 
 class BakeryModel
 {
@@ -34,7 +33,7 @@ class BakeryModel
      *
      * In the case of a readOnly model, no mutations will be registered.
      *
-     * @var boolean
+     * @var bool
      */
     public static $readOnly = false;
 
@@ -55,12 +54,12 @@ class BakeryModel
             if ($this->instance) {
                 return $this->instance;
             }
-    
+
             Utils::invariant(
                 $this->model,
-                'Model not set on ' . class_basename($this)
+                'Model not set on '.class_basename($this)
             );
-    
+
             $this->instance = resolve($this->model);
         }
 
@@ -98,7 +97,7 @@ class BakeryModel
     private function getKeyField(): array
     {
         return [
-            $this->getModel()->getKeyName() => ['type' => Type::nonNull(Type::ID())]
+            $this->getModel()->getKeyName() => ['type' => Type::nonNull(Type::ID())],
         ];
     }
 
@@ -131,7 +130,8 @@ class BakeryModel
                 $type = $type['type'];
             }
 
-            $lookupTypeName = Type::getNamedType($type)->name . 'LookupType';
+            $lookupTypeName = Type::getNamedType($type)->name.'LookupType';
+
             return Bakery::type($lookupTypeName);
         });
 
@@ -180,10 +180,10 @@ class BakeryModel
         return collect($this->relations())->map(function ($value, $key) {
             $relationType = $this->resolveRelation($key);
             if ($this->isPluralRelation($relationType)) {
-                return str_singular($key) . 'Ids';
+                return str_singular($key).'Ids';
             }
 
-            return $key . 'Id';
+            return $key.'Id';
         })->all();
     }
 
@@ -199,12 +199,13 @@ class BakeryModel
             // TODO: How do we make sure we have a fresh model here?
             $this->fill($input);
             $this->save();
+
             return $this->instance->fresh();
         });
     }
 
     /**
-     * Update the model with GraphQL input
+     * Update the model with GraphQL input.
      *
      * @param array $input
      * @return self
@@ -214,6 +215,7 @@ class BakeryModel
         return DB::transaction(function () use ($input) {
             $this->fill($input);
             $this->save();
+
             return $this;
         });
     }
@@ -227,6 +229,7 @@ class BakeryModel
         $this->fillScalars($scalars);
         $this->fillRelations($relations);
         $this->fillConnections($connections);
+
         return $this;
     }
 
@@ -234,6 +237,7 @@ class BakeryModel
     {
         $this->instance->save();
         event(new BakeryModelSaved($this));
+
         return $this;
     }
 
@@ -290,7 +294,7 @@ class BakeryModel
             try {
                 $this->fillScalar($key, $value);
             } catch (Exception $previous) {
-                throw new UserError('Could not set ' . $key, [
+                throw new UserError('Could not set '.$key, [
                     $key => $previous->getMessage(),
                 ]);
             }
@@ -306,7 +310,7 @@ class BakeryModel
      */
     protected function fillScalar(string $key, $value)
     {
-        $policyMethod = 'set' . studly_case($key);
+        $policyMethod = 'set'.studly_case($key);
 
         if (method_exists($this->policy, $policyMethod)) {
             $this->gate->authorize($policyMethod, [$this, $value]);

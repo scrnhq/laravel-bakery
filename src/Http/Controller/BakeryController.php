@@ -47,7 +47,7 @@ class BakeryController extends Controller
      * Handle an HTTP response containing the GraphQL query.
      *
      * @param Request $request
-    * @return JsonResponse
+     * @return JsonResponse
      */
     public function graphql(Request $request): JsonResponse
     {
@@ -60,7 +60,7 @@ class BakeryController extends Controller
 
     public function graphiql()
     {
-        if (!App::isLocal()) {
+        if (! App::isLocal()) {
             abort(404);
         }
 

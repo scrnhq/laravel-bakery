@@ -7,7 +7,6 @@ use GraphQL\Type\Definition\Type;
 use Bakery\Support\Facades\Bakery;
 use GraphQL\Type\Definition\IDType;
 use GraphQL\Type\Definition\StringType;
-use Illuminate\Database\Eloquent\Model;
 
 class CollectionSearchType extends ModelAwareInputType
 {
@@ -18,7 +17,7 @@ class CollectionSearchType extends ModelAwareInputType
      */
     protected function name(): string
     {
-        return Utils::typename($this->model->getModel()) . 'Search';
+        return Utils::typename($this->model->getModel()).'Search';
     }
 
     /**
@@ -47,7 +46,7 @@ class CollectionSearchType extends ModelAwareInputType
             } else {
                 $type = Type::getNamedType($type);
             }
-            $fields[$relation] = Bakery::type($type->name . 'Search');
+            $fields[$relation] = Bakery::type($type->name.'Search');
         }
 
         return $fields;

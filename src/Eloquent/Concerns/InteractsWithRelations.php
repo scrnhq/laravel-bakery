@@ -4,7 +4,6 @@ namespace Bakery\Eloquent\Concerns;
 
 use RuntimeException;
 use Bakery\Utils\Utils;
-use Bakery\Types\ModelType;
 use Bakery\Support\Facades\Bakery;
 use Illuminate\Database\Eloquent\Relations;
 
@@ -34,9 +33,9 @@ trait InteractsWithRelations
             $relation = $this->resolveRelation($key);
             $relationType = $this->getRelationTypeName($relation);
             $method = "fill{$relationType}Relation";
-            $policyMethod = 'create' . studly_case($key);
+            $policyMethod = 'create'.studly_case($key);
 
-            if (!method_exists($this, $method)) {
+            if (! method_exists($this, $method)) {
                 throw new RuntimeException("Unknown or unfillable relation type: {$key} of type ${relationType}");
             }
 
@@ -58,9 +57,9 @@ trait InteractsWithRelations
             $relation = $this->resolveRelationOfConnection($key);
             $relationType = $this->getRelationTypeName($relation);
             $method = "connect{$relationType}Relation";
-            $policyMethod = 'set' . studly_case($this->getRelationOfConnection($key));
+            $policyMethod = 'set'.studly_case($this->getRelationOfConnection($key));
 
-            if (!method_exists($this, $method)) {
+            if (! method_exists($this, $method)) {
                 throw new RuntimeException("Unknown or unfillable connection type: {$key} of type ${relationType}");
             }
 
@@ -164,7 +163,7 @@ trait InteractsWithRelations
                 $model->fill($attributes);
                 $model->setAttribute($relation->getForeignKeyName(), $relation->getParentKey());
                 $model->save();
-            };
+            }
         };
     }
 
@@ -212,7 +211,7 @@ trait InteractsWithRelations
     {
         Utils::invariant(
             method_exists($this->instance, $relation),
-            class_basename($this->instance) . ' has no relation named ' . $relation
+            class_basename($this->instance).' has no relation named '.$relation
         );
 
         return $this->instance->{$relation}();
@@ -221,7 +220,7 @@ trait InteractsWithRelations
     /**
      * Get the relation name of a connection.
      * e.g. userId => user
-     *      commentIds => comments
+     *      commentIds => comments.
      *
      * @param string $connection
      * @return Relations\Relation
@@ -252,7 +251,7 @@ trait InteractsWithRelations
      * Return if the relation is a plural relation.
      *
      * @param Relations\Relation $relation
-     * @return boolean
+     * @return bool
      */
     protected function isPluralRelation(Relations\Relation $relation)
     {
@@ -260,10 +259,10 @@ trait InteractsWithRelations
     }
 
     /**
-     * Return if the relation is a singular relation
+     * Return if the relation is a singular relation.
      *
      * @param Relations\Relation $relation
-     * @return boolean
+     * @return bool
      */
     protected function isSingularRelation(Relations\Relation $relation)
     {
@@ -290,7 +289,7 @@ trait InteractsWithRelations
                 }
             }
 
-            throw new RuntimeException('Could not found a relationship name for relation ' . $relation);
+            throw new RuntimeException('Could not found a relationship name for relation '.$relation);
         }
     }
 }

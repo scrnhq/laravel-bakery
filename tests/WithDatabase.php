@@ -100,6 +100,7 @@ trait WithDatabase
         $user->email = 'j.doe@example.com';
         $user->password = 'secret';
         $user->save();
+
         return $user;
     }
 }

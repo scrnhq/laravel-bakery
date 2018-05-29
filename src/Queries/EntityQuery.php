@@ -3,11 +3,9 @@
 namespace Bakery\Queries;
 
 use Bakery\Utils\Utils;
-use Bakery\Queries\Query;
 use Bakery\Eloquent\BakeryModel;
 use GraphQL\Type\Definition\Type;
 use Bakery\Support\Facades\Bakery;
-use Illuminate\Database\Eloquent\Model;
 use GraphQL\Type\Definition\ListOfType;
 
 abstract class EntityQuery extends Query
@@ -44,7 +42,7 @@ abstract class EntityQuery extends Query
 
         Utils::invariant(
             $this->model instanceof BakeryModel,
-            class_basename($this->model) . ' is not an instance of ' . BakeryModel::class
+            class_basename($this->model).' is not an instance of '.BakeryModel::class
         );
     }
 
@@ -82,7 +80,7 @@ abstract class EntityQuery extends Query
                 continue;
             }
 
-            $lookupTypeName = Type::getNamedType($type)->name . 'LookupType';
+            $lookupTypeName = Type::getNamedType($type)->name.'LookupType';
             $args[$relation] = Bakery::type($lookupTypeName);
         }
 

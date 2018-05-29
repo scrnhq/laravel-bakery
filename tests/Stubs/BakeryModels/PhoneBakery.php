@@ -3,10 +3,9 @@
 namespace Bakery\Tests\Stubs\BakeryModels;
 
 use Bakery;
+use Bakery\Tests\Models\Phone;
 use Bakery\Eloquent\BakeryModel;
 use GraphQL\Type\Definition\Type;
-
-use Bakery\Tests\Models\Phone;
 
 class PhoneBakery extends BakeryModel
 {

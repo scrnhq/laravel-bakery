@@ -3,11 +3,10 @@
 namespace Bakery\Tests\Stubs\BakeryModels;
 
 use Bakery;
+use Bakery\Tests\Models\User;
 use Bakery\Eloquent\BakeryModel;
 use GraphQL\Type\Definition\Type;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-
-use Bakery\Tests\Models\User;
 
 class UserBakery extends BakeryModel
 {
@@ -28,8 +27,8 @@ class UserBakery extends BakeryModel
                 'type' => Type::string(),
                 'policy' => function (User $user, $args, Authenticatable $viewer = null) {
                     return $viewer && $user->is($viewer);
-                }
-            ]
+                },
+            ],
         ];
     }
 
@@ -40,7 +39,7 @@ class UserBakery extends BakeryModel
                 'type' => Type::nonNull(Type::listOf(Bakery::type('Article'))),
                 'policy' => function (User $user, $args, Authenticatable $viewer = null) {
                     return $viewer && $user->is($viewer);
-                }
+                },
             ],
             'phone' => Type::nonNull(Bakery::type('Phone')),
             'roles' => Type::nonNull(Type::listOf(Bakery::type('Role'))),

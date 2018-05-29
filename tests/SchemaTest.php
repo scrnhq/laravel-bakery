@@ -2,18 +2,15 @@
 
 namespace Bakery\Tests;
 
-use Bakery\Exceptions\InvariantViolation;
-
+use Bakery\Support\Schema;
 use Bakery\Tests\Stubs\DummyType;
-use Bakery\Tests\Stubs\DummyQuery;
+use Bakery\Support\Facades\Bakery;
 use Bakery\Tests\Stubs\DummyClass;
+use Bakery\Tests\Stubs\DummyQuery;
 use Bakery\Tests\Stubs\DummyMutation;
 use Bakery\Tests\Stubs\DummyReadOnly;
+use Bakery\Exceptions\InvariantViolation;
 use Bakery\Tests\Stubs\DummyInheritClass;
-
-use Bakery\Support\Schema;
-use Bakery\Tests\TestCase;
-use Bakery\Support\Facades\Bakery;
 use GraphQL\Type\Schema as GraphQLSchema;
 
 class NotResourceSchema extends Schema
@@ -40,7 +37,7 @@ class ReadOnlySchema extends Schema
 class TestSchema extends Schema
 {
     protected $models = [
-        DummyInheritClass::class
+        DummyInheritClass::class,
     ];
 
     protected $queries = [

@@ -2,11 +2,7 @@
 
 namespace Bakery\Tests\Feature;
 
-use Schema;
-use Eloquent;
-
 use Bakery\Tests\Models;
-use Bakery\Tests\Stubs;
 use Bakery\Tests\FeatureTestCase;
 
 class CollectionQueryTest extends FeatureTestCase
@@ -86,10 +82,10 @@ class CollectionQueryTest extends FeatureTestCase
     public function it_can_filter_by_its_fields()
     {
         factory(Models\Article::class)->create([
-            'title' => 'foo'
+            'title' => 'foo',
         ]);
         factory(Models\Article::class)->create([
-            'title' => 'bar'
+            'title' => 'bar',
         ]);
 
         $query = '
@@ -235,7 +231,7 @@ class CollectionQueryTest extends FeatureTestCase
             query {
                 articles(filter: {
                     AND: [
-                        { user: { id: "' . $userOne->id . '" } }, 
+                        { user: { id: "'.$userOne->id.'" } }, 
                         { OR: [{title_contains: "hello"}, {content: "Lorem Ipsum"}] },
                     ]
                 }) {
@@ -299,9 +295,9 @@ class CollectionQueryTest extends FeatureTestCase
             query {
                 articles(filter: {
                     user: {
-                        email: "' . $firstUser->email . '"
+                        email: "'.$firstUser->email.'"
                         phone: {
-                            number: "' . $firstUser->phone->number . '"
+                            number: "'.$firstUser->phone->number.'"
                         }
                     }
                 }) {
@@ -337,8 +333,8 @@ class CollectionQueryTest extends FeatureTestCase
             query {
                 users(filter: {
                     OR: [
-                        { phone: { number: "' . $phone->number . '" }},
-                        { articles: { title: "' . $article->title . '" } }
+                        { phone: { number: "'.$phone->number.'" }},
+                        { articles: { title: "'.$article->title.'" } }
                     ]
                 }) {
                     items {

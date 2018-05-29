@@ -2,19 +2,16 @@
 
 namespace Bakery\Support;
 
-use Bakery\Utils\Utils;
-use Bakery\Types\ModelType;
+use Bakery\Types;
+use GraphQL\Type\SchemaConfig;
+use Bakery\Support\Facades\Bakery;
+use Bakery\Queries\CollectionQuery;
 use Bakery\Mutations\CreateMutation;
 use Bakery\Mutations\DeleteMutation;
 use Bakery\Mutations\UpdateMutation;
-use Bakery\Queries\CollectionQuery;
 use Bakery\Queries\SingleEntityQuery;
-use Bakery\Support\Facades\Bakery;
-use Bakery\Traits\GraphQLResource;
-use Bakery\Types;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Schema as GraphQLSchema;
-use GraphQL\Type\SchemaConfig;
 
 class Schema
 {
@@ -50,11 +47,12 @@ class Schema
             $types[] = new Types\CollectionSearchType($model);
             $types[] = new Types\CollectionOrderByType($model);
 
-            if (!$model::$readOnly) {
+            if (! $model::$readOnly) {
                 $types[] = new Types\CreateInputType($model);
                 $types[] = new Types\UpdateInputType($model);
             }
         }
+
         return $types;
     }
 
@@ -85,6 +83,7 @@ class Schema
             $collectionQuery = new CollectionQuery($model);
             $queries[$collectionQuery->name] = $collectionQuery;
         }
+
         return $queries;
     }
 
@@ -114,7 +113,7 @@ class Schema
     {
         $mutations = [];
         foreach ($this->getModels() as $model) {
-            if (!$model::$readOnly) {
+            if (! $model::$readOnly) {
                 $createMutation = new CreateMutation($model);
                 $mutations[$createMutation->name] = $createMutation;
 
@@ -125,6 +124,7 @@ class Schema
                 $mutations[$deleteMutation->name] = $deleteMutation;
             }
         }
+
         return $mutations;
     }
 
@@ -161,8 +161,10 @@ class Schema
                 if ($name === $mutation->name) {
                     return $mutation;
                 }
+
                 return Bakery::type($name);
             });
+
         return new GraphQLSchema($config);
     }
 
@@ -176,6 +178,7 @@ class Schema
         } else {
             $objectType = $this->makeObjectTypeFromClass($type, $options);
         }
+
         return $objectType;
     }
 

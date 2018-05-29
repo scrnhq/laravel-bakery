@@ -25,7 +25,7 @@ abstract class EntityMutation extends ModelAwareMutation
      */
     protected function name(): string
     {
-        return $this->action . Utils::typename($this->model->getModel());
+        return $this->action.Utils::typename($this->model->getModel());
     }
 
     /**
@@ -45,7 +45,7 @@ abstract class EntityMutation extends ModelAwareMutation
      */
     public function args()
     {
-        $inputTypeName = studly_case($this->name()) . 'Input';
+        $inputTypeName = studly_case($this->name()).'Input';
 
         return [
             'input' => Bakery::nonNull(Bakery::type($inputTypeName)),

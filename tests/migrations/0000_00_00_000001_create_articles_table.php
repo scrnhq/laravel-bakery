@@ -25,6 +25,7 @@ class CreateArticlesTable extends Migration
                 ->onDelete('cascade');
         });
     }
+
     public function down()
     {
         Schema::drop('articles');

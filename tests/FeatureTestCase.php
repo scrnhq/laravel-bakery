@@ -2,8 +2,6 @@
 
 namespace Bakery\Tests;
 
-use Bakery\Tests\Stubs;
-use Bakery\Tests\Models;
 use Bakery\Tests\Stubs\Policies;
 use Bakery\BakeryServiceProvider;
 use Bakery\Support\Facades\Bakery;
@@ -32,7 +30,6 @@ class FeatureTestCase extends OrchestraTestCase
         $gate->policy(Models\Comment::class, Policies\CommentPolicy::class);
     }
 
-
     protected function setUp()
     {
         parent::setUp();
@@ -40,8 +37,8 @@ class FeatureTestCase extends OrchestraTestCase
         // Disable exception handling for easer testing.
         $this->withoutExceptionHandling();
 
-        $this->loadMigrationsFrom(__DIR__ . '/migrations');
-        $this->withFactories(__DIR__ . '/factories');
+        $this->loadMigrationsFrom(__DIR__.'/migrations');
+        $this->withFactories(__DIR__.'/factories');
 
         // Set up default schema.
         app()['config']->set('bakery.types', [

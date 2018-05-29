@@ -2,8 +2,6 @@
 
 namespace Bakery\Tests;
 
-use Bakery\Tests\Stubs\Model;
-
 class BakeryServiceProviderTest extends FeatureTestCase
 {
     /** @test */

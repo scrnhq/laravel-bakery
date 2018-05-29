@@ -2,10 +2,9 @@
 
 namespace Bakery;
 
+use Bakery\Events\BakeryModelSaved;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
-
-use Bakery\Events\BakeryModelSaved;
 use Bakery\Listeners\PersistQueuedDatabaseTransactions;
 
 class BakeryServiceProvider extends ServiceProvider
@@ -24,7 +23,7 @@ class BakeryServiceProvider extends ServiceProvider
      */
     private function getConfigPath()
     {
-        return __DIR__ . '/../config/bakery.php';
+        return __DIR__.'/../config/bakery.php';
     }
 
     /**
@@ -104,7 +103,7 @@ class BakeryServiceProvider extends ServiceProvider
      */
     public function registerViews()
     {
-        $this->loadViewsFrom(__DIR__ . '/views', static::$abstract);
+        $this->loadViewsFrom(__DIR__.'/views', static::$abstract);
     }
 
     /**
@@ -122,7 +121,7 @@ class BakeryServiceProvider extends ServiceProvider
 
     protected function loadHelpers()
     {
-        require(__DIR__ . '/helpers.php');
+        require __DIR__.'/helpers.php';
     }
 
     /**

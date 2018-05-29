@@ -10,7 +10,7 @@ class ModelAwareType extends Type
     /**
      * A reference to the class.
      *
-     * @var String
+     * @var string
      */
     protected $class;
 
@@ -41,7 +41,7 @@ class ModelAwareType extends Type
 
         Utils::invariant(
             $this->model instanceof BakeryModel,
-            class_basename($this->model) . ' is not an instance of ' . BakeryModel::class
+            class_basename($this->model).' is not an instance of '.BakeryModel::class
         );
     }
 }
