@@ -45,44 +45,57 @@ class CreateInputType extends ModelAwareInputType
      *
      * @return array
      */
-    private function getRelationFields(): array
+    protected function getRelationFields(): array
     {
-        $fields = [];
-
-        collect($this->model->getRelations())->each(function ($type, $relation) use (&$fields) {
+        return collect($this->model->getRelations())->keys()->reduce(function ($fields, $relation) {
             $model = $this->model->getModel();
 
             Utils::invariant(
                 method_exists($model, $relation),
-                'Relation '.$relation.' does not exist as method on model '.$model
+                'Relation '.$relation.' does not exist as method on model '.class_basename($model)
             );
 
             $relationship = $model->{$relation}();
-            $inputType = $this->inputTypeName($relationship);
 
             Utils::invariant(
                 $relationship instanceof Relation,
-                'Relation '.$relation.' on '.$model.' does not return an Eloquent relationship'
+                'Relation '.$relation.' on '.class_basename($model).' does not return an instance of '.Relation::class
             );
 
-            if (Utils::pluralRelationship($relationship)) {
-                $name = str_singular($relation).'Ids';
-                $fields[$name] = Bakery::listOf(Bakery::ID());
+            return $fields->merge($this->getFieldsForRelation($relation, $relationship));
+        }, collect())->toArray();
+    }
 
-                if (Bakery::hasType($inputType)) {
-                    $fields[$relation] = Bakery::listOf(Bakery::type($inputType));
-                }
+    /**
+     * Set the relation fields.
+     *
+     * @param string $relation
+     * @param Relation $relationship
+     * @param array $fields
+     * @return void
+     */
+    protected function getFieldsForRelation(string $relation, Relation $relationship): array
+    {
+        $fields = [];
+        $inputType = $this->inputTypeName($relationship);
+
+        if (Utils::pluralRelationship($relationship)) {
+            $name = str_singular($relation).'Ids';
+            $fields[$name] = Bakery::listOf(Bakery::ID());
+
+            if (Bakery::hasType($inputType)) {
+                $fields[$relation] = Bakery::listOf(Bakery::type($inputType));
             }
+        }
 
-            if (Utils::singularRelationship($relationship)) {
-                $name = str_singular($relation).'Id';
-                $fields[$name] = Bakery::ID();
+        if (Utils::singularRelationship($relationship)) {
+            $name = str_singular($relation).'Id';
+            $fields[$name] = Bakery::ID();
 
-                if (Bakery::hasType($inputType)) {
-                    $fields[$relation] = Bakery::type($inputType);
-                }
+            if (Bakery::hasType($inputType)) {
+                $fields[$relation] = Bakery::type($inputType);
             }
-        });
+        }
 
         return $fields;
     }
@@ -93,7 +106,7 @@ class CreateInputType extends ModelAwareInputType
      * @param Relation $relationship
      * @return string
      */
-    private function inputTypeName(Relation $relationship): string
+    protected function inputTypeName(Relation $relationship): string
     {
         return 'Create'.class_basename($relationship->getRelated()).'Input';
     }

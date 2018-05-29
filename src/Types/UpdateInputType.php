@@ -8,6 +8,7 @@ use Bakery\Support\Facades\Bakery;
 use GraphQL\Type\Definition\NonNull;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations;
+use Illuminate\Database\Eloquent\Relations\Relation;
 
 class UpdateInputType extends ModelAwareInputType
 {
@@ -60,36 +61,69 @@ class UpdateInputType extends ModelAwareInputType
      *
      * @return array
      */
-    private function getRelationFields(): array
+    protected function getRelationFields(): array
+    {
+        return collect($this->model->getRelations())->keys()->reduce(function ($fields, $relation) {
+            $model = $this->model->getModel();
+
+            Utils::invariant(
+                method_exists($model, $relation),
+                'Relation '.$relation.' does not exist as method on model '.class_basename($model)
+            );
+
+            $relationship = $model->{$relation}();
+
+            Utils::invariant(
+                $relationship instanceof Relation,
+                'Relation '.$relation.' on '.class_basename($model).' does not return an instance of '.Relation::class
+            );
+
+            return $fields->merge($this->getFieldsForRelation($relation, $relationship));
+        }, collect())->toArray();
+    }
+
+    /**
+     * Set the relation fields.
+     *
+     * @param string $relation
+     * @param Relation $relationship
+     * @param array $fields
+     * @return void
+     */
+    protected function getFieldsForRelation(string $relation, Relation $relationship): array
     {
         $fields = [];
+        $inputType = $this->inputTypeName($relationship);
 
-        $model = $this->model->getModel();
-        foreach ($model->getFillable() as $fillable) {
-            if (method_exists($model, $fillable)) {
-                $relationship = $model->{$fillable}();
-                $inputType = 'Create'.class_basename($relationship->getRelated()).'Input';
+        if (Utils::pluralRelationship($relationship)) {
+            $name = str_singular($relation).'Ids';
+            $fields[$name] = Bakery::listOf(Bakery::ID());
 
-                if ($relationship instanceof Relations\HasMany || $relationship instanceof Relations\BelongsToMany) {
-                    $name = str_singular($fillable).'Ids';
-                    $fields[$name] = Bakery::listOf(Bakery::ID());
+            if (Bakery::hasType($inputType)) {
+                $fields[$relation] = Bakery::listOf(Bakery::type($inputType));
+            }
+        }
 
-                    if (Bakery::hasType($inputType)) {
-                        $fields[$fillable] = Bakery::listOf(Bakery::type($inputType));
-                    }
-                }
+        if (Utils::singularRelationship($relationship)) {
+            $name = str_singular($relation).'Id';
+            $fields[$name] = Bakery::ID();
 
-                if ($relationship instanceof Relations\BelongsTo || $relationship instanceof Relations\HasOne) {
-                    $name = str_singular($fillable).'Id';
-                    $fields[$name] = Bakery::ID();
-
-                    if (Bakery::hasType($inputType)) {
-                        $fields[$fillable] = Bakery::type($inputType);
-                    }
-                }
+            if (Bakery::hasType($inputType)) {
+                $fields[$relation] = Bakery::type($inputType);
             }
         }
 
         return $fields;
+    }
+
+    /**
+     * Generate the input type name for a relationship.
+     *
+     * @param Relation $relationship
+     * @return string
+     */
+    protected function inputTypeName(Relation $relationship): string
+    {
+        return 'Update'.class_basename($relationship->getRelated()).'Input';
     }
 }
