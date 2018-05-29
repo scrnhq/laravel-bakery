@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations;
 use Illuminate\Database\Eloquent\Relations\Relation;
 
-class UpdateInputType extends ModelAwareInputType
+class UpdateInputType extends MutationInputType
 {
     /**
      * Get the name of the Update Input Type.
@@ -54,66 +54,6 @@ class UpdateInputType extends ModelAwareInputType
     private function getFillableFields(): array
     {
         return Utils::nullifyFields($this->model->getFillableFields())->toArray();
-    }
-
-    /**
-     * Get the fields for the relations of the model.
-     *
-     * @return array
-     */
-    protected function getRelationFields(): array
-    {
-        return collect($this->model->getRelations())->keys()->reduce(function ($fields, $relation) {
-            $model = $this->model->getModel();
-
-            Utils::invariant(
-                method_exists($model, $relation),
-                'Relation '.$relation.' does not exist as method on model '.class_basename($model)
-            );
-
-            $relationship = $model->{$relation}();
-
-            Utils::invariant(
-                $relationship instanceof Relation,
-                'Relation '.$relation.' on '.class_basename($model).' does not return an instance of '.Relation::class
-            );
-
-            return $fields->merge($this->getFieldsForRelation($relation, $relationship));
-        }, collect())->toArray();
-    }
-
-    /**
-     * Set the relation fields.
-     *
-     * @param string $relation
-     * @param Relation $relationship
-     * @param array $fields
-     * @return void
-     */
-    protected function getFieldsForRelation(string $relation, Relation $relationship): array
-    {
-        $fields = [];
-        $inputType = $this->inputTypeName($relationship);
-
-        if (Utils::pluralRelationship($relationship)) {
-            $name = str_singular($relation).'Ids';
-            $fields[$name] = Bakery::listOf(Bakery::ID());
-
-            if (Bakery::hasType($inputType)) {
-                $fields[$relation] = Bakery::listOf(Bakery::type($inputType));
-            }
-        }
-
-        if (Utils::singularRelationship($relationship)) {
-            $name = str_singular($relation).'Id';
-            $fields[$name] = Bakery::ID();
-
-            if (Bakery::hasType($inputType)) {
-                $fields[$relation] = Bakery::type($inputType);
-            }
-        }
-
-        return $fields;
     }
 
     /**
