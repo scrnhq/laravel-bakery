@@ -54,15 +54,17 @@ class EntityType extends ModelAwareType
     {
         $policy = $field['policy'];
 
+        // Check if the policy method is callable
         if (is_callable($policy)) {
-            // Check if the policy method is callable
             if (! $policy($source, $args, $viewer)) {
                 throw new AuthorizationException(
                     'Cannot read property '.$key.' of '.$this->name
                 );
             }
-        } elseif (is_string($policy)) {
-            // Check if there is a policy with this name
+        }
+        
+        // Check if there is a policy with this name
+        if (is_string($policy)) {
             $gate = app(Gate::class)->forUser($viewer);
             if (! $gate->check($policy, $source)) {
                 throw new AuthorizationException('Cannot read property '.$key.' of '.$this->name);
