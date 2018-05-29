@@ -234,6 +234,7 @@ class BakeryModel
             $instance = Bakery::create($this->model);
             $instance->fill($input);
             $instance->save();
+
             return $instance;
         });
     }
@@ -249,6 +250,7 @@ class BakeryModel
         return DB::transaction(function () use ($input) {
             $this->fill($input);
             $this->save();
+
             return $this;
         });
     }

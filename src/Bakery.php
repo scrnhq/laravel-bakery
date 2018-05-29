@@ -200,7 +200,7 @@ class Bakery
     }
 
     /**
-     * Wrap a fresh new Eloquent model in a BaeryModel
+     * Wrap a fresh new Eloquent model in a BaeryModel.
      *
      * @param mixed $model
      * @return BakeryModel

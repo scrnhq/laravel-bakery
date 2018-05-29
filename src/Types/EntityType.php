@@ -62,7 +62,7 @@ class EntityType extends ModelAwareType
                 );
             }
         }
-        
+
         // Check if there is a policy with this name
         if (is_string($policy)) {
             $gate = app(Gate::class)->forUser($viewer);
