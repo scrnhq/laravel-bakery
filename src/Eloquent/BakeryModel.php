@@ -9,7 +9,6 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Bakery\Events\BakeryModelSaved;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Contracts\Auth\Access\Gate;
 use Bakery\Eloquent\Concerns\QueuesTransactions;
 use Bakery\Eloquent\Concerns\InteractsWithRelations;
