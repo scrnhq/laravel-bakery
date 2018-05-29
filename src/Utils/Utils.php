@@ -72,6 +72,13 @@ class Utils
                $relationship instanceof Relations\HasOne;
     }
 
+    public static function normalizeFields($fields): Collection
+    {
+        return collect($fields)->map(function ($field) {
+            return self::toFieldArray($field);
+        });
+    }
+
     public static function nullifyField($field): array
     {
         $field = self::toFieldArray($field);

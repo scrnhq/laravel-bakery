@@ -11,11 +11,13 @@ use Bakery\Events\BakeryModelSaved;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Contracts\Auth\Access\Gate;
+use Bakery\Eloquent\Concerns\QueuesTransactions;
 use Bakery\Eloquent\Concerns\InteractsWithRelations;
 use Bakery\Eloquent\Concerns\InteractsWithAttributes;
 
 class BakeryModel
 {
+    use QueuesTransactions;
     use InteractsWithRelations;
     use InteractsWithAttributes;
 
@@ -65,14 +67,6 @@ class BakeryModel
     public static $readOnly = false;
 
     /**
-     * The queue of closures that should be called
-     * after the entity is persisted.
-     *
-     * @var array
-     */
-    private $transactionQueue = [];
-
-    /**
      * Construct a new Bakery Model.
      *
      * You can either pass in the model or define it as a property when
@@ -102,19 +96,22 @@ class BakeryModel
         $this->policy = $this->gate->getPolicyFor($this->instance);
     }
 
-    private function normalizeFields(Collection $fields): Collection
-    {
-        return $fields->map(function ($field) {
-            return Utils::toFieldArray($field);
-        });
-    }
-
-    public function getModel()
+    /**
+     * Get the model instance.
+     *
+     * @return Model
+     */
+    public function getModel(): Model
     {
         return $this->instance;
     }
 
-    public function getModelClass()
+    /**
+     * Get the class of the model.
+     *
+     * @return string
+     */
+    public function getModelClass(): string
     {
         return $this->model;
     }
@@ -129,6 +126,11 @@ class BakeryModel
         return [];
     }
 
+    /**
+     * Get the key (ID) field.
+     *
+     * @return array
+     */
     private function getKeyField(): array
     {
         return [
@@ -136,16 +138,28 @@ class BakeryModel
         ];
     }
 
+    /**
+     * Get all the readable fields.
+     *
+     * @return Collection
+     */
     final public function getFields(): Collection
     {
         return collect($this->getKeyField())->merge(
-            $this->normalizeFields(collect($this->fields()))
+            Utils::normalizeFields(collect($this->fields()))
         );
     }
 
+    /**
+     * Get the fields that can be filled.
+     *
+     * This excludes the ID field.
+     *
+     * @return Collection
+     */
     final public function getFillableFields(): Collection
     {
-        return $this->normalizeFields(collect($this->fields()));
+        return Utils::normalizeFields(collect($this->fields()));
     }
 
     /**
@@ -185,24 +199,14 @@ class BakeryModel
         return [];
     }
 
+    /**
+     * Get the relational fields.
+     *
+     * @return Collection
+     */
     final public function getRelations(): Collection
     {
-        return $this->normalizeFields(collect($this->relations()));
-    }
-
-    private function bootQuery(): Builder
-    {
-        return $this->getModel()->query();
-    }
-
-    final public function query(): Builder
-    {
-        return $this->scopeQuery($this->bootQuery());
-    }
-
-    public function scopeQuery(Builder $query): Builder
-    {
-        return $query;
+        return Utils::normalizeFields(collect($this->relations()));
     }
 
     /**
@@ -327,19 +331,6 @@ class BakeryModel
         return collect($attributes)->filter(function ($value, $key) {
             return in_array($key, $this->connections());
         })->toArray();
-    }
-
-    /**
-     * Persist the DB transactions that are queued.
-     *
-     * @return void
-     */
-    public function persistQueuedDatabaseTransactions()
-    {
-        foreach ($this->transactionQueue as $key => $closure) {
-            $closure($this);
-            unset($this->transactionQueue[$key]);
-        }
     }
 
     /**
