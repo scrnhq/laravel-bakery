@@ -7,7 +7,6 @@ use GraphQL\Type\Definition\Type;
 use Bakery\Support\Facades\Bakery;
 use GraphQL\Type\Definition\NonNull;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations;
 use Illuminate\Database\Eloquent\Relations\Relation;
 
 class UpdateInputType extends MutationInputType

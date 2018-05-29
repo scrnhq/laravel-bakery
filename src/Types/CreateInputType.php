@@ -4,8 +4,6 @@ namespace Bakery\Types;
 
 use Bakery\Utils\Utils;
 use GraphQL\Type\Definition\Type;
-use Bakery\Support\Facades\Bakery;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
 
 class CreateInputType extends MutationInputType
