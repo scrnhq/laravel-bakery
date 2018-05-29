@@ -6,6 +6,7 @@ use Bakery\Tests\Stubs\Policies;
 use Bakery\BakeryServiceProvider;
 use Bakery\Support\Facades\Bakery;
 use Illuminate\Contracts\Auth\Access\Gate;
+use Orchestra\Database\ConsoleServiceProvider;
 use Orchestra\Testbench\TestCase as OrchestraTestCase;
 use Illuminate\Foundation\Testing\Concerns\InteractsWithDatabase;
 
@@ -52,7 +53,10 @@ class FeatureTestCase extends OrchestraTestCase
 
     protected function getPackageProviders($app)
     {
-        return [BakeryServiceProvider::class];
+        return [
+            BakeryServiceProvider::class
+            ConsoleServiceProvider::class,
+        ];
     }
 
     protected function getPackageAliases($app)
