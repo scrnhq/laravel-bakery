@@ -26,7 +26,7 @@ class ModelAwareType extends Type
      *
      * @param string $class
      */
-    public function __construct(string $class)
+    public function __construct(string $class = null)
     {
         if (isset($class)) {
             $this->class = $class;
