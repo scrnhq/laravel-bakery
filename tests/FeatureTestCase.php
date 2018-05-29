@@ -54,7 +54,7 @@ class FeatureTestCase extends OrchestraTestCase
     protected function getPackageProviders($app)
     {
         return [
-            BakeryServiceProvider::class
+            BakeryServiceProvider::class,
             ConsoleServiceProvider::class,
         ];
     }
