@@ -29,23 +29,18 @@ class CollectionSearchType extends ModelAwareInputType
     {
         $fields = [];
 
-        foreach ($this->model->getFields() as $name => $type) {
-            if (is_array($type)) {
-                $type = Type::getNamedType($type['type']);
-            } else {
-                $type = Type::getNamedType($type);
-            }
+        foreach ($this->model->getFields() as $name => $field) {
+            $field = Utils::toFieldArray($field);
+            $type = Type::getNamedType($field['type']);
+
             if ($type instanceof StringType || $type instanceof IDType) {
                 $fields[$name] = Bakery::boolean();
             }
         }
 
-        foreach ($this->model->relations() as $relation => $type) {
-            if (is_array($type)) {
-                $type = Type::getNamedType($type['type']);
-            } else {
-                $type = Type::getNamedType($type);
-            }
+        foreach ($this->model->relations() as $relation => $field) {
+            $field = Utils::toFieldArray($field);
+            $type = Type::getNamedType($field['type']);
             $fields[$relation] = Bakery::type($type->name.'Search');
         }
 

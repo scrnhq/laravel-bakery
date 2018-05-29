@@ -31,12 +31,9 @@ class CollectionFilterType extends ModelAwareInputType
             $fields = array_merge($fields, $this->getFilters($name, $type));
         }
 
-        foreach ($this->model->relations() as $relation => $type) {
-            if (is_array($type)) {
-                $type = Type::getNamedType($type['type']);
-            } else {
-                $type = Type::getNamedType($type);
-            }
+        foreach ($this->model->relations() as $relation => $field) {
+            $field = Utils::toFieldArray($field);
+            $type = Type::getNamedType($field['type']);
 
             $fields[$relation] = Bakery::type($type->name.'Filter');
         }
