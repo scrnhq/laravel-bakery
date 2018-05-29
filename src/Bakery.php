@@ -178,7 +178,7 @@ class Bakery
      * @param Model $model
      * @return BakeryModel
      */
-    public function getModel(Model $model): BakeryModel
+    public function wrapModel(Model $model): BakeryModel
     {
         Utils::invariant(
             array_key_exists(get_class($model), $this->bakeryModels),
@@ -189,19 +189,45 @@ class Bakery
     }
 
     /**
-     * Wrap a new Eloquent model in a Bakery model.
+     * Alias for wrapModel.
      *
      * @param Model $model
      * @return BakeryModel
      */
-    public function newModel(Model $model): BakeryModel
+    public function wrap(Model $model): BakeryModel
     {
+        return $this->wrapModel($model);
+    }
+
+    /**
+     * Wrap a fresh new Eloquent model in a BaeryModel
+     *
+     * @param mixed $model
+     * @return BakeryModel
+     */
+    public function createModel($model): BakeryModel
+    {
+        if (is_object($model)) {
+            $model = get_class($model);
+        }
+
         Utils::invariant(
-            array_key_exists(get_class($model), $this->bakeryModels),
-            class_basename($model).' is not registered as Bakery model'
+            array_key_exists($model, $this->bakeryModels),
+            $model.' is not registered as Bakery model'
         );
 
-        return new $this->bakeryModels[get_class($model)]();
+        return new $this->bakeryModels[$model]();
+    }
+
+    /**
+     * Alias for createModel.
+     *
+     * @param mixed $model
+     * @return BakeryModel
+     */
+    public function create($model): BakeryModel
+    {
+        return $this->createModel($model);
     }
 
     /**

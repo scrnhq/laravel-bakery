@@ -91,9 +91,9 @@ trait InteractsWithRelations
     protected function fillBelongsToRelation(Relations\BelongsTo $relation, $attributes = [])
     {
         $related = Bakery::getModelType($relation->getRelated())
-            ->createWithGraphQLInput($attributes);
+            ->create($attributes);
 
-        $relation->associate($related);
+        $relation->associate($related->getModel());
     }
 
     /**
@@ -105,7 +105,7 @@ trait InteractsWithRelations
      */
     protected function connectHasOneRelation(Relations\HasOne $relation, $id)
     {
-        $model = Bakery::getModel($relation->getRelated()->findOrFail($id));
+        $model = Bakery::wrap($relation->getRelated()->findOrFail($id));
 
         $this->transactionQueue[] = function () use ($model, $relation) {
             $model->setAttribute($relation->getForeignKeyName(), $relation->getParentKey());
@@ -122,7 +122,7 @@ trait InteractsWithRelations
      */
     protected function fillHasOneRelation(Relations\HasOne $relation, $attributes)
     {
-        $model = Bakery::getModel($relation->getRelated());
+        $model = Bakery::wrap($relation->getRelated());
         $model->fill($attributes);
 
         $this->transactionQueue[] = function () use ($model, $relation) {
@@ -155,11 +155,11 @@ trait InteractsWithRelations
     protected function fillHasManyRelation(Relations\HasMany $relation, array $values)
     {
         $this->transactionQueue[] = function () use ($relation, $values) {
-            $model = Bakery::getModel($relation->getRelated());
+            $model = Bakery::wrap($relation->getRelated());
             $model->delete();
 
             foreach ($values as $attributes) {
-                $model = Bakery::newModel($relation->getRelated());
+                $model = Bakery::create($relation->getRelated());
                 $model->fill($attributes);
                 $model->setAttribute($relation->getForeignKeyName(), $relation->getParentKey());
                 $model->save();
@@ -193,7 +193,7 @@ trait InteractsWithRelations
         $related = $relation->getRelated();
 
         foreach ($value as $attributes) {
-            $instances[] = $related->createWithGraphQLInput($attributes);
+            $instances[] = $related->create($attributes);
         }
 
         $this->transactionQueue[] = function (Model $model) use ($relation, $instances) {

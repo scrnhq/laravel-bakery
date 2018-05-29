@@ -25,8 +25,8 @@ class CreateMutation extends EntityMutation
         $this->authorize($this->action, $this->model->getModel());
 
         $input = $args['input'];
-        $model = $this->model->createWithGraphQLInput($input);
+        $model = $this->model->create($input);
 
-        return $model;
+        return $model->getModel();
     }
 }

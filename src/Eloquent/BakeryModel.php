@@ -12,20 +12,47 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Contracts\Auth\Access\Gate;
 use Bakery\Eloquent\Concerns\InteractsWithRelations;
+use Bakery\Eloquent\Concerns\InteractsWithAttributes;
 
 class BakeryModel
 {
     use InteractsWithRelations;
+    use InteractsWithAttributes;
 
+    /**
+     * The class of the Eloquent model.
+     *
+     * @var string
+     */
     protected $model;
 
-    protected $lookupFields = [];
-
+    /**
+     * The underlying instance of the Eloquent model.
+     *
+     * @var Model
+     */
     private $instance;
 
+    /**
+     * Reference to the Laravel gate.
+     *
+     * @var Gate
+     */
     private $gate;
 
+    /**
+     * Reference to the Policy of the model.
+     *
+     * @var Policy
+     */
     private $policy;
+
+    /**
+     * The fields that can be used to lookup the model.
+     *
+     * @var array
+     */
+    protected $lookupFields = [];
 
     /**
      * A static property that tells Bakery
@@ -45,6 +72,14 @@ class BakeryModel
      */
     private $transactionQueue = [];
 
+    /**
+     * Construct a new Bakery Model.
+     *
+     * You can either pass in the model or define it as a property when
+     * extending the class.
+     *
+     * @param Model $model
+     */
     public function __construct(Model $model = null)
     {
         if (isset($model)) {
@@ -193,14 +228,13 @@ class BakeryModel
      * @param array $input
      * @return self
      */
-    public function createWithGraphQLInput(array $input)
+    public function create(array $input)
     {
         return DB::transaction(function () use ($input) {
-            // TODO: How do we make sure we have a fresh model here?
-            $this->fill($input);
-            $this->save();
-
-            return $this->instance->fresh();
+            $instance = Bakery::create($this->model);
+            $instance->fill($input);
+            $instance->save();
+            return $instance;
         });
     }
 
@@ -210,16 +244,21 @@ class BakeryModel
      * @param array $input
      * @return self
      */
-    public function updateWithGraphQLInput(array $input)
+    public function update(array $input)
     {
         return DB::transaction(function () use ($input) {
             $this->fill($input);
             $this->save();
-
             return $this;
         });
     }
 
+    /**
+     * Fill the underlying model with input.
+     *
+     * @param array $input
+     * @return self
+     */
     public function fill(array $input)
     {
         $scalars = $this->getFillableScalars($input);
@@ -233,6 +272,11 @@ class BakeryModel
         return $this;
     }
 
+    /**
+     * Save the underlying method.
+     *
+     * @return self
+     */
     public function save()
     {
         $this->instance->save();
@@ -284,42 +328,6 @@ class BakeryModel
     }
 
     /**
-     * Fill the scalars in the model.
-     *
-     * @param array $scalars
-     */
-    protected function fillScalars(array $scalars)
-    {
-        foreach ($scalars as $key => $value) {
-            try {
-                $this->fillScalar($key, $value);
-            } catch (Exception $previous) {
-                throw new UserError('Could not set '.$key, [
-                    $key => $previous->getMessage(),
-                ]);
-            }
-        }
-    }
-
-    /**
-     * Fill a scalar.
-     *
-     * @param string $key
-     * @param mixed $value
-     * @return void
-     */
-    protected function fillScalar(string $key, $value)
-    {
-        $policyMethod = 'set'.studly_case($key);
-
-        if (method_exists($this->policy, $policyMethod)) {
-            $this->gate->authorize($policyMethod, [$this, $value]);
-        }
-
-        return $this->instance->setAttribute($key, $value);
-    }
-
-    /**
      * Persist the DB transactions that are queued.
      *
      * @return void
@@ -332,8 +340,15 @@ class BakeryModel
         }
     }
 
+    /**
+     * Pass through method calls to the underlying model.
+     *
+     * @param string $name
+     * @param array $arguments
+     * @return mixed
+     */
     public function __call($name, $arguments)
     {
-        $this->instance->{$name}(...$arguments);
+        return $this->instance->{$name}(...$arguments);
     }
 }

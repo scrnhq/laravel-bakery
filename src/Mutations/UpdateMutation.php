@@ -45,7 +45,7 @@ class UpdateMutation extends EntityMutation
         $this->authorize($this->action, $model->getModel());
 
         $input = $args['input'];
-        $model->updateWithGraphQLInput($input);
+        $model->update($input);
 
         return $model->getModel();
     }
@@ -61,7 +61,7 @@ class UpdateMutation extends EntityMutation
         $primaryKey = $this->model->getKeyName();
 
         if (array_key_exists($primaryKey, $args)) {
-            return $this->model->findOrFail($args[$primaryKey]);
+            return Bakery::wrap($this->model->findOrFail($args[$primaryKey]));
         }
 
         $query = $this->model->query();
@@ -81,6 +81,6 @@ class UpdateMutation extends EntityMutation
             throw (new TooManyResultsException)->setModel($this->class, $results->pluck($this->model->getKeyName()));
         }
 
-        return Bakery::getModel($results->first());
+        return Bakery::wrap($results->first());
     }
 }
