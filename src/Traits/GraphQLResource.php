@@ -2,7 +2,10 @@
 
 namespace Bakery\Traits;
 
-use Bakery\Events\GraphQLResourceSaved;
+use Exception;
+use GraphQL\Error\Error;
+use Bakery\Exceptions\UserError;
+use Bakery\Events\BakeryModelSaved;
 use Illuminate\Contracts\Auth\Access\Gate;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -35,7 +38,7 @@ trait GraphQLResource
     protected function fireCustomModelEvent($event, $method)
     {
         if ($event === 'saved') {
-            $result = static::$dispatcher->$method(new GraphQLResourceSaved($this));
+            $result = static::$dispatcher->$method(new BakeryModelSaved($this));
         } else {
             $result = parent::fireCustomModelEvent($event, $method);
         }
@@ -203,16 +206,30 @@ trait GraphQLResource
      */
     protected function fillScalars(array $scalars)
     {
+        foreach ($scalars as $key => $value) {
+            try {
+                $this->fillScalar($key, $value);
+            } catch (Exception $previous) {
+                throw new UserError('Could not set ' . $key, [
+                    $key => $previous->getMessage(),
+                ]);
+            }
+        }
+    }
+
+    protected function fillScalar(string $key, $value)
+    {
+        // TODO: Extract this
         $gate = app(Gate::class);
         $policy = $gate->getPolicyFor($this);
 
-        foreach ($scalars as $key => $value) {
-            $policyMethod = 'set' . studly_case($key);
-            if (method_exists($policy, $policyMethod)) {
-                $gate->authorize($policyMethod, [$this, $value]);
-            }
+        $policyMethod = 'set' . studly_case($key);
+
+        if (method_exists($policy, $policyMethod)) {
+            $gate->authorize($policyMethod, [$this, $value]);
         }
-        $this->fill($scalars);
+
+        return $this->setAttribute($key, $value);
     }
 
     /**
@@ -499,7 +516,7 @@ trait GraphQLResource
      *
      * @return void
      */
-    public function persistQueuedGraphQLDatabaseTransactions()
+    public function persistGraphQLDatabaseTransactions()
     {
         foreach ($this->bakeryTransactionQueue as $key => $closure) {
             $closure($this);

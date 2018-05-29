@@ -2,6 +2,7 @@
 
 namespace Bakery\Queries;
 
+use Bakery\Utils\Utils;
 use Bakery\Exceptions\PaginationMaxCountExceededException;
 use Bakery\Support\Facades\Bakery;
 use Bakery\Traits\JoinsRelationships;
@@ -30,7 +31,7 @@ class CollectionQuery extends EntityQuery
      */
     protected function name(): string
     {
-        return camel_case(str_plural(class_basename($this->class)));
+        return Utils::plural($this->model->getModel());
     }
 
     /**
@@ -40,7 +41,7 @@ class CollectionQuery extends EntityQuery
      */
     protected function typeName(): string
     {
-        return studly_case(str_singular(class_basename($this->class)));
+        return Utils::typeName($this->model->getModel());
     }
 
     /**
@@ -61,8 +62,8 @@ class CollectionQuery extends EntityQuery
     public function args(): array
     {
         $args = [
-            'page' => Bakery::int(),
-            'count' => Bakery::int(),
+            'page' => Type::int(),
+            'count' => Type::int(),
             'filter' => Bakery::type($this->typeName() . 'Filter'),
             'search' => Bakery::type($this->typeName() . 'RootSearch'),
         ];
@@ -93,8 +94,12 @@ class CollectionQuery extends EntityQuery
             throw new PaginationMaxCountExceededException($maxCount);
         }
 
-        $query = $this->model->where(function ($query) use ($viewer, $args) {
-            return $this->scopeQuery($query->authorizedForReading($viewer), $args, $viewer);
+        $query = $this->model->getModel()->where(function ($query) use ($viewer, $args) {
+            return $this->scopeQuery(
+                $this->model->query($viewer),
+                $args,
+                $viewer
+            );
         });
 
         if (array_key_exists('filter', $args) && !empty($args['filter'])) {
@@ -110,25 +115,6 @@ class CollectionQuery extends EntityQuery
         }
 
         return $query->paginate($count, ['*'], 'page', $page);
-    }
-
-    /**
-     * CollectionQuery constructor.
-     *
-     * @param string|null $class
-     * @throws \Exception
-     */
-    public function __construct(string $class = null)
-    {
-        if (isset($class)) {
-            $this->class = $class;
-        }
-
-        if (!isset($this->class)) {
-            throw new \Exception('No class defined for the collection query.');
-        }
-
-        $this->model = resolve($this->class);
     }
 
     /**
@@ -181,7 +167,9 @@ class CollectionQuery extends EntityQuery
                     }
                 });
             } else {
-                if (in_array($key, array_keys($query->getModel()->relations()))) {
+                $model = Utils::typename($query->getModel());
+                $relations = Bakery::getModelType($model)->relations();
+                if (in_array($key, array_keys($relations))) {
                     $this->applyRelationFilter($query, $key, $value, $type);
                 } else {
                     $this->filter($query, $key, $value, $type);

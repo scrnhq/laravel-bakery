@@ -2,43 +2,22 @@
 
 namespace Bakery\Types;
 
+use Bakery\Utils\Utils;
 use GraphQL\Type\Definition\Type;
 use Bakery\Support\Facades\Bakery;
 use Illuminate\Database\Eloquent\Model;
 use GraphQL\Type\Definition\ListOfType;
 
-class CollectionFilterType extends InputType
+class CollectionFilterType extends ModelAwareInputType
 {
     /**
-     * The name of the type.
+     * Get the name of the Collection Filter Type.
      *
-     * @var string
+     * @return string
      */
-    protected $name;
-
-    /**
-     * A reference to the model.
-     *
-     * @var Model
-     */
-    protected $model;
-
-    /**
-     * Define the collection filter type as an input type.
-     *
-     * @var boolean
-     */
-    protected $input = true;
-
-    /**
-     * Construct a new collection filter type.
-     *
-     * @param string $class
-     */
-    public function __construct(string $class)
+    protected function name(): string
     {
-        $this->name = class_basename($class) . 'Filter';
-        $this->model = app($class);
+        return Utils::typename($this->model->getModel()) . 'Filter';
     }
 
     /**
@@ -50,7 +29,7 @@ class CollectionFilterType extends InputType
     {
         $fields = [];
 
-        foreach ($this->model->fields() as $name => $type) {
+        foreach ($this->model->getFields() as $name => $type) {
             $fields = array_merge($fields, $this->getFilters($name, $type));
         }
 
@@ -60,12 +39,12 @@ class CollectionFilterType extends InputType
             } else {
                 $type = Type::getNamedType($type);
             }
-            $type = Type::getNamedType($type);
-            $fields[$relation] = Bakery::getType($type->name . 'Filter');
+
+            $fields[$relation] = Bakery::type($type->name . 'Filter');
         }
 
-        $fields['AND'] = Bakery::listOf(Bakery::getType($this->name));
-        $fields['OR'] = Bakery::listOf(Bakery::getType($this->name));
+        $fields['AND'] = Bakery::listOf(Bakery::type($this->name));
+        $fields['OR'] = Bakery::listOf(Bakery::type($this->name));
 
         return $fields;
     }
@@ -84,6 +63,7 @@ class CollectionFilterType extends InputType
         } else {
             $type = Type::getNamedType($type);
         }
+
         $fields = [];
 
         if (!Type::isLeafType($type)) {

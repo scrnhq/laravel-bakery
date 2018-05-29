@@ -3,14 +3,12 @@
 namespace Bakery\Tests\Traits;
 
 use Bakery\Tests\Stubs;
-use Bakery\Tests\Stubs\Post;
-use Bakery\Tests\Stubs\User;
+use Bakery\Tests\Models\User;
+use Bakery\Tests\Models\Article;
+
 use Bakery\Tests\TestCase;
 use Bakery\Tests\WithDatabase;
 use Bakery\Traits\JoinsRelationships;
-use Illuminate\Contracts\Auth\Access\Gate;
-use Illuminate\Auth\Access\AuthorizationException;
-use Illuminate\Database\Query\JoinClause;
 
 class JoinsRelationshipsTest extends TestCase
 {
@@ -19,11 +17,11 @@ class JoinsRelationshipsTest extends TestCase
     /** @test */
     public function it_can_join_a_belongs_to_relation()
     {
-        $posts = Post::query();
+        $articles = Article::query();
 
-        $this->joinRelation($posts, 'user');
+        $this->joinRelation($articles, 'user');
 
-        $this->assertEquals('select `posts`.* from `posts` inner join `users` on `users`.`id` = `posts`.`user_id`', $posts->toSql());
+        $this->assertEquals('select `articles`.* from `articles` inner join `users` on `users`.`id` = `articles`.`user_id`', $articles->toSql());
     }
 
     /** @test */
@@ -41,8 +39,8 @@ class JoinsRelationshipsTest extends TestCase
     {
         $users = User::query();
 
-        $this->joinRelation($users, 'posts');
+        $this->joinRelation($users, 'articles');
 
-        $this->assertEquals('select `users`.* from `users` inner join `posts` on `posts`.`user_id` = `users`.`id`', $users->toSql());
+        $this->assertEquals('select `users`.* from `users` inner join `articles` on `articles`.`user_id` = `users`.`id`', $users->toSql());
     }
 }

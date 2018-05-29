@@ -35,9 +35,7 @@ class DeleteMutation extends EntityMutation
      */
     public function args()
     {
-        return array_merge([
-            $this->model->getKeyName() => Bakery::ID(),
-        ], $this->model->lookupFields());
+        return $this->model->getLookupFields();
     }
 
     /**

@@ -2,10 +2,11 @@
 
 namespace Bakery;
 
-use Bakery\Events\GraphQLResourceSaved;
-use Bakery\Listeners\PersistQueuedGraphQLDatabaseTransactions;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
+
+use Bakery\Events\BakeryModelSaved;
+use Bakery\Listeners\PersistQueuedDatabaseTransactions;
 
 class BakeryServiceProvider extends ServiceProvider
 {
@@ -113,7 +114,10 @@ class BakeryServiceProvider extends ServiceProvider
      */
     protected function registerListeners()
     {
-        Event::listen(GraphQLResourceSaved::class, PersistQueuedGraphQLDatabaseTransactions::class);
+        Event::listen(
+            BakeryModelSaved::class,
+            PersistQueuedDatabaseTransactions::class
+        );
     }
 
     protected function loadHelpers()

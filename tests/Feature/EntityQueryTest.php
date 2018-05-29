@@ -2,41 +2,25 @@
 
 namespace Bakery\Tests\Feature;
 
-use Bakery\Exceptions\TooManyResultsException;
+use Bakery\Tests\Models;
 use Bakery\Tests\Stubs;
-use Bakery\Tests\TestCase;
 use Bakery\Tests\WithDatabase;
-use Eloquent;
-use Illuminate\Auth\Access\AuthorizationException;
-use Illuminate\Contracts\Auth\Access\Gate;
+use Bakery\Tests\FeatureTestCase;
+
 use Schema;
+use Eloquent;
+use Illuminate\Contracts\Auth\Access\Gate;
 
-class EntityQueryTest extends TestCase
+class EntityQueryTest extends FeatureTestCase
 {
-    use WithDatabase;
-
-    protected function setUp()
-    {
-        parent::setUp();
-        Eloquent::unguard();
-        app(Gate::class)->policy(Stubs\User::class, Stubs\Policies\UserPolicy::class);
-        $this->migrateDatabase();
-    }
-
-    protected function getEnvironmentSetUp($app)
-    {
-        parent::getEnvironmentSetUp($app);
-        $this->setupDatabase($app);
-    }
-
     /** @test */
     public function it_returns_single_entity()
     {
-        Stubs\Model::create();
+        $article = factory(Models\Article::class)->create();
 
         $query = '
             query {
-                model(id: 1) {
+                article(id: "' . $article->id . '") {
                     id
                 }
             }
@@ -44,18 +28,18 @@ class EntityQueryTest extends TestCase
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
         $response->assertStatus(200);
-        $response->assertJsonStructure(['data' => ['model']]);
-        $this->assertEquals(json_decode($response->getContent())->data->model->id, '1');
+        $response->assertJsonStructure(['data' => ['article']]);
+        $response->assertJsonFragment(['id' => $article->id]);
     }
 
     /** @test */
     public function it_returns_single_entity_for_a_lookup_field()
     {
-        Stubs\Model::create(['slug' => 'test-model']);
+        $article = factory(Models\Article::class)->create();
 
         $query = '
             query {
-                model(slug: "test-model") {
+                article(slug: "' . $article->slug . '") {
                     id
                 }
             }
@@ -63,87 +47,75 @@ class EntityQueryTest extends TestCase
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
         $response->assertStatus(200);
-        $response->assertJsonStructure(['data' => ['model']]);
-        $this->assertEquals(json_decode($response->getContent())->data->model->id, '1');
+        $response->assertJsonStructure(['data' => ['article']]);
+        $response->assertJsonFragment(['id' => $article->id]);
     }
 
     /** @test */
     public function it_returns_null_when_there_are_no_results()
     {
-        Stubs\Model::create(['slug' => 'test-model']);
+        $article = factory(Models\Article::class)->create();
 
         $query = '
             query {
-                model(slug: "foo") {
+                article(slug: "no-match") {
                     id
                 }
             }
         ';
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $response->assertJsonFragment(['model' => null]);
+        $response->assertJsonFragment(['article' => null]);
     }
 
     /** @test */
     public function it_throws_too_many_results_exception_if_lookup_is_not_specific_enough()
     {
-        $this->expectException(TooManyResultsException::class);
-
-        Stubs\Model::create(['slug' => 'test-model']);
-        Stubs\Model::create(['slug' => 'test-model']);
+        $this->withExceptionHandling();
+        factory(Models\Article::class, 2)->create(['slug' => 'slug']);
 
         $query = '
             query {
-                model(slug: "test-model") {
+                article(slug: "slug") {
                     id
                 }
             }
         ';
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
+        $response->assertJsonFragment(['article' => null]);
     }
 
     /** @test */
     public function it_can_lookup_entities_by_relational_fields()
     {
-        $user = Stubs\User::create([
-            'name' => 'John Doe',
-            'email' => 'john.doe@example.com',
-            'password' => 'secret',
-        ]);
-
-        $user->posts()->create([
-            'title' => 'Hello world!',
-            'slug' => 'hello-world',
-        ]);
+        $user = factory(Models\User::class)->create();
+        $article = factory(Models\Article::class)->create(['user_id' => $user->id]);
 
         $query = '
             query {
-                post(user: { email: "john.doe@example.com"}) {
+                article(user: { email: "' . $user->email . '"}) {
                     id
                 }
             }
         ';
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $this->assertEquals(json_decode($response->getContent())->data->post->id, '1');
+        $response->assertJsonFragment(['id' => $article->id]);
     }
 
     /** @test */
     public function it_checks_if_the_viewer_is_not_allowed_to_read_a_field()
     {
-        $this->expectException(AuthorizationException::class);
-
-        $user = Stubs\User::create([
-            'name' => 'John Doe',
-            'email' => 'john.doe@example.com',
-            'password' => 'secret',
-            'secret_information' => 'topsecret',
+        $this->withExceptionHandling();
+        $secret = 'secr3t';
+        $user = factory(Models\User::class)->create([
+            'secret_information' => $secret,
         ]);
 
         $query = '
             query {
-                user(email: "john.doe@example.com") {
+                user(id: "' . $user->id .'") {
                     id
                     secret_information
                 }
@@ -157,18 +129,16 @@ class EntityQueryTest extends TestCase
     /** @test */
     public function it_checks_if_the_viewer_is_allowed_to_read_a_field()
     {
-        $user = Stubs\User::create([
-            'name' => 'John Doe',
-            'email' => 'john.doe@example.com',
-            'password' => 'secret',
-            'secret_information' => 'topsecret',
+        $secret = 'secr3t';
+        $user = factory(Models\User::class)->create([
+            'secret_information' => $secret,
         ]);
 
-        \Auth::login($user);
+        $this->actingAs($user);
 
         $query = '
             query {
-                user(email: "john.doe@example.com") {
+                user(id: "' . $user->id .'") {
                     id
                     secret_information
                 }
@@ -176,80 +146,72 @@ class EntityQueryTest extends TestCase
         ';
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $response->assertJsonFragment(['secret_information' => 'topsecret']);
+        $response->assertJsonFragment(['secret_information' => $secret]);
     }
 
 
     /** @test */
     public function it_checks_if_the_viewer_is_not_allowed_to_read_a_relation()
     {
-        $this->expectException(AuthorizationException::class);
-
-        $user = Stubs\User::create([
-            'name' => 'John Doe',
-            'email' => 'john.doe@example.com',
-            'password' => 'secret',
-            'secret_information' => 'topsecret',
+        $this->withExceptionHandling();
+        $user = factory(Models\User::class)->create();
+        $article = factory(Models\Article::class)->create([
+            'user_id' => $user->id,
         ]);
 
         $query = '
             query {
-                user(email: "john.doe@example.com") {
+                user(id: "' . $user->id . '") {
                     id
-                    phone {
+                    articles {
                         id
+                        title
                     }
                 }
             }
         ';
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $response->assertJsonFragment(['secret_information' => 'topsecret']);
+        $response->assertJsonFragment(['user' => null]);
     }
 
 
     /** @test */
     public function it_checks_if_the_viewer_is_allowed_to_read_a_relation()
     {
-        $user = Stubs\User::create([
-            'name' => 'John Doe',
-            'email' => 'john.doe@example.com',
-            'password' => 'secret',
-            'secret_information' => 'topsecret',
+        $user = factory(Models\User::class)->create();
+        $article = factory(Models\Article::class)->create([
+            'user_id' => $user->id,
         ]);
 
-        \Auth::login($user);
+        $this->actingAs($user);
 
         $query = '
             query {
-                user(email: "john.doe@example.com") {
+                user(id: "' . $user->id . '") {
                     id
-                    phone {
+                    articles {
                         id
+                        title
                     }
                 }
             }
         ';
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $response->assertJsonFragment(['phone' => null]);
+        $response->assertJsonStructure(['data' => ['user' => ['articles' => 'id']]]);
+        $response->assertJsonFragment(['title' => $article->title]);
     }
 
     /** @test */
     public function it_checks_if_the_viewer_is_not_allowed_to_read_a_field_by_policy()
     {
-        $this->expectException(AuthorizationException::class);
-
-        $user = Stubs\User::create([
-            'name' => 'John Doe',
-            'email' => 'john.doe@example.com',
-            'password' => 'secret',
-            'secret_information' => 'topsecret',
-        ]);
+        $this->withExceptionHandling();
+        $user = factory(Models\User::class)->create();
 
         $query = '
             query {
-                user(email: "john.doe@example.com") {
+                user(id: "' . $user->id . '") {
                     id
                     password
                 }
@@ -257,24 +219,19 @@ class EntityQueryTest extends TestCase
         ';
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $response->assertJsonFragment(['password' => null]);
+        $response->assertJsonFragment(['user' => null]);
     }
 
     /** @test */
     public function it_checks_if_the_viewer_is_allowed_to_read_a_field_by_policy()
     {
-        $user = Stubs\User::create([
-            'name' => 'John Doe',
-            'email' => 'john.doe@example.com',
-            'password' => 'secret',
-            'secret_information' => 'topsecret',
-        ]);
+        $user = factory(Models\User::class)->create();
 
-        \Auth::login($user);
+        $this->actingAs($user);
 
         $query = '
             query {
-                user(email: "john.doe@example.com") {
+                user(id: "' . $user->id . '") {
                     id
                     password
                 }

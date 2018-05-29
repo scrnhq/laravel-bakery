@@ -2,9 +2,12 @@
 
 namespace Bakery\Mutations;
 
-use Bakery\Exceptions\TooManyResultsException;
+use Bakery\Utils\Utils;
+use Bakery\Eloquent\BakeryModel;
 use GraphQL\Type\Definition\Type;
+use Bakery\Support\Facades\Bakery;
 use Illuminate\Database\Eloquent\Model;
+use Bakery\Exceptions\TooManyResultsException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class UpdateMutation extends EntityMutation
@@ -23,9 +26,10 @@ class UpdateMutation extends EntityMutation
      */
     public function args()
     {
-        return array_merge(parent::args(), [
-            $this->model->getKeyName() => Type::ID(),
-        ], $this->model->lookupFields());
+        return array_merge(
+            parent::args(),
+            Utils::nullifyFields($this->model->getLookupFields())->toArray()
+        );
     }
 
     /**
@@ -37,13 +41,14 @@ class UpdateMutation extends EntityMutation
      */
     public function resolve($root, $args = []): Model
     {
+        // TODO: Naming is a bit eh, weird here.
         $model = $this->getModel($args);
-        $this->authorize($this->action, $model);
+        $this->authorize($this->action, $model->getModel());
 
         $input = $args['input'];
         $model->updateWithGraphQLInput($input);
 
-        return $model;
+        return $model->getModel();
     }
 
     /**
@@ -52,7 +57,7 @@ class UpdateMutation extends EntityMutation
      * @param array $args
      * @return Model
      */
-    protected function getModel(array $args): Model
+    protected function getModel(array $args): BakeryModel
     {
         $primaryKey = $this->model->getKeyName();
 
@@ -77,6 +82,6 @@ class UpdateMutation extends EntityMutation
             throw (new TooManyResultsException)->setModel($this->class, $results->pluck($this->model->getKeyName()));
         }
 
-        return $results->first();
+        return Bakery::getModel($results->first());
     }
 }

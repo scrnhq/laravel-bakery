@@ -2,42 +2,23 @@
 
 namespace Bakery\Tests\Feature;
 
-use Bakery\Tests\Stubs;
-use Bakery\Tests\TestCase;
-use Eloquent;
 use Schema;
+use Eloquent;
 
-class CollectionQueryTest extends TestCase
+use Bakery\Tests\Models;
+use Bakery\Tests\Stubs;
+use Bakery\Tests\FeatureTestCase;
+
+class CollectionQueryTest extends FeatureTestCase
 {
-    protected function getEnvironmentSetUp($app)
-    {
-        $this->setupDatabase($app);
-
-        $app['config']->set('bakery.models', [
-            Stubs\Model::class,
-            Stubs\User::class,
-            Stubs\Post::class,
-            Stubs\Comment::class,
-            Stubs\Role::class,
-            Stubs\Phone::class,
-        ]);
-    }
-
-    protected function setUp()
-    {
-        parent::setUp();
-        $this->migrateDatabase();
-        Eloquent::unguard();
-    }
-
     /** @test */
     public function it_returns_collection_of_entities_with_pagination()
     {
-        Stubs\Model::create();
+        factory(Models\Article::class, 3)->create();
 
         $query = '
             query {
-                models {
+                articles {
                     items {
                         id
                     }
@@ -57,7 +38,7 @@ class CollectionQueryTest extends TestCase
         $response->assertStatus(200);
         $response->assertJsonStructure([
             'data' => [
-                'models' => [
+                'articles' => [
                     'items' => [],
                     'pagination' => [
                         'total',
@@ -70,16 +51,17 @@ class CollectionQueryTest extends TestCase
                 ],
             ],
         ]);
+        $response->assertJsonFragment(['total' => 3]);
     }
 
     /** @test */
     public function it_can_fetch_the_next_page()
     {
-        Stubs\Model::create();
+        factory(Models\Article::class, 30)->create();
 
         $query = '
             query {
-                models(page: 2) {
+                articles(page: 2) {
                     items {
                         id
                     }
@@ -103,16 +85,24 @@ class CollectionQueryTest extends TestCase
     /** @test */
     public function it_can_filter_by_its_fields()
     {
-        Stubs\Model::create(['title' => 'foo']);
-        Stubs\Model::create(['title' => 'bar']);
+        factory(Models\Article::class)->create([
+            'title' => 'foo'
+        ]);
+        factory(Models\Article::class)->create([
+            'title' => 'bar'
+        ]);
 
         $query = '
             query {
-                models(filter: {
+                articles(filter: {
                     title: "foo",
                 }) {
                     items {
                         id
+                        title
+                    }
+                    pagination {
+                        total
                     }
                 }
             }
@@ -120,24 +110,29 @@ class CollectionQueryTest extends TestCase
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
         $response->assertStatus(200);
-        $result = json_decode($response->getContent())->data->models;
-        $this->assertCount(1, $result->items);
+        $response->assertJsonFragment(['total' => 1]);
+        $response->assertJsonFragment(['title' => 'foo']);
+        $response->assertJsonMissing(['title' => 'bar']);
     }
 
     /** @test */
     public function it_can_filter_with_dyanmic_field_filters()
     {
-        Stubs\Model::create(['title' => 'Hello world']);
-        Stubs\Model::create(['title' => 'Hello mars']);
-        Stubs\Model::create(['title' => 'Goodbye world']);
+        factory(Models\Article::class)->create(['title' => 'Hello world']);
+        factory(Models\Article::class)->create(['title' => 'Hello mars']);
+        factory(Models\Article::class)->create(['title' => 'Goodbye world']);
 
         $query = '
             query {
-                models(filter: {
+                articles(filter: {
                     title_contains: "hello",
                 }) {
                     items {
                         id
+                        title
+                    }
+                    pagination {
+                        total
                     }
                 }
             }
@@ -145,24 +140,31 @@ class CollectionQueryTest extends TestCase
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
         $response->assertStatus(200);
-        $result = json_decode($response->getContent())->data->models;
-        $this->assertCount(2, $result->items);
+        $response->assertJsonFragment(['total' => 2]);
+        $response->assertJsonFragment(['title' => 'Hello world']);
+        $response->assertJsonFragment(['title' => 'Hello mars']);
+        $response->assertJsonMissing(['title' => 'Goodbye world']);
     }
 
     /** @test */
     public function it_can_filter_with_AND_filters()
     {
-        Stubs\Model::create(['title' => 'Hello world', 'body' => 'Dummy content']);
-        Stubs\Model::create(['title' => 'Hello mars']);
-        Stubs\Model::create(['title' => 'Goodbye world']);
+        factory(Models\Article::class)->create(['title' => 'Hello world', 'content' => 'foo']);
+        factory(Models\Article::class)->create(['title' => 'Hello mars', 'content' => 'bar']);
+        factory(Models\Article::class)->create(['title' => 'Goodbye world', 'content' => 'baz']);
 
         $query = '
             query {
-                models(filter: {
-                    AND: [{title_contains: "hello"}, {body: "Dummy content"}]
+                articles(filter: {
+                    AND: [{title_contains: "hello"}, {content: "foo"}]
                 }) {
                     items {
                         id
+                        title
+                        content
+                    }
+                    pagination {
+                        total
                     }
                 }
             }
@@ -170,25 +172,31 @@ class CollectionQueryTest extends TestCase
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
         $response->assertStatus(200);
-        $result = json_decode($response->getContent())->data->models;
-        $this->assertCount(1, $result->items);
+        $response->assertJsonFragment(['total' => 1]);
+        $response->assertJsonFragment(['title' => 'Hello world', 'content' => 'foo']);
+        $response->assertJsonMissing(['title' => 'Hello mars', 'content' => 'bar']);
+        $response->assertJsonMissing(['title' => 'Goodbye world', 'content' => 'baz']);
     }
 
     /** @test */
     public function it_can_filter_with_OR_filters()
     {
-        Stubs\Model::create(['title' => 'Hello world']);
-        Stubs\Model::create(['title' => 'Hello mars']);
-        Stubs\Model::create(['title' => 'Goodbye world', 'body' => 'Lorem ipsum']);
-        Stubs\Model::create(['title' => 'Something completly different']);
+        factory(Models\Article::class)->create(['title' => 'Hello world', 'content' => 'foo']);
+        factory(Models\Article::class)->create(['title' => 'Hello mars', 'content' => 'bar']);
+        factory(Models\Article::class)->create(['title' => 'Goodbye world', 'content' => 'baz']);
 
         $query = '
             query {
-                models(filter: {
-                    OR: [{title_contains: "hello"}, {body: "Lorem ipsum"}]
+                articles(filter: {
+                    OR: [{title_contains: "hello"}, {content: "bar"}]
                 }) {
                     items {
                         id
+                        title
+                        content
+                    }
+                    pagination {
+                        total
                     }
                 }
             }
@@ -196,50 +204,69 @@ class CollectionQueryTest extends TestCase
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
         $response->assertStatus(200);
-        $result = json_decode($response->getContent())->data->models;
-        $this->assertCount(3, $result->items);
+        $response->assertJsonFragment(['total' => 2]);
+        $response->assertJsonFragment(['title' => 'Hello world', 'content' => 'foo']);
+        $response->assertJsonFragment(['title' => 'Hello mars', 'content' => 'bar']);
+        $response->assertJsonMissing(['title' => 'Goodbye world', 'content' => 'baz']);
     }
 
     /** @test */
     public function it_can_filter_with_AND_and_OR_filters()
     {
-        $userOne = $this->createUser();
-        $userTwo = $this->createUser();
-        Stubs\Post::create(['title' => 'Hello world', 'user_id' => $userOne->id]);
-        Stubs\Post::create(['title' => 'Hello world', 'body' => 'Lorem ipsum', 'user_id' => $userOne->id]);
-        Stubs\Post::create(['title' => 'Hello world', 'body' => 'Lorem ipsum', 'user_id' => $userTwo->id]);
+        $userOne = factory(Models\User::class)->create();
+        $userTwo = factory(Models\User::class)->create();
+        $articleOne = factory(Models\Article::class)->create([
+            'title' => 'Hello world',
+            'content' => 'Lorem ipsum',
+            'user_id' => $userOne->id,
+        ]);
+        $articleTwo = factory(Models\Article::class)->create([
+            'title' => 'Hello world',
+            'content' => 'Lorem ipsum',
+            'user_id' => $userOne->id,
+        ]);
+        $articleThree = factory(Models\Article::class)->create([
+            'title' => 'Hello world',
+            'content' => 'Lorem ipsum',
+            'user_id' => $userTwo->id,
+        ]);
 
         $query = '
             query {
-                posts(filter: {
+                articles(filter: {
                     AND: [
                         { user: { id: "' . $userOne->id . '" } }, 
-                        { OR: [{title_contains: "hello"}, {body: "Lorem Ipsum"}] },
+                        { OR: [{title_contains: "hello"}, {content: "Lorem Ipsum"}] },
                     ]
                 }) {
                     items {
                         id
                     }
+                    pagination {
+                        total
+                    }
                 }
             }
         ';
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
         $response->assertStatus(200);
-        $result = json_decode($response->getContent())->data->posts;
-        $this->assertCount(2, $result->items);
+        $response->assertJsonFragment(['total' => 2]);
+        $response->assertJsonFragment(['id' => $articleOne->id]);
+        $response->assertJsonFragment(['id' => $articleTwo->id]);
+        $response->assertJsonMissing(['id' => $articleThree->id]);
     }
 
     /** @test */
     public function it_can_order_by_field()
     {
-        $first = Stubs\Model::create(['title' => 'Hello mars']);
-        $second = Stubs\Model::create(['title' => 'Hello world']);
-        $third = Stubs\Model::create(['title' => 'Goodbye world']);
+        $first = factory(Models\Article::class)->create(['title' => 'Hello world']);
+        $second = factory(Models\Article::class)->create(['title' => 'Hello mars']);
+        $third = factory(Models\Article::class)->create(['title' => 'Goodbye world']);
 
         $query = '
             query {
-                models(orderBy: title_ASC) {
+                articles(orderBy: title_ASC) {
                     items {
                         id
                     }
@@ -249,65 +276,30 @@ class CollectionQueryTest extends TestCase
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
         $response->assertStatus(200);
-        $result = json_decode($response->getContent())->data->models;
+        $result = json_decode($response->getContent())->data->articles;
         $this->assertEquals($result->items[0]->id, $third->id);
-        $this->assertEquals($result->items[1]->id, $first->id);
-        $this->assertEquals($result->items[2]->id, $second->id);
-    }
-
-    /** @test */
-    public function it_can_order_by_field_with_lower_case()
-    {
-        $first = Stubs\Model::create(['lower_case' => 'Hello mars']);
-        $second = Stubs\Model::create(['lower_case' => 'Hello world']);
-        $third = Stubs\Model::create(['lower_case' => 'Goodbye world']);
-
-        $query = '
-            query {
-                models(orderBy: lower_case_DESC) {
-                    items {
-                        id
-                    }
-                }
-            }
-        ';
-
-        $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $response->assertStatus(200);
-        $result = json_decode($response->getContent())->data->models;
-        $this->assertEquals($result->items[0]->id, $second->id);
-        $this->assertEquals($result->items[1]->id, $first->id);
-        $this->assertEquals($result->items[2]->id, $third->id);
+        $this->assertEquals($result->items[1]->id, $second->id);
+        $this->assertEquals($result->items[2]->id, $first->id);
     }
 
     /** @test */
     public function it_can_filter_by_nested_relations()
     {
-        $firstUser = Stubs\User::create([
-            'name' => 'John Doe',
-            'email' => 'john.doe@example.com',
-            'password' => 'secret',
+        $firstUser = factory(Models\User::class)->create();
+        $secondUser = factory(Models\User::class)->create();
+
+        $phone = factory(Models\Phone::class)->create([
+            'user_id' => $firstUser->id,
         ]);
 
-        $firstUser->phone()->create([
-            'number' => '+31612345678',
-        ]);
-
-        $secondUser = Stubs\User::create([
-            'name' => 'Jane Doe',
-            'email' => 'jane.doe@example.com',
-            'password' => 'secret',
-        ]);
-
-        $firstUser->posts()->create(['title' => 'Hello world!']);
-        $firstUser->posts()->create(['title' => 'Hello mars!']);
-        $secondUser->posts()->create(['title' => 'Howdy!']);
+        factory(Models\Article::class, 2)->create(['user_id' => $firstUser->id]);
+        factory(Models\Article::class)->create(['user_id' => $secondUser->id]);
 
         $query = '
             query {
-                posts(filter: {
+                articles(filter: {
                     user: {
-                        name: "' . $firstUser->name . '"
+                        email: "' . $firstUser->email . '"
                         phone: {
                             number: "' . $firstUser->phone->number . '"
                         }
@@ -316,62 +308,53 @@ class CollectionQueryTest extends TestCase
                     items {
                         id
                     }
-                }
-            }
-        ';
-
-        $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $result = json_decode($response->getContent())->data->posts;
-        $this->assertCount(2, $result->items);
-    }
-
-    /** @test */
-    public function it_can_filter_with_AND_and_OR_filters_on_relationships()
-    {
-        $firstUser = Stubs\User::create([
-            'name' => 'John Doe',
-            'email' => 'john.doe@example.com',
-            'password' => 'secret',
-        ]);
-
-        $firstUser->phone()->create([
-            'number' => '+31612345678',
-        ]);
-
-        $secondUser = Stubs\User::create([
-            'name' => 'Jane Doe',
-            'email' => 'jane.doe@example.com',
-            'password' => 'secret',
-        ]);
-
-        $secondUser->posts()->create([
-            'title' => 'Hello world!',
-        ]);
-
-        $thirdUser = Stubs\User::create([
-            'name' => 'Jone Doe',
-            'email' => 'jone.doe@example.com',
-            'password' => 'secret',
-        ]);
-
-        $thirdUser->phone()->create([
-            'number' => '+3161212121',
-        ]);
-
-        $query = '
-            query {
-                users(filter: {
-                    OR: [{ phone: { number: "+31612345678", id: "1" }}, { posts: { title: "Hello world!" } }]
-                }) {
-                    items {
-                        id
+                    pagination {
+                        total
                     }
                 }
             }
         ';
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $result = json_decode($response->getContent())->data->users;
-        $this->assertCount(2, $result->items);
+        $response->assertJsonFragment(['total' => 2]);
+        $response->assertJsonFragment(['id' => $firstUser->articles[0]->id]);
+        $response->assertJsonFragment(['id' => $firstUser->articles[1]->id]);
+        $response->assertJsonMissing(['id' => $secondUser->articles[0]->id]);
+    }
+
+    /** @test */
+    public function it_can_filter_with_AND_and_OR_filters_on_relationships()
+    {
+        $firstUser = factory(Models\User::class)->create();
+        $phone = factory(Models\Phone::class)->create(['user_id' => $firstUser->id]);
+
+        $secondUser = factory(Models\User::class)->create();
+        $article = factory(Models\Article::class)->create(['user_id' => $secondUser->id]);
+
+        $thirdUser = factory(Models\User::class)->create();
+
+        $query = '
+            query {
+                users(filter: {
+                    OR: [
+                        { phone: { number: "' . $phone->number . '" }},
+                        { articles: { title: "' . $article->title . '" } }
+                    ]
+                }) {
+                    items {
+                        id
+                    }
+                    pagination {
+                        total
+                    }
+                }
+            }
+        ';
+
+        $response = $this->json('GET', '/graphql', ['query' => $query]);
+        $response->assertJsonFragment(['total' => 2]);
+        $response->assertJsonFragment(['id' => $firstUser->id]);
+        $response->assertJsonFragment(['id' => $secondUser->id]);
+        $response->assertJsonMissing(['id' => $thirdUser->id]);
     }
 }

@@ -2,9 +2,12 @@
 
 namespace Bakery\Queries;
 
-use Bakery\Query;
+use Bakery\Utils\Utils;
+use Bakery\Queries\Query;
+use Bakery\Eloquent\BakeryModel;
 use GraphQL\Type\Definition\Type;
 use Bakery\Support\Facades\Bakery;
+use Illuminate\Database\Eloquent\Model;
 use GraphQL\Type\Definition\ListOfType;
 
 abstract class EntityQuery extends Query
@@ -32,11 +35,17 @@ abstract class EntityQuery extends Query
             $this->class = $class;
         }
 
-        if (!isset($this->class)) {
-            throw new \Exception('No class defined for the collection query.');
-        }
+        Utils::invariant(
+            $this->class,
+            'No class defined for the entity query.'
+        );
 
         $this->model = resolve($this->class);
+
+        Utils::invariant(
+            $this->model instanceof BakeryModel,
+            class_basename($this->model) . ' is not an instance of ' . BakeryModel::class
+        );
     }
 
     /**
@@ -46,7 +55,7 @@ abstract class EntityQuery extends Query
      */
     protected function name(): string
     {
-        return camel_case(str_singular(class_basename($this->class)));
+        return Utils::single($this->model->getModel());
     }
 
     /**
@@ -56,7 +65,7 @@ abstract class EntityQuery extends Query
      */
     public function type()
     {
-        return Bakery::type(studly_case(str_singular(class_basename($this->class))));
+        return Bakery::type(Utils::typename($this->model->getModel()));
     }
 
     /**
@@ -66,10 +75,7 @@ abstract class EntityQuery extends Query
      */
     public function args(): array
     {
-        $args = array_merge(
-            [$this->model->getKeyName() => Bakery::ID()],
-            $this->model->lookupFields()
-        );
+        $args = $this->model->getLookupFields();
 
         foreach ($this->model->relations() as $relation => $type) {
             if ($type instanceof ListofType) {

@@ -2,7 +2,8 @@
 
 namespace Bakery\Support;
 
-use Bakery\Exceptions\ModelNotGraphQLResource;
+use Bakery\Utils\Utils;
+use Bakery\Types\ModelType;
 use Bakery\Mutations\CreateMutation;
 use Bakery\Mutations\DeleteMutation;
 use Bakery\Mutations\UpdateMutation;
@@ -41,10 +42,6 @@ class Schema
     {
         $types = [];
         foreach ($this->getModels() as $model) {
-            if (!in_array(GraphQLResource::class, class_uses_deep($model))) {
-                throw (new ModelNotGraphQLResource($model));
-            }
-
             $types[] = new Types\EntityType($model);
             $types[] = new Types\EntityCollectionType($model);
             $types[] = new Types\EntityLookupType($model);
@@ -53,7 +50,7 @@ class Schema
             $types[] = new Types\CollectionSearchType($model);
             $types[] = new Types\CollectionOrderByType($model);
 
-            if (!empty(app($model)->getFillable())) {
+            if (!$model::$readOnly) {
                 $types[] = new Types\CreateInputType($model);
                 $types[] = new Types\UpdateInputType($model);
             }
@@ -117,7 +114,7 @@ class Schema
     {
         $mutations = [];
         foreach ($this->getModels() as $model) {
-            if (!empty(app($model)->getFillable())) {
+            if (!$model::$readOnly) {
                 $createMutation = new CreateMutation($model);
                 $mutations[$createMutation->name] = $createMutation;
 
@@ -134,6 +131,7 @@ class Schema
     public function getMutations()
     {
         $mutations = [];
+
         foreach ($this->mutations as $name => $mutation) {
             $mutation = is_object($mutation) ?: resolve($mutation);
             $name = is_string($name) ? $name : $mutation->name;
@@ -149,6 +147,7 @@ class Schema
     public function toGraphQLSchema(): GraphQLSchema
     {
         Bakery::addTypes($this->getTypes());
+        Bakery::addModels($this->getModels());
 
         $query = $this->makeObjectType($this->fieldsToArray($this->getQueries()), ['name' => 'Query']);
         $mutation = $this->makeObjectType($this->fieldsToArray($this->getMutations()), ['name' => 'Mutation']);

@@ -2,7 +2,7 @@
 
 namespace Bakery\Tests\Stubs\Policies;
 
-use Bakery\Tests\Stubs\User;
+use Bakery\Tests\Models\User;
 
 class CommentPolicy
 {
@@ -11,7 +11,7 @@ class CommentPolicy
         return true;
     }
 
-    public function setPost(User $user): bool
+    public function setArticle(User $user): bool
     {
         return true;
     }

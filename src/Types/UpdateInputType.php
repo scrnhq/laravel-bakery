@@ -2,70 +2,57 @@
 
 namespace Bakery\Types;
 
+use Bakery\Utils\Utils;
 use Bakery\Support\Facades\Bakery;
 use GraphQL\Type\Definition\NonNull;
 use GraphQL\Type\Definition\Type;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations;
 
-class UpdateInputType extends InputType
+class UpdateInputType extends ModelAwareInputType
 {
     /**
-     * The name of the type.
+     * Get the name of the Update Input Type.
      *
-     * @var string
+     * @return string
      */
-    protected $name;
-
-    /**
-     * A reference to the model.
-     *
-     * @var Model
-     */
-    protected $model;
-
-    /**
-     * Construct a new collection filter type.
-     *
-     * @param string $class
-     */
-    public function __construct(string $class)
+    protected function name(): string
     {
-        $this->name = 'Update' . class_basename($class) . 'Input';
-        $this->model = app($class);
+        return 'Update' . Utils::typename($this->model->getModel()) . 'Input';
     }
 
     /**
-     * Return the fields for the collection filter type.
+     * Return the fields for theUpdate Input Type.
      *
      * @return array
      */
     public function fields(): array
     {
-        return array_merge($this->getFillableFields(), $this->getRelationFields());
+        $fields = array_merge(
+            $this->getFillableFields(),
+            $this->getRelationFields()
+        );
+
+        Utils::invariant(
+            count($fields) > 0,
+            'There are no fields defined for ' . class_basename($this->model)
+        );
+
+        return $fields;
     }
 
     /**
      * Get the fillable fields of the model.
      *
+     * Updating in Bakery works like PATCH you only have to pass in
+     * the values you want to update. The rest stays untouched.
+     * Because of that we have to remove the nonNull wrappers on the fields.
+     *
      * @return array
      */
     private function getFillableFields(): array
     {
-        $fields = array_filter($this->model->fields(), function ($value, $key) {
-            if (is_array($value)) {
-                $type = Type::getNamedType($value['type']);
-            } else {
-                $type = Type::getNamedType($value);
-            }
-            $fillable = array_values($this->model->getFillable());
-
-            return in_array($key, $fillable) && Type::isLeafType($type);
-        }, ARRAY_FILTER_USE_BOTH);
-
-        return array_map(function ($type) {
-            return $type instanceof NonNull ? $type->getWrappedType() : $type;
-        }, $fields);
+        return Utils::nullifyFields($this->model->getFillableFields())->toArray();
     }
 
     /**
@@ -77,9 +64,10 @@ class UpdateInputType extends InputType
     {
         $fields = [];
 
-        foreach ($this->model->getFillable() as $fillable) {
-            if (method_exists($this->model, $fillable)) {
-                $relationship = $this->model->{$fillable}();
+        $model = $this->model->getModel();
+        foreach ($model->getFillable() as $fillable) {
+            if (method_exists($model, $fillable)) {
+                $relationship = $model->{$fillable}();
                 $inputType = 'Create' . class_basename($relationship->getRelated()) . 'Input';
 
                 if ($relationship instanceof Relations\HasMany || $relationship instanceof Relations\BelongsToMany) {

@@ -4,7 +4,7 @@ namespace Bakery\Tests;
 
 use Bakery\Tests\Stubs\Model;
 
-class BakeryServiceProviderTest extends TestCase
+class BakeryServiceProviderTest extends FeatureTestCase
 {
     /** @test */
     public function it_is_bound()
@@ -17,7 +17,5 @@ class BakeryServiceProviderTest extends TestCase
     {
         $config = app()->config['bakery'];
         $this->assertNotEmpty($config);
-        $this->assertArrayHasKey('models', $config);
-        $this->assertContains(Model::class, $config['models']);
     }
 }

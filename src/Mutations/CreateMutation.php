@@ -22,7 +22,7 @@ class CreateMutation extends EntityMutation
      */
     public function resolve($root, $args = []): Model
     {
-        $this->authorize($this->action, $this->class);
+        $this->authorize($this->action, $this->model->getModel());
 
         $input = $args['input'];
         $model = $this->model->createWithGraphQLInput($input);

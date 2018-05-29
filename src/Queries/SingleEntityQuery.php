@@ -26,16 +26,6 @@ class SingleEntityQuery extends EntityQuery
     protected $model;
 
     /**
-     * Get the name of the EntityQuery.
-     *
-     * @return string
-     */
-    protected function name(): string
-    {
-        return camel_case(str_singular(class_basename($this->class)));
-    }
-
-    /**
      * The arguments for the Query.
      *
      * @return array
@@ -43,8 +33,8 @@ class SingleEntityQuery extends EntityQuery
     public function args(): array
     {
         $args = array_merge(
-            [$this->model->getKeyName() => Bakery::ID()],
-            $this->model->lookupFields()
+            [$this->model->getModel()->getKeyName() => Bakery::ID()],
+            $this->model->getLookupFields()
         );
 
         foreach ($this->model->relations() as $relation => $type) {
@@ -72,9 +62,13 @@ class SingleEntityQuery extends EntityQuery
      */
     public function resolve($root, array $args = [], $viewer)
     {
-        $primaryKey = $this->model->getKeyName();
+        $primaryKey = $this->model->getModel()->getKeyName();
 
-        $query = $this->scopeQuery($this->model->authorizedForReading($viewer), $args, $viewer);
+        $query = $this->scopeQuery(
+            $this->model->query($viewer),
+            $args,
+            $viewer
+        );
 
         if (array_key_exists($primaryKey, $args)) {
             return $query->find($args[$primaryKey]);
@@ -99,7 +93,11 @@ class SingleEntityQuery extends EntityQuery
         }
 
         if ($results->count() > 1) {
-            throw (new TooManyResultsException)->setModel($this->class, $results->pluck($this->model->getKeyName()));
+            throw (new TooManyResultsException)
+                ->setModel(
+                    $this->class,
+                    $results->pluck($this->model->getModel()->getKeyName())
+                );
         }
 
         return $results->first();

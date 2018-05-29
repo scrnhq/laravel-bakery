@@ -3,12 +3,12 @@
 return [
     /*
      |--------------------------------------------------------------------------
-     | Bakery Models
+     | Bakery types
      |--------------------------------------------------------------------------
      |
-     | Here you can define the models that should be baked by Bakery.
+     | Here you can define your Bakery types.
      */
-    'models' => [],
+    'types' => [],
 
     /*
      |--------------------------------------------------------------------------

@@ -2,9 +2,9 @@
 
 namespace Bakery\Tests\Feature;
 
-use Bakery\Tests\TestCase;
+use Bakery\Tests\FeatureTestCase;
 
-class BakeryControllerTest extends TestCase
+class BakeryControllerTest extends FeatureTestCase
 {
     /** @test */
     public function it_returns_a_200()

@@ -3,10 +3,10 @@
 namespace Bakery\Tests\Feature;
 
 use App;
-use Bakery\Tests\TestCase;
+use Bakery\Tests\FeatureTestCase;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
-class GraphiQLControllerTest extends TestCase
+class GraphiQLControllerTest extends FeatureTestCase
 {
     /** @test */
     public function it_aborts_when_viewing_in_production()

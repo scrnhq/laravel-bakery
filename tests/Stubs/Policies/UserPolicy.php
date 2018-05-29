@@ -2,7 +2,7 @@
 
 namespace Bakery\Tests\Stubs\Policies;
 
-use Bakery\Tests\Stubs\User;
+use Bakery\Tests\Models\User;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class UserPolicy
@@ -55,7 +55,7 @@ class UserPolicy
         return true;
     }
 
-    public function createPosts(User $user): bool
+    public function createArticles(User $user): bool
     {
         return true;
     }

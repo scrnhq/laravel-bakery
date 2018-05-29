@@ -2,8 +2,8 @@
 
 namespace Bakery\Tests\Stubs\Policies;
 
-use Bakery\Tests\Stubs\User;
-use Bakery\Test\Stubs\Phone;
+use Bakery\Test\Models\Phone;
+use Bakery\Tests\Models\User;
 
 class PhonePolicy
 {

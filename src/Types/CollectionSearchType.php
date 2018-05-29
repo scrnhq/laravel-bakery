@@ -2,36 +2,23 @@
 
 namespace Bakery\Types;
 
-use GraphQL\Type\Definition\StringType;
+use Bakery\Utils\Utils;
 use GraphQL\Type\Definition\Type;
 use Bakery\Support\Facades\Bakery;
+use GraphQL\Type\Definition\IDType;
+use GraphQL\Type\Definition\StringType;
 use Illuminate\Database\Eloquent\Model;
 
-class CollectionSearchType extends InputType
+class CollectionSearchType extends ModelAwareInputType
 {
     /**
-     * The name of the type.
+     * Get the name of the Collection Search Type.
      *
-     * @var string
+     * @return string
      */
-    protected $name;
-
-    /**
-     * A reference to the model.
-     *
-     * @var Model
-     */
-    protected $model;
-
-    /**
-     * Construct a new collection filter type.
-     *
-     * @param string $class
-     */
-    public function __construct(string $class)
+    protected function name(): string
     {
-        $this->name = class_basename($class) . 'Search';
-        $this->model = app($class);
+        return Utils::typename($this->model->getModel()) . 'Search';
     }
 
     /**
@@ -43,13 +30,13 @@ class CollectionSearchType extends InputType
     {
         $fields = [];
 
-        foreach ($this->model->fields() as $name => $type) {
+        foreach ($this->model->getFields() as $name => $type) {
             if (is_array($type)) {
                 $type = Type::getNamedType($type['type']);
             } else {
                 $type = Type::getNamedType($type);
             }
-            if ($type instanceof StringType) {
+            if ($type instanceof StringType || $type instanceof IDType) {
                 $fields[$name] = Bakery::boolean();
             }
         }

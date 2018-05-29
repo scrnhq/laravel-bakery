@@ -2,26 +2,14 @@
 
 namespace Bakery\Mutations;
 
-use Bakery\Mutation;
-use Bakery\Support\Facades\Bakery;
+use Bakery\Utils\Utils;
 use GraphQL\Type\Definition\Type;
+use Bakery\Support\Facades\Bakery;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
-abstract class EntityMutation extends Mutation
+abstract class EntityMutation extends ModelAwareMutation
 {
     use AuthorizesRequests;
-
-    /**
-     * The class of the Entity.
-     *
-     * @var string
-     */
-    protected $class;
-
-    /**
-     * The reference to the Entity.
-     */
-    protected $model;
 
     /**
      * The action name used for building the Mutation name.
@@ -31,13 +19,23 @@ abstract class EntityMutation extends Mutation
     protected $action;
 
     /**
+     * Get the name of the EntityMutation.
+     *
+     * @return string
+     */
+    protected function name(): string
+    {
+        return $this->action . Utils::typename($this->model->getModel());
+    }
+
+    /**
      * The type of the Mutation.
      *
      * @return Type
      */
     public function type()
     {
-        return Bakery::type(studly_case(str_singular(class_basename($this->class))));
+        return Bakery::type(Utils::typename($this->model->getModel()));
     }
 
     /**
@@ -52,33 +50,5 @@ abstract class EntityMutation extends Mutation
         return [
             'input' => Bakery::nonNull(Bakery::type($inputTypeName)),
         ];
-    }
-
-    /**
-     * EntityMutation constructor.
-     *
-     * @param string $class
-     */
-    public function __construct(string $class = null)
-    {
-        if (isset($class)) {
-            $this->class = $class;
-        }
-
-        if (!isset($this->class)) {
-            throw new \Exception('No class defined for the entity mutation.');
-        }
-
-        $this->model = resolve($this->class);
-    }
-
-    /**
-     * Get the name of the EntityMutation.
-     *
-     * @return string
-     */
-    protected function name(): string
-    {
-        return $this->action . studly_case(str_singular(class_basename($this->class)));
     }
 }
