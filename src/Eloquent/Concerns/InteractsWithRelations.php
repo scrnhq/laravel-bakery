@@ -282,14 +282,14 @@ trait InteractsWithRelations
     {
         if (in_array(get_class($relation), $this->relationships)) {
             return class_basename($relation);
-        } else {
-            foreach (class_parents($relation) as $parent) {
-                if (in_array($parent, $this->bakeryRelationships)) {
-                    return class_basename($parent);
-                }
-            }
-
-            throw new RuntimeException('Could not found a relationship name for relation '.$relation);
         }
+
+        foreach (class_parents($relation) as $parent) {
+            if (in_array($parent, $this->relationships)) {
+                return class_basename($parent);
+            }
+        }
+
+        throw new RuntimeException('Could not found a relationship name for relation '.$relation);
     }
 }
