@@ -22,9 +22,9 @@ class DeleteMutation extends EntityMutation
      *
      * @return Type
      */
-    public function type()
+    public function type(): Type
     {
-        return Bakery::boolean();
+        return Type::boolean();
     }
 
     /**
@@ -32,7 +32,7 @@ class DeleteMutation extends EntityMutation
      *
      * @return array
      */
-    public function args()
+    public function args(): array
     {
         return $this->model->getLookupFields();
     }
@@ -42,14 +42,17 @@ class DeleteMutation extends EntityMutation
      *
      * @param  mixed $root
      * @param  array $args
+     * @param  mixed $viewer
      * @return bool
      */
-    public function resolve($root, $args = []): bool
+    public function resolve($root, array $args, $viewer): Model
     {
         $model = $this->getModel($args);
         $this->authorize('delete', $model);
 
-        return $model->delete();
+        $model->delete();
+
+        return $model;
     }
 
     /**

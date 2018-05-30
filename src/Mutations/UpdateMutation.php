@@ -23,7 +23,7 @@ class UpdateMutation extends EntityMutation
      *
      * @return array
      */
-    public function args()
+    public function args(): array
     {
         return array_merge(
             parent::args(),
@@ -36,9 +36,10 @@ class UpdateMutation extends EntityMutation
      *
      * @param  mixed $root
      * @param  array $args
+     * @param  mixed $viewer
      * @return array
      */
-    public function resolve($root, $args = []): Model
+    public function resolve($root, array $args, $viewer): Model
     {
         // TODO: Naming is a bit eh, weird here.
         $model = $this->getModel($args);
