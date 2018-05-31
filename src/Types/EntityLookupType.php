@@ -3,9 +3,12 @@
 namespace Bakery\Types;
 
 use Bakery\Utils\Utils;
+use Bakery\Concerns\ModelAware;
 
-class EntityLookupType extends ModelAwareInputType
+class EntityLookupType extends InputType
 {
+    use ModelAware;
+
     /**
      * Get the name of the Entity Lookup Type.
      *
@@ -13,7 +16,7 @@ class EntityLookupType extends ModelAwareInputType
      */
     protected function name(): string
     {
-        return Utils::typename($this->model->getModel()).'LookupType';
+        return $this->schema->typename().'LookupType';
     }
 
     /**
@@ -23,6 +26,6 @@ class EntityLookupType extends ModelAwareInputType
      */
     public function fields(): array
     {
-        return $this->model->getLookupFields();
+        return $this->schema->getLookupFields();
     }
 }

@@ -2,13 +2,13 @@
 
 namespace Bakery\Events;
 
-use Bakery\Eloquent\BakeryModel;
+use Illuminate\Database\Eloquent\Model;
 
 class BakeryModelSaved
 {
     protected $model;
 
-    public function __construct(BakeryModel $model)
+    public function __construct(Model $model)
     {
         $this->model = $model;
     }

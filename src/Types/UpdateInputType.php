@@ -18,7 +18,7 @@ class UpdateInputType extends MutationInputType
      */
     protected function name(): string
     {
-        return 'Update'.Utils::typename($this->model->getModel()).'Input';
+        return 'Update'.$this->schema->typename().'Input';
     }
 
     /**
@@ -52,17 +52,17 @@ class UpdateInputType extends MutationInputType
      */
     private function getFillableFields(): array
     {
-        return Utils::nullifyFields($this->model->getFillableFields())->toArray();
+        return Utils::nullifyFields($this->schema->getFillableFields())->toArray();
     }
 
     /**
      * Generate the input type name for a relationship.
      *
-     * @param Relation $relationship
+     * @param string $relation
      * @return string
      */
-    protected function inputTypeName(Relation $relationship): string
+    protected function inputTypename(string $relation): string
     {
-        return 'Update'.class_basename($relationship->getRelated()).'Input';
+        return 'Update'.Utils::typename($relation).'Input';
     }
 }

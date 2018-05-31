@@ -8,6 +8,6 @@ class DummyMutation extends CreateMutation
 {
     public function __construct()
     {
-        parent::__construct(DummyInheritClass::class);
+        parent::__construct(DummyModel::class);
     }
 }

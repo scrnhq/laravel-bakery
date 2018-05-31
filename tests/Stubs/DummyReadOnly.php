@@ -2,11 +2,13 @@
 
 namespace Bakery\Tests\Stubs;
 
-use Bakery\Eloquent\BakeryModel;
+use Bakery\Eloquent\ModelSchema;
 
-class DummyReadOnly extends BakeryModel
+class DummyReadOnly
 {
+    use ModelSchema;
+
     public static $readOnly = true;
 
-    protected $model = Model::class;
+    public static $model = Model::class;
 }

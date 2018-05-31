@@ -3,14 +3,16 @@
 namespace Bakery\Mutations;
 
 use Bakery\Utils\Utils;
+use Bakery\Concerns\ModelAware;
 use Bakery\Eloquent\BakeryModel;
 use GraphQL\Type\Definition\Type;
 use Bakery\Support\Facades\Bakery;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
-abstract class EntityMutation extends ModelAwareMutation
+abstract class EntityMutation extends Mutation
 {
+    use ModelAware;
     use AuthorizesRequests;
 
     /**
@@ -27,7 +29,7 @@ abstract class EntityMutation extends ModelAwareMutation
      */
     protected function name(): string
     {
-        return $this->action.Utils::typename($this->model->getModel());
+        return $this->action.$this->schema->typename();
     }
 
     /**
@@ -37,7 +39,7 @@ abstract class EntityMutation extends ModelAwareMutation
      */
     public function type(): Type
     {
-        return Bakery::type(Utils::typename($this->model->getModel()));
+        return Bakery::type($this->schema->typename());
     }
 
     /**

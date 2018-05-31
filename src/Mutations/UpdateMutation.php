@@ -27,7 +27,7 @@ class UpdateMutation extends EntityMutation
     {
         return array_merge(
             parent::args(),
-            Utils::nullifyFields($this->model->getLookupFields())->toArray()
+            Utils::nullifyFields($this->schema->getLookupFields())->toArray()
         );
     }
 
@@ -41,14 +41,13 @@ class UpdateMutation extends EntityMutation
      */
     public function resolve($root, array $args, $viewer): Model
     {
-        // TODO: Naming is a bit eh, weird here.
         $model = $this->getModel($args);
-        $this->authorize($this->action, $model->getModel());
+        $this->authorize($this->action, $model);
 
         $input = $args['input'];
-        $model->update($input);
+        $model->updateWithInput($input);
 
-        return $model->getModel();
+        return $model;
     }
 
     /**
@@ -57,12 +56,12 @@ class UpdateMutation extends EntityMutation
      * @param array $args
      * @return Model
      */
-    protected function getModel(array $args): BakeryModel
+    protected function getModel(array $args): Model
     {
         $primaryKey = $this->model->getKeyName();
 
         if (array_key_exists($primaryKey, $args)) {
-            return Bakery::wrap($this->model->findOrFail($args[$primaryKey]));
+            return $this->model->findOrFail($args[$primaryKey]);
         }
 
         $query = $this->model->query();
@@ -82,6 +81,6 @@ class UpdateMutation extends EntityMutation
             throw (new TooManyResultsException)->setModel($this->class, $results->pluck($this->model->getKeyName()));
         }
 
-        return Bakery::wrap($results->first());
+        return $results->first();
     }
 }

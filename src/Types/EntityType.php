@@ -4,14 +4,17 @@ namespace Bakery\Types;
 
 use Closure;
 use Bakery\Utils\Utils;
+use Bakery\Concerns\ModelAware;
 use Bakery\Support\Facades\Bakery;
 use GraphQL\Type\Definition\NonNull;
 use GraphQL\Type\Definition\ListOfType;
 use Illuminate\Contracts\Auth\Access\Gate;
 use Illuminate\Auth\Access\AuthorizationException;
 
-class EntityType extends ModelAwareType
+class EntityType extends Type
 {
+    use ModelAware;
+
     /**
      * Get the name of the Entity type.
      *
@@ -19,7 +22,7 @@ class EntityType extends ModelAwareType
      */
     protected function name(): string
     {
-        return Utils::typename($this->model->getModel());
+        return $this->schema->typename();
     }
 
     /**
@@ -70,8 +73,8 @@ class EntityType extends ModelAwareType
 
     public function fields(): array
     {
-        $fields = $this->model->getFields();
-        $relations = $this->model->getRelations();
+        $fields = $this->schema->getFields();
+        $relations = $this->schema->getRelations();
 
         foreach ($relations as $key => $type) {
             if ($type instanceof ListOfType) {
@@ -79,7 +82,7 @@ class EntityType extends ModelAwareType
                 $fields[$singularKey.'Ids'] = [
                     'type' => Bakery::listOf(Bakery::ID()),
                     'resolve' => function ($model) use ($key) {
-                        $keyName = $model->getModel()->{$key}()->getRelated()->getKeyName();
+                        $keyName = $model->{$key}()->getRelated()->getKeyName();
 
                         return $model->{$key}->pluck($keyName)->toArray();
                     },

@@ -3,13 +3,17 @@
 namespace Bakery\Types;
 
 use Bakery\Utils\Utils;
+use Bakery\Concerns\ModelAware;
 use GraphQL\Type\Definition\Type;
 use Bakery\Support\Facades\Bakery;
+use GraphQL\Type\Definition\ListOfType;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
 
-class MutationInputType extends ModelAwareInputType
+abstract class MutationInputType extends InputType
 {
+    use ModelAware;
+
     /**
      * Get the fields for the relations of the model.
      *
@@ -17,22 +21,10 @@ class MutationInputType extends ModelAwareInputType
      */
     protected function getRelationFields(): array
     {
-        return collect($this->model->getRelations())->keys()->reduce(function ($fields, $relation) {
-            $model = $this->model->getModel();
-
-            Utils::invariant(
-                method_exists($model, $relation),
-                'Relation '.$relation.' does not exist as method on model '.class_basename($model)
-            );
-
-            $relationship = $model->{$relation}();
-
-            Utils::invariant(
-                $relationship instanceof Relation,
-                'Relation '.$relation.' on '.class_basename($model).' does not return an instance of '.Relation::class
-            );
-
-            return $fields->merge($this->getFieldsForRelation($relation, $relationship));
+        $relations = $this->schema->getRelations();
+        return $relations->keys()->reduce(function ($fields, $key) use ($relations) {
+            $field = $relations[$key];
+            return $fields->merge($this->getFieldsForRelation($key, $field));
         }, collect())->toArray();
     }
 
@@ -44,21 +36,20 @@ class MutationInputType extends ModelAwareInputType
      * @param array $fields
      * @return array
      */
-    protected function getFieldsForRelation(string $relation, Relation $relationship): array
+    protected function getFieldsForRelation(string $relation, array $field): array
     {
         $fields = [];
-        $inputType = $this->inputTypeName($relationship);
+        $field = Utils::nullifyField($field);
+        $inputType = $this->inputTypename($relation);
 
-        if (Utils::pluralRelationship($relationship)) {
+        if ($field['type'] instanceof ListOfType) {
             $name = str_singular($relation).'Ids';
             $fields[$name] = Bakery::listOf(Bakery::ID());
 
             if (Bakery::hasType($inputType)) {
                 $fields[$relation] = Bakery::listOf(Bakery::type($inputType));
             }
-        }
-
-        if (Utils::singularRelationship($relationship)) {
+        } else {
             $name = str_singular($relation).'Id';
             $fields[$name] = Bakery::ID();
 
@@ -69,4 +60,6 @@ class MutationInputType extends ModelAwareInputType
 
         return $fields;
     }
+
+    abstract protected function inputTypeName(string $relation): string;
 }

@@ -35,6 +35,15 @@ class Schema
         return [];
     }
 
+    protected function isReadOnly($model)
+    {
+        if (!property_exists($model, 'readOnly')) {
+            return false;
+        }
+
+        return $model::$readOnly;
+    }
+
     protected function getModelTypes()
     {
         $types = [];
@@ -47,7 +56,7 @@ class Schema
             $types[] = new Types\CollectionSearchType($model);
             $types[] = new Types\CollectionOrderByType($model);
 
-            if (! $model::$readOnly) {
+            if (!$this->isReadOnly($model)) {
                 $types[] = new Types\CreateInputType($model);
                 $types[] = new Types\UpdateInputType($model);
             }
@@ -113,7 +122,7 @@ class Schema
     {
         $mutations = [];
         foreach ($this->getModels() as $model) {
-            if (! $model::$readOnly) {
+            if (!$this->isReadOnly($model)) {
                 $createMutation = new CreateMutation($model);
                 $mutations[$createMutation->name] = $createMutation;
 
@@ -147,7 +156,7 @@ class Schema
     public function toGraphQLSchema(): GraphQLSchema
     {
         Bakery::addTypes($this->getTypes());
-        Bakery::addModels($this->getModels());
+        Bakery::addModelSchemas($this->getModels());
 
         $query = $this->makeObjectType($this->fieldsToArray($this->getQueries()), ['name' => 'Query']);
         $mutation = $this->makeObjectType($this->fieldsToArray($this->getMutations()), ['name' => 'Mutation']);

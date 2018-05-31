@@ -3,9 +3,12 @@
 namespace Bakery\Types;
 
 use Bakery\Utils\Utils;
+use Bakery\Concerns\ModelAware;
 
-class CollectionOrderByType extends ModelAwareEnumType
+class CollectionOrderByType extends EnumType
 {
+    use ModelAware;
+
     /**
      * Get the name of the Collection Order By Type.
      *
@@ -13,7 +16,7 @@ class CollectionOrderByType extends ModelAwareEnumType
      */
     protected function name(): string
     {
-        return Utils::typename($this->model->getModel()).'OrderBy';
+        return $this->schema->typename().'OrderBy';
     }
 
     /**
@@ -25,7 +28,7 @@ class CollectionOrderByType extends ModelAwareEnumType
     {
         $values = [];
 
-        foreach ($this->model->fields() as $name => $type) {
+        foreach ($this->schema->getFields() as $name => $type) {
             $values[] = $name.'_ASC';
             $values[] = $name.'_DESC';
         }

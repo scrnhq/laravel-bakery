@@ -1,11 +1,13 @@
 <?php
 
-namespace Bakery\Mutations;
+namespace Bakery\Concerns;
 
 use Bakery\Utils\Utils;
-use Bakery\Eloquent\BakeryModel;
+use Bakery\Eloquent\ModelSchema;
+use Bakery\Eloquent\BakeryMutable;
+use Illuminate\Database\Eloquent\Model;
 
-class ModelAwareMutation extends Mutation
+trait ModelAware
 {
     /**
      * A reference to the class.
@@ -37,11 +39,18 @@ class ModelAwareMutation extends Mutation
             'No class defined.'
         );
 
-        $this->model = resolve($this->class);
+        $this->schema = resolve($this->class);
 
         Utils::invariant(
-            $this->model instanceof BakeryModel,
-            class_basename($this->model).' is not an instance of '.BakeryModel::class
+            Utils::usesTrait($this->schema, ModelSchema::class),
+            class_basename($this->schema).' does not use the '.ModelSchema::class.' trait.'
+        );
+
+        $this->model = $this->schema->getModel();
+
+        Utils::invariant(
+            Utils::usesTrait($this->model, BakeryMutable::class),
+            class_basename($this->model).' does not use the '.BakeryMutable::class.' trait.'
         );
     }
 }

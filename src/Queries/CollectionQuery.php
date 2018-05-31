@@ -35,23 +35,13 @@ class CollectionQuery extends EntityQuery
     }
 
     /**
-     * Get the basename for the types.
-     *
-     * @return string
-     */
-    protected function typeName(): string
-    {
-        return Utils::typeName($this->model->getModel());
-    }
-
-    /**
      * The type of the CollectionQuery.
      *
      * @return mixed
      */
     public function type(): Type
     {
-        return Bakery::type($this->typeName().'Collection');
+        return Bakery::type($this->schema->typename().'Collection');
     }
 
     /**
@@ -64,12 +54,12 @@ class CollectionQuery extends EntityQuery
         $args = [
             'page' => Type::int(),
             'count' => Type::int(),
-            'filter' => Bakery::type($this->typeName().'Filter'),
-            'search' => Bakery::type($this->typeName().'RootSearch'),
+            'filter' => Bakery::type($this->schema->typename().'Filter'),
+            'search' => Bakery::type($this->schema->typename().'RootSearch'),
         ];
 
-        if (! empty($this->model->fields())) {
-            $args['orderBy'] = Bakery::type($this->typeName().'OrderBy');
+        if (! empty($this->schema->getFields())) {
+            $args['orderBy'] = Bakery::type($this->schema->typename().'OrderBy');
         }
 
         return $args;
@@ -94,7 +84,7 @@ class CollectionQuery extends EntityQuery
             throw new PaginationMaxCountExceededException($maxCount);
         }
 
-        $query = $this->model->getModel()->where(function ($query) use ($viewer, $args) {
+        $query = $this->model->where(function ($query) use ($viewer, $args) {
             return $this->scopeQuery(
                 $this->model->query($viewer),
                 $args,
@@ -167,8 +157,7 @@ class CollectionQuery extends EntityQuery
                     }
                 });
             } else {
-                $model = Utils::typename($query->getModel());
-                $relations = Bakery::getModelType($model)->relations();
+                $relations = $query->getModel()->getSchema()->relations();
                 if (in_array($key, array_keys($relations))) {
                     $this->applyRelationFilter($query, $key, $value, $type);
                 } else {

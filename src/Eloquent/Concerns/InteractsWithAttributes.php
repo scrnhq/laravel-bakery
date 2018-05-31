@@ -37,6 +37,6 @@ trait InteractsWithAttributes
             $this->gate->authorize($policyMethod, [$this, $value]);
         }
 
-        return $this->instance->setAttribute($key, $value);
+        return $this->setAttribute($key, $value);
     }
 }

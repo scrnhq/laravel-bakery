@@ -9,6 +9,7 @@ use GraphQL\Type\Schema;
 use Bakery\Types\ModelType;
 use Bakery\Traits\BakeryTypes;
 use Bakery\Eloquent\BakeryModel;
+use Bakery\Eloquent\BakeryExtends;
 use Bakery\Exceptions\TypeNotFound;
 use GraphQL\Executor\ExecutionResult;
 use GraphQL\Type\Definition\ObjectType;
@@ -41,11 +42,11 @@ class Bakery
     protected $typeInstances = [];
 
     /**
-     * The registered Bakery models.
+     * The registered model schemas.
      *
      * @var array
      */
-    protected $bakeryModels = [];
+    protected $modelSchemas = [];
 
     /**
      * Add types to the registry.
@@ -72,16 +73,30 @@ class Bakery
         $this->types[$name] = $class;
     }
 
-    public function addModels(array $models)
+    public function addModelSchemas(array $models)
     {
-        foreach ($models as $key => $model) {
-            $this->addModel($model);
+        foreach ($models as $model) {
+            $this->addModelSchema($model);
         }
     }
 
-    public function addModel($model)
+    public function addModelSchema($model)
     {
-        $this->bakeryModels[resolve($model)->getModelClass()] = $model;
+        if (!is_subclass_of($model, Model::class)) {
+            $this->modelSchemas[$model::$model] = $model;
+        }
+    }
+
+    public function getModelSchema($model)
+    {
+        $model = is_string($model) ? $model : get_class($model);
+
+        Utils::invariant(
+            array_key_exists($model, $this->modelSchemas),
+            $model.' has no registered model schema in Bakery.'
+        );
+
+        return $this->modelSchemas[$model];
     }
 
     /**
@@ -153,81 +168,6 @@ class Bakery
     public function type($name)
     {
         return $this->getType($name);
-    }
-
-    /**
-     * Get the bakery model by name or class name.
-     *
-     * @param string $name
-     * @return ModelType
-     */
-    public function getModelType($name): BakeryModel
-    {
-        $name = is_string($name) ? $name : class_basename($name);
-
-        if (! isset($this->types[$name])) {
-            throw new TypeNotFound('Type '.$name.' not found.');
-        }
-
-        return $this->types[$name]->model;
-    }
-
-    /**
-     * Wrap an Eloquent model in a Bakery model.
-     *
-     * @param Model $model
-     * @return BakeryModel
-     */
-    public function wrapModel(Model $model): BakeryModel
-    {
-        Utils::invariant(
-            array_key_exists(get_class($model), $this->bakeryModels),
-            class_basename($model).' is not registered as Bakery model'
-        );
-
-        return new $this->bakeryModels[get_class($model)]($model);
-    }
-
-    /**
-     * Alias for wrapModel.
-     *
-     * @param Model $model
-     * @return BakeryModel
-     */
-    public function wrap(Model $model): BakeryModel
-    {
-        return $this->wrapModel($model);
-    }
-
-    /**
-     * Wrap a fresh new Eloquent model in a BaeryModel.
-     *
-     * @param mixed $model
-     * @return BakeryModel
-     */
-    public function createModel($model): BakeryModel
-    {
-        if (is_object($model)) {
-            $model = get_class($model);
-        }
-
-        Utils::invariant(
-            array_key_exists($model, $this->bakeryModels),
-            $model.' is not registered as Bakery model'
-        );
-
-        return new $this->bakeryModels[$model]();
-    }
-
-    /**
-     * Alias for createModel.
-     *
-     * @param mixed $model
-     * @return BakeryModel
-     */
-    public function create($model): BakeryModel
-    {
-        return $this->createModel($model);
     }
 
     /**

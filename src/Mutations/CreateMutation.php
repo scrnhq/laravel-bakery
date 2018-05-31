@@ -23,11 +23,11 @@ class CreateMutation extends EntityMutation
      */
     public function resolve($root, array $args, $viewer): Model
     {
-        $this->authorize($this->action, $this->model->getModel());
+        $this->authorize($this->action, $this->model);
 
         $input = $args['input'];
-        $model = $this->model->create($input);
+        $model = $this->model->createWithInput($input);
 
-        return $model->getModel();
+        return $model;
     }
 }

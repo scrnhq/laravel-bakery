@@ -4,13 +4,15 @@ namespace Bakery\Tests\Stubs\BakeryModels;
 
 use Bakery;
 use Bakery\Tests\Models\User;
-use Bakery\Eloquent\BakeryModel;
+use Bakery\Eloquent\ModelSchema;
 use GraphQL\Type\Definition\Type;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
-class UserBakery extends BakeryModel
+class UserBakery
 {
-    protected $model = User::class;
+    use ModelSchema;
+
+    public static $model = User::class;
 
     public $lookupFields = ['email'];
 

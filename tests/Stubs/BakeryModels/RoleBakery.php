@@ -3,12 +3,14 @@
 namespace Bakery\Tests\Stubs\BakeryModels;
 
 use Bakery\Tests\Models\Role;
-use Bakery\Eloquent\BakeryModel;
+use Bakery\Eloquent\ModelSchema;
 use GraphQL\Type\Definition\Type;
 
-class RoleBakery extends BakeryModel
+class RoleBakery
 {
-    protected $model = Role::class;
+    use ModelSchema;
+
+    public static $model = Role::class;
 
     public function fields(): array
     {

@@ -5,6 +5,7 @@ namespace Bakery\Types;
 use Bakery\Utils\Utils;
 use GraphQL\Type\Definition\Type;
 use Illuminate\Support\Collection;
+use Bakery\Support\Facades\Bakery;
 use Illuminate\Database\Eloquent\Relations\Relation;
 
 class CreateInputType extends MutationInputType
@@ -16,7 +17,7 @@ class CreateInputType extends MutationInputType
      */
     protected function name(): string
     {
-        return 'Create'.Utils::typename($this->model->getModel()).'Input';
+        return 'Create'.$this->schema->typename().'Input';
     }
 
     /**
@@ -46,7 +47,7 @@ class CreateInputType extends MutationInputType
      */
     protected function getFillableFields(): Collection
     {
-        return $this->model->getFillableFields()->map(function ($field, $key) {
+        return $this->schema->getFillableFields()->map(function ($field, $key) {
             $defaults = $this->model->getAttributes();
 
             if (in_array($key, array_keys($defaults))) {
@@ -60,11 +61,11 @@ class CreateInputType extends MutationInputType
     /**
      * Generate the input type name for a relationship.
      *
-     * @param Relation $relationship
+     * @param string $relation
      * @return string
      */
-    protected function inputTypeName(Relation $relationship): string
+    protected function inputTypename(string $relation): string
     {
-        return 'Create'.class_basename($relationship->getRelated()).'Input';
+        return 'Create'.Utils::typename($relation).'Input';
     }
 }

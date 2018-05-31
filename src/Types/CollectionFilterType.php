@@ -3,11 +3,14 @@
 namespace Bakery\Types;
 
 use Bakery\Utils\Utils;
+use Bakery\Concerns\ModelAware;
 use GraphQL\Type\Definition\Type;
 use Bakery\Support\Facades\Bakery;
 
-class CollectionFilterType extends ModelAwareInputType
+class CollectionFilterType extends InputType
 {
+    use ModelAware;
+
     /**
      * Get the name of the Collection Filter Type.
      *
@@ -15,7 +18,7 @@ class CollectionFilterType extends ModelAwareInputType
      */
     protected function name(): string
     {
-        return Utils::typename($this->model->getModel()).'Filter';
+        return $this->schema->typename().'Filter';
     }
 
     /**
@@ -27,11 +30,11 @@ class CollectionFilterType extends ModelAwareInputType
     {
         $fields = [];
 
-        foreach ($this->model->getFields() as $name => $type) {
+        foreach ($this->schema->getFields() as $name => $type) {
             $fields = array_merge($fields, $this->getFilters($name, $type));
         }
 
-        foreach ($this->model->relations() as $relation => $field) {
+        foreach ($this->schema->getRelations() as $relation => $field) {
             $field = Utils::toFieldArray($field);
             $type = Type::getNamedType($field['type']);
 

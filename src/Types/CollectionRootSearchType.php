@@ -3,10 +3,14 @@
 namespace Bakery\Types;
 
 use Bakery\Utils\Utils;
+use Bakery\Concerns\ModelAware;
+use GraphQL\Type\Definition\Type;
 use Bakery\Support\Facades\Bakery;
 
-class CollectionRootSearchType extends ModelAwareInputType
+class CollectionRootSearchType extends InputType
 {
+    use ModelAware;
+
     /**
      * Get the name of the Collection Root Search Type.
      *
@@ -14,7 +18,7 @@ class CollectionRootSearchType extends ModelAwareInputType
      */
     protected function name(): string
     {
-        return Utils::typename($this->model->getModel()).'RootSearch';
+        return $this->schema->typename().'RootSearch';
     }
 
     /**
@@ -25,8 +29,8 @@ class CollectionRootSearchType extends ModelAwareInputType
     public function fields(): array
     {
         return [
-            'query' => Bakery::nonNull(Bakery::string()),
-            'fields' => Bakery::nonNull(Bakery::type(Utils::typename(class_basename($this->model->getModel()).'Search'))),
+            'query' => Type::nonNull(Type::string()),
+            'fields' => Type::nonNull(Bakery::type($this->schema->typename().'Search')),
         ];
     }
 }

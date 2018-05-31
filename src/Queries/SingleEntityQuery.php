@@ -30,15 +30,10 @@ class SingleEntityQuery extends EntityQuery
      */
     public function args(): array
     {
-        $args = array_merge(
-            [$this->model->getModel()->getKeyName() => Bakery::ID()],
-            $this->model->getLookupFields()
-        );
+        $args = $this->schema->getLookupFields();
 
-        foreach ($this->model->relations() as $relation => $type) {
-            if (is_array($type)) {
-                $type = $type['type'];
-            }
+        foreach ($this->model->getRelations() as $relation => $field) {
+            $type = $field['type'];
             if ($type instanceof ListofType) {
                 continue;
             }
@@ -60,7 +55,7 @@ class SingleEntityQuery extends EntityQuery
      */
     public function resolve($root, array $args, $viewer)
     {
-        $primaryKey = $this->model->getModel()->getKeyName();
+        $primaryKey = $this->model->getKeyName();
         $query = $this->scopeQuery($this->model->query($viewer), $args, $viewer);
 
         if (array_key_exists($primaryKey, $args)) {
@@ -77,7 +72,7 @@ class SingleEntityQuery extends EntityQuery
             throw (new TooManyResultsException)
                 ->setModel(
                     $this->class,
-                    $results->pluck($this->model->getModel()->getKeyName())
+                    $results->pluck($this->model->getKeyName())
                 );
         }
 

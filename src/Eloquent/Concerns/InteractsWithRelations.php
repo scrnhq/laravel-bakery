@@ -39,7 +39,7 @@ trait InteractsWithRelations
                 throw new RuntimeException("Unknown or unfillable relation type: {$key} of type ${relationType}");
             }
 
-            $this->gate->authorize($policyMethod, [$this->instance, $attributes]);
+            $this->gate()->authorize($policyMethod, [$this, $attributes]);
 
             $this->{$method}($relation, $attributes);
         }
@@ -63,7 +63,7 @@ trait InteractsWithRelations
                 throw new RuntimeException("Unknown or unfillable connection type: {$key} of type ${relationType}");
             }
 
-            $this->gate->authorize($policyMethod, [$this->instance, $attributes]);
+            $this->gate()->authorize($policyMethod, [$this, $attributes]);
 
             $this->{$method}($relation, $attributes);
         }
@@ -90,10 +90,8 @@ trait InteractsWithRelations
      */
     protected function fillBelongsToRelation(Relations\BelongsTo $relation, $attributes = [])
     {
-        $related = Bakery::getModelType($relation->getRelated())
-            ->create($attributes);
-
-        $relation->associate($related->getModel());
+        $related = $relation->getRelated()->create($attributes);
+        $relation->associate($related);
     }
 
     /**
@@ -105,7 +103,7 @@ trait InteractsWithRelations
      */
     protected function connectHasOneRelation(Relations\HasOne $relation, $id)
     {
-        $model = Bakery::wrap($relation->getRelated()->findOrFail($id));
+        $model = $relation->getRelated()->findOrFail($id);
 
         $this->transactionQueue[] = function () use ($model, $relation) {
             $model->setAttribute($relation->getForeignKeyName(), $relation->getParentKey());
@@ -122,7 +120,7 @@ trait InteractsWithRelations
      */
     protected function fillHasOneRelation(Relations\HasOne $relation, $attributes)
     {
-        $model = Bakery::wrap($relation->getRelated());
+        $model = $relation->getRelated();
         $model->fill($attributes);
 
         $this->transactionQueue[] = function () use ($model, $relation) {
@@ -155,12 +153,12 @@ trait InteractsWithRelations
     protected function fillHasManyRelation(Relations\HasMany $relation, array $values)
     {
         $this->transactionQueue[] = function () use ($relation, $values) {
-            $model = Bakery::wrap($relation->getRelated());
+            $model = $relation->getRelated();
             $model->delete();
 
             foreach ($values as $attributes) {
-                $model = Bakery::create($relation->getRelated());
-                $model->fill($attributes);
+                $model = $relation->getRelated()->newInstance();
+                $model->fillWithInput($attributes);
                 $model->setAttribute($relation->getForeignKeyName(), $relation->getParentKey());
                 $model->save();
             }
@@ -210,11 +208,11 @@ trait InteractsWithRelations
     protected function resolveRelation(string $relation): Relations\Relation
     {
         Utils::invariant(
-            method_exists($this->instance, $relation),
-            class_basename($this->instance).' has no relation named '.$relation
+            method_exists($this, $relation),
+            class_basename($this).' has no relation named '.$relation
         );
 
-        return $this->instance->{$relation}();
+        return $this->{$relation}();
     }
 
     /**

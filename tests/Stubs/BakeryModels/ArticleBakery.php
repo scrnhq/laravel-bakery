@@ -3,13 +3,15 @@
 namespace Bakery\Tests\Stubs\BakeryModels;
 
 use Bakery;
-use Bakery\Eloquent\BakeryModel;
+use Bakery\Eloquent\ModelSchema;
 use Bakery\Tests\Models\Article;
 use GraphQL\Type\Definition\Type;
 
-class ArticleBakery extends BakeryModel
+class ArticleBakery
 {
-    protected $model = Article::class;
+    use ModelSchema;
+
+    public static $model = Article::class;
 
     public function fields(): array
     {

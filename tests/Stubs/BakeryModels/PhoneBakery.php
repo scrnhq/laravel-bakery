@@ -4,12 +4,14 @@ namespace Bakery\Tests\Stubs\BakeryModels;
 
 use Bakery;
 use Bakery\Tests\Models\Phone;
-use Bakery\Eloquent\BakeryModel;
+use Bakery\Eloquent\ModelSchema;
 use GraphQL\Type\Definition\Type;
 
-class PhoneBakery extends BakeryModel
+class PhoneBakery
 {
-    protected $model = Phone::class;
+    use ModelSchema;
+
+    public static $model = Phone::class;
 
     public function fields(): array
     {

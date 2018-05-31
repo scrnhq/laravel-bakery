@@ -7,10 +7,10 @@ use Bakery\Tests\Stubs\DummyType;
 use Bakery\Support\Facades\Bakery;
 use Bakery\Tests\Stubs\DummyClass;
 use Bakery\Tests\Stubs\DummyQuery;
+use Bakery\Tests\Stubs\DummyModel;
 use Bakery\Tests\Stubs\DummyMutation;
 use Bakery\Tests\Stubs\DummyReadOnly;
 use Bakery\Exceptions\InvariantViolation;
-use Bakery\Tests\Stubs\DummyInheritClass;
 use GraphQL\Type\Schema as GraphQLSchema;
 
 class NotResourceSchema extends Schema
@@ -20,10 +20,10 @@ class NotResourceSchema extends Schema
     ];
 }
 
-class InheritedClassSchema extends Schema
+class InlineEloquentSchema extends Schema
 {
     protected $models = [
-        DummyInheritClass::class,
+        DummyModel::class,
     ];
 }
 
@@ -37,19 +37,19 @@ class ReadOnlySchema extends Schema
 class TestSchema extends Schema
 {
     protected $models = [
-        DummyInheritClass::class,
+        DummyModel::class,
     ];
 
     protected $queries = [
-        'model' => DummyQuery::class,
+        'dummyModel' => DummyQuery::class,
     ];
 
     protected $mutations = [
-        'createModel' => DummyMutation::class,
+        'createDummyModel' => DummyMutation::class,
     ];
 
     protected $types = [
-        'Model' => DummyType::class,
+        'DummyModel' => DummyType::class,
     ];
 }
 
@@ -74,12 +74,12 @@ class SchemaTest extends FeatureTestCase
     /** @test */
     public function it_registers_class_that_does_extend_the_correct_class()
     {
-        $schema = new InheritedClassSchema();
+        $schema = new InlineEloquentSchema();
         $schema->toGraphQLSchema();
         $queries = $schema->getQueries();
 
-        $this->assertArrayHasKey('model', $queries);
-        $this->assertArrayHasKey('models', $queries);
+        $this->assertArrayHasKey('dummyModel', $queries);
+        $this->assertArrayHasKey('dummyModels', $queries);
     }
 
     /** @test */
@@ -102,7 +102,7 @@ class SchemaTest extends FeatureTestCase
         $schema->toGraphQLSchema();
         $queries = $schema->getQueries();
 
-        $this->assertInstanceOf(DummyQuery::class, $queries['model']);
+        $this->assertInstanceOf(DummyQuery::class, $queries['dummyModel']);
     }
 
     /** @test */
@@ -112,9 +112,9 @@ class SchemaTest extends FeatureTestCase
         $schema->toGraphQLSchema();
         $mutations = $schema->getMutations();
 
-        $this->assertArrayHasKey('createModel', $mutations);
-        $this->assertArrayHasKey('updateModel', $mutations);
-        $this->assertArrayHasKey('deleteModel', $mutations);
+        $this->assertArrayHasKey('createDummyModel', $mutations);
+        $this->assertArrayHasKey('updateDummyModel', $mutations);
+        $this->assertArrayHasKey('deleteDummyModel', $mutations);
     }
 
     /** @test */
@@ -124,7 +124,7 @@ class SchemaTest extends FeatureTestCase
         $schema->toGraphQLSchema();
         $mutations = $schema->getMutations();
 
-        $this->assertInstanceOf(DummyMutation::class, $mutations['createModel']);
+        $this->assertInstanceOf(DummyMutation::class, $mutations['createDummyModel']);
     }
 
     /** @test */
@@ -133,7 +133,7 @@ class SchemaTest extends FeatureTestCase
         $schema = new TestSchema();
         $types = $schema->getTypes();
 
-        $this->assertEquals(DummyType::class, $types['Model']);
+        $this->assertEquals(DummyType::class, $types['DummyModel']);
     }
 
     /** @test */
@@ -144,7 +144,7 @@ class SchemaTest extends FeatureTestCase
         $graphQLschema = $schema->toGraphQLSchema();
 
         $this->assertInstanceOf(GraphQLSchema::class, $graphQLschema);
-        $this->assertContains('Model', $graphQLschema->getTypeMap());
+        $this->assertContains('DummyModel', $graphQLschema->getTypeMap());
 
         $graphQLschema->assertValid();
     }

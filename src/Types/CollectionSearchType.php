@@ -3,13 +3,16 @@
 namespace Bakery\Types;
 
 use Bakery\Utils\Utils;
+use Bakery\Concerns\ModelAware;
 use GraphQL\Type\Definition\Type;
 use Bakery\Support\Facades\Bakery;
 use GraphQL\Type\Definition\IDType;
 use GraphQL\Type\Definition\StringType;
 
-class CollectionSearchType extends ModelAwareInputType
+class CollectionSearchType extends InputType
 {
+    use ModelAware;
+
     /**
      * Get the name of the Collection Search Type.
      *
@@ -17,7 +20,7 @@ class CollectionSearchType extends ModelAwareInputType
      */
     protected function name(): string
     {
-        return Utils::typename($this->model->getModel()).'Search';
+        return $this->schema->typename().'Search';
     }
 
     /**
@@ -29,7 +32,7 @@ class CollectionSearchType extends ModelAwareInputType
     {
         $fields = [];
 
-        foreach ($this->model->getFields() as $name => $field) {
+        foreach ($this->schema->getFields() as $name => $field) {
             $field = Utils::toFieldArray($field);
             $type = Type::getNamedType($field['type']);
 
@@ -38,8 +41,7 @@ class CollectionSearchType extends ModelAwareInputType
             }
         }
 
-        foreach ($this->model->relations() as $relation => $field) {
-            $field = Utils::toFieldArray($field);
+        foreach ($this->model->getRElations() as $relation => $field) {
             $type = Type::getNamedType($field['type']);
             $fields[$relation] = Bakery::type($type->name.'Search');
         }

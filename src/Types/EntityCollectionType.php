@@ -3,11 +3,14 @@
 namespace Bakery\Types;
 
 use Bakery\Utils\Utils;
+use Bakery\Concerns\ModelAware;
 use Bakery\Support\Facades\Bakery;
 use Illuminate\Pagination\LengthAwarePaginator;
 
-class EntityCollectionType extends ModelAwareType
+class EntityCollectionType extends Type
 {
+    use ModelAware;
+
     /**
      * Get the name of the Entity type.
      *
@@ -15,7 +18,7 @@ class EntityCollectionType extends ModelAwareType
      */
     protected function name(): string
     {
-        return Utils::typename($this->model->getModel()).'Collection';
+        return $this->schema->typename().'Collection';
     }
 
     /**
@@ -27,7 +30,7 @@ class EntityCollectionType extends ModelAwareType
     {
         return [
             'pagination' => Bakery::getType('Pagination'),
-            'items' => Bakery::listOf(Bakery::type(Utils::typename($this->model->getModel()))),
+            'items' => Bakery::listOf(Bakery::type($this->schema->typename())),
         ];
     }
 
