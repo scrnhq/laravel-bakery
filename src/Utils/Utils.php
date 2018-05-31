@@ -103,6 +103,7 @@ class Utils
     public static function usesTrait($class, string $trait)
     {
         $traits = class_uses_deep($class, true);
+
         return in_array($trait, $traits);
     }
 }

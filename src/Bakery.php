@@ -6,10 +6,7 @@ use Auth;
 use GraphQL\GraphQL;
 use Bakery\Utils\Utils;
 use GraphQL\Type\Schema;
-use Bakery\Types\ModelType;
 use Bakery\Traits\BakeryTypes;
-use Bakery\Eloquent\BakeryModel;
-use Bakery\Eloquent\BakeryExtends;
 use Bakery\Exceptions\TypeNotFound;
 use GraphQL\Executor\ExecutionResult;
 use GraphQL\Type\Definition\ObjectType;
@@ -82,7 +79,7 @@ class Bakery
 
     public function addModelSchema($model)
     {
-        if (!is_subclass_of($model, Model::class)) {
+        if (! is_subclass_of($model, Model::class)) {
             $this->modelSchemas[$model::$model] = $model;
         }
     }

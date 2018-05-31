@@ -2,7 +2,6 @@
 
 namespace Bakery\Types;
 
-use Bakery\Utils\Utils;
 use Bakery\Concerns\ModelAware;
 
 class CollectionOrderByType extends EnumType

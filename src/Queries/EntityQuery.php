@@ -4,7 +4,6 @@ namespace Bakery\Queries;
 
 use Bakery\Utils\Utils;
 use Bakery\Concerns\ModelAware;
-use Bakery\Eloquent\ModelSchema;
 use GraphQL\Type\Definition\Type;
 use Bakery\Support\Facades\Bakery;
 use GraphQL\Type\Definition\ListOfType;
@@ -12,7 +11,7 @@ use GraphQL\Type\Definition\ListOfType;
 abstract class EntityQuery extends Query
 {
     use ModelAware;
-    
+
     /**
      * Get the name of the EntityQuery.
      *

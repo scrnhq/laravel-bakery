@@ -2,9 +2,8 @@
 
 namespace Bakery\Eloquent;
 
-use Bakery\Eloquent\Concerns;
-use Illuminate\Support\Facades\DB;
 use Bakery\Support\Facades\Bakery;
+use Illuminate\Support\Facades\DB;
 use Bakery\Events\BakeryModelSaved;
 use Illuminate\Contracts\Auth\Access\Gate;
 
@@ -25,7 +24,7 @@ trait BakeryMutable
      */
     protected function gate(): Gate
     {
-        if (!isset($this->gate)) {
+        if (! isset($this->gate)) {
             $this->gate = app(Gate::class);
         }
 
@@ -122,6 +121,7 @@ trait BakeryMutable
     {
         return collect($attributes)->filter(function ($value, $key) {
             $fields = $this->getSchema()->getFillableFields()->keys();
+
             return $fields->contains($key);
         })->toArray();
     }
@@ -137,6 +137,7 @@ trait BakeryMutable
     {
         return collect($attributes)->filter(function ($value, $key) {
             $relations = $this->getSchema()->getRelations()->keys();
+
             return $relations->contains($key);
         })->toArray();
     }

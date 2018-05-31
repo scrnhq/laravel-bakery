@@ -3,8 +3,6 @@
 namespace Bakery\Mutations;
 
 use Bakery\Utils\Utils;
-use Bakery\Eloquent\BakeryModel;
-use Bakery\Support\Facades\Bakery;
 use Illuminate\Database\Eloquent\Model;
 use Bakery\Exceptions\TooManyResultsException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;

@@ -22,8 +22,10 @@ abstract class MutationInputType extends InputType
     protected function getRelationFields(): array
     {
         $relations = $this->schema->getRelations();
+
         return $relations->keys()->reduce(function ($fields, $key) use ($relations) {
             $field = $relations[$key];
+
             return $fields->merge($this->getFieldsForRelation($key, $field));
         }, collect())->toArray();
     }
