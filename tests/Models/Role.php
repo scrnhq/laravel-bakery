@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Role extends Model
 {
     use BakeryMutable;
-    
+
     protected $casts = [
         'id' => 'string',
     ];

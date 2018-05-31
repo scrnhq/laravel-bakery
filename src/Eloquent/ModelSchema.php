@@ -3,10 +3,9 @@
 namespace Bakery\Eloquent;
 
 use Bakery\Utils\Utils;
-use Illuminate\Support\Str;
 use GraphQL\Type\Definition\Type;
-use Illuminate\Support\Collection;
 use Bakery\Support\Facades\Bakery;
+use Illuminate\Support\Collection;
 use GraphQL\Type\Definition\ListOfType;
 use Illuminate\Database\Eloquent\Model;
 
@@ -123,6 +122,7 @@ trait ModelSchema
     public function getRelations(): Collection
     {
         $relations = method_exists($this, 'relations') ? $this->relations() : [];
+
         return Utils::normalizeFields($relations);
     }
 
