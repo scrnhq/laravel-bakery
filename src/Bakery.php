@@ -70,6 +70,12 @@ class Bakery
         $this->types[$name] = $class;
     }
 
+    /**
+     * Add the models as model schemas to the registry.
+     *
+     * @param array $models
+     * @return void
+     */
     public function addModelSchemas(array $models)
     {
         foreach ($models as $model) {
@@ -77,6 +83,12 @@ class Bakery
         }
     }
 
+    /**
+     * Add a single model schema to the registry.
+     *
+     * @param mixed $model
+     * @return void
+     */
     public function addModelSchema($model)
     {
         if (! is_subclass_of($model, Model::class)) {
@@ -84,6 +96,13 @@ class Bakery
         }
     }
 
+    /**
+     * Return a model schema based on the model provided.
+     * This can either be an instance or a class name.
+     *
+     * @param mixed $model
+     * @return mixed
+     */
     public function getModelSchema($model)
     {
         $model = is_string($model) ? $model : get_class($model);
