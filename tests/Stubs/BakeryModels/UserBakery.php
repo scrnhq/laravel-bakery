@@ -2,10 +2,10 @@
 
 namespace Bakery\Tests\Stubs\BakeryModels;
 
-use Bakery\Eloquent\Introspectable;
-use Bakery\Support\Facades\Bakery;
 use Bakery\Tests\Models\User;
 use GraphQL\Type\Definition\Type;
+use Bakery\Support\Facades\Bakery;
+use Bakery\Eloquent\Introspectable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class UserBakery

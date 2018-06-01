@@ -3,6 +3,7 @@
 namespace Bakery\Types;
 
 use Bakery\Utils\Utils;
+
 class UpdateInputType extends MutationInputType
 {
     /**

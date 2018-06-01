@@ -166,6 +166,7 @@ class CollectionQuery extends EntityQuery
                 }
             }
         }
+
         return $query;
     }
 

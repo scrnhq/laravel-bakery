@@ -17,7 +17,7 @@ class Utils
     public static function invariant($test, $message = '', $args = null)
     {
         if (! $test) {
-            if (sizeof($args)) {
+            if (count($args)) {
                 $message = sprintf($message, $args);
             }
 

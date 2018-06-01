@@ -2,9 +2,9 @@
 
 namespace Bakery\Eloquent\Concerns;
 
-use Bakery\Exceptions\InvariantViolation;
 use RuntimeException;
 use Bakery\Utils\Utils;
+use Bakery\Exceptions\InvariantViolation;
 use Illuminate\Database\Eloquent\Relations;
 
 trait InteractsWithRelations
@@ -234,7 +234,7 @@ trait InteractsWithRelations
             return str_singular(str_before($connection, 'Id'));
         }
 
-        throw new InvariantViolation('Could not get relation of connection: ' . $connection);
+        throw new InvariantViolation('Could not get relation of connection: '.$connection);
     }
 
     /**
