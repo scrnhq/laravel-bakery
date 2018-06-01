@@ -2,7 +2,7 @@
 
 namespace Bakery\Tests\Stubs\BakeryModels;
 
-use Bakery;
+use Bakery\Support\Facades\Bakery;
 use Bakery\Tests\Models\Phone;
 use GraphQL\Type\Definition\Type;
 use Bakery\Eloquent\Introspectable;

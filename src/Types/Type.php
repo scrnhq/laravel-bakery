@@ -31,9 +31,9 @@ class Type
      * If no name is specified fall back on an
      * automatically generated name based on the class name.
      *
-     * @return void
+     * @return string
      */
-    protected function name()
+    protected function name(): string
     {
         if (property_exists($this, 'name')) {
             return $this->name;
@@ -62,6 +62,8 @@ class Type
                 return call_user_func_array($resolver, $args);
             };
         }
+
+        return null;
     }
 
     /**
@@ -147,5 +149,6 @@ class Type
         } elseif (property_exists($this, $key)) {
             return $this->{$key};
         }
+        return null;
     }
 }

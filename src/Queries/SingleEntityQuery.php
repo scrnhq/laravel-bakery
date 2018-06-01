@@ -65,7 +65,7 @@ class SingleEntityQuery extends EntityQuery
         $results = $this->queryByArgs($query, $args)->get();
 
         if ($results->count() < 1) {
-            return;
+            return null;
         }
 
         if ($results->count() > 1) {

@@ -2,7 +2,6 @@
 
 namespace Bakery\Utils;
 
-use GraphQL\Type\Definition\Type;
 use Illuminate\Support\Collection;
 use GraphQL\Type\Definition\NonNull;
 use Bakery\Exceptions\InvariantViolation;
@@ -13,17 +12,13 @@ class Utils
     /**
      * @param $test
      * @param string $message
-     * @param mixed $sprintfParam1
-     * @param mixed $sprintfParam2 ...
-     * @throws Error
+     * @param array $args
      */
-    public static function invariant($test, $message = '')
+    public static function invariant($test, $message = '', $args = null)
     {
         if (! $test) {
-            if (func_num_args() > 2) {
-                $args = func_get_args();
-                array_shift($args);
-                $message = call_user_func_array('sprintf', $args);
+            if (sizeof($args)) {
+                $message = sprintf($message, $args);
             }
 
             throw new InvariantViolation($message);

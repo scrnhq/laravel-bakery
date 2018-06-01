@@ -2,7 +2,7 @@
 
 namespace Bakery\Tests\Stubs\BakeryModels;
 
-use Bakery;
+use Bakery\Support\Facades\Bakery;
 use Bakery\Tests\Models\Article;
 use GraphQL\Type\Definition\Type;
 use Bakery\Eloquent\Introspectable;
@@ -19,7 +19,6 @@ class ArticleBakery
             'slug' => Type::nonNull(Type::string()),
             'title' => Type::nonNull(Type::string()),
             'content' => Type::nonNull(Type::string()),
-            'slug' => Type::nonNull(Type::string()),
         ];
     }
 

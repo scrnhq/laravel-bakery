@@ -20,7 +20,7 @@ class DeleteMutationTest extends FeatureTestCase
             }
         ';
 
-        $response = $this->json('GET', '/graphql', ['query' => $query]);
+        $this->json('GET', '/graphql', ['query' => $query]);
         $this->assertDatabaseHas('articles', ['id' => $article->id]);
     }
 
@@ -68,7 +68,7 @@ class DeleteMutationTest extends FeatureTestCase
         $this->withExceptionHandling();
 
         $user = factory(Models\User::class)->create();
-        $article = factory(Models\Article::class, 2)->create([
+        factory(Models\Article::class, 2)->create([
             'slug' => 'hello-world',
         ]);
 

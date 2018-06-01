@@ -284,7 +284,7 @@ class CollectionQueryTest extends FeatureTestCase
         $firstUser = factory(Models\User::class)->create();
         $secondUser = factory(Models\User::class)->create();
 
-        $phone = factory(Models\Phone::class)->create([
+        factory(Models\Phone::class)->create([
             'user_id' => $firstUser->id,
         ]);
 

@@ -81,7 +81,7 @@ class UpdateMutationTest extends FeatureTestCase
     public function it_throws_too_many_results_exception_when_lookup_is_not_specific_enough()
     {
         $this->withExceptionHandling();
-        $articles = factory(Models\Article::class, 2)->create([
+        factory(Models\Article::class, 2)->create([
             'slug' => 'hello-world',
         ]);
 
@@ -107,7 +107,7 @@ class UpdateMutationTest extends FeatureTestCase
     public function it_lets_you_do_deep_nested_update_mutations()
     {
         $user = factory(Models\User::class)->create();
-        $article = factory(Models\Article::class)->create();
+        factory(Models\Article::class)->create();
         $this->actingAs($user);
 
         $query = '

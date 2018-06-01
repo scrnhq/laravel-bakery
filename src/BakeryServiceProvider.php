@@ -47,7 +47,7 @@ class BakeryServiceProvider extends ServiceProvider
      */
     public function registerBakery()
     {
-        $this->app->singleton(static::$abstract, function ($app) {
+        $this->app->singleton(static::$abstract, function () {
             return new Bakery();
         });
     }

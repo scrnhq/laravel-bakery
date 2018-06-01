@@ -2,7 +2,6 @@
 
 namespace Bakery\Http\Controller;
 
-use App;
 use GraphQL\Error\Debug;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
@@ -32,7 +31,7 @@ class BakeryController extends Controller
     {
         $debug = null;
 
-        if (config('app.debug') or App::runningUnitTests()) {
+        if (config('app.debug') or app()->runningUnitTests()) {
             $debug = Debug::INCLUDE_DEBUG_MESSAGE;
         }
 
@@ -60,7 +59,7 @@ class BakeryController extends Controller
 
     public function graphiql()
     {
-        if (! App::isLocal()) {
+        if (! app()->isLocal()) {
             abort(404);
         }
 

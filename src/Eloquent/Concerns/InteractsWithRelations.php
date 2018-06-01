@@ -2,9 +2,9 @@
 
 namespace Bakery\Eloquent\Concerns;
 
+use Bakery\Exceptions\InvariantViolation;
 use RuntimeException;
 use Bakery\Utils\Utils;
-use Bakery\Support\Facades\Bakery;
 use Illuminate\Database\Eloquent\Relations;
 
 trait InteractsWithRelations
@@ -138,7 +138,7 @@ trait InteractsWithRelations
      */
     protected function connectHasManyRelation(Relations\HasMany $relation, array $ids)
     {
-        $this->transactionQueue[] = function (Model $model) use ($relation, $ids) {
+        $this->transactionQueue[] = function () use ($relation, $ids) {
             $relation->sync($ids);
         };
     }
@@ -169,6 +169,7 @@ trait InteractsWithRelations
      * Connect the belongs to many relation.
      *
      * @param Relations\BelongsToMany $relation
+     * @param array $ids
      * @return void
      */
     protected function connectBelongsToManyRelation(Relations\BelongsToMany $relation, array $ids)
@@ -194,7 +195,7 @@ trait InteractsWithRelations
             $instances[] = $related->create($attributes);
         }
 
-        $this->transactionQueue[] = function (Model $model) use ($relation, $instances) {
+        $this->transactionQueue[] = function () use ($relation, $instances) {
             $relation->sync($instances->pluck('id')->all());
         };
     }
@@ -232,6 +233,8 @@ trait InteractsWithRelations
         if (ends_with($connection, 'Id')) {
             return str_singular(str_before($connection, 'Id'));
         }
+
+        throw new InvariantViolation('Could not get relation of connection: ' . $connection);
     }
 
     /**

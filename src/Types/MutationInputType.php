@@ -4,11 +4,8 @@ namespace Bakery\Types;
 
 use Bakery\Utils\Utils;
 use Bakery\Concerns\ModelAware;
-use GraphQL\Type\Definition\Type;
 use Bakery\Support\Facades\Bakery;
 use GraphQL\Type\Definition\ListOfType;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\Relation;
 
 abstract class MutationInputType extends InputType
 {
@@ -34,8 +31,7 @@ abstract class MutationInputType extends InputType
      * Set the relation fields.
      *
      * @param string $relation
-     * @param Relation $relationship
-     * @param array $fields
+     * @param array $field
      * @return array
      */
     protected function getFieldsForRelation(string $relation, array $field): array

@@ -75,7 +75,8 @@ trait Mutable
     /**
      * Update the model with GraphQL input.
      *
-     * @param array $input
+     * @param array $attributes
+     * @param array $options
      * @return self
      */
     public function updateWithInput(array $attributes = [], array $options = [])
@@ -110,6 +111,7 @@ trait Mutable
     /**
      * Save the underlying model.
      *
+     * @param array $options
      * @return self
      */
     public function save(array $options = [])

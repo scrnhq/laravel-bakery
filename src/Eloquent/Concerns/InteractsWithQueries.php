@@ -2,6 +2,8 @@
 
 namespace Bakery\Eloquent\Concerns;
 
+use Illuminate\Database\Eloquent\Builder;
+
 trait InteractsWithQueries
 {
     /**

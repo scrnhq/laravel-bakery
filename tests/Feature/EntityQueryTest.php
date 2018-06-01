@@ -48,7 +48,7 @@ class EntityQueryTest extends FeatureTestCase
     /** @test */
     public function it_returns_null_when_there_are_no_results()
     {
-        $article = factory(Models\Article::class)->create();
+        factory(Models\Article::class)->create();
 
         $query = '
             query {
@@ -148,7 +148,7 @@ class EntityQueryTest extends FeatureTestCase
     {
         $this->withExceptionHandling();
         $user = factory(Models\User::class)->create();
-        $article = factory(Models\Article::class)->create([
+        factory(Models\Article::class)->create([
             'user_id' => $user->id,
         ]);
 

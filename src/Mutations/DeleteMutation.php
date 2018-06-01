@@ -42,7 +42,9 @@ class DeleteMutation extends EntityMutation
      * @param  mixed $root
      * @param  array $args
      * @param  mixed $viewer
-     * @return bool
+     * @return Model
+     * @throws \Illuminate\Auth\Access\AuthorizationException
+     * @throws \Exception
      */
     public function resolve($root, array $args, $viewer): Model
     {

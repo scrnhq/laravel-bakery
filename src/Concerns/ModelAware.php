@@ -24,6 +24,13 @@ trait ModelAware
     protected $model;
 
     /**
+     * A reference to the schema.
+     *
+     * @var
+     */
+    protected $schema;
+
+    /**
      * Construct a new model aware input type.
      *
      * @param string $class

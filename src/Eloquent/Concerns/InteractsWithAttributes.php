@@ -2,6 +2,8 @@
 
 namespace Bakery\Eloquent\Concerns;
 
+use GraphQL\Error\UserError;
+
 trait InteractsWithAttributes
 {
     /**
@@ -14,7 +16,7 @@ trait InteractsWithAttributes
         foreach ($scalars as $key => $value) {
             try {
                 $this->fillScalar($key, $value);
-            } catch (Exception $previous) {
+            } catch (\Exception $previous) {
                 throw new UserError('Could not set '.$key, [
                     $key => $previous->getMessage(),
                 ]);
@@ -27,7 +29,7 @@ trait InteractsWithAttributes
      *
      * @param string $key
      * @param mixed $value
-     * @return void
+     * @return $this;
      */
     protected function fillScalar(string $key, $value)
     {

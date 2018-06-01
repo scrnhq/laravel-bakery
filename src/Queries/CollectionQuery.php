@@ -72,6 +72,7 @@ class CollectionQuery extends EntityQuery
      * @param array $args
      * @param mixed $viewer
      * @return LengthAwarePaginator
+     * @throws PaginationMaxCountExceededException
      */
     public function resolve($root, array $args, $viewer)
     {
@@ -86,7 +87,7 @@ class CollectionQuery extends EntityQuery
 
         $query = $this->model->where(function ($query) use ($viewer, $args) {
             return $this->scopeQuery(
-                $this->model->query($viewer),
+                $this->schema->query($viewer),
                 $args,
                 $viewer
             );
@@ -143,7 +144,7 @@ class CollectionQuery extends EntityQuery
      * @param Builder $query
      * @param array $args
      * @param mixed $type
-     * @return void
+     * @return Builder
      */
     protected function applyFiltersRecursively(Builder $query, array $args, $type = null)
     {
@@ -165,6 +166,7 @@ class CollectionQuery extends EntityQuery
                 }
             }
         }
+        return $query;
     }
 
     /**

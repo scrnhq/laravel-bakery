@@ -19,7 +19,8 @@ class CreateMutation extends EntityMutation
      * @param  mixed $root
      * @param  array $args
      * @param  mixed $viewer
-     * @return array
+     * @return Model
+     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     public function resolve($root, array $args, $viewer): Model
     {

@@ -34,7 +34,7 @@ trait Introspectable
      * If $this is already an Eloquent model, we just return this.
      * Otherwise we boot up an intance of that model and return it.
      *
-     * @return void
+     * @return mixed
      */
     public function getModel()
     {
@@ -164,8 +164,8 @@ trait Introspectable
      */
     public function __call($method, $parameters)
     {
-        if ($this instanceof Eloquent) {
-            return parent::__call();
+        if ($this instanceof Model) {
+            return parent::__call($method, $parameters);
         }
 
         return $this->getModel()->{$method}($parameters);

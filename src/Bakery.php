@@ -2,7 +2,6 @@
 
 namespace Bakery;
 
-use Auth;
 use GraphQL\GraphQL;
 use Bakery\Utils\Utils;
 use GraphQL\Type\Schema;
@@ -180,6 +179,7 @@ class Bakery
      * @api
      * @param $name
      * @return ObjectType
+     * @throws TypeNotFound
      */
     public function type($name)
     {
@@ -202,7 +202,7 @@ class Bakery
         }
 
         $root = null;
-        $context = Auth::user();
+        $context = auth()->user();
         $query = array_get($input, 'query');
         $variables = array_get($input, 'variables');
         if (is_string($variables)) {

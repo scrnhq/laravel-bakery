@@ -7,7 +7,7 @@ use GraphQL\Type\Definition\Type;
 
 class EnumTypeStub extends EnumType
 {
-    protected $name = 'EnumStub';
+    public $name = 'EnumStub';
 
     public function values(): array
     {

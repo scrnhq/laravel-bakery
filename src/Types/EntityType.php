@@ -51,7 +51,11 @@ class EntityType extends Type
      * Check the policy of a field.
      *
      * @param array $field
+     * @param $source
+     * @param $args
+     * @param $viewer
      * @return void
+     * @throws AuthorizationException
      */
     protected function checkPolicy(array $field, $source, $args, $viewer)
     {

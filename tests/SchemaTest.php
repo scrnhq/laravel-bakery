@@ -4,7 +4,6 @@ namespace Bakery\Tests;
 
 use Bakery\Support\Schema;
 use Bakery\Tests\Stubs\DummyType;
-use Bakery\Support\Facades\Bakery;
 use Bakery\Tests\Stubs\DummyClass;
 use Bakery\Tests\Stubs\DummyModel;
 use Bakery\Tests\Stubs\DummyQuery;

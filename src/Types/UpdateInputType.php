@@ -3,11 +3,6 @@
 namespace Bakery\Types;
 
 use Bakery\Utils\Utils;
-use GraphQL\Type\Definition\Type;
-use Bakery\Support\Facades\Bakery;
-use GraphQL\Type\Definition\NonNull;
-use Illuminate\Database\Eloquent\Model;
-
 class UpdateInputType extends MutationInputType
 {
     /**
