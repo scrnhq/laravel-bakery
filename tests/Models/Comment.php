@@ -2,12 +2,12 @@
 
 namespace Bakery\Tests\Models;
 
-use Bakery\Eloquent\BakeryMutable;
+use Bakery\Eloquent\Mutable;
 use Illuminate\Database\Eloquent\Model;
 
 class Comment extends Model
 {
-    use BakeryMutable;
+    use Mutable;
 
     protected $casts = [
         'id' => 'string',

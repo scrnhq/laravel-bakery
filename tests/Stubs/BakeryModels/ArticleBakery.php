@@ -3,13 +3,13 @@
 namespace Bakery\Tests\Stubs\BakeryModels;
 
 use Bakery;
-use Bakery\Eloquent\ModelSchema;
 use Bakery\Tests\Models\Article;
 use GraphQL\Type\Definition\Type;
+use Bakery\Eloquent\Introspectable;
 
 class ArticleBakery
 {
-    use ModelSchema;
+    use Introspectable;
 
     public static $model = Article::class;
 

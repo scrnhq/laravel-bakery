@@ -140,4 +140,27 @@ class UpdateMutationTest extends FeatureTestCase
         $this->assertDatabaseHas('comments', ['body' => 'First!', 'article_id' => '2']);
         $this->assertDatabaseHas('comments', ['body' => 'Great post!', 'article_id' => '2']);
     }
+
+    /** @test */
+    public function it_can_set_policy_for_updating_an_attribute()
+    {
+        $this->withExceptionHandling();
+        $user = factory(Models\User::class)->create();
+        $this->actingAs($user);
+
+        $query = '
+            mutation {
+                updateUser(
+                    id: '.$user->id.'
+                    input: { type: "admin" }
+               ) {
+                    id
+                }
+            }
+        ';
+
+        $response = $this->json('GET', '/graphql', ['query' => $query]);
+        $response->assertJsonFragment(['updateUser' => null]);
+        $this->assertDatabaseMissing('users', ['type' => 'admin']);
+    }
 }

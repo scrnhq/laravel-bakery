@@ -2,10 +2,10 @@
 
 namespace Bakery\Tests\Stubs;
 
-use Bakery\Eloquent\BakeryMutable;
+use Bakery\Eloquent\Mutable;
 use Illuminate\Database\Eloquent\Model as BaseModel;
 
 class Model extends BaseModel
 {
-    use BakeryMutable;
+    use Mutable;
 }

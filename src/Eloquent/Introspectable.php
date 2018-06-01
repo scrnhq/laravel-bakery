@@ -9,11 +9,21 @@ use Illuminate\Support\Collection;
 use GraphQL\Type\Definition\ListOfType;
 use Illuminate\Database\Eloquent\Model;
 
-trait ModelSchema
+trait Introspectable
 {
+    /**
+     * A reference to the underlying Eloquent instance.
+     *
+     * @var mixed
+     */
     protected $instance = null;
 
-    public function typename()
+    /**
+     * Return the typename of the model.
+     *
+     * @return string
+     */
+    public function typename(): string
     {
         return Utils::typename($this->getModel());
     }

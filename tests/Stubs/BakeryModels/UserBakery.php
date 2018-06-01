@@ -4,13 +4,13 @@ namespace Bakery\Tests\Stubs\BakeryModels;
 
 use Bakery;
 use Bakery\Tests\Models\User;
-use Bakery\Eloquent\ModelSchema;
 use GraphQL\Type\Definition\Type;
+use Bakery\Eloquent\Introspectable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class UserBakery
 {
-    use ModelSchema;
+    use Introspectable;
 
     public static $model = User::class;
 
@@ -21,6 +21,7 @@ class UserBakery
         return [
             'name' => Type::nonNull(Type::string()),
             'email' => Type::nonNull(Type::string()),
+            'type' => Type::nonNull(Type::string()),
             'password' => [
                 'type' => Type::nonNull(Type::string()),
                 'policy' => 'readPassword',

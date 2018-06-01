@@ -2,12 +2,16 @@
 
 namespace Bakery\Tests\Models;
 
-use Bakery\Eloquent\BakeryMutable;
+use Bakery\Eloquent\Mutable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class User extends Authenticatable
 {
-    use BakeryMutable;
+    use Mutable;
+
+    protected $attributes = [
+        'type' => 'regular',
+    ];
 
     protected $casts = [
         'id' => 'string',

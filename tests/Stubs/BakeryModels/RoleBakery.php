@@ -3,12 +3,12 @@
 namespace Bakery\Tests\Stubs\BakeryModels;
 
 use Bakery\Tests\Models\Role;
-use Bakery\Eloquent\ModelSchema;
 use GraphQL\Type\Definition\Type;
+use Bakery\Eloquent\Introspectable;
 
 class RoleBakery
 {
-    use ModelSchema;
+    use Introspectable;
 
     public static $model = Role::class;
 

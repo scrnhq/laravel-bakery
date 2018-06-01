@@ -3,8 +3,8 @@
 namespace Bakery\Concerns;
 
 use Bakery\Utils\Utils;
-use Bakery\Eloquent\ModelSchema;
-use Bakery\Eloquent\BakeryMutable;
+use Bakery\Eloquent\Mutable;
+use Bakery\Eloquent\Introspectable;
 use Illuminate\Database\Eloquent\Model;
 
 trait ModelAware
@@ -42,15 +42,15 @@ trait ModelAware
         $this->schema = resolve($this->class);
 
         Utils::invariant(
-            Utils::usesTrait($this->schema, ModelSchema::class),
-            class_basename($this->schema).' does not use the '.ModelSchema::class.' trait.'
+            Utils::usesTrait($this->schema, Introspectable::class),
+            class_basename($this->schema).' does not use the '.Introspectable::class.' trait.'
         );
 
         $this->model = $this->schema->getModel();
 
         Utils::invariant(
-            Utils::usesTrait($this->model, BakeryMutable::class),
-            class_basename($this->model).' does not use the '.BakeryMutable::class.' trait.'
+            Utils::usesTrait($this->model, Mutable::class),
+            class_basename($this->model).' does not use the '.Mutable::class.' trait.'
         );
     }
 }

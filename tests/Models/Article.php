@@ -2,16 +2,12 @@
 
 namespace Bakery\Tests\Models;
 
-use Bakery\Eloquent\BakeryMutable;
+use Bakery\Eloquent\Mutable;
 use Illuminate\Database\Eloquent\Model;
 
 class Article extends Model
 {
-    use BakeryMutable;
-
-    protected $attributes = [
-        'content' => 'Lorem ipsum',
-    ];
+    use Mutable;
 
     protected $casts = [
         'id' => 'string',

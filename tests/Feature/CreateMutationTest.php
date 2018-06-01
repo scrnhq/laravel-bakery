@@ -75,29 +75,6 @@ class CreateMutationTest extends FeatureTestCase
     }
 
     /** @test */
-    public function when_creating_an_entity_a_value_with_a_default_value_is_not_required()
-    {
-        $user = factory(Models\User::class)->create();
-        $this->actingAs($user);
-
-        $query = '
-            mutation {
-                createArticle(input: {
-                    title: "Hello world!"
-                    slug: "hello-world"
-                    userId: 1,
-                }) {
-                    id
-                }
-            }
-        ';
-
-        $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $response->assertJsonFragment(['id']);
-        $this->assertDatabaseHas('articles', ['title' => 'Hello world!']);
-    }
-
-    /** @test */
     public function it_lets_you_create_a_has_one_relationship()
     {
         $user = factory(Models\User::class)->create();

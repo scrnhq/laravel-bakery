@@ -4,12 +4,12 @@ namespace Bakery\Tests\Stubs\BakeryModels;
 
 use Bakery;
 use Bakery\Tests\Models\Phone;
-use Bakery\Eloquent\ModelSchema;
 use GraphQL\Type\Definition\Type;
+use Bakery\Eloquent\Introspectable;
 
 class PhoneBakery
 {
-    use ModelSchema;
+    use Introspectable;
 
     public static $model = Phone::class;
 

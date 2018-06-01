@@ -3,13 +3,13 @@
 namespace Bakery\Tests\Stubs\BakeryModels;
 
 use Bakery;
-use Bakery\Eloquent\ModelSchema;
 use Bakery\Tests\Models\Comment;
 use GraphQL\Type\Definition\Type;
+use Bakery\Eloquent\Introspectable;
 
 class CommentBakery
 {
-    use ModelSchema;
+    use Introspectable;
 
     public static $model = Comment::class;
 

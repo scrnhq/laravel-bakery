@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\DB;
 use Bakery\Events\BakeryModelSaved;
 use Illuminate\Contracts\Auth\Access\Gate;
 
-trait BakeryMutable
+trait Mutable
 {
     use Concerns\QueuesTransactions;
     use Concerns\InteractsWithRelations;
@@ -29,6 +29,16 @@ trait BakeryMutable
         }
 
         return $this->gate;
+    }
+
+    /**
+     * Return the policy of the class.
+     *
+     * @return mixed
+     */
+    protected function policy()
+    {
+        return $this->gate()->getPolicyFor($this);
     }
 
     /**

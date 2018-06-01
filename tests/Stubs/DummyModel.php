@@ -2,15 +2,15 @@
 
 namespace Bakery\Tests\Stubs;
 
-use Bakery\Eloquent\ModelSchema;
+use Bakery\Eloquent\Mutable;
 use GraphQL\Type\Definition\Type;
-use Bakery\Eloquent\BakeryMutable;
+use Bakery\Eloquent\Introspectable;
 use Illuminate\Database\Eloquent\Model;
 
 class DummyModel extends Model
 {
-    use ModelSchema;
-    use BakeryMutable;
+    use Mutable;
+    use Introspectable;
 
     public function fields(): array
     {

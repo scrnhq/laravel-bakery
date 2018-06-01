@@ -31,9 +31,9 @@ trait InteractsWithAttributes
      */
     protected function fillScalar(string $key, $value)
     {
-        $policyMethod = 'set'.studly_case($key);
+        $policyMethod = 'set'.studly_case($key).'Attribute';
 
-        if (method_exists($this->policy, $policyMethod)) {
+        if (method_exists($this->policy(), $policyMethod)) {
             $this->gate->authorize($policyMethod, [$this, $value]);
         }
 

@@ -2,11 +2,11 @@
 
 namespace Bakery\Tests\Stubs;
 
-use Bakery\Eloquent\ModelSchema;
+use Bakery\Eloquent\Introspectable;
 
 class DummyReadOnly
 {
-    use ModelSchema;
+    use Introspectable;
 
     public static $readOnly = true;
 

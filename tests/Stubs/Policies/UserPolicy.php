@@ -28,6 +28,11 @@ class UserPolicy
     {
         return true;
     }
+    
+    public function setTypeAttribute(User $user): bool
+    {
+        return false;
+    }
 
     /**
      * Determine if a phone can be created through the user.
