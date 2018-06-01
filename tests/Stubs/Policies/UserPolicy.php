@@ -28,7 +28,7 @@ class UserPolicy
     {
         return true;
     }
-    
+
     public function setTypeAttribute(User $user): bool
     {
         return false;
