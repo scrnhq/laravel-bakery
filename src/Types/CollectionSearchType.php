@@ -41,7 +41,7 @@ class CollectionSearchType extends InputType
             }
         }
 
-        foreach ($this->model->getRElations() as $relation => $field) {
+        foreach ($this->schema->getRelations() as $relation => $field) {
             $type = Type::getNamedType($field['type']);
             $fields[$relation] = Bakery::type($type->name.'Search');
         }

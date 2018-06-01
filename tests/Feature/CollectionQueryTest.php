@@ -353,4 +353,35 @@ class CollectionQueryTest extends FeatureTestCase
         $response->assertJsonFragment(['id' => $secondUser->id]);
         $response->assertJsonMissing(['id' => $thirdUser->id]);
     }
+
+    /** @test */
+    public function it_can_search_on_fields()
+    {
+        // Searching currently only works with Postgres
+        // with any other DB it returns the query
+        // but we can make sure that the GraphQL
+        // side of things is working correctly with this test.
+        factory(Models\Article::class, 3)->create();
+
+        $query = '
+            query {
+                articles(search: {
+                    query: "foo"
+                    fields: {
+                        title: true
+                    }
+                }) {
+                    items {
+                        id
+                    }
+                    pagination {
+                        total
+                    }
+                }
+            }
+        ';
+
+        $response = $this->json('GET', '/graphql', ['query' => $query]);
+        $response->assertJsonFragment(['total' => 3]);
+    }
 }

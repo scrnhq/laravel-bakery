@@ -274,7 +274,7 @@ class CollectionQuery extends Query
         $qualifiedNeedle = preg_replace('/[*&|:\']+/', ' ', $needle);
 
         foreach ($fields as $key => $value) {
-            if (array_key_exists($key, $this->model->relations())) {
+            if (array_key_exists($key, $this->schema->getRelations())) {
                 $this->applyRelationalSearch($query, $this->model, $key, $needle, $value);
             } else {
                 $this->tsFields[] = $this->model->getTable().'.'.$key;
