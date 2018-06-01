@@ -2,23 +2,22 @@
 
 namespace Bakery\Types;
 
+use Bakery\Concerns\ModelAware;
 use Bakery\Support\Facades\Bakery;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class EntityCollectionType extends Type
 {
-    protected $model;
-    protected $name;
+    use ModelAware;
 
     /**
-     * Construct a new entity collection type.
+     * Get the name of the Entity type.
      *
-     * @param string $class
+     * @return string
      */
-    public function __construct(string $class)
+    protected function name(): string
     {
-        $this->name = class_basename($class) . 'Collection';
-        $this->model = app($class);
+        return $this->schema->typename().'Collection';
     }
 
     /**
@@ -30,7 +29,7 @@ class EntityCollectionType extends Type
     {
         return [
             'pagination' => Bakery::getType('Pagination'),
-            'items' => Bakery::listOf(Bakery::getType(class_basename($this->model))),
+            'items' => Bakery::listOf(Bakery::type($this->schema->typename())),
         ];
     }
 

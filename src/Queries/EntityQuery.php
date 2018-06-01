@@ -2,42 +2,15 @@
 
 namespace Bakery\Queries;
 
-use Bakery\Query;
+use Bakery\Utils\Utils;
+use Bakery\Concerns\ModelAware;
 use GraphQL\Type\Definition\Type;
 use Bakery\Support\Facades\Bakery;
 use GraphQL\Type\Definition\ListOfType;
 
 abstract class EntityQuery extends Query
 {
-    /**
-     * The class of the Entity.
-     *
-     * @var string
-     */
-    protected $class;
-
-    /**
-     * The reference to the Entity.
-     */
-    protected $model;
-
-    /**
-     * EntityQuery constructor.
-     *
-     * @param string $class
-     */
-    public function __construct(string $class = null)
-    {
-        if (isset($class)) {
-            $this->class = $class;
-        }
-
-        if (!isset($this->class)) {
-            throw new \Exception('No class defined for the collection query.');
-        }
-
-        $this->model = resolve($this->class);
-    }
+    use ModelAware;
 
     /**
      * Get the name of the EntityQuery.
@@ -46,7 +19,7 @@ abstract class EntityQuery extends Query
      */
     protected function name(): string
     {
-        return camel_case(str_singular(class_basename($this->class)));
+        return Utils::single($this->model);
     }
 
     /**
@@ -56,7 +29,7 @@ abstract class EntityQuery extends Query
      */
     public function type()
     {
-        return Bakery::type(studly_case(str_singular(class_basename($this->class))));
+        return Bakery::type($this->schema->typename());
     }
 
     /**
@@ -66,17 +39,15 @@ abstract class EntityQuery extends Query
      */
     public function args(): array
     {
-        $args = array_merge(
-            [$this->model->getKeyName() => Bakery::ID()],
-            $this->model->lookupFields()
-        );
+        $args = $this->model->getLookupFields();
 
-        foreach ($this->model->relations() as $relation => $type) {
+        foreach ($this->model->getRelations() as $relation => $field) {
+            $type = $field['type'];
             if ($type instanceof ListofType) {
                 continue;
             }
 
-            $lookupTypeName = Type::getNamedType($type)->name . 'LookupType';
+            $lookupTypeName = Type::getNamedType($type)->name.'LookupType';
             $args[$relation] = Bakery::type($lookupTypeName);
         }
 

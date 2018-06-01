@@ -3,12 +3,10 @@
 namespace Bakery\Queries;
 
 use GraphQL\Type\Definition\Type;
-use Illuminate\Database\Eloquent\Model;
-use GraphQL\Type\Definition\ListOfType;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
-
 use Bakery\Support\Facades\Bakery;
+use GraphQL\Type\Definition\ListOfType;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
 use Bakery\Exceptions\TooManyResultsException;
 
 class SingleEntityQuery extends EntityQuery
@@ -26,36 +24,21 @@ class SingleEntityQuery extends EntityQuery
     protected $model;
 
     /**
-     * Get the name of the EntityQuery.
-     *
-     * @return string
-     */
-    protected function name(): string
-    {
-        return camel_case(str_singular(class_basename($this->class)));
-    }
-
-    /**
      * The arguments for the Query.
      *
      * @return array
      */
     public function args(): array
     {
-        $args = array_merge(
-            [$this->model->getKeyName() => Bakery::ID()],
-            $this->model->lookupFields()
-        );
+        $args = $this->schema->getLookupFields();
 
-        foreach ($this->model->relations() as $relation => $type) {
-            if (is_array($type)) {
-                $type = $type['type'];
-            }
+        foreach ($this->model->getRelations() as $relation => $field) {
+            $type = $field['type'];
             if ($type instanceof ListofType) {
                 continue;
             }
 
-            $lookupTypeName = Type::getNamedType($type)->name . 'LookupType';
+            $lookupTypeName = Type::getNamedType($type)->name.'LookupType';
             $args[$relation] = Bakery::type($lookupTypeName);
         }
 
@@ -70,16 +53,41 @@ class SingleEntityQuery extends EntityQuery
      * @param mixed $viewer
      * @return Model
      */
-    public function resolve($root, array $args = [], $viewer)
+    public function resolve($root, array $args, $viewer)
     {
         $primaryKey = $this->model->getKeyName();
-
-        $query = $this->scopeQuery($this->model->authorizedForReading($viewer), $args, $viewer);
+        $query = $this->scopeQuery($this->model->query($viewer), $args, $viewer);
 
         if (array_key_exists($primaryKey, $args)) {
             return $query->find($args[$primaryKey]);
         }
 
+        $results = $this->queryByArgs($query, $args)->get();
+
+        if ($results->count() < 1) {
+            return;
+        }
+
+        if ($results->count() > 1) {
+            throw (new TooManyResultsException)
+                ->setModel(
+                    $this->class,
+                    $results->pluck($this->model->getKeyName())
+                );
+        }
+
+        return $results->first();
+    }
+
+    /**
+     * Query by the arguments supplied to the query.
+     *
+     * @param Builder $query
+     * @param array $args
+     * @return Builder
+     */
+    protected function queryByArgs(Builder $query, array $args): Builder
+    {
         foreach ($args as $key => $value) {
             if (is_array($value)) {
                 $query->whereHas($key, function ($subQuery) use ($value) {
@@ -92,17 +100,7 @@ class SingleEntityQuery extends EntityQuery
             }
         }
 
-        $results = $query->get();
-
-        if ($results->count() < 1) {
-            return null;
-        }
-
-        if ($results->count() > 1) {
-            throw (new TooManyResultsException)->setModel($this->class, $results->pluck($this->model->getKeyName()));
-        }
-
-        return $results->first();
+        return $query;
     }
 
     /**

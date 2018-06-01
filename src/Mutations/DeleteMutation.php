@@ -4,10 +4,8 @@ namespace Bakery\Mutations;
 
 use GraphQL\Type\Definition\Type;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
-
 use Bakery\Exceptions\TooManyResultsException;
-use Bakery\Support\Facades\Bakery;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class DeleteMutation extends EntityMutation
 {
@@ -23,9 +21,9 @@ class DeleteMutation extends EntityMutation
      *
      * @return Type
      */
-    public function type()
+    public function type(): Type
     {
-        return Bakery::boolean();
+        return Type::boolean();
     }
 
     /**
@@ -33,11 +31,9 @@ class DeleteMutation extends EntityMutation
      *
      * @return array
      */
-    public function args()
+    public function args(): array
     {
-        return array_merge([
-            $this->model->getKeyName() => Bakery::ID(),
-        ], $this->model->lookupFields());
+        return $this->schema->getLookupFields();
     }
 
     /**
@@ -45,14 +41,19 @@ class DeleteMutation extends EntityMutation
      *
      * @param  mixed $root
      * @param  array $args
-     * @return bool
+     * @param  mixed $viewer
+     * @return Model
+     * @throws \Illuminate\Auth\Access\AuthorizationException
+     * @throws \Exception
      */
-    public function resolve($root, $args = []): bool
+    public function resolve($root, array $args, $viewer): Model
     {
         $model = $this->getModel($args);
         $this->authorize('delete', $model);
 
-        return $model->delete();
+        $model->delete();
+
+        return $model;
     }
 
     /**

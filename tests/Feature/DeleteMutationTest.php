@@ -2,123 +2,86 @@
 
 namespace Bakery\Tests\Feature;
 
-use Gate;
-use Eloquent;
-use Bakery\Tests\Stubs;
-use Bakery\Tests\TestCase;
-use Bakery\Tests\WithDatabase;
-use Bakery\Http\Controller\BakeryController;
-use Illuminate\Auth\Access\AuthorizationException;
-use Bakery\Exceptions\TooManyResultsException;
+use Bakery\Tests\Models;
+use Bakery\Tests\FeatureTestCase;
 
-class DeleteMutationTest extends TestCase
+class DeleteMutationTest extends FeatureTestCase
 {
-    protected function getEnvironmentSetUp($app)
-    {
-        $this->setupDatabase($app);
-
-        $app['config']->set('bakery.models', [
-            Stubs\Model::class,
-            Stubs\Post::class,
-            Stubs\Comment::class,
-            Stubs\Phone::class,
-            Stubs\User::class,
-            Stubs\Role::class,
-        ]);
-    }
-
-    protected function setUp()
-    {
-        parent::setUp();
-        Eloquent::reguard();
-        $this->migrateDatabase();
-    }
-
     /** @test */
     public function it_does_not_allow_deleting_entity_as_guest()
     {
-        $this->expectException(AuthorizationException::class);
+        $this->withExceptionHandling();
 
-        $user = $this->createUser();
-        $post = new Stubs\Post(['title' => 'Hello world!']);
-        $post->user()->associate($user);
-        $post->save();
+        $article = factory(Models\Article::class)->create();
 
         $query = '
             mutation {
-                deletePost(id: ' . $post->id . ')
+                deleteArticle(id: '.$article->id.')
             }
         ';
 
-        $response = $this->json('GET', '/graphql', ['query' => $query]);
+        $this->json('GET', '/graphql', ['query' => $query]);
+        $this->assertDatabaseHas('articles', ['id' => $article->id]);
     }
 
     /** @test */
     public function it_does_not_allow_deleting_entity_as_user_when_there_is_no_policy()
     {
-        $this->expectException(AuthorizationException::class);
+        $this->withExceptionHandling();
+        $this->actingAs(factory(Models\User::class)->create());
 
-        $user = $this->createUser();
-        $post = new Stubs\Post(['title' => 'Hello world!']);
-        $post->user()->associate($user);
-        $post->save();
-
-        $this->actingAs($user);
+        $role = factory(Models\Role::class)->create();
 
         $query = '
             mutation {
-                deletePost(id: ' . $post->id . ')
+                deleteRole(id: '.$role->id.')
             }
         ';
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
+        $response->assertJsonFragment(['deleteRole' => null]);
+        $this->assertDatabaseHas('roles', ['id' => $role->id]);
     }
 
     /** @test */
     public function it_does_allow_deleting_entity_as_user_when_it_is_allowed_by_policy()
     {
-        Gate::policy(Stubs\Post::class, Stubs\Policies\PostPolicy::class);
-
-        $user = $this->createUser();
-        $post = new Stubs\Post(['title' => 'Hello world!']);
-        $post->user()->associate($user);
-        $post->save();
+        $user = factory(Models\User::class)->create();
+        $article = factory(Models\Article::class)->create();
 
         $this->actingAs($user);
 
         $query = '
             mutation {
-                deletePost(id: ' . $post->id . ')
+                deleteArticle(id: '.$article->id.')
             }
         ';
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $this->assertDatabaseMissing('posts', ['title' => 'Hello world! (updated)']);
+        $response->assertJsonFragment(['deleteArticle' => true]);
+        $this->assertDatabaseMissing('articles', ['id' => $article->id]);
     }
 
     /** @test */
     public function it_throws_too_many_results_exception_when_lookup_is_not_specific_enough()
     {
-        $this->expectException(TooManyResultsException::class);
-        Gate::policy(Stubs\Post::class, Stubs\Policies\PostPolicy::class);
+        $this->withExceptionHandling();
 
-        $user = $this->createUser();
-        $post = new Stubs\Post(['title' => 'Hello world!', 'slug' => 'hello-world']);
-        $post->user()->associate($user);
-        $post->save();
-
-        $post2 = new Stubs\Post(['title' => 'Hello world! (part two)', 'slug' => 'hello-world']);
-        $post2->user()->associate($user);
-        $post2->save();
+        $user = factory(Models\User::class)->create();
+        factory(Models\Article::class, 2)->create([
+            'slug' => 'hello-world',
+        ]);
 
         $this->actingAs($user);
 
         $query = '
             mutation {
-                deletePost(slug: "hello-world")
+                deleteArticle(slug: "hello-world")
             }
         ';
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
+        $response->assertJsonFragment(['deleteArticle' => null]);
+        $this->assertDatabaseHas('articles', ['slug' => 'hello-world']);
     }
 }

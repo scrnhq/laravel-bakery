@@ -2,26 +2,16 @@
 
 namespace Bakery\Mutations;
 
-use Bakery\Mutation;
-use Bakery\Support\Facades\Bakery;
+use Bakery\Concerns\ModelAware;
 use GraphQL\Type\Definition\Type;
+use Bakery\Support\Facades\Bakery;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 abstract class EntityMutation extends Mutation
 {
+    use ModelAware;
     use AuthorizesRequests;
-
-    /**
-     * The class of the Entity.
-     *
-     * @var string
-     */
-    protected $class;
-
-    /**
-     * The reference to the Entity.
-     */
-    protected $model;
 
     /**
      * The action name used for building the Mutation name.
@@ -31,13 +21,23 @@ abstract class EntityMutation extends Mutation
     protected $action;
 
     /**
+     * Get the name of the EntityMutation.
+     *
+     * @return string
+     */
+    protected function name(): string
+    {
+        return $this->action.$this->schema->typename();
+    }
+
+    /**
      * The type of the Mutation.
      *
      * @return Type
      */
-    public function type()
+    public function type(): Type
     {
-        return Bakery::type(studly_case(str_singular(class_basename($this->class))));
+        return Bakery::type($this->schema->typename());
     }
 
     /**
@@ -45,9 +45,9 @@ abstract class EntityMutation extends Mutation
      *
      * @return array
      */
-    public function args()
+    public function args(): array
     {
-        $inputTypeName = studly_case($this->name()) . 'Input';
+        $inputTypeName = studly_case($this->name()).'Input';
 
         return [
             'input' => Bakery::nonNull(Bakery::type($inputTypeName)),
@@ -55,30 +55,12 @@ abstract class EntityMutation extends Mutation
     }
 
     /**
-     * EntityMutation constructor.
+     * Resolve the mutation.
      *
-     * @param string $class
+     * @param mixed $root
+     * @param mixed $args
+     * @param mixed $viewer
+     * @return Model
      */
-    public function __construct(string $class = null)
-    {
-        if (isset($class)) {
-            $this->class = $class;
-        }
-
-        if (!isset($this->class)) {
-            throw new \Exception('No class defined for the entity mutation.');
-        }
-
-        $this->model = resolve($this->class);
-    }
-
-    /**
-     * Get the name of the EntityMutation.
-     *
-     * @return string
-     */
-    protected function name(): string
-    {
-        return $this->action . studly_case(str_singular(class_basename($this->class)));
-    }
+    abstract public function resolve($root, array $args, $viewer): Model;
 }

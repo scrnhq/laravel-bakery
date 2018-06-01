@@ -2,47 +2,101 @@
 
 namespace Bakery\Types;
 
+use Closure;
+use Bakery\Utils\Utils;
+use Bakery\Concerns\ModelAware;
 use Bakery\Support\Facades\Bakery;
-use GraphQL\Type\Definition\ListOfType;
 use GraphQL\Type\Definition\NonNull;
-use Illuminate\Auth\Access\AuthorizationException;
+use GraphQL\Type\Definition\ListOfType;
 use Illuminate\Contracts\Auth\Access\Gate;
+use Illuminate\Auth\Access\AuthorizationException;
 
 class EntityType extends Type
 {
-    protected $name;
+    use ModelAware;
 
-    protected $model;
-
-    public function __construct(string $class)
+    /**
+     * Get the name of the Entity type.
+     *
+     * @return string
+     */
+    protected function name(): string
     {
-        $this->name = class_basename($class);
-        $this->model = app($class);
+        return $this->schema->typename();
+    }
+
+    /**
+     * Create the field resolver.
+     *
+     * @param array $field
+     * @param string $key
+     * @return Closure
+     */
+    protected function createFieldResolver(array $field, string $key): Closure
+    {
+        return function ($source, $args, $viewer) use ($key, $field) {
+            if (array_key_exists('policy', $field)) {
+                $this->checkPolicy($field, $source, $args, $viewer);
+            }
+
+            if (array_key_exists('resolve', $field)) {
+                return $field['resolve']($source, $args, $viewer);
+            } else {
+                return $source->getAttribute($key);
+            }
+        };
+    }
+
+    /**
+     * Check the policy of a field.
+     *
+     * @param array $field
+     * @param $source
+     * @param $args
+     * @param $viewer
+     * @return void
+     * @throws AuthorizationException
+     */
+    protected function checkPolicy(array $field, $source, $args, $viewer)
+    {
+        $policy = $field['policy'];
+        $gate = app(Gate::class)->forUser($viewer);
+
+        // Check if the policy method is callable
+        if (is_callable($policy) && ! $policy($source, $args, $viewer)) {
+            throw new AuthorizationException(
+                'Cannot read property '.$key.' of '.$this->name
+            );
+        }
+
+        // Check if there is a policy with this name
+        if (is_string($policy) && ! $gate->check($policy, $source)) {
+            throw new AuthorizationException('Cannot read property '.$key.' of '.$this->name);
+        }
     }
 
     public function fields(): array
     {
-        $fields = $this->model->fields();
-
-        $relations = array_filter($this->model->relations(), function ($key) {
-            return !in_array($key, $this->model->getHidden());
-        }, ARRAY_FILTER_USE_KEY);
+        $fields = $this->schema->getFields();
+        $relations = $this->schema->getRelations();
 
         foreach ($relations as $key => $type) {
             if ($type instanceof ListOfType) {
                 $singularKey = str_singular($key);
-                $fields[$singularKey . 'Ids'] = [
+                $fields[$singularKey.'Ids'] = [
                     'type' => Bakery::listOf(Bakery::ID()),
                     'resolve' => function ($model) use ($key) {
                         $keyName = $model->{$key}()->getRelated()->getKeyName();
+
                         return $model->{$key}->pluck($keyName)->toArray();
                     },
                 ];
             } else {
-                $fields[$key . 'Id'] = [
+                $fields[$key.'Id'] = [
                     'type' => $type instanceof NonNull ? Bakery::nonNull(Bakery::ID()) : Bakery::ID(),
                     'resolve' => function ($model) use ($key) {
                         $instance = $model->{$key};
+
                         return $instance ? $instance->getKey() : null;
                     },
                 ];
@@ -50,42 +104,10 @@ class EntityType extends Type
             $fields[$key] = $type;
         }
 
-        $fields = collect($fields)->filter(function ($field, $key) {
-            return !in_array($key, $this->model->getHidden());
-        });
+        return collect($fields)->map(function ($field, $key) {
+            $field = Utils::toFieldArray($field);
+            $field['resolve'] = $this->createFieldResolver($field, $key);
 
-        return $fields->map(function ($field, $key) {
-            if (is_array($field)) {
-                if (array_key_exists('readable', $field)) {
-                    return [
-                        'type' => $field['type'],
-                        'resolve' => function ($source, $args, $viewer) use ($key, $field) {
-                            if (!$field['readable']($source, $args, $viewer)) {
-                                throw new AuthorizationException('Cannot read property ' . $key . ' of ' . $this->name);
-                            }
-                            if (array_key_exists('resolve', $field)) {
-                                return $field['resolve']($source, $args, $viewer);
-                            } else {
-                                return $source->getAttribute($key);
-                            }
-                        },
-                    ];
-                } elseif (array_key_exists('policy', $field)) {
-                    return [
-                        'type' => $field['type'],
-                        'resolve' => function ($source, $args, $viewer) use ($key, $field) {
-                            if (!app(Gate::class)->forUser($viewer)->check($field['policy'], $source)) {
-                                throw new AuthorizationException('Cannot read property ' . $key . ' of ' . $this->name);
-                            }
-                            if (array_key_exists('resolve', $field)) {
-                                return $field['resolve']($source, $args, $viewer);
-                            } else {
-                                return $source->getAttribute($key);
-                            }
-                        },
-                    ];
-                }
-            }
             return $field;
         })->toArray();
     }

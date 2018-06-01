@@ -2,101 +2,67 @@
 
 namespace Bakery\Types;
 
-use GraphQL\Type\Definition\Type;
-use Bakery\Support\Facades\Bakery;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations;
+use Bakery\Utils\Utils;
+use Illuminate\Support\Collection;
 
-class CreateInputType extends InputType
+class CreateInputType extends MutationInputType
 {
     /**
-     * The name of the type.
+     * Get the name of the Create Input Type.
      *
-     * @var string
+     * @return string
      */
-    protected $name;
-
-    /**
-     * A reference to the model.
-     *
-     * @var Model
-     */
-    protected $model;
-
-    /**
-     * Construct a new collection filter type.
-     *
-     * @param string $class
-     */
-    public function __construct(string $class)
+    protected function name(): string
     {
-        $this->name = 'Create' . class_basename($class) . 'Input';
-        $this->model = app($class);
+        return 'Create'.$this->schema->typename().'Input';
     }
 
     /**
-     * Return the fields for the collection filter type.
+     * Return the fields for the Create Input Type.
      *
      * @return array
      */
     public function fields(): array
     {
-        return array_merge($this->getFillableFields(), $this->getRelationFields());
+        $fields = array_merge(
+            $this->getFillableFields()->toArray(),
+            $this->getRelationFields()
+        );
+
+        Utils::invariant(
+            count($fields) > 0,
+            'There are no fields defined for '.class_basename($this->model)
+        );
+
+        return $fields;
     }
 
     /**
      * Get the fillable fields of the model.
      *
-     * @return array
+     * @return Collection
      */
-    private function getFillableFields(): array
+    protected function getFillableFields(): Collection
     {
-        return array_filter($this->model->fields(), function ($value, $key) {
-            if (is_array($value)) {
-                $type = Type::getNamedType($value['type']);
-            } else {
-                $type = Type::getNamedType($value);
-            }
-            $fillable = array_values($this->model->getFillable());
+        return $this->schema->getFillableFields()->map(function ($field, $key) {
+            $defaults = $this->model->getAttributes();
 
-            return in_array($key, $fillable) && Type::isLeafType($type);
-        }, ARRAY_FILTER_USE_BOTH);
+            if (in_array($key, array_keys($defaults))) {
+                return Utils::nullifyField($field);
+            }
+
+            return $field;
+        });
     }
 
     /**
-     * Get the fields for the relations of the model.
+     * Generate the input type name for a relationship.
      *
-     * @return array
+     * @param string $relation
+     * @return string
      */
-    private function getRelationFields(): array
+    protected function inputTypename(string $relation): string
     {
-        $fields = [];
-
-        foreach ($this->model->getFillable() as $fillable) {
-            if (method_exists($this->model, $fillable)) {
-                $relationship = $this->model->{$fillable}();
-                $inputType = 'Create' . class_basename($relationship->getRelated()) . 'Input';
-
-                if ($relationship instanceof Relations\HasMany || $relationship instanceof Relations\BelongsToMany) {
-                    $name = str_singular($fillable) . 'Ids';
-                    $fields[$name] = Bakery::listOf(Bakery::ID());
-
-                    if (Bakery::hasType($inputType)) {
-                        $fields[$fillable] = Bakery::listOf(Bakery::type($inputType));
-                    }
-                }
-
-                if ($relationship instanceof Relations\BelongsTo || $relationship instanceof Relations\HasOne) {
-                    $name = str_singular($fillable) . 'Id';
-                    $fields[$name] = Bakery::ID();
-
-                    if (Bakery::hasType($inputType)) {
-                        $fields[$fillable] = Bakery::type($inputType);
-                    }
-                }
-            }
-        };
-
-        return $fields;
+        return 'Create'.Utils::typename($relation).'Input';
     }
 }

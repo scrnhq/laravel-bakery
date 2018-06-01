@@ -2,48 +2,22 @@
 
 namespace Bakery\Tests\Feature;
 
-use Bakery\Tests\Stubs;
-use Bakery\Tests\TestCase;
-use Eloquent;
-use Illuminate\Auth\Access\AuthorizationException;
-use Illuminate\Contracts\Auth\Access\Gate;
+use Bakery\Tests\Models;
+use Bakery\Tests\FeatureTestCase;
 
-class CreateMutationTest extends TestCase
+class CreateMutationTest extends FeatureTestCase
 {
-    protected function getEnvironmentSetUp($app)
-    {
-        $this->setupDatabase($app);
-
-        $app['config']->set('bakery.models', [
-            Stubs\Model::class,
-            Stubs\Post::class,
-            Stubs\Comment::class,
-            Stubs\Phone::class,
-            Stubs\User::class,
-            Stubs\Role::class,
-        ]);
-    }
-
-    protected function setUp()
-    {
-        parent::setUp();
-        Eloquent::reguard();
-        app(Gate::class)->policy(Stubs\User::class, Stubs\Policies\UserPolicy::class);
-        app(Gate::class)->policy(Stubs\Post::class, Stubs\Policies\PostPolicy::class);
-        app(Gate::class)->policy(Stubs\Comment::class, Stubs\Policies\CommentPolicy::class);
-        app(Gate::class)->policy(Stubs\Phone::class, Stubs\Policies\PhonePolicy::class);
-        $this->migrateDatabase();
-    }
-
     /** @test */
     public function it_does_not_allow_creating_entity_as_guest()
     {
-        $this->expectException(AuthorizationException::class);
+        $this->withExceptionHandling();
 
         $query = '
             mutation {
-                createPost(input: {
+                createArticle(input: {
                     title: "Hello world!"
+                    slug: "hello-world"
+                    content: "Lorem ispum"
                 }) {
                     id
                 }
@@ -51,14 +25,15 @@ class CreateMutationTest extends TestCase
         ';
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $this->assertDatabaseMissing('post', ['title' => 'Hello world!']);
+        $response->assertJsonFragment(['createArticle' => null]);
+        $this->assertDatabaseMissing('articles', ['title' => 'Hello world!']);
     }
 
     /** @test */
     public function it_does_not_allow_creating_entity_as_user_when_there_is_no_policy()
     {
-        $this->expectException(AuthorizationException::class);
-        $this->actingAs($this->createUser());
+        $this->withExceptionHandling();
+        $this->actingAs(factory(Models\User::class)->create());
 
         $query = '
             mutation {
@@ -71,18 +46,22 @@ class CreateMutationTest extends TestCase
         ';
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
+        $response->assertJsonFragment(['createRole' => null]);
         $this->assertDatabaseMissing('roles', ['name' => 'admin']);
     }
 
     /** @test */
     public function it_does_allow_creating_entity_as_user_when_it_is_allowed_by_policy()
     {
-        $this->actingAs($this->createUser());
+        $user = factory(Models\User::class)->create();
+        $this->actingAs($user);
 
         $query = '
             mutation {
-                createPost(input: {
+                createArticle(input: {
                     title: "Hello world!"
+                    slug: "hello-world"
+                    content: "Lorem ipsum"
                     userId: 1,
                 }) {
                     id
@@ -91,13 +70,15 @@ class CreateMutationTest extends TestCase
         ';
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $this->assertDatabaseHas('posts', ['title' => 'Hello world!']);
+        $response->assertJsonFragment(['id']);
+        $this->assertDatabaseHas('articles', ['title' => 'Hello world!']);
     }
 
     /** @test */
     public function it_lets_you_create_a_has_one_relationship()
     {
-        $this->actingAs($this->createUser());
+        $user = factory(Models\User::class)->create();
+        $this->actingAs($user);
 
         $query = '
             mutation {
@@ -113,15 +94,17 @@ class CreateMutationTest extends TestCase
         ';
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
+        $response->assertJsonFragment(['id']);
+        $this->assertDatabaseHas('users', ['email' => 'jane.doe@example.com']);
         $this->assertDatabaseHas('phones', ['number' => '+31612345678', 'user_id' => '2']);
     }
 
     /** @test */
     public function it_lets_you_save_a_has_one_relationship()
     {
-        $this->actingAs($this->createUser());
+        $phone = factory(Models\Phone::class)->create();
 
-        $phone = Stubs\Phone::create(['number' => '+31612345678']);
+        $this->actingAs($phone->user);
 
         $query = '
             mutation {
@@ -129,7 +112,7 @@ class CreateMutationTest extends TestCase
                     email: "jane.doe@example.com",
                     name: "Jane Doe",
                     password: "secret",
-                    phoneId: "1",
+                    phoneId: "'.$phone->id.'",
                 }) {
                     id
                 }
@@ -137,13 +120,17 @@ class CreateMutationTest extends TestCase
         ';
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
+        $response->assertJsonFragment(['id']);
+        $this->assertDatabaseHas('users', ['email' => 'jane.doe@example.com']);
         $this->assertDatabaseHas('phones', ['user_id' => '2']);
     }
 
     /** @test */
     public function it_lets_you_create_a_belongs_to_relationship()
     {
-        $this->actingAs($this->createUser());
+        $user = factory(Models\User::class)->create();
+
+        $this->actingAs($user);
 
         $query = '
             mutation {
@@ -161,6 +148,7 @@ class CreateMutationTest extends TestCase
         ';
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
+        $response->assertJsonFragment(['id']);
         $this->assertDatabaseHas('phones', ['number' => '+31612345678', 'user_id' => '2']);
         $this->assertDatabaseHas('users', ['name' => 'Jane Doe']);
     }
@@ -168,24 +156,18 @@ class CreateMutationTest extends TestCase
     /** @test */
     public function it_lets_you_to_assign_a_belongs_to_relationship()
     {
-        $this->actingAs($this->createUser());
+        $user = factory(Models\User::class)->create();
 
-        $post = new Stubs\Post(['title' => 'Hello world!']);
-        $post->user_id = 1;
-        $post->save();
+        $this->actingAs($user);
 
-        $commenter = Stubs\User::create([
-            'name' => 'Jane Doe',
-            'password' => 'secret',
-            'email' => 'jane.doe@example.com',
-        ]);
+        $article = factory(Models\Article::class)->create(['user_id' => 1]);
 
         $query = '
             mutation {
                 createComment(input: {
                     body: "Cool story bro",
-                    postId: ' . $post->id . '
-                    userId: ' . $commenter->id . '
+                    userId: '.$user->id.'
+                    articleId: '.$article->id.'
                 }) {
                     id
                 }
@@ -193,18 +175,17 @@ class CreateMutationTest extends TestCase
         ';
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $this->assertDatabaseHas('comments', ['id' => '1', 'post_id' => $post->id, 'user_id' => $commenter->id]);
+        $response->assertJsonFragment(['id']);
+        $this->assertDatabaseHas('comments', ['id' => '1', 'article_id' => $article->id, 'user_id' => $user->id]);
     }
 
     /** @test */
     public function it_lets_you_assign_a_many_to_many_relationship()
     {
-        $this->actingAs($this->createUser());
+        $user = factory(Models\User::class)->create();
+        $this->actingAs($user);
 
-        $roles = [
-            Stubs\Role::create(['name' => 'moderator']),
-            Stubs\Role::create(['name' => 'writer']),
-        ];
+        $roles = factory(Models\Role::class, 2)->create();
 
         $query = '
             mutation {
@@ -212,7 +193,7 @@ class CreateMutationTest extends TestCase
                     email: "jane.doe@example.com",
                     name: "Jane Doe",
                     password: "secret", 
-                    roleIds: [1, 2] 
+                    roleIds: ["'.$roles[0]->id.'", "'.$roles[1]->id.'"]
                 }) {
                     id
                 }
@@ -220,6 +201,7 @@ class CreateMutationTest extends TestCase
         ';
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
+        $response->assertJsonFragment(['id']);
         $this->assertDatabaseHas('role_user', ['role_id' => '1', 'user_id' => '2']);
         $this->assertDatabaseHas('role_user', ['role_id' => '2', 'user_id' => '2']);
     }
@@ -227,16 +209,19 @@ class CreateMutationTest extends TestCase
     /** @test */
     public function it_lets_you_insert_a_has_many_relationship()
     {
-        $this->actingAs($this->createUser());
+        $user = factory(Models\User::class)->create();
+        $this->actingAs($user);
 
         $query = '
             mutation {
-                createPost(input: {
-                    title: "Hello World",
-                    userId: 1,
+                createArticle(input: {
+                    title: "Hello World"
+                    slug: "hello-world"
+                    content: "Lorem ipsum"
+                    userId: 1
                     comments: [
-                        { body: "First!", userId: 1 },
-                        { body: "Great post!", userId: 1 },
+                        { body: "First!", userId: 1 }
+                        { body: "Great post!", userId: 1 }
                     ]
                 }) {
                     id
@@ -245,26 +230,31 @@ class CreateMutationTest extends TestCase
         ';
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $this->assertDatabaseHas('comments', ['body' => 'First!', 'post_id' => '1']);
-        $this->assertDatabaseHas('comments', ['body' => 'Great post!', 'post_id' => '1']);
+        $response->assertJsonFragment(['id']);
+        $this->assertDatabaseHas('articles', ['title' => 'Hello World', 'user_id' => '1']);
+        $this->assertDatabaseHas('comments', ['body' => 'First!', 'article_id' => '1']);
+        $this->assertDatabaseHas('comments', ['body' => 'Great post!', 'article_id' => '1']);
     }
 
     /** @test */
     public function it_lets_you_do_deep_nested_create_mutations()
     {
-        $this->actingAs($this->createUser());
+        $user = factory(Models\User::class)->create();
+        $this->actingAs($user);
 
         $query = '
             mutation {
                 createUser(input: {
-                    email: "jane.doe@example.com",
-                    name: "Jane Doe",
-                    password: "secret", 
-                    posts: [{
-                        title: "Hello World!",
+                    email: "jane.doe@example.com"
+                    name: "Jane Doe"
+                    password: "secret"
+                    articles: [{
+                        title: "Hello World!"
+                        slug: "hello-world" 
+                        content: "Lorem ipsum"
                         comments: [
-                            { body: "First!", userId: 1 },
-                            { body: "Great post!", userId: 1 },
+                            { body: "First!", userId: 1 }
+                            { body: "Great post!", userId: 1 }
                         ]
                     }]
                 }) {
@@ -274,9 +264,10 @@ class CreateMutationTest extends TestCase
         ';
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
+        $response->assertJsonFragment(['id']);
         $this->assertDatabaseHas('users', ['email' => 'jane.doe@example.com', 'name' => 'Jane Doe']);
-        $this->assertDatabaseHas('posts', ['title' => 'Hello World!', 'user_id' => '2']);
-        $this->assertDatabaseHas('comments', ['body' => 'First!', 'post_id' => '1']);
-        $this->assertDatabaseHas('comments', ['body' => 'Great post!', 'post_id' => '1']);
+        $this->assertDatabaseHas('articles', ['title' => 'Hello World!', 'user_id' => '2']);
+        $this->assertDatabaseHas('comments', ['body' => 'First!', 'article_id' => '1']);
+        $this->assertDatabaseHas('comments', ['body' => 'Great post!', 'article_id' => '1']);
     }
 }

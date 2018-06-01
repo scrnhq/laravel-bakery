@@ -2,9 +2,9 @@
 
 namespace Bakery\Mutations;
 
-use Bakery\Exceptions\TooManyResultsException;
-use GraphQL\Type\Definition\Type;
+use Bakery\Utils\Utils;
 use Illuminate\Database\Eloquent\Model;
+use Bakery\Exceptions\TooManyResultsException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class UpdateMutation extends EntityMutation
@@ -21,11 +21,12 @@ class UpdateMutation extends EntityMutation
      *
      * @return array
      */
-    public function args()
+    public function args(): array
     {
-        return array_merge(parent::args(), [
-            $this->model->getKeyName() => Type::ID(),
-        ], $this->model->lookupFields());
+        return array_merge(
+            parent::args(),
+            Utils::nullifyFields($this->schema->getLookupFields())->toArray()
+        );
     }
 
     /**
@@ -33,15 +34,17 @@ class UpdateMutation extends EntityMutation
      *
      * @param  mixed $root
      * @param  array $args
-     * @return array
+     * @param  mixed $viewer
+     * @return Model
+     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
-    public function resolve($root, $args = []): Model
+    public function resolve($root, array $args, $viewer): Model
     {
         $model = $this->getModel($args);
         $this->authorize($this->action, $model);
 
         $input = $args['input'];
-        $model->updateWithGraphQLInput($input);
+        $model->updateWithInput($input);
 
         return $model;
     }

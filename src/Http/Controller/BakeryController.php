@@ -2,11 +2,11 @@
 
 namespace Bakery\Http\Controller;
 
-use App;
 use GraphQL\Error\Debug;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller;
+use Illuminate\Contracts\Debug\ExceptionHandler;
 
 class BakeryController extends Controller
 {
@@ -20,6 +20,28 @@ class BakeryController extends Controller
         //
     }
 
+    protected function isExceptionHandlingDisabled()
+    {
+        $handler = app(ExceptionHandler::class);
+
+        return str_contains(get_class($handler), 'InteractsWithExceptionHandling');
+    }
+
+    protected function debug()
+    {
+        $debug = null;
+
+        if (config('app.debug') or app()->runningUnitTests()) {
+            $debug = Debug::INCLUDE_DEBUG_MESSAGE;
+        }
+
+        if ($this->isExceptionHandlingDisabled()) {
+            $debug = Debug::RETHROW_INTERNAL_EXCEPTIONS;
+        }
+
+        return $debug;
+    }
+
     /**
      * Handle an HTTP response containing the GraphQL query.
      *
@@ -30,15 +52,14 @@ class BakeryController extends Controller
     {
         $input = $request->all();
 
-        $debug = Debug::INCLUDE_DEBUG_MESSAGE | Debug::RETHROW_INTERNAL_EXCEPTIONS;
-        $data = app('bakery')->executeQuery($input)->toArray($debug);
+        $data = app('bakery')->executeQuery($input)->toArray($this->debug());
 
         return response()->json($data, 200, []);
     }
 
     public function graphiql()
     {
-        if (!App::isLocal()) {
+        if (! app()->isLocal()) {
             abort(404);
         }
 

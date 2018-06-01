@@ -7,7 +7,7 @@ use Exception;
 class PaginationMaxCountExceededException extends Exception
 {
     /**
-     * @param string $model The Model that does not have the trait
+     * @param int $maxCount
      */
     public function __construct(int $maxCount)
     {

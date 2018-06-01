@@ -2,18 +2,16 @@
 
 namespace Bakery\Support;
 
-use Bakery\Exceptions\ModelNotGraphQLResource;
+use Bakery\Types;
+use GraphQL\Type\SchemaConfig;
+use Bakery\Support\Facades\Bakery;
+use Bakery\Queries\CollectionQuery;
 use Bakery\Mutations\CreateMutation;
 use Bakery\Mutations\DeleteMutation;
 use Bakery\Mutations\UpdateMutation;
-use Bakery\Queries\CollectionQuery;
 use Bakery\Queries\SingleEntityQuery;
-use Bakery\Support\Facades\Bakery;
-use Bakery\Traits\GraphQLResource;
-use Bakery\Types;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Schema as GraphQLSchema;
-use GraphQL\Type\SchemaConfig;
 
 class Schema
 {
@@ -37,14 +35,19 @@ class Schema
         return [];
     }
 
+    protected function isReadOnly($model)
+    {
+        if (! property_exists($model, 'readOnly')) {
+            return false;
+        }
+
+        return $model::$readOnly;
+    }
+
     protected function getModelTypes()
     {
         $types = [];
         foreach ($this->getModels() as $model) {
-            if (!in_array(GraphQLResource::class, class_uses_deep($model))) {
-                throw (new ModelNotGraphQLResource($model));
-            }
-
             $types[] = new Types\EntityType($model);
             $types[] = new Types\EntityCollectionType($model);
             $types[] = new Types\EntityLookupType($model);
@@ -53,11 +56,12 @@ class Schema
             $types[] = new Types\CollectionSearchType($model);
             $types[] = new Types\CollectionOrderByType($model);
 
-            if (!empty(app($model)->getFillable())) {
+            if (! $this->isReadOnly($model)) {
                 $types[] = new Types\CreateInputType($model);
                 $types[] = new Types\UpdateInputType($model);
             }
         }
+
         return $types;
     }
 
@@ -88,6 +92,7 @@ class Schema
             $collectionQuery = new CollectionQuery($model);
             $queries[$collectionQuery->name] = $collectionQuery;
         }
+
         return $queries;
     }
 
@@ -117,7 +122,7 @@ class Schema
     {
         $mutations = [];
         foreach ($this->getModels() as $model) {
-            if (!empty(app($model)->getFillable())) {
+            if (! $this->isReadOnly($model)) {
                 $createMutation = new CreateMutation($model);
                 $mutations[$createMutation->name] = $createMutation;
 
@@ -128,12 +133,14 @@ class Schema
                 $mutations[$deleteMutation->name] = $deleteMutation;
             }
         }
+
         return $mutations;
     }
 
     public function getMutations()
     {
         $mutations = [];
+
         foreach ($this->mutations as $name => $mutation) {
             $mutation = is_object($mutation) ?: resolve($mutation);
             $name = is_string($name) ? $name : $mutation->name;
@@ -149,6 +156,7 @@ class Schema
     public function toGraphQLSchema(): GraphQLSchema
     {
         Bakery::addTypes($this->getTypes());
+        Bakery::addModelSchemas($this->getModels());
 
         $query = $this->makeObjectType($this->fieldsToArray($this->getQueries()), ['name' => 'Query']);
         $mutation = $this->makeObjectType($this->fieldsToArray($this->getMutations()), ['name' => 'Mutation']);
@@ -162,8 +170,10 @@ class Schema
                 if ($name === $mutation->name) {
                     return $mutation;
                 }
+
                 return Bakery::type($name);
             });
+
         return new GraphQLSchema($config);
     }
 
@@ -177,6 +187,7 @@ class Schema
         } else {
             $objectType = $this->makeObjectTypeFromClass($type, $options);
         }
+
         return $objectType;
     }
 
