@@ -62,8 +62,6 @@ class Type
                 return call_user_func_array($resolver, $args);
             };
         }
-
-        return null;
     }
 
     /**
@@ -149,6 +147,5 @@ class Type
         } elseif (property_exists($this, $key)) {
             return $this->{$key};
         }
-        return null;
     }
 }

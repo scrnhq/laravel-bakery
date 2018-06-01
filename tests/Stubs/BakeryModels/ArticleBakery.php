@@ -2,9 +2,9 @@
 
 namespace Bakery\Tests\Stubs\BakeryModels;
 
-use Bakery\Support\Facades\Bakery;
 use Bakery\Tests\Models\Article;
 use GraphQL\Type\Definition\Type;
+use Bakery\Support\Facades\Bakery;
 use Bakery\Eloquent\Introspectable;
 
 class ArticleBakery
