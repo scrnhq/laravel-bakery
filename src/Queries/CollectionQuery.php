@@ -3,6 +3,7 @@
 namespace Bakery\Queries;
 
 use Bakery\Utils\Utils;
+use Bakery\Concerns\ModelAware;
 use GraphQL\Type\Definition\Type;
 use Bakery\Support\Facades\Bakery;
 use Illuminate\Support\Facades\DB;
@@ -13,8 +14,9 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Bakery\Exceptions\PaginationMaxCountExceededException;
 
-class CollectionQuery extends EntityQuery
+class CollectionQuery extends Query
 {
+    use ModelAware;
     use JoinsRelationships;
 
     /**

@@ -2,6 +2,8 @@
 
 namespace Bakery\Queries;
 
+use Bakery\Utils\Utils;
+use Bakery\Concerns\ModelAware;
 use GraphQL\Type\Definition\Type;
 use Bakery\Support\Facades\Bakery;
 use GraphQL\Type\Definition\ListOfType;
@@ -9,19 +11,29 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Bakery\Exceptions\TooManyResultsException;
 
-class SingleEntityQuery extends EntityQuery
+class SingleEntityQuery extends Query
 {
-    /**
-     * The class of the Entity.
-     *
-     * @var string
-     */
-    protected $class;
+    use ModelAware;
 
     /**
-     * The reference to the Entity.
+     * Get the name of the query.
+     *
+     * @return string
      */
-    protected $model;
+    protected function name(): string
+    {
+        return Utils::single($this->model);
+    }
+
+    /**
+     * The return type of the query.
+     *
+     * @return Type
+     */
+    public function type()
+    {
+        return Bakery::type($this->schema->typename());
+    }
 
     /**
      * The arguments for the Query.

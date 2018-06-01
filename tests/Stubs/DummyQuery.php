@@ -2,9 +2,9 @@
 
 namespace Bakery\Tests\Stubs;
 
-use Bakery\Queries\EntityQuery;
+use Bakery\Queries\SingleEntityQuery;
 
-class DummyQuery extends EntityQuery
+class DummyQuery extends SingleEntityQuery
 {
     public function __construct()
     {
