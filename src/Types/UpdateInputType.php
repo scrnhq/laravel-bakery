@@ -3,6 +3,7 @@
 namespace Bakery\Types;
 
 use Bakery\Utils\Utils;
+use Illuminate\Support\Collection;
 
 class UpdateInputType extends MutationInputType
 {
@@ -24,8 +25,8 @@ class UpdateInputType extends MutationInputType
     public function fields(): array
     {
         $fields = array_merge(
-            $this->getFillableFields(),
-            $this->getRelationFields()
+            $this->getFillableFields()->toArray(),
+            $this->getRelationFields()->toArray()
         );
 
         Utils::invariant(
@@ -45,9 +46,10 @@ class UpdateInputType extends MutationInputType
      *
      * @return array
      */
-    private function getFillableFields(): array
+    protected function getFillableFields(): Collection
     {
-        return Utils::nullifyFields($this->schema->getFillableFields())->toArray();
+        $fields = parent::getFillableFields();
+        return Utils::nullifyFields($fields);
     }
 
     /**

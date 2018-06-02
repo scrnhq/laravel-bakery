@@ -4,6 +4,8 @@ namespace Bakery\Types;
 
 use Bakery\Utils\Utils;
 use Bakery\Concerns\ModelAware;
+use GraphQL\Type\Definition\Type;
+use Illuminate\Support\Collection;
 use Bakery\Support\Facades\Bakery;
 use GraphQL\Type\Definition\ListOfType;
 
@@ -12,11 +14,29 @@ abstract class MutationInputType extends InputType
     use ModelAware;
 
     /**
+     * Get the fillable fields for the input type.
+     *
+     * Here we grab the fillable fields from the model and filter out the
+     * ones that are not a leaf type. Right now Bakery only supports passing
+     * leaf types or list of leaf types as input. Complex, nested input only
+     * work with relations.
+     *
+     * @return Collection
+     */
+    protected function getFillableFields(): Collection
+    {
+        return $this->schema->getFillableFields()->filter(function ($field, $key) {
+            $fieldType = Type::getNamedType($field['type']);
+            return Type::isLeafType($fieldType);
+        });
+    }
+
+    /**
      * Get the fields for the relations of the model.
      *
      * @return array
      */
-    protected function getRelationFields(): array
+    protected function getRelationFields(): Collection
     {
         $relations = $this->schema->getRelations();
 
@@ -24,7 +44,7 @@ abstract class MutationInputType extends InputType
             $field = $relations[$key];
 
             return $fields->merge($this->getFieldsForRelation($key, $field));
-        }, collect())->toArray();
+        }, collect());
     }
 
     /**

@@ -26,7 +26,7 @@ class CreateInputType extends MutationInputType
     {
         $fields = array_merge(
             $this->getFillableFields()->toArray(),
-            $this->getRelationFields()
+            $this->getRelationFields()->toArray()
         );
 
         Utils::invariant(
@@ -44,7 +44,9 @@ class CreateInputType extends MutationInputType
      */
     protected function getFillableFields(): Collection
     {
-        return $this->schema->getFillableFields()->map(function ($field, $key) {
+        $fields = parent::getFillableFields();
+        
+        return $fields->map(function ($field, $key) {
             $defaults = $this->model->getAttributes();
 
             if (in_array($key, array_keys($defaults))) {
