@@ -45,7 +45,7 @@ class CreateInputType extends MutationInputType
     protected function getFillableFields(): Collection
     {
         $fields = parent::getFillableFields();
-        
+
         return $fields->map(function ($field, $key) {
             $defaults = $this->model->getAttributes();
 

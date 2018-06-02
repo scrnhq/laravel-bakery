@@ -5,8 +5,8 @@ namespace Bakery\Types;
 use Bakery\Utils\Utils;
 use Bakery\Concerns\ModelAware;
 use GraphQL\Type\Definition\Type;
-use Illuminate\Support\Collection;
 use Bakery\Support\Facades\Bakery;
+use Illuminate\Support\Collection;
 use GraphQL\Type\Definition\ListOfType;
 
 abstract class MutationInputType extends InputType
@@ -27,6 +27,7 @@ abstract class MutationInputType extends InputType
     {
         return $this->schema->getFillableFields()->filter(function ($field, $key) {
             $fieldType = Type::getNamedType($field['type']);
+
             return Type::isLeafType($fieldType);
         });
     }

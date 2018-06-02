@@ -49,6 +49,7 @@ class UpdateInputType extends MutationInputType
     protected function getFillableFields(): Collection
     {
         $fields = parent::getFillableFields();
+
         return Utils::nullifyFields($fields);
     }
 
