@@ -5,13 +5,15 @@ namespace Bakery\Types;
 use Closure;
 use Bakery\Utils\Utils;
 use Bakery\Concerns\ModelAware;
+use GraphQL\Type\Definition\Type;
+use Bakery\Types\Type as BaseType;
 use Bakery\Support\Facades\Bakery;
 use GraphQL\Type\Definition\NonNull;
 use GraphQL\Type\Definition\ListOfType;
 use Illuminate\Contracts\Auth\Access\Gate;
 use Illuminate\Auth\Access\AuthorizationException;
 
-class EntityType extends Type
+class EntityType extends BaseType
 {
     use ModelAware;
 
@@ -80,20 +82,28 @@ class EntityType extends Type
         $fields = $this->schema->getFields();
         $relations = $this->schema->getRelations();
 
-        foreach ($relations as $key => $type) {
-            if ($type instanceof ListOfType) {
+        foreach ($relations as $key => $field) {
+            $fieldType = Utils::nullifyField($field)['type'];
+
+            if ($fieldType instanceof ListOfType) {
                 $singularKey = str_singular($key);
                 $fields[$singularKey.'Ids'] = [
-                    'type' => Bakery::listOf(Bakery::ID()),
+                    'type' => Type::listOf(Type::ID()),
                     'resolve' => function ($model) use ($key) {
                         $keyName = $model->{$key}()->getRelated()->getKeyName();
 
                         return $model->{$key}->pluck($keyName)->toArray();
                     },
                 ];
+                $fields[$key.'_count'] = [
+                    'type' => Type::nonNull(Type::int()),
+                    'resolve' => function ($model) use ($key) {
+                        return $model->{$key}->count();
+                    },
+                ];
             } else {
                 $fields[$key.'Id'] = [
-                    'type' => $type instanceof NonNull ? Bakery::nonNull(Bakery::ID()) : Bakery::ID(),
+                    'type' => $field instanceof NonNull ? Type::nonNull(Type::ID()) : Type::ID(),
                     'resolve' => function ($model) use ($key) {
                         $instance = $model->{$key};
 
@@ -101,7 +111,7 @@ class EntityType extends Type
                     },
                 ];
             }
-            $fields[$key] = $type;
+            $fields[$key] = $field;
         }
 
         return collect($fields)->map(function ($field, $key) {

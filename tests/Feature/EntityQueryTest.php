@@ -233,4 +233,27 @@ class EntityQueryTest extends FeatureTestCase
         $response = $this->json('GET', '/graphql', ['query' => $query]);
         $response->assertJsonFragment(['password' => $user->password]);
     }
+
+    /** @test */
+    public function it_shows_the_count_for_many_relationships()
+    {
+        $user = factory(Models\User::class)->create();
+        factory(Models\Article::class)->create([
+            'user_id' => $user->id,
+        ]);
+
+        $this->actingAs($user);
+
+        $query = '
+            query {
+                user(id: "'.$user->id.'") {
+                    id
+                    articles_count
+                }
+            }
+        ';
+
+        $response = $this->json('GET', '/graphql', ['query' => $query]);
+        $response->assertJsonFragment(['articles_count' => 3]);
+    }
 }
