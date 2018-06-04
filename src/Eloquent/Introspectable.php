@@ -3,7 +3,6 @@
 namespace Bakery\Eloquent;
 
 use Bakery\Utils\Utils;
-use Bakery\Eloquent\Concerns;
 use GraphQL\Type\Definition\Type;
 use Bakery\Support\Facades\Bakery;
 use Illuminate\Support\Collection;

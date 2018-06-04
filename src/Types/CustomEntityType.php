@@ -17,7 +17,7 @@ abstract class CustomEntityType extends EntityType
         if (property_exists($this, 'name')) {
             return $this->name;
         }
-        
+
         return Utils::typename(str_before(class_basename($this), 'Type'));
     }
 }

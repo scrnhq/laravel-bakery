@@ -15,7 +15,7 @@ class CustomEntityQuery extends EntityQuery
         if (property_exists($this, 'name')) {
             return $this->name;
         }
-        
+
         return camel_case(str_before(class_basename($this), 'Query'));
     }
 }

@@ -54,7 +54,7 @@ trait QueriesModel
     {
         $result = $this->find($root, $args, $viewer);
 
-        if (!$result) {
+        if (! $result) {
             throw (new ModelNotFoundException)->setModel($this->class);
         }
 
