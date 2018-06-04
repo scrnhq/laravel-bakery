@@ -59,7 +59,8 @@ abstract class MutationInputType extends InputType
     {
         $fields = [];
         $field = Utils::nullifyField($field);
-        $inputType = $this->inputTypename($relation);
+        $fieldType = Type::getNamedType($field['type']);
+        $inputType = 'Create'.Utils::typename($fieldType->name).'Input';
 
         if ($field['type'] instanceof ListOfType) {
             $name = str_singular($relation).'Ids';
@@ -79,6 +80,4 @@ abstract class MutationInputType extends InputType
 
         return $fields;
     }
-
-    abstract protected function inputTypeName(string $relation): string;
 }

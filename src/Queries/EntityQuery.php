@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Bakery\Exceptions\TooManyResultsException;
 
-class SingleEntityQuery extends Query
+class EntityQuery extends Query
 {
     use ModelAware;
 
@@ -44,7 +44,7 @@ class SingleEntityQuery extends Query
     {
         $args = $this->schema->getLookupFields();
 
-        foreach ($this->model->getRelations() as $relation => $field) {
+        foreach ($this->schema->getRelations() as $relation => $field) {
             $type = $field['type'];
             if ($type instanceof ListofType) {
                 continue;
@@ -68,7 +68,12 @@ class SingleEntityQuery extends Query
     public function resolve($root, array $args, $viewer)
     {
         $primaryKey = $this->model->getKeyName();
-        $query = $this->scopeQuery($this->model->query($viewer), $args, $viewer);
+
+        $query = $this->scopeQuery(
+            $this->schema->getBakeryQuery($viewer),
+            $args,
+            $viewer
+        );
 
         if (array_key_exists($primaryKey, $args)) {
             return $query->find($args[$primaryKey]);
@@ -81,11 +86,7 @@ class SingleEntityQuery extends Query
         }
 
         if ($results->count() > 1) {
-            throw (new TooManyResultsException)
-                ->setModel(
-                    $this->class,
-                    $results->pluck($this->model->getKeyName())
-                );
+            throw (new TooManyResultsException)->setModel($this->class);
         }
 
         return $results->first();

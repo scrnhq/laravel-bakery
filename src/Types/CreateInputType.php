@@ -56,15 +56,4 @@ class CreateInputType extends MutationInputType
             return $field;
         });
     }
-
-    /**
-     * Generate the input type name for a relationship.
-     *
-     * @param string $relation
-     * @return string
-     */
-    protected function inputTypename(string $relation): string
-    {
-        return 'Create'.Utils::typename($relation).'Input';
-    }
 }

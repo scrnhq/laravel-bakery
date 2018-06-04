@@ -3,6 +3,7 @@
 namespace Bakery\Eloquent;
 
 use Bakery\Utils\Utils;
+use Bakery\Eloquent\Concerns;
 use GraphQL\Type\Definition\Type;
 use Bakery\Support\Facades\Bakery;
 use Illuminate\Support\Collection;
@@ -11,6 +12,8 @@ use Illuminate\Database\Eloquent\Model;
 
 trait Introspectable
 {
+    use Concerns\InteractsWithQueries;
+
     /**
      * A reference to the underlying Eloquent instance.
      *
@@ -88,13 +91,16 @@ trait Introspectable
     /**
      * Get the fields that can be filled.
      *
-     * This excludes the ID field.
+     * This excludes the ID field and other fields that are guarded from
+     * mass assignment exceptions.
      *
      * @return Collection
      */
     public function getFillableFields(): Collection
     {
-        return Utils::normalizeFields(collect($this->fields() ?? []));
+        return Utils::normalizeFields($this->fields() ?? [])->filter(function ($field, $key) {
+            return collect($this->getFillable())->contains($key);
+        });
     }
 
     /**
@@ -109,12 +115,8 @@ trait Introspectable
                 return in_array($key, $this->lookupFields ?? []);
             });
 
-        $relations = collect($this->getRelations())->map(function ($type) {
-            if (is_array($type)) {
-                $type = $type['type'];
-            }
-
-            $lookupTypeName = Type::getNamedType($type)->name.'LookupType';
+        $relations = collect($this->getRelations())->map(function ($field) {
+            $lookupTypeName = Type::getNamedType($field['type'])->name.'LookupType';
 
             return Bakery::type($lookupTypeName);
         });

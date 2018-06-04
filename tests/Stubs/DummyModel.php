@@ -12,10 +12,14 @@ class DummyModel extends Model
     use Mutable;
     use Introspectable;
 
+    protected $fillable = [
+        'name',
+    ];
+
     public function fields(): array
     {
         return [
-            'foo' => Type::string(),
+            'name' => Type::string(),
         ];
     }
 }

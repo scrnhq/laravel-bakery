@@ -4,12 +4,12 @@ namespace Bakery\Support;
 
 use Bakery\Types;
 use GraphQL\Type\SchemaConfig;
+use Bakery\Queries\EntityQuery;
 use Bakery\Support\Facades\Bakery;
 use Bakery\Queries\CollectionQuery;
 use Bakery\Mutations\CreateMutation;
 use Bakery\Mutations\DeleteMutation;
 use Bakery\Mutations\UpdateMutation;
-use Bakery\Queries\SingleEntityQuery;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Schema as GraphQLSchema;
 
@@ -86,7 +86,7 @@ class Schema
     {
         $queries = [];
         foreach ($this->getModels() as $model) {
-            $entityQuery = new SingleEntityQuery($model);
+            $entityQuery = new EntityQuery($model);
             $queries[$entityQuery->name] = $entityQuery;
 
             $collectionQuery = new CollectionQuery($model);
@@ -158,21 +158,28 @@ class Schema
         Bakery::addTypes($this->getTypes());
         Bakery::addModelSchemas($this->getModels());
 
-        $query = $this->makeObjectType($this->fieldsToArray($this->getQueries()), ['name' => 'Query']);
-        $mutation = $this->makeObjectType($this->fieldsToArray($this->getMutations()), ['name' => 'Mutation']);
-        $config = SchemaConfig::create()
-            ->setQuery($query)
-            ->setMutation($mutation)
-            ->setTypeLoader(function ($name) use ($query, $mutation) {
-                if ($name === $query->name) {
-                    return $query;
-                }
-                if ($name === $mutation->name) {
-                    return $mutation;
-                }
+        $config = SchemaConfig::create();
 
-                return Bakery::type($name);
-            });
+        $query = $this->makeObjectType($this->fieldsToArray($this->getQueries()), ['name' => 'Query']);
+        if (count($query->getFields()) > 0) {
+            $config->setQuery($query);
+        }
+
+        $mutation = $this->makeObjectType($this->fieldsToArray($this->getMutations()), ['name' => 'Mutation']);
+        if (count($mutation->getFields()) > 0) {
+            $config->setMutation($mutation);
+        }
+
+        $config->setTypeLoader(function ($name) use ($query, $mutation) {
+            if ($name === $query->name) {
+                return $query;
+            }
+            if ($name === $mutation->name) {
+                return $mutation;
+            }
+
+            return Bakery::type($name);
+        });
 
         return new GraphQLSchema($config);
     }

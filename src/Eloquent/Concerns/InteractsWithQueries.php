@@ -11,9 +11,16 @@ trait InteractsWithQueries
      *
      * @return Builder
      */
-    private function bootQuery(): Builder
+    public function getBakeryQuery($viewer): Builder
     {
-        return $this->getModel()->query();
+        $model = $this->getModel();
+        $query = $model->query();
+
+        if (method_exists($model, 'scopeAuthorizedForReading')) {
+            $query = $query->authorizedForReading($viewer);
+        }
+
+        return $this->scopeQuery($query);
     }
 
     /**
@@ -28,15 +35,5 @@ trait InteractsWithQueries
     public function scopeQuery(Builder $query): Builder
     {
         return $query;
-    }
-
-    /**
-     * Get the query.
-     *
-     * @return Builder
-     */
-    final public function query(): Builder
-    {
-        return $this->scopeQuery($this->bootQuery());
     }
 }

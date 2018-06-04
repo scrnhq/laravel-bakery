@@ -52,15 +52,4 @@ class UpdateInputType extends MutationInputType
 
         return Utils::nullifyFields($fields);
     }
-
-    /**
-     * Generate the input type name for a relationship.
-     *
-     * @param string $relation
-     * @return string
-     */
-    protected function inputTypename(string $relation): string
-    {
-        return 'Update'.Utils::typename($relation).'Input';
-    }
 }

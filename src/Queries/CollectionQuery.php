@@ -87,13 +87,11 @@ class CollectionQuery extends Query
             throw new PaginationMaxCountExceededException($maxCount);
         }
 
-        $query = $this->model->where(function ($query) use ($viewer, $args) {
-            return $this->scopeQuery(
-                $this->schema->query($viewer),
-                $args,
-                $viewer
-            );
-        });
+        $query = $this->scopeQuery(
+            $this->schema->getBakeryQuery($viewer),
+            $args,
+            $viewer
+        );
 
         if (array_key_exists('filter', $args) && ! empty($args['filter'])) {
             $query = $this->applyFilters($query, $args['filter']);

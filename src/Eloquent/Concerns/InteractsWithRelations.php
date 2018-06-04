@@ -78,7 +78,8 @@ trait InteractsWithRelations
      */
     protected function connectBelongsToRelation(Relations\BelongsTo $relation, $id)
     {
-        $relation->associate($id);
+        $model = $relation->getRelated()->findOrFail($id);
+        $relation->associate($model);
     }
 
     /**
@@ -90,7 +91,7 @@ trait InteractsWithRelations
      */
     protected function fillBelongsToRelation(Relations\BelongsTo $relation, $attributes = [])
     {
-        $related = $relation->getRelated()->create($attributes);
+        $related = $relation->getRelated()->createWithInput($attributes);
         $relation->associate($related);
     }
 
@@ -121,7 +122,7 @@ trait InteractsWithRelations
     protected function fillHasOneRelation(Relations\HasOne $relation, $attributes)
     {
         $model = $relation->getRelated();
-        $model->fill($attributes);
+        $model->fillWithInput($attributes);
 
         $this->transactionQueue[] = function () use ($model, $relation) {
             $model->setAttribute($relation->getForeignKeyName(), $relation->getParentKey());
@@ -153,11 +154,11 @@ trait InteractsWithRelations
     protected function fillHasManyRelation(Relations\HasMany $relation, array $values)
     {
         $this->transactionQueue[] = function () use ($relation, $values) {
-            $model = $relation->getRelated();
-            $model->delete();
+            $related = $relation->getRelated();
+            $relation->delete();
 
             foreach ($values as $attributes) {
-                $model = $relation->getRelated()->newInstance();
+                $model = $related->newInstance();
                 $model->fillWithInput($attributes);
                 $model->setAttribute($relation->getForeignKeyName(), $relation->getParentKey());
                 $model->save();
@@ -192,7 +193,7 @@ trait InteractsWithRelations
         $related = $relation->getRelated();
 
         foreach ($value as $attributes) {
-            $instances[] = $related->create($attributes);
+            $instances[] = $related->createWithInput($attributes);
         }
 
         $this->transactionQueue[] = function () use ($relation, $instances) {
@@ -213,7 +214,13 @@ trait InteractsWithRelations
             class_basename($this).' has no relation named '.$relation
         );
 
-        return $this->{$relation}();
+        $resolvedRelation = $this->{$relation}();
+
+        // After we resolved it we unset it because we don't actually
+        // want to use the results of the relation.
+        // unset($this->{$relation});
+
+        return $resolvedRelation;
     }
 
     /**
