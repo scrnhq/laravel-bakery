@@ -31,6 +31,7 @@ abstract class Field implements FieldContract
      */
     public function type()
     {
+        return null;
     }
 
     /**
@@ -51,7 +52,7 @@ abstract class Field implements FieldContract
     private function getResolver()
     {
         if (! method_exists($this, 'resolve')) {
-            return;
+            return null;
         }
 
         return [$this, 'resolve'];
@@ -103,5 +104,6 @@ abstract class Field implements FieldContract
         } elseif (property_exists($this, $key)) {
             return $this->{$key};
         }
+        return null;
     }
 }

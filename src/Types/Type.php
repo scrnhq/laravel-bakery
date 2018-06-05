@@ -7,6 +7,8 @@ use GraphQL\Type\Definition\Type as BaseType;
 
 class Type
 {
+    protected $type;
+
     /**
      * Return the default fields.
      *
@@ -147,5 +149,6 @@ class Type
         } elseif (property_exists($this, $key)) {
             return $this->{$key};
         }
+        return null;
     }
 }

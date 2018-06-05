@@ -44,7 +44,7 @@ class UpdateInputType extends MutationInputType
      * the values you want to update. The rest stays untouched.
      * Because of that we have to remove the nonNull wrappers on the fields.
      *
-     * @return array
+     * @return Collection
      */
     protected function getFillableFields(): Collection
     {

@@ -37,7 +37,7 @@ class EntityType extends BaseType
     {
         return function ($source, $args, $viewer) use ($key, $field) {
             if (array_key_exists('policy', $field)) {
-                $this->checkPolicy($field, $source, $args, $viewer);
+                $this->checkPolicy($field, $key, $source, $args, $viewer);
             }
 
             if (array_key_exists('resolve', $field)) {
@@ -52,13 +52,14 @@ class EntityType extends BaseType
      * Check the policy of a field.
      *
      * @param array $field
+     * @param string $key
      * @param $source
      * @param $args
      * @param $viewer
      * @return void
      * @throws AuthorizationException
      */
-    protected function checkPolicy(array $field, $source, $args, $viewer)
+    protected function checkPolicy(array $field, string $key, $source, $args, $viewer)
     {
         $policy = $field['policy'];
         $gate = app(Gate::class)->forUser($viewer);

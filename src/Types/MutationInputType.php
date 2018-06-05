@@ -35,7 +35,7 @@ abstract class MutationInputType extends InputType
     /**
      * Get the fields for the relations of the model.
      *
-     * @return array
+     * @return Collection
      */
     protected function getRelationFields(): Collection
     {

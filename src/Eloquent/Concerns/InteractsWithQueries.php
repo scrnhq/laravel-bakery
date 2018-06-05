@@ -2,6 +2,7 @@
 
 namespace Bakery\Eloquent\Concerns;
 
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Builder;
 
 trait InteractsWithQueries
@@ -9,6 +10,7 @@ trait InteractsWithQueries
     /**
      * Boot the query builder on the underlying model.
      *
+     * @param Authenticatable $viewer
      * @return Builder
      */
     public function getBakeryQuery($viewer): Builder
