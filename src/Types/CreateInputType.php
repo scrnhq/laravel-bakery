@@ -75,10 +75,9 @@ class CreateInputType extends InputType
         foreach ($this->model->getFillable() as $fillable) {
             if (method_exists($this->model, $fillable)) {
                 $relationship = $this->model->{$fillable}();
-                $type = get_class($relationship);
                 $inputType = 'Create' . class_basename($relationship->getRelated()) . 'Input';
 
-                if ($type === Relations\HasMany::class || $type === Relations\BelongsToMany::class) {
+                if ($relationship instanceof Relations\HasMany || $relationship instanceof Relations\BelongsToMany) {
                     $name = str_singular($fillable) . 'Ids';
                     $fields[$name] = Bakery::listOf(Bakery::ID());
 
@@ -87,7 +86,7 @@ class CreateInputType extends InputType
                     }
                 }
 
-                if ($type === Relations\BelongsTo::class || $type === Relations\HasOne::class) {
+                if ($relationship instanceof Relations\BelongsTo || $relationship instanceof Relations\HasOne) {
                     $name = str_singular($fillable) . 'Id';
                     $fields[$name] = Bakery::ID();
 

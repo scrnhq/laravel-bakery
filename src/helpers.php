@@ -22,7 +22,7 @@ if (!function_exists('class_uses_deep')) {
      *
      * @param  string   $class
      * @param  boolean  $autoload
-     * @return string
+     * @return array
      */
     function class_uses_deep($class, $autoload = true)
     {

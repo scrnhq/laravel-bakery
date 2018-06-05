@@ -2,18 +2,26 @@
 
 namespace Bakery\Queries;
 
-use GraphQL\Type\Definition\Type;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-
-use Bakery\Support\Facades\Bakery;
 use Bakery\Exceptions\PaginationMaxCountExceededException;
-use Illuminate\Database\Query\Grammars\PostgresGrammar;
+use Bakery\Traits\JoinsRelationships;
+use GraphQL\Type\Definition\Type;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Query\Grammars;
 use Illuminate\Support\Facades\DB;
 
 class CollectionQuery extends EntityQuery
 {
+    use JoinsRelationships;
+
+    /**
+     * The fields to be fulltext searched on.
+     *
+     * @var array
+     */
+    protected $tsFields;
+
     /**
      * Get the name of the CollectionQuery.
      *
@@ -55,6 +63,7 @@ class CollectionQuery extends EntityQuery
             'page' => Bakery::int(),
             'count' => Bakery::int(),
             'filter' => Bakery::type($this->typeName() . 'Filter'),
+            'search' => Bakery::type($this->typeName() . 'RootSearch'),
         ];
 
         if (!empty($this->model->fields())) {
@@ -87,11 +96,15 @@ class CollectionQuery extends EntityQuery
             return $this->scopeQuery($query->authorizedForReading($viewer), $args, $viewer);
         });
 
-        if (array_key_exists('filter', $args)) {
+        if (array_key_exists('filter', $args) && !empty($args['filter'])) {
             $query = $this->applyFilters($query, $args['filter']);
         }
 
-        if (array_key_exists('orderBy', $args)) {
+        if (array_key_exists('search', $args) && !empty($args['search'])) {
+            $query = $this->applySearch($query, $args['search']);
+        }
+
+        if (array_key_exists('orderBy', $args) && !empty($args['orderBy'])) {
             $query = $this->applyOrderBy($query, $args['orderBy']);
         }
 
@@ -161,7 +174,9 @@ class CollectionQuery extends EntityQuery
             if ($key === 'AND' || $key === 'OR') {
                 $query->where(function ($query) use ($value, $key) {
                     foreach ($value as $set) {
-                        $this->applyFiltersRecursively($query, $set, $key);
+                        if (!empty($set)) {
+                            $this->applyFiltersRecursively($query, $set ?? [], $key);
+                        }
                     }
                 });
             } else {
@@ -213,50 +228,111 @@ class CollectionQuery extends EntityQuery
 
         $likeOperator = $this->getCaseInsensitiveLikeOperator();
 
+        $table = $query->getModel()->getTable() . '.';
+
         if (ends_with($key, '_not_contains')) {
             $key = str_before($key, '_not_contains');
             $query->where($key, 'NOT ' . $likeOperator, '%' . $value . '%', $type);
-        } elseif (ends_with($key, '_contains')) {
+        } elseif (ends_with($table . $key, '_contains')) {
             $key = str_before($key, '_contains');
-            $query->where($key, $likeOperator, '%' . $value . '%', $type);
+            $query->where($table . $key, $likeOperator, '%' . $value . '%', $type);
         } elseif (ends_with($key, '_not_starts_with')) {
             $key = str_before($key, '_not_starts_with');
-            $query->where($key, 'NOT ' . $likeOperator, $value . '%', $type);
+            $query->where($table . $key, 'NOT ' . $likeOperator, $value . '%', $type);
         } elseif (ends_with($key, '_starts_with')) {
             $key = str_before($key, '_starts_with');
-            $query->where($key, $likeOperator, $value . '%', $type);
+            $query->where($table . $key, $likeOperator, $value . '%', $type);
         } elseif (ends_with($key, '_not_ends_with')) {
             $key = str_before($key, '_not_ends_with');
-            $query->where($key, 'NOT ' . $likeOperator, '%' . $value, $type);
+            $query->where($table . $key, 'NOT ' . $likeOperator, '%' . $value, $type);
         } elseif (ends_with($key, '_ends_with')) {
             $key = str_before($key, '_ends_with');
-            $query->where($key, $likeOperator, '%' . $value, $type);
+            $query->where($table . $key, $likeOperator, '%' . $value, $type);
         } elseif (ends_with($key, '_not')) {
             $key = str_before($key, '_not');
-            $query->where($key, '!=', $value, $type);
+            $query->where($table . $key, '!=', $value, $type);
         } elseif (ends_with($key, '_not_in')) {
             $key = str_before($key, '_not_in');
-            $query->whereNotIn($key, $value, $type);
+            $query->whereNotIn($table . $key, $value, $type);
         } elseif (ends_with($key, '_in')) {
             $key = str_before($key, '_in');
-            $query->whereIn($key, $value, $type);
+            $query->whereIn($table . $key, $value, $type);
         } elseif (ends_with($key, '_lt')) {
             $key = str_before($key, '_lt');
-            $query->where($key, '<', $value, $type);
+            $query->where($table . $key, '<', $value, $type);
         } elseif (ends_with($key, '_lte')) {
             $key = str_before($key, '_lte');
-            $query->where($key, '<=', $value, $type);
+            $query->where($table . $key, '<=', $value, $type);
         } elseif (ends_with($key, '_gt')) {
             $key = str_before($key, '_gt');
-            $query->where($key, '>', $value, $type);
+            $query->where($table . $key, '>', $value, $type);
         } elseif (ends_with($key, '_gte')) {
             $key = str_before($key, '_gte');
-            $query->where($key, '>=', $value, $type);
+            $query->where($table . $key, '>=', $value, $type);
         } else {
-            $query->where($key, '=', $value, $type);
+            $query->where($table . $key, '=', $value, $type);
         }
 
         return $query;
+    }
+
+    /**
+     * @param Builder $query
+     * @param array $search
+     * @return Builder
+     */
+    protected function applySearch(Builder $query, array $search)
+    {
+        $this->tsFields = [];
+
+        $needle = $search['query'];
+        $fields = $search['fields'];
+
+        $qualifiedNeedle = preg_replace('/[*&|:\']+/', ' ', $needle);
+
+        foreach ($fields as $key => $value) {
+            if (array_key_exists($key, $this->model->relations())) {
+                $this->applyRelationalSearch($query, $this->model, $key, $needle, $value);
+            } else {
+                $this->tsFields[] = $this->model->getTable() . '.' . $key;
+            }
+        }
+
+        if (empty($needle) || empty($this->tsFields)) {
+            return $query;
+        }
+
+        $grammar = DB::connection()->getQueryGrammar();
+        if ($grammar instanceof Grammars\PostgresGrammar) {
+            $dictionary = config('bakery.postgresDictionary');
+            $fields = implode(', ', $this->tsFields);
+            $query->whereRaw("to_tsvector('${dictionary}', concat_ws(' ', " . $fields . ")) @@ to_tsquery('${dictionary}', ?)", ["'$qualifiedNeedle':*"]);
+            $query->groupBy($this->model->getQualifiedKeyName());
+        }
+        return $query;
+    }
+
+    /**
+     * @param Builder $query
+     * @param Model $model
+     * @param string $relationName
+     * @param string $needle
+     * @param array $fields
+     */
+    protected function applyRelationalSearch(Builder $query, Model $model, string $relationName, string $needle, array $fields)
+    {
+        $relation = $model->$relationName();
+        $related = $relation->getRelated();
+
+        $this->joinRelation($query, $relationName, 'left');
+
+        foreach ($fields as $key => $value) {
+            if (array_key_exists($key, $related->relations())) {
+                $this->applyRelationalSearch($query, $related, $key, $needle, $value);
+            } else {
+                $this->tsFields[] = $related->getTable() . '.' . $key;
+            }
+        }
     }
 
     /**
@@ -324,7 +400,7 @@ class CollectionQuery extends EntityQuery
      */
     protected function getCaseInsensitiveLikeOperator()
     {
-        return DB::connection()->getQueryGrammar() instanceof PostgresGrammar
+        return DB::connection()->getQueryGrammar() instanceof Grammars\PostgresGrammar
             ? 'ILIKE'
             : 'LIKE';
     }
