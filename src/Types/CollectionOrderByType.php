@@ -5,7 +5,6 @@ namespace Bakery\Types;
 use Bakery\Concerns\ModelAware;
 use GraphQL\Type\Definition\Type;
 use Bakery\Support\Facades\Bakery;
-use Illuminate\Database\Eloquent\Model;
 
 class CollectionOrderByType extends InputType
 {
@@ -14,7 +13,7 @@ class CollectionOrderByType extends InputType
     /**
      * Define the collection order type as an input type.
      *
-     * @var boolean
+     * @var bool
      */
     protected $input = true;
 
@@ -43,7 +42,7 @@ class CollectionOrderByType extends InputType
 
         foreach ($this->schema->getRelations() as $relation => $field) {
             $type = Type::getNamedType($field['type']);
-            $fields[$relation] = Bakery::getType($type->name . 'OrderBy');
+            $fields[$relation] = Bakery::getType($type->name.'OrderBy');
         }
 
         return $fields;

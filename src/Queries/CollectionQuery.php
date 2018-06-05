@@ -374,7 +374,7 @@ class CollectionQuery extends Query
      */
     protected function orderByRelation(Builder $query, string $table, string $column, string $ordering): Builder
     {
-        return $query->orderBy($table . '.' . $column, $ordering);
+        return $query->orderBy($table.'.'.$column, $ordering);
     }
 
     /**
