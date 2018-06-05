@@ -14,7 +14,7 @@ class Utils
      * @param string $message
      * @param array $args
      */
-    public static function invariant($test, $message = '', $args = null)
+    public static function invariant($test, $message = '', ...$args)
     {
         if (! $test) {
             if (count($args)) {
