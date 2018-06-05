@@ -305,7 +305,8 @@ class CollectionQuery extends Query
      */
     protected function applyRelationalSearch(Builder $query, Model $model, string $relationName, string $needle, array $fields)
     {
-        $related = $model->$relation()->getRelated();
+        $relation = $model->$relation();
+        $related = $relation->getRelated();
         $this->joinRelation($query, $relation, 'left');
 
         foreach ($fields as $key => $value) {
@@ -349,7 +350,8 @@ class CollectionQuery extends Query
      */
     protected function applyRelationalOrderBy(Builder $query, Model $model, string $relation, array $args)
     {
-        $related = $model->$relation()->getRelated();
+        $relation = $model->$relation();
+        $related = $relation->getRelated();
         $this->joinRelation($query, $relation, 'left');
 
         foreach ($args as $key => $value) {

@@ -285,13 +285,25 @@ class CollectionQueryTest extends FeatureTestCase
         $jane = factory(Models\User::class)->create(['email' => 'jane.doe@example.com']);
         $joe = factory(Models\User::class)->create(['email' => 'joe.doe@example.com']);
 
+        $johnsPhone = factory(Models\Phone::class)->create(['number' => '1', 'user_id' => $john->id]);
+        $janesPhone = factory(Models\Phone::class)->create(['number' => '2', 'user_id' => $jane->id]);
+        $joesPhone = factory(Models\Phone::class)->create(['number' => '3', 'user_id' => $joe->id]);
+
         $articleByJohn = factory(Models\Article::class)->create(['title' => 'Hello world', 'user_id' => $john->id]);
         $articleByJane = factory(Models\Article::class)->create(['title' => 'Hello world', 'user_id' => $jane->id]);
         $articleByJoe = factory(Models\Article::class)->create(['title' => 'Hello mars', 'user_id' => $joe->id]);
 
         $query = '
             query {
-                articles(orderBy: { title: ASC, user: { email: ASC } }) {
+                articles(orderBy: { 
+                    title: ASC,
+                    user: {
+                        email: ASC
+                        phone: {
+                            number: DESC
+                        }
+                    }
+                }) {
                     items {
                         id
                         title

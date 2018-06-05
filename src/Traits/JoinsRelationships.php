@@ -14,11 +14,10 @@ trait JoinsRelationships
      * @param bool $where
      * @return Builder
      */
-    public function joinRelation(Builder $query, string $relationName, string $type = 'inner', $where = false): Builder
+    public function joinRelation(Builder $query, Relations\Relation $relation, string $type = 'inner', $where = false): Builder
     {
-        $relation = $query->getRelation($relationName);
         $related = $relation->getRelated();
-
+        
         if ($relation instanceof Relations\BelongsTo) {
             $query->join($related->getTable(), $relation->getQualifiedOwnerKeyName(), '=', $relation->getQualifiedForeignKey(), $type, $where);
         } elseif ($relation instanceof Relations\BelongsToMany) {
