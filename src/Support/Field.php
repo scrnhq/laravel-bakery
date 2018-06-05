@@ -104,6 +104,7 @@ abstract class Field implements FieldContract
         } elseif (property_exists($this, $key)) {
             return $this->{$key};
         }
+
         return null;
     }
 }

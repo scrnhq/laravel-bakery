@@ -2,8 +2,8 @@
 
 namespace Bakery\Eloquent\Concerns;
 
-use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Contracts\Auth\Authenticatable;
 
 trait InteractsWithQueries
 {
