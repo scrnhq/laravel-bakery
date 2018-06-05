@@ -238,7 +238,7 @@ class EntityQueryTest extends FeatureTestCase
     public function it_shows_the_count_for_many_relationships()
     {
         $user = factory(Models\User::class)->create();
-        factory(Models\Article::class)->create([
+        factory(Models\Article::class, 3)->create([
             'user_id' => $user->id,
         ]);
 
