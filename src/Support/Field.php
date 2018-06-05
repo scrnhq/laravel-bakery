@@ -47,11 +47,11 @@ abstract class Field implements FieldContract
     /**
      * Retrieve the resolver for the Field.
      *
-     * @return Callback|null
+     * @return callable|null
      */
     private function getResolver()
     {
-        if (!method_exists($this, 'resolve')) {
+        if (! method_exists($this, 'resolve')) {
             return null;
         }
 
@@ -66,7 +66,7 @@ abstract class Field implements FieldContract
      */
     public function getAttributes()
     {
-        if (!$this->name) {
+        if (! $this->name) {
             throw new InvalidFieldException('Required property name missing for Field.');
         }
 
@@ -84,6 +84,7 @@ abstract class Field implements FieldContract
      * Convert the Field instance to an array.
      *
      * @return array
+     * @throws InvalidFieldException
      */
     public function toArray()
     {

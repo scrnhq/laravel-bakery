@@ -2,19 +2,19 @@
 
 namespace Bakery\Tests\Stubs;
 
-use GraphQL\Type\Definition\Type;
 use Bakery\Types\EnumType;
+use GraphQL\Type\Definition\Type;
 
 class EnumTypeStub extends EnumType
 {
-    protected $name = 'EnumStub';
+    public $name = 'EnumStub';
 
     public function values(): array
     {
         return [
             'A' => [
                 'value' => 'A',
-            ]
+            ],
         ];
     }
 
@@ -23,7 +23,7 @@ class EnumTypeStub extends EnumType
         return [
             'test' => [
                 'type' => Type::string(),
-            ]
+            ],
         ];
     }
 }

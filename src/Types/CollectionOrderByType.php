@@ -2,25 +2,14 @@
 
 namespace Bakery\Types;
 
+use Bakery\Concerns\ModelAware;
 use GraphQL\Type\Definition\Type;
 use Bakery\Support\Facades\Bakery;
 use Illuminate\Database\Eloquent\Model;
 
 class CollectionOrderByType extends InputType
 {
-    /**
-     * The name of the type.
-     *
-     * @var string
-     */
-    protected $name;
-
-    /**
-     * A reference to the model.
-     *
-     * @var Model
-     */
-    protected $model;
+    use ModelAware;
 
     /**
      * Define the collection order type as an input type.
@@ -30,14 +19,13 @@ class CollectionOrderByType extends InputType
     protected $input = true;
 
     /**
-     * Construct a new collection orderby type.
+     * Get the name of the Collection Order By Type.
      *
-     * @param string $class
+     * @return string
      */
-    public function __construct(string $class)
+    protected function name(): string
     {
-        $this->name = class_basename($class) . 'OrderBy';
-        $this->model = app($class);
+        return $this->schema->typename().'OrderBy';
     }
 
     /**
@@ -49,16 +37,11 @@ class CollectionOrderByType extends InputType
     {
         $fields = [];
 
-        foreach ($this->model->fields() as $name => $type) {
+        foreach ($this->schema->getFields() as $name => $field) {
             $fields[$name] = Bakery::getType('Order');
         }
 
-        foreach ($this->model->relations() as $relation => $type) {
-            if (is_array($type)) {
-                $type = Type::getNamedType($type['type']);
-            } else {
-                $type = Type::getNamedType($type);
-            }
+        foreach ($this->schema->getRelations() as $relation => $field) {
             $type = Type::getNamedType($type);
             $fields[$relation] = Bakery::getType($type->name . 'OrderBy');
         }

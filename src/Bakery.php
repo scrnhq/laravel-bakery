@@ -2,22 +2,22 @@
 
 namespace Bakery;
 
-use Auth;
-use Bakery\Exceptions\TypeNotFound;
-use Bakery\Support\Schema as BakerySchema;
-use Bakery\Traits\BakeryTypes;
-use Bakery\Types;
-use GraphQL\Executor\ExecutionResult;
 use GraphQL\GraphQL;
-use GraphQL\Type\Definition\ObjectType;
+use Bakery\Utils\Utils;
 use GraphQL\Type\Schema;
+use Bakery\Traits\BakeryTypes;
+use Bakery\Exceptions\TypeNotFound;
+use GraphQL\Executor\ExecutionResult;
+use GraphQL\Type\Definition\ObjectType;
+use Illuminate\Database\Eloquent\Model;
+use Bakery\Support\Schema as BakerySchema;
 
 class Bakery
 {
     use BakeryTypes;
 
     /**
-     * The schemas
+     * The schemas.
      *
      * @var array
      */
@@ -36,6 +36,13 @@ class Bakery
      * @var array
      */
     protected $typeInstances = [];
+
+    /**
+     * The registered model schemas.
+     *
+     * @var array
+     */
+    protected $modelSchemas = [];
 
     /**
      * Add types to the registry.
@@ -58,27 +65,60 @@ class Bakery
      */
     public function addType($class, string $name = null)
     {
-        $name = $this->getTypeName($class, $name);
+        $name = $name ?: $class->name;
         $this->types[$name] = $class;
     }
 
     /**
-     * Return the name of the type.
+     * Add the models as model schemas to the registry.
      *
-     * @param $class
-     * @param null|string $name
-     * @return string
+     * @param array $models
+     * @return void
      */
-    protected function getTypeName($class, string $name = null): string
+    public function addModelSchemas(array $models)
     {
-        return $name ? $name : (is_object($class) ? $class : resolve($class))->name;
+        foreach ($models as $model) {
+            $this->addModelSchema($model);
+        }
+    }
+
+    /**
+     * Add a single model schema to the registry.
+     *
+     * @param mixed $model
+     * @return void
+     */
+    public function addModelSchema($model)
+    {
+        if (! is_subclass_of($model, Model::class)) {
+            $this->modelSchemas[$model::$model] = $model;
+        }
+    }
+
+    /**
+     * Return a model schema based on the model provided.
+     * This can either be an instance or a class name.
+     *
+     * @param mixed $model
+     * @return mixed
+     */
+    public function getModelSchema($model)
+    {
+        $model = is_string($model) ? $model : get_class($model);
+
+        Utils::invariant(
+            array_key_exists($model, $this->modelSchemas),
+            $model.' has no registered model schema in Bakery.'
+        );
+
+        return $this->modelSchemas[$model];
     }
 
     /**
      * Return if the name is registered as a type.
      *
      * @param string $name
-     * @return boolean
+     * @return bool
      */
     public function hasType(string $name): bool
     {
@@ -99,13 +139,14 @@ class Bakery
     }
 
     /**
-     * Get the default GraphQL schema
+     * Get the default GraphQL schema.
      *
      * @return Schema
      */
     public function schema()
     {
         $schema = new Support\DefaultSchema();
+
         return $schema->toGraphQLSchema();
     }
 
@@ -118,8 +159,8 @@ class Bakery
      */
     public function getType($name)
     {
-        if (!isset($this->types[$name])) {
-            throw new TypeNotFound('Type ' . $name . ' not found.');
+        if (! isset($this->types[$name])) {
+            throw new TypeNotFound('Type '.$name.' not found.');
         }
 
         if (isset($this->typeInstances[$name])) {
@@ -139,6 +180,7 @@ class Bakery
      * @api
      * @param $name
      * @return ObjectType
+     * @throws TypeNotFound
      */
     public function type($name)
     {
@@ -154,14 +196,14 @@ class Bakery
      */
     public function executeQuery($input, $schema = null): ExecutionResult
     {
-        if (!$schema) {
+        if (! $schema) {
             $schema = $this->schema();
         } elseif ($schema instanceof BakerySchema) {
             $schema = $schema->toGraphQLSchema();
         }
 
         $root = null;
-        $context = Auth::user();
+        $context = auth()->user();
         $query = array_get($input, 'query');
         $variables = array_get($input, 'variables');
         if (is_string($variables)) {
@@ -190,6 +232,7 @@ class Bakery
         } else {
             $objectType = $type->toGraphQLType($options);
         }
+
         return $objectType;
     }
 

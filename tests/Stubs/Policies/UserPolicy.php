@@ -2,60 +2,47 @@
 
 namespace Bakery\Tests\Stubs\Policies;
 
-use Bakery\Tests\Stubs\User;
+use Bakery\Tests\Models\User;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class UserPolicy
 {
-    /**
-     * Determine if a user can be created by the user.
-     *
-     * @param  User  $user
-     * @return bool
-     */
-    public function create(User $user): bool
+    public function create(): bool
     {
         return true;
     }
 
-    /**
-     * Determine if a user can be updated by the user.
-     *
-     * @param  User  $user
-     * @return bool
-     */
-    public function update(User $user): bool
+    public function update(): bool
     {
         return true;
     }
 
-    /**
-     * Determine if a phone can be created through the user.
-     *
-     * @param User $user
-     * @return bool
-     */
-    public function createPhone(User $user): bool
+    public function setTypeAttribute(): bool
+    {
+        return false;
+    }
+
+    public function createPhone(): bool
     {
         return true;
     }
 
-    public function setPhone(User $user): bool
+    public function setPhone(): bool
     {
         return true;
     }
 
-    public function createRoles(User $user): bool
+    public function createRoles(): bool
     {
         return true;
     }
 
-    public function setRoles(User $user): bool
+    public function setRoles(): bool
     {
         return true;
     }
 
-    public function createPosts(User $user): bool
+    public function createArticles(): bool
     {
         return true;
     }

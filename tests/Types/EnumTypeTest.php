@@ -2,9 +2,9 @@
 
 namespace Bakery\Tests\Types;
 
-use GraphQL\Type\Definition\EnumType;
-use Bakery\Tests\Stubs\EnumTypeStub;
 use Bakery\Tests\TestCase;
+use Bakery\Tests\Stubs\EnumTypeStub;
+use GraphQL\Type\Definition\EnumType;
 
 class EnumTypeTest extends TestCase
 {

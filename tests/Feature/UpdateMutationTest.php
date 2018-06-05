@@ -2,53 +2,21 @@
 
 namespace Bakery\Tests\Feature;
 
-use Bakery\Exceptions\TooManyResultsException;
-use Bakery\Tests\Stubs;
-use Bakery\Tests\TestCase;
-use Eloquent;
-use Illuminate\Auth\Access\AuthorizationException;
-use Illuminate\Contracts\Auth\Access\Gate;
+use Bakery\Tests\Models;
+use Bakery\Tests\FeatureTestCase;
 
-class UpdateMutationTest extends TestCase
+class UpdateMutationTest extends FeatureTestCase
 {
-    protected function getEnvironmentSetUp($app)
-    {
-        $this->setupDatabase($app);
-
-        $app['config']->set('bakery.models', [
-            Stubs\Model::class,
-            Stubs\Post::class,
-            Stubs\Comment::class,
-            Stubs\Phone::class,
-            Stubs\User::class,
-            Stubs\Role::class,
-        ]);
-    }
-
-    protected function setUp()
-    {
-        parent::setUp();
-        Eloquent::reguard();
-        app(Gate::class)->policy(Stubs\User::class, Stubs\Policies\UserPolicy::class);
-        app(Gate::class)->policy(Stubs\Post::class, Stubs\Policies\PostPolicy::class);
-        app(Gate::class)->policy(Stubs\Comment::class, Stubs\Policies\CommentPolicy::class);
-        $this->migrateDatabase();
-    }
-
     /** @test */
     public function it_does_not_allow_updating_entity_as_guest()
     {
-        $this->expectException(AuthorizationException::class);
-
-        $user = $this->createUser();
-        $post = new Stubs\Post(['title' => 'Hello world!']);
-        $post->user()->associate($user);
-        $post->save();
+        $this->withExceptionHandling();
+        $article = factory(Models\Article::class)->create();
 
         $query = '
             mutation {
-                updatePost(
-                    id: ' . $post->id . '
+                updateArticle(
+                    id: '.$article->id.'
                     input: { title: "Hello world! (updated)" }
                ) {
                     id
@@ -57,22 +25,22 @@ class UpdateMutationTest extends TestCase
         ';
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
+        $response->assertJsonFragment(['updateArticle' => null]);
+        $this->assertDatabaseMissing('articles', ['id' => $article->id, 'title' => 'Hello world! (updated)']);
     }
 
     /** @test */
     public function it_does_not_allow_updating_entity_as_user_when_there_is_no_policy()
     {
-        $this->expectException(AuthorizationException::class);
+        $this->withExceptionHandling();
+        $this->actingAs(factory(Models\User::class)->create());
 
-        $role = new Stubs\Role(['name' => 'admin']);
-        $role->save();
-
-        $this->actingAs($this->createUser());
+        $role = factory(Models\Role::class)->create();
 
         $query = '
             mutation {
                 updateRole(
-                    id: ' . $role->id . ',
+                    id: '.$role->id.',
                     input: { name: "moderator" }
                 ) {
                     id
@@ -81,22 +49,22 @@ class UpdateMutationTest extends TestCase
         ';
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
+        $response->assertJsonFragment(['updateRole' => null]);
+        $this->assertDatabaseMissing('roles', ['name' => 'moderator']);
     }
 
     /** @test */
     public function it_does_allow_updating_entity_as_user_when_it_is_allowed_by_policy()
     {
-        $user = $this->createUser();
-        $post = new Stubs\Post(['title' => 'Hello world!']);
-        $post->user()->associate($user);
-        $post->save();
+        $user = factory(Models\User::class)->create();
+        $article = factory(Models\Article::class)->create();
 
         $this->actingAs($user);
 
         $query = '
             mutation {
-                updatePost(
-                    id: ' . $post->id . ',
+                updateArticle(
+                    id: '.$article->id.',
                     input: { title: "Hello world! (updated)" }
                 ) {
                     id
@@ -105,28 +73,23 @@ class UpdateMutationTest extends TestCase
         ';
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $this->assertDatabaseHas('posts', ['title' => 'Hello world! (updated)']);
+        $response->assertJsonFragment(['id']);
+        $this->assertDatabaseHas('articles', ['title' => 'Hello world! (updated)']);
     }
 
     /** @test */
     public function it_throws_too_many_results_exception_when_lookup_is_not_specific_enough()
     {
-        $this->expectException(TooManyResultsException::class);
+        $this->withExceptionHandling();
+        factory(Models\Article::class, 2)->create([
+            'slug' => 'hello-world',
+        ]);
 
-        $user = $this->createUser();
-        $post = new Stubs\Post(['title' => 'Hello world!', 'slug' => 'hello-world']);
-        $post->user()->associate($user);
-        $post->save();
-
-        $post2 = new Stubs\Post(['title' => 'Hello world! (part two)', 'slug' => 'hello-world']);
-        $post2->user()->associate($user);
-        $post2->save();
-
-        $this->actingAs($user);
+        $this->actingAs(factory(Models\User::class)->create());
 
         $query = '
             mutation {
-                updatePost(
+                updateArticle(
                     slug: "hello-world",
                     input: { title: "Hello world! (updated)" }
                 ) {
@@ -136,29 +99,30 @@ class UpdateMutationTest extends TestCase
         ';
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
+        $response->assertJsonFragment(['updateArticle' => null]);
+        $this->assertDatabaseMissing('articles', ['title' => 'Hello world! (updated)']);
     }
 
     /** @test */
     public function it_lets_you_do_deep_nested_update_mutations()
     {
-        $user = $this->createUser();
+        $user = factory(Models\User::class)->create();
+        factory(Models\Article::class)->create();
         $this->actingAs($user);
-
-        $post = new Stubs\Post(['title' => 'Hello World!', 'slug' => 'hello-world']);
-        $post->user()->associate($user);
-        $post->save();
 
         $query = '
             mutation {
                 updateUser(
-                    id: ' . $user->id . '
+                    id: '.$user->id.'
                     input: {
-                        name: "Jona Doe",
-                        posts: [{
-                            title: "This is my second post!",
+                        name: "Jona Doe"
+                        articles: [{
+                            title: "This is my second post!"
+                            slug: "second-post"
+                            content: "Lorem ispum"
                             comments: [
-                                { body: "First!", userId: ' . $user->id . ' },
-                                { body: "Great post!", userId: ' . $user->id . '},
+                                { body: "First!", userId: '.$user->id.' }
+                                { body: "Great post!", userId: '.$user->id.'}
                             ]
                         }]
                     }
@@ -169,10 +133,34 @@ class UpdateMutationTest extends TestCase
         ';
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
+        $response->assertJsonFragment(['id']);
         $this->assertDatabaseHas('users', ['name' => 'Jona Doe']);
-        $this->assertDatabaseMissing('posts', ['title' => 'Hello World!', 'user_id' => $user->id]);
-        $this->assertDatabaseHas('posts', ['title' => 'This is my second post!', 'user_id' => $user->id]);
-        $this->assertDatabaseHas('comments', ['body' => 'First!', 'post_id' => '2']);
-        $this->assertDatabaseHas('comments', ['body' => 'Great post!', 'post_id' => '2']);
+        $this->assertDatabaseMissing('articles', ['title' => 'Hello World!', 'user_id' => $user->id]);
+        $this->assertDatabaseHas('articles', ['title' => 'This is my second post!', 'user_id' => $user->id]);
+        $this->assertDatabaseHas('comments', ['body' => 'First!', 'article_id' => '2']);
+        $this->assertDatabaseHas('comments', ['body' => 'Great post!', 'article_id' => '2']);
+    }
+
+    /** @test */
+    public function it_can_set_policy_for_updating_an_attribute()
+    {
+        $this->withExceptionHandling();
+        $user = factory(Models\User::class)->create();
+        $this->actingAs($user);
+
+        $query = '
+            mutation {
+                updateUser(
+                    id: '.$user->id.'
+                    input: { type: "admin" }
+               ) {
+                    id
+                }
+            }
+        ';
+
+        $response = $this->json('GET', '/graphql', ['query' => $query]);
+        $response->assertJsonFragment(['updateUser' => null]);
+        $this->assertDatabaseMissing('users', ['type' => 'admin']);
     }
 }

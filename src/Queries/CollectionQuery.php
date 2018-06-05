@@ -2,17 +2,21 @@
 
 namespace Bakery\Queries;
 
-use Bakery\Exceptions\PaginationMaxCountExceededException;
-use Bakery\Traits\JoinsRelationships;
+use Bakery\Utils\Utils;
+use Bakery\Concerns\ModelAware;
 use GraphQL\Type\Definition\Type;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use Illuminate\Database\Eloquent\Builder;
+use Bakery\Support\Facades\Bakery;
+use Illuminate\Support\Facades\DB;
+use Bakery\Traits\JoinsRelationships;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\Grammars;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Bakery\Exceptions\PaginationMaxCountExceededException;
 
-class CollectionQuery extends EntityQuery
+class CollectionQuery extends Query
 {
+    use ModelAware;
     use JoinsRelationships;
 
     /**
@@ -29,17 +33,7 @@ class CollectionQuery extends EntityQuery
      */
     protected function name(): string
     {
-        return camel_case(str_plural(class_basename($this->class)));
-    }
-
-    /**
-     * Get the basename for the types.
-     *
-     * @return string
-     */
-    protected function typeName(): string
-    {
-        return studly_case(str_singular(class_basename($this->class)));
+        return Utils::plural($this->model->getModel());
     }
 
     /**
@@ -49,7 +43,7 @@ class CollectionQuery extends EntityQuery
      */
     public function type(): Type
     {
-        return Bakery::type($this->typeName() . 'Collection');
+        return Bakery::type($this->schema->typename().'Collection');
     }
 
     /**
@@ -60,14 +54,14 @@ class CollectionQuery extends EntityQuery
     public function args(): array
     {
         $args = [
-            'page' => Bakery::int(),
-            'count' => Bakery::int(),
-            'filter' => Bakery::type($this->typeName() . 'Filter'),
-            'search' => Bakery::type($this->typeName() . 'RootSearch'),
+            'page' => Type::int(),
+            'count' => Type::int(),
+            'filter' => Bakery::type($this->schema->typename().'Filter'),
+            'search' => Bakery::type($this->schema->typename().'RootSearch'),
         ];
 
-        if (!empty($this->model->fields())) {
-            $args['orderBy'] = Bakery::type($this->typeName() . 'OrderBy');
+        if (! empty($this->schema->getFields())) {
+            $args['orderBy'] = Bakery::type($this->schema->typename().'OrderBy');
         }
 
         return $args;
@@ -80,8 +74,9 @@ class CollectionQuery extends EntityQuery
      * @param array $args
      * @param mixed $viewer
      * @return LengthAwarePaginator
+     * @throws PaginationMaxCountExceededException
      */
-    public function resolve($root, array $args = [], $viewer)
+    public function resolve($root, array $args, $viewer)
     {
         $page = array_get($args, 'page', 1);
         $count = array_get($args, 'count', 15);
@@ -92,42 +87,25 @@ class CollectionQuery extends EntityQuery
             throw new PaginationMaxCountExceededException($maxCount);
         }
 
-        $query = $this->model->where(function ($query) use ($viewer, $args) {
-            return $this->scopeQuery($query->authorizedForReading($viewer), $args, $viewer);
-        });
+        $query = $this->scopeQuery(
+            $this->schema->getBakeryQuery($viewer),
+            $args,
+            $viewer
+        );
 
-        if (array_key_exists('filter', $args) && !empty($args['filter'])) {
+        if (array_key_exists('filter', $args) && ! empty($args['filter'])) {
             $query = $this->applyFilters($query, $args['filter']);
         }
 
-        if (array_key_exists('search', $args) && !empty($args['search'])) {
+        if (array_key_exists('search', $args) && ! empty($args['search'])) {
             $query = $this->applySearch($query, $args['search']);
         }
 
-        if (array_key_exists('orderBy', $args) && !empty($args['orderBy'])) {
+        if (array_key_exists('orderBy', $args) && ! empty($args['orderBy'])) {
             $query = $this->applyOrderBy($query, $args['orderBy']);
         }
 
         return $query->paginate($count, ['*'], 'page', $page);
-    }
-
-    /**
-     * CollectionQuery constructor.
-     *
-     * @param string|null $class
-     * @throws \Exception
-     */
-    public function __construct(string $class = null)
-    {
-        if (isset($class)) {
-            $this->class = $class;
-        }
-
-        if (!isset($this->class)) {
-            throw new \Exception('No class defined for the collection query.');
-        }
-
-        $this->model = resolve($this->class);
     }
 
     /**
@@ -166,7 +144,7 @@ class CollectionQuery extends EntityQuery
      * @param Builder $query
      * @param array $args
      * @param mixed $type
-     * @return void
+     * @return Builder
      */
     protected function applyFiltersRecursively(Builder $query, array $args, $type = null)
     {
@@ -174,19 +152,22 @@ class CollectionQuery extends EntityQuery
             if ($key === 'AND' || $key === 'OR') {
                 $query->where(function ($query) use ($value, $key) {
                     foreach ($value as $set) {
-                        if (!empty($set)) {
+                        if (! empty($set)) {
                             $this->applyFiltersRecursively($query, $set ?? [], $key);
                         }
                     }
                 });
             } else {
-                if (in_array($key, array_keys($query->getModel()->relations()))) {
+                $relations = $query->getModel()->getSchema()->relations();
+                if (in_array($key, array_keys($relations))) {
                     $this->applyRelationFilter($query, $key, $value, $type);
                 } else {
                     $this->filter($query, $key, $value, $type);
                 }
             }
         }
+
+        return $query;
     }
 
     /**
@@ -204,7 +185,7 @@ class CollectionQuery extends EntityQuery
         $operator = '>=';
         $type = $type ?: 'and';
 
-        if (!$args) {
+        if (! $args) {
             return $query->doesntHave($relation, $type);
         }
 
@@ -228,49 +209,49 @@ class CollectionQuery extends EntityQuery
 
         $likeOperator = $this->getCaseInsensitiveLikeOperator();
 
-        $table = $query->getModel()->getTable() . '.';
+        $table = $query->getModel()->getTable().'.';
 
         if (ends_with($key, '_not_contains')) {
             $key = str_before($key, '_not_contains');
-            $query->where($key, 'NOT ' . $likeOperator, '%' . $value . '%', $type);
-        } elseif (ends_with($table . $key, '_contains')) {
+            $query->where($key, 'NOT '.$likeOperator, '%'.$value.'%', $type);
+        } elseif (ends_with($table.$key, '_contains')) {
             $key = str_before($key, '_contains');
-            $query->where($table . $key, $likeOperator, '%' . $value . '%', $type);
+            $query->where($table.$key, $likeOperator, '%'.$value.'%', $type);
         } elseif (ends_with($key, '_not_starts_with')) {
             $key = str_before($key, '_not_starts_with');
-            $query->where($table . $key, 'NOT ' . $likeOperator, $value . '%', $type);
+            $query->where($table.$key, 'NOT '.$likeOperator, $value.'%', $type);
         } elseif (ends_with($key, '_starts_with')) {
             $key = str_before($key, '_starts_with');
-            $query->where($table . $key, $likeOperator, $value . '%', $type);
+            $query->where($table.$key, $likeOperator, $value.'%', $type);
         } elseif (ends_with($key, '_not_ends_with')) {
             $key = str_before($key, '_not_ends_with');
-            $query->where($table . $key, 'NOT ' . $likeOperator, '%' . $value, $type);
+            $query->where($table.$key, 'NOT '.$likeOperator, '%'.$value, $type);
         } elseif (ends_with($key, '_ends_with')) {
             $key = str_before($key, '_ends_with');
-            $query->where($table . $key, $likeOperator, '%' . $value, $type);
+            $query->where($table.$key, $likeOperator, '%'.$value, $type);
         } elseif (ends_with($key, '_not')) {
             $key = str_before($key, '_not');
-            $query->where($table . $key, '!=', $value, $type);
+            $query->where($table.$key, '!=', $value, $type);
         } elseif (ends_with($key, '_not_in')) {
             $key = str_before($key, '_not_in');
-            $query->whereNotIn($table . $key, $value, $type);
+            $query->whereNotIn($table.$key, $value, $type);
         } elseif (ends_with($key, '_in')) {
             $key = str_before($key, '_in');
-            $query->whereIn($table . $key, $value, $type);
+            $query->whereIn($table.$key, $value, $type);
         } elseif (ends_with($key, '_lt')) {
             $key = str_before($key, '_lt');
-            $query->where($table . $key, '<', $value, $type);
+            $query->where($table.$key, '<', $value, $type);
         } elseif (ends_with($key, '_lte')) {
             $key = str_before($key, '_lte');
-            $query->where($table . $key, '<=', $value, $type);
+            $query->where($table.$key, '<=', $value, $type);
         } elseif (ends_with($key, '_gt')) {
             $key = str_before($key, '_gt');
-            $query->where($table . $key, '>', $value, $type);
+            $query->where($table.$key, '>', $value, $type);
         } elseif (ends_with($key, '_gte')) {
             $key = str_before($key, '_gte');
-            $query->where($table . $key, '>=', $value, $type);
+            $query->where($table.$key, '>=', $value, $type);
         } else {
-            $query->where($table . $key, '=', $value, $type);
+            $query->where($table.$key, '=', $value, $type);
         }
 
         return $query;
@@ -291,10 +272,10 @@ class CollectionQuery extends EntityQuery
         $qualifiedNeedle = preg_replace('/[*&|:\']+/', ' ', $needle);
 
         foreach ($fields as $key => $value) {
-            if (array_key_exists($key, $this->model->relations())) {
+            if (array_key_exists($key, $this->schema->getRelations())) {
                 $this->applyRelationalSearch($query, $this->model, $key, $needle, $value);
             } else {
-                $this->tsFields[] = $this->model->getTable() . '.' . $key;
+                $this->tsFields[] = $this->model->getTable().'.'.$key;
             }
         }
 
@@ -306,9 +287,10 @@ class CollectionQuery extends EntityQuery
         if ($grammar instanceof Grammars\PostgresGrammar) {
             $dictionary = config('bakery.postgresDictionary');
             $fields = implode(', ', $this->tsFields);
-            $query->whereRaw("to_tsvector('${dictionary}', concat_ws(' ', " . $fields . ")) @@ to_tsquery('${dictionary}', ?)", ["'$qualifiedNeedle':*"]);
+            $query->whereRaw("to_tsvector('${dictionary}', concat_ws(' ', ".$fields.")) @@ to_tsquery('${dictionary}', ?)", ["'$qualifiedNeedle':*"]);
             $query->groupBy($this->model->getQualifiedKeyName());
         }
+
         return $query;
     }
 
@@ -330,7 +312,7 @@ class CollectionQuery extends EntityQuery
             if (array_key_exists($key, $related->relations())) {
                 $this->applyRelationalSearch($query, $related, $key, $needle, $value);
             } else {
-                $this->tsFields[] = $related->getTable() . '.' . $key;
+                $this->tsFields[] = $related->getTable().'.'.$key;
             }
         }
     }
@@ -355,8 +337,16 @@ class CollectionQuery extends EntityQuery
         return $query;
     }
 
-
-    protected function applyRelationalOrderBy(Builder $query, Model $model, string $relation, $args)
+    /**
+     * Apply relational order by.
+     *
+     * @param Builder $query
+     * @param Model $model
+     * @param string $relation
+     * @param array $args
+     * @return void
+     */
+    protected function applyRelationalOrderBy(Builder $query, Model $model, string $relation, array $args)
     {
         $relation = $model->$relation();
         $related = $relation->getRelated();
@@ -375,9 +365,18 @@ class CollectionQuery extends EntityQuery
         }
     }
 
-    protected function orderByRelation(Builder $query, string $table, string $column, string $ordering)
+    /**
+     * Order the query by relation.
+     *
+     * @param Builder $query
+     * @param string $table
+     * @param string $column
+     * @param string $ordering
+     * @return Builder
+     */
+    protected function orderByRelation(Builder $query, string $table, string $column, string $ordering): Builder
     {
-        $query->orderBy($table . '.' . $column, $ordering);
+        return $query->orderBy($table . '.' . $column, $ordering);
     }
 
     /**
