@@ -17,7 +17,7 @@ trait JoinsRelationships
     public function joinRelation(Builder $query, Relations\Relation $relation, string $type = 'inner', $where = false): Builder
     {
         $related = $relation->getRelated();
-        
+
         if ($relation instanceof Relations\BelongsTo) {
             $query->join($related->getTable(), $relation->getQualifiedOwnerKeyName(), '=', $relation->getQualifiedForeignKey(), $type, $where);
         } elseif ($relation instanceof Relations\BelongsToMany) {
