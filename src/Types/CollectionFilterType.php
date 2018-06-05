@@ -2,43 +2,23 @@
 
 namespace Bakery\Types;
 
+use Bakery\Utils\Utils;
+use Bakery\Concerns\ModelAware;
 use GraphQL\Type\Definition\Type;
 use Bakery\Support\Facades\Bakery;
-use Illuminate\Database\Eloquent\Model;
-use GraphQL\Type\Definition\ListOfType;
 
 class CollectionFilterType extends InputType
 {
-    /**
-     * The name of the type.
-     *
-     * @var string
-     */
-    protected $name;
+    use ModelAware;
 
     /**
-     * A reference to the model.
+     * Get the name of the Collection Filter Type.
      *
-     * @var Model
+     * @return string
      */
-    protected $model;
-
-    /**
-     * Define the collection filter type as an input type.
-     *
-     * @var boolean
-     */
-    protected $input = true;
-
-    /**
-     * Construct a new collection filter type.
-     *
-     * @param string $class
-     */
-    public function __construct(string $class)
+    protected function name(): string
     {
-        $this->name = class_basename($class) . 'Filter';
-        $this->model = app($class);
+        return $this->schema->typename().'Filter';
     }
 
     /**
@@ -50,22 +30,19 @@ class CollectionFilterType extends InputType
     {
         $fields = [];
 
-        foreach ($this->model->fields() as $name => $type) {
+        foreach ($this->schema->getFields() as $name => $type) {
             $fields = array_merge($fields, $this->getFilters($name, $type));
         }
 
-        foreach ($this->model->relations() as $relation => $type) {
-            if (is_array($type)) {
-                $type = Type::getNamedType($type['type']);
-            } else {
-                $type = Type::getNamedType($type);
-            }
-            $type = Type::getNamedType($type);
-            $fields[$relation] = Bakery::getType($type->name . 'Filter');
+        foreach ($this->schema->getRelations() as $relation => $field) {
+            $field = Utils::toFieldArray($field);
+            $type = Type::getNamedType($field['type']);
+
+            $fields[$relation] = Bakery::type($type->name.'Filter');
         }
 
-        $fields['AND'] = Bakery::listOf(Bakery::getType($this->name));
-        $fields['OR'] = Bakery::listOf(Bakery::getType($this->name));
+        $fields['AND'] = Bakery::listOf(Bakery::type($this->name));
+        $fields['OR'] = Bakery::listOf(Bakery::type($this->name));
 
         return $fields;
     }
@@ -84,26 +61,27 @@ class CollectionFilterType extends InputType
         } else {
             $type = Type::getNamedType($type);
         }
+
         $fields = [];
 
-        if (!Type::isLeafType($type)) {
+        if (! Type::isLeafType($type)) {
             return $fields;
         }
 
         $fields[$name] = $type;
-        $fields[$name . '_contains'] = $type;
-        $fields[$name . '_not_contains'] = $type;
-        $fields[$name . '_starts_with'] = $type;
-        $fields[$name . '_not_starts_with'] = $type;
-        $fields[$name . '_ends_with'] = $type;
-        $fields[$name . '_not_ends_with'] = $type;
-        $fields[$name . '_not'] = $type;
-        $fields[$name . '_not_in'] = Bakery::listOf($type);
-        $fields[$name . '_in'] = Bakery::listOf($type);
-        $fields[$name . '_lt'] = $type;
-        $fields[$name . '_lte'] = $type;
-        $fields[$name . '_gt'] = $type;
-        $fields[$name . '_gte'] = $type;
+        $fields[$name.'_contains'] = $type;
+        $fields[$name.'_not_contains'] = $type;
+        $fields[$name.'_starts_with'] = $type;
+        $fields[$name.'_not_starts_with'] = $type;
+        $fields[$name.'_ends_with'] = $type;
+        $fields[$name.'_not_ends_with'] = $type;
+        $fields[$name.'_not'] = $type;
+        $fields[$name.'_not_in'] = Bakery::listOf($type);
+        $fields[$name.'_in'] = Bakery::listOf($type);
+        $fields[$name.'_lt'] = $type;
+        $fields[$name.'_lte'] = $type;
+        $fields[$name.'_gt'] = $type;
+        $fields[$name.'_gte'] = $type;
 
         return $fields;
     }

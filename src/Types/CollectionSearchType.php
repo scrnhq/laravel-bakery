@@ -2,36 +2,25 @@
 
 namespace Bakery\Types;
 
-use GraphQL\Type\Definition\StringType;
+use Bakery\Utils\Utils;
+use Bakery\Concerns\ModelAware;
 use GraphQL\Type\Definition\Type;
 use Bakery\Support\Facades\Bakery;
-use Illuminate\Database\Eloquent\Model;
+use GraphQL\Type\Definition\IDType;
+use GraphQL\Type\Definition\StringType;
 
 class CollectionSearchType extends InputType
 {
-    /**
-     * The name of the type.
-     *
-     * @var string
-     */
-    protected $name;
+    use ModelAware;
 
     /**
-     * A reference to the model.
+     * Get the name of the Collection Search Type.
      *
-     * @var Model
+     * @return string
      */
-    protected $model;
-
-    /**
-     * Construct a new collection filter type.
-     *
-     * @param string $class
-     */
-    public function __construct(string $class)
+    protected function name(): string
     {
-        $this->name = class_basename($class) . 'Search';
-        $this->model = app($class);
+        return $this->schema->typename().'Search';
     }
 
     /**
@@ -43,24 +32,18 @@ class CollectionSearchType extends InputType
     {
         $fields = [];
 
-        foreach ($this->model->fields() as $name => $type) {
-            if (is_array($type)) {
-                $type = Type::getNamedType($type['type']);
-            } else {
-                $type = Type::getNamedType($type);
-            }
-            if ($type instanceof StringType) {
+        foreach ($this->schema->getFields() as $name => $field) {
+            $field = Utils::toFieldArray($field);
+            $type = Type::getNamedType($field['type']);
+
+            if ($type instanceof StringType || $type instanceof IDType) {
                 $fields[$name] = Bakery::boolean();
             }
         }
 
-        foreach ($this->model->relations() as $relation => $type) {
-            if (is_array($type)) {
-                $type = Type::getNamedType($type['type']);
-            } else {
-                $type = Type::getNamedType($type);
-            }
-            $fields[$relation] = Bakery::type($type->name . 'Search');
+        foreach ($this->schema->getRelations() as $relation => $field) {
+            $type = Type::getNamedType($field['type']);
+            $fields[$relation] = Bakery::type($type->name.'Search');
         }
 
         return $fields;

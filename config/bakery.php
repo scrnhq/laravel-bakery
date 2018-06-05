@@ -3,10 +3,11 @@
 return [
     /*
      |--------------------------------------------------------------------------
-     | Bakery Models
+     | Bakery models
      |--------------------------------------------------------------------------
      |
-     | Here you can define the models that should be baked by Bakery.
+     | Here you can define your Bakery models.
+     | The classes you define here should extend Bakery\Eloquent\BakeryModel.
      */
     'models' => [],
 

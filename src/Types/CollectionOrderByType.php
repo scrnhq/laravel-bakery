@@ -2,33 +2,20 @@
 
 namespace Bakery\Types;
 
-use Illuminate\Database\Eloquent\Model;
+use Bakery\Concerns\ModelAware;
 
 class CollectionOrderByType extends EnumType
 {
-    /**
-     * The name of the type.
-     *
-     * @var string
-     */
-    protected $name;
+    use ModelAware;
 
     /**
-     * A reference to the model.
+     * Get the name of the Collection Order By Type.
      *
-     * @var Model
+     * @return string
      */
-    protected $model;
-
-    /**
-     * Construct a new collection orderby type.
-     *
-     * @param string $class
-     */
-    public function __construct(string $class)
+    protected function name(): string
     {
-        $this->name = class_basename($class) . 'OrderBy';
-        $this->model = app($class);
+        return $this->schema->typename().'OrderBy';
     }
 
     /**
@@ -40,9 +27,9 @@ class CollectionOrderByType extends EnumType
     {
         $values = [];
 
-        foreach ($this->model->fields() as $name => $type) {
-            $values[] = $name . '_ASC';
-            $values[] = $name . '_DESC';
+        foreach ($this->schema->getFields() as $name => $type) {
+            $values[] = $name.'_ASC';
+            $values[] = $name.'_DESC';
         }
 
         return $values;

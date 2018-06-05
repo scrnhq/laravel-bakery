@@ -2,33 +2,20 @@
 
 namespace Bakery\Types;
 
-use Bakery\Support\Facades\Bakery;
+use Bakery\Concerns\ModelAware;
 
 class EntityLookupType extends InputType
 {
-    /**
-     * The name of the entity lookup type.
-     *
-     * @var string
-     */
-    protected $name;
+    use ModelAware;
 
     /**
-     * The model of the entity lookup type.
+     * Get the name of the Entity Lookup Type.
      *
-     * @var Model
+     * @return string
      */
-    protected $model;
-
-    /**
-     * Construct a new entity lookup type.
-     *
-     * @param string $class
-     */
-    public function __construct(string $class)
+    protected function name(): string
     {
-        $this->name = class_basename($class) . 'LookupType';
-        $this->model = app($class);
+        return $this->schema->typename().'LookupType';
     }
 
     /**
@@ -38,9 +25,6 @@ class EntityLookupType extends InputType
      */
     public function fields(): array
     {
-        return array_merge(
-            [$this->model->getKeyName() => Bakery::ID()],
-            $this->model->lookupFields()
-        );
+        return $this->schema->getLookupFields();
     }
 }

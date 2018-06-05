@@ -1,6 +1,6 @@
 <?php
 
-if (!function_exists('str_before')) {
+if (! function_exists('str_before')) {
     /**
      * Get the portion of a string before a given value.
      *
@@ -14,14 +14,14 @@ if (!function_exists('str_before')) {
     }
 }
 
-if (!function_exists('class_uses_deep')) {
+if (! function_exists('class_uses_deep')) {
     /**
      * Recursively get all the traits a class uses.
      * Credits to:
-     * https://stackoverflow.com/questions/46218000/how-to-check-if-a-class-uses-a-trait-in-php
+     * https://stackoverflow.com/questions/46218000/how-to-check-if-a-class-uses-a-trait-in-php.
      *
      * @param  string   $class
-     * @param  boolean  $autoload
+     * @param  bool  $autoload
      * @return array
      */
     function class_uses_deep($class, $autoload = true)
@@ -33,15 +33,14 @@ if (!function_exists('class_uses_deep')) {
             $traits = array_merge(class_uses($class, $autoload), $traits);
         } while ($class = get_parent_class($class));
 
-
         // Get traits of all parent traits
         $traitsToSearch = $traits;
 
-        while (!empty($traitsToSearch)) {
+        while (! empty($traitsToSearch)) {
             $newTraits = class_uses(array_pop($traitsToSearch), $autoload);
             $traits = array_merge($newTraits, $traits);
             $traitsToSearch = array_merge($newTraits, $traitsToSearch);
-        };
+        }
 
         foreach ($traits as $trait => $same) {
             $traits = array_merge(class_uses($trait, $autoload), $traits);

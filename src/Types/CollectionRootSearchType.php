@@ -2,34 +2,22 @@
 
 namespace Bakery\Types;
 
+use Bakery\Concerns\ModelAware;
+use GraphQL\Type\Definition\Type;
 use Bakery\Support\Facades\Bakery;
-use Illuminate\Database\Eloquent\Model;
 
 class CollectionRootSearchType extends InputType
 {
-    /**
-     * The name of the type.
-     *
-     * @var string
-     */
-    protected $name;
+    use ModelAware;
 
     /**
-     * A reference to the model.
+     * Get the name of the Collection Root Search Type.
      *
-     * @var Model
+     * @return string
      */
-    protected $model;
-
-    /**
-     * Construct a new collection filter type.
-     *
-     * @param string $class
-     */
-    public function __construct(string $class)
+    protected function name(): string
     {
-        $this->name = class_basename($class) . 'RootSearch';
-        $this->model = app($class);
+        return $this->schema->typename().'RootSearch';
     }
 
     /**
@@ -40,8 +28,8 @@ class CollectionRootSearchType extends InputType
     public function fields(): array
     {
         return [
-            'query' => Bakery::nonNull(Bakery::string()),
-            'fields' => Bakery::nonNull(Bakery::type(class_basename($this->model) . 'Search')),
+            'query' => Type::nonNull(Type::string()),
+            'fields' => Type::nonNull(Bakery::type($this->schema->typename().'Search')),
         ];
     }
 }
