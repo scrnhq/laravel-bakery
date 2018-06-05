@@ -295,6 +295,8 @@ class CollectionQuery extends Query
     }
 
     /**
+     * Apply a relational search.
+     *
      * @param Builder $query
      * @param Model $model
      * @param string $relationName
@@ -303,10 +305,8 @@ class CollectionQuery extends Query
      */
     protected function applyRelationalSearch(Builder $query, Model $model, string $relationName, string $needle, array $fields)
     {
-        $relation = $model->$relationName();
-        $related = $relation->getRelated();
-
-        $this->joinRelation($query, $relationName, 'left');
+        $related = $model->$relation()->getRelated();
+        $this->joinRelation($query, $relation, 'left');
 
         foreach ($fields as $key => $value) {
             if (array_key_exists($key, $related->relations())) {
@@ -326,8 +326,9 @@ class CollectionQuery extends Query
      */
     protected function applyOrderBy(Builder $query, array $args)
     {
+        $relations = $this->schema->getRelations();
         foreach ($args as $key => $value) {
-            if (in_array($key, array_keys($query->getModel()->relations()))) {
+            if ($relations->keys()->contains($key)) {
                 $this->applyRelationalOrderBy($query, $this->model, $key, $value);
             } else {
                 $this->orderBy($query, $key, $value);
@@ -348,16 +349,13 @@ class CollectionQuery extends Query
      */
     protected function applyRelationalOrderBy(Builder $query, Model $model, string $relation, array $args)
     {
-        $relation = $model->$relation();
-        $related = $relation->getRelated();
-        $table = $related->getTable();
-        $one = $table . '.' . $related->getKeyName();
-        $two = $relation->getForeignKey();
-    
-        $query->join($table, $one, '=', $two);
+        $related = $model->$relation()->getRelated();
+        $this->joinRelation($query, $relation, 'left');
 
         foreach ($args as $key => $value) {
-            if (in_array($key, array_keys($related->relations()))) {
+            $schema = resolve(Bakery::getModelSchema($related));
+            $relations = $schema->getRelations();
+            if ($relations->keys()->contains($key)) {
                 $this->applyRelationalOrderBy($query, $related, $key, $value);
             } else {
                 $this->orderBy($query, $key, $value);
