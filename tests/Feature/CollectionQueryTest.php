@@ -281,13 +281,13 @@ class CollectionQueryTest extends FeatureTestCase
     /** @test */
     public function it_can_order_by_combination_of_nested_relations()
     {
-        $john = factory(Models\User::class)->create();
-        $jane = factory(Models\User::class)->create();
-        $joe = factory(Models\User::class)->create();
+        $john = factory(Models\User::class)->create(['email' => 'john.doe@example.com']);
+        $jane = factory(Models\User::class)->create(['email' => 'jane.doe@example.com']);
+        $joe = factory(Models\User::class)->create(['email' => 'joe.doe@example.com']);
 
         $articleByJohn = factory(Models\Article::class)->create(['title' => 'Hello world', 'user_id' => $john->id]);
-        $articleByJane = factory(Models\Article::class)->create(['title' => 'Hello mars', 'user_id' => $jane->id]);
-        $articleByJoe = factory(Models\Article::class)->create(['title' => 'Hello venus', 'user_id' => $joe->id]);
+        $articleByJane = factory(Models\Article::class)->create(['title' => 'Hello world', 'user_id' => $jane->id]);
+        $articleByJoe = factory(Models\Article::class)->create(['title' => 'Hello mars', 'user_id' => $joe->id]);
 
         $query = '
             query {
@@ -303,8 +303,8 @@ class CollectionQueryTest extends FeatureTestCase
         $response = $this->json('GET', '/graphql', ['query' => $query]);
         $response->assertStatus(200);
         $result = json_decode($response->getContent())->data->articles;
-        $this->assertEquals($result->items[0]->id, $articleByJane->id);
-        $this->assertEquals($result->items[1]->id, $articleByJoe->id);
+        $this->assertEquals($result->items[0]->id, $articleByJoe->id);
+        $this->assertEquals($result->items[1]->id, $articleByJane->id);
         $this->assertEquals($result->items[2]->id, $articleByJohn->id);
     }
 
