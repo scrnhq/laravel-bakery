@@ -364,20 +364,6 @@ class CollectionQuery extends Query
     }
 
     /**
-     * Order the query by relation.
-     *
-     * @param Builder $query
-     * @param string $table
-     * @param string $column
-     * @param string $ordering
-     * @return Builder
-     */
-    protected function orderByRelation(Builder $query, string $table, string $column, string $ordering): Builder
-    {
-        return $query->orderBy($table.'.'.$column, $ordering);
-    }
-
-    /**
      * Apply the ordening.
      *
      * @param Builder $query
