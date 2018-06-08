@@ -262,7 +262,7 @@ class CollectionQueryTest extends FeatureTestCase
 
         $query = '
             query {
-                articles(orderBy: title_ASC) {
+                articles(orderBy: { title: ASC }) {
                     items {
                         id
                     }
@@ -279,6 +279,47 @@ class CollectionQueryTest extends FeatureTestCase
     }
 
     /** @test */
+    public function it_can_order_by_combination_of_nested_relations()
+    {
+        $john = factory(Models\User::class)->create(['email' => 'john.doe@example.com']);
+        $jane = factory(Models\User::class)->create(['email' => 'jane.doe@example.com']);
+        $joe = factory(Models\User::class)->create(['email' => 'joe.doe@example.com']);
+
+        $johnsPhone = factory(Models\Phone::class)->create(['number' => '1', 'user_id' => $john->id]);
+        $janesPhone = factory(Models\Phone::class)->create(['number' => '2', 'user_id' => $jane->id]);
+        $joesPhone = factory(Models\Phone::class)->create(['number' => '3', 'user_id' => $joe->id]);
+
+        $articleByJohn = factory(Models\Article::class)->create(['title' => 'Hello world', 'user_id' => $john->id]);
+        $articleByJane = factory(Models\Article::class)->create(['title' => 'Hello world', 'user_id' => $jane->id]);
+        $articleByJoe = factory(Models\Article::class)->create(['title' => 'Hello mars', 'user_id' => $joe->id]);
+
+        $query = '
+            query {
+                articles(orderBy: { 
+                    title: ASC,
+                    user: {
+                        email: ASC
+                        phone: {
+                            number: DESC
+                        }
+                    }
+                }) {
+                    items {
+                        id
+                        title
+                    }
+                }
+            }
+        ';
+
+        $response = $this->json('GET', '/graphql', ['query' => $query]);
+        $response->assertStatus(200);
+        $result = json_decode($response->getContent())->data->articles;
+        $this->assertEquals($result->items[0]->id, $articleByJoe->id);
+        $this->assertEquals($result->items[1]->id, $articleByJane->id);
+        $this->assertEquals($result->items[2]->id, $articleByJohn->id);
+    }
+
     public function it_can_filter_by_nested_relations()
     {
         $firstUser = factory(Models\User::class)->create();

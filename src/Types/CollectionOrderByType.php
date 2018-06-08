@@ -3,10 +3,19 @@
 namespace Bakery\Types;
 
 use Bakery\Concerns\ModelAware;
+use GraphQL\Type\Definition\Type;
+use Bakery\Support\Facades\Bakery;
 
-class CollectionOrderByType extends EnumType
+class CollectionOrderByType extends InputType
 {
     use ModelAware;
+
+    /**
+     * Define the collection order type as an input type.
+     *
+     * @var bool
+     */
+    protected $input = true;
 
     /**
      * Get the name of the Collection Order By Type.
@@ -19,19 +28,23 @@ class CollectionOrderByType extends EnumType
     }
 
     /**
-     * Return the fields for the collection filter type.
+     * Return the fields for the collection order by type.
      *
      * @return array
      */
-    public function values(): array
+    public function fields(): array
     {
-        $values = [];
+        $fields = [];
 
-        foreach ($this->schema->getFields() as $name => $type) {
-            $values[] = $name.'_ASC';
-            $values[] = $name.'_DESC';
+        foreach ($this->schema->getFields() as $name => $field) {
+            $fields[$name] = Bakery::getType('Order');
         }
 
-        return $values;
+        foreach ($this->schema->getRelations() as $relation => $field) {
+            $type = Type::getNamedType($field['type']);
+            $fields[$relation] = Bakery::getType($type->name.'OrderBy');
+        }
+
+        return $fields;
     }
 }

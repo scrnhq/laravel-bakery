@@ -295,6 +295,8 @@ class CollectionQuery extends Query
     }
 
     /**
+     * Apply a relational search.
+     *
      * @param Builder $query
      * @param Model $model
      * @param string $relationName
@@ -303,10 +305,9 @@ class CollectionQuery extends Query
      */
     protected function applyRelationalSearch(Builder $query, Model $model, string $relationName, string $needle, array $fields)
     {
-        $relation = $model->$relationName();
+        $relation = $model->$relation();
         $related = $relation->getRelated();
-
-        $this->joinRelation($query, $relationName, 'left');
+        $this->joinRelation($query, $relation, 'left');
 
         foreach ($fields as $key => $value) {
             if (array_key_exists($key, $related->relations())) {
@@ -324,26 +325,57 @@ class CollectionQuery extends Query
      * @param string $orderBy
      * @return Builder
      */
-    protected function applyOrderBy(Builder $query, $orderBy)
+    protected function applyOrderBy(Builder $query, array $args)
     {
-        $orderBy = str_replace_last('_', '@seperator', $orderBy);
-        $column = str_before($orderBy, '@seperator');
-        $ordering = str_after($orderBy, '@seperator');
+        $relations = $this->schema->getRelations();
+        foreach ($args as $key => $value) {
+            if ($relations->keys()->contains($key)) {
+                $this->applyRelationalOrderBy($query, $this->model, $key, $value);
+            } else {
+                $this->orderBy($query, $key, $value);
+            }
+        }
 
-        return $query->orderBy($column, $ordering);
+        return $query;
     }
 
     /**
-     * Flat the nested filter args array.
+     * Apply relational order by.
      *
-     * @param  array $args
-     * @return array
+     * @param Builder $query
+     * @param Model $model
+     * @param string $relation
+     * @param array $args
+     * @return void
      */
-    protected function flatten(array $args)
+    protected function applyRelationalOrderBy(Builder $query, Model $model, string $relation, array $args)
     {
-        return collect($args)->flatMap(function ($values) {
-            return $values;
-        })->toArray();
+        $relation = $model->$relation();
+        $related = $relation->getRelated();
+        $this->joinRelation($query, $relation, 'left');
+
+        foreach ($args as $key => $value) {
+            $schema = resolve(Bakery::getModelSchema($related));
+            $relations = $schema->getRelations();
+            if ($relations->keys()->contains($key)) {
+                $this->applyRelationalOrderBy($query, $related, $key, $value);
+            } else {
+                $this->orderBy($query, $key, $value);
+            }
+        }
+    }
+
+    /**
+     * Apply the ordening.
+     *
+     * @param Builder $query
+     * @param string $column
+     * @param string $ordering
+     * @return Builder
+     */
+    protected function orderBy(Builder $query, string $column, string $ordering)
+    {
+        return $query->orderBy($column, $ordering);
     }
 
     /**
