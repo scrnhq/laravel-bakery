@@ -4,13 +4,13 @@ namespace Bakery\Support;
 
 use Bakery\Types;
 use GraphQL\Type\SchemaConfig;
-use Bakery\Queries\EntityQuery;
 use Bakery\Support\Facades\Bakery;
-use Bakery\Queries\CollectionQuery;
 use Bakery\Mutations\CreateMutation;
 use Bakery\Mutations\DeleteMutation;
 use Bakery\Mutations\UpdateMutation;
+use Bakery\Queries\SingleEntityQuery;
 use GraphQL\Type\Definition\ObjectType;
+use Bakery\Queries\EntityCollectionQuery;
 use GraphQL\Type\Schema as GraphQLSchema;
 
 class Schema
@@ -87,10 +87,10 @@ class Schema
     {
         $queries = [];
         foreach ($this->getModels() as $model) {
-            $entityQuery = new EntityQuery($model);
+            $entityQuery = new SingleEntityQuery($model);
             $queries[$entityQuery->name] = $entityQuery;
 
-            $collectionQuery = new CollectionQuery($model);
+            $collectionQuery = new EntityCollectionQuery($model);
             $queries[$collectionQuery->name] = $collectionQuery;
         }
 
@@ -100,6 +100,7 @@ class Schema
     public function getQueries()
     {
         $queries = [];
+
         foreach ($this->queries as $name => $query) {
             $query = is_object($query) ?: resolve($query);
             $name = is_string($name) ? $name : $query->name;

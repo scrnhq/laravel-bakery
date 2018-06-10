@@ -4,17 +4,22 @@ namespace Bakery\Mutations;
 
 use GraphQL\Type\Definition\Type;
 use Illuminate\Database\Eloquent\Model;
-use Bakery\Exceptions\TooManyResultsException;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class DeleteMutation extends EntityMutation
 {
     /**
-     * The action name used for building the Mutation name.
+     * Get the name of the mutation.
      *
-     * @var string
+     * @return string
      */
-    protected $action = 'delete';
+    protected function name(): string
+    {
+        if (property_exists($this, 'name')) {
+            return $this->name;
+        }
+
+        return 'delete'.$this->schema->typename();
+    }
 
     /**
      * Get the return type of the mutation.
@@ -48,44 +53,11 @@ class DeleteMutation extends EntityMutation
      */
     public function resolve($root, array $args, $viewer): Model
     {
-        $model = $this->getModel($args);
+        $model = $this->findOrFail($root, $args, $viewer);
         $this->authorize('delete', $model);
 
         $model->delete();
 
         return $model;
-    }
-
-    /**
-     * Get the model for the mutation.
-     *
-     * @param array $args
-     * @return Model
-     */
-    protected function getModel(array $args): Model
-    {
-        $primaryKey = $this->model->getKeyName();
-
-        if (array_key_exists($primaryKey, $args)) {
-            return $this->model->findOrFail($args[$primaryKey]);
-        }
-
-        $query = $this->model->query();
-
-        foreach ($args as $key => $value) {
-            $query->where($key, $value);
-        }
-
-        $results = $query->get();
-
-        if ($results->count() < 1) {
-            throw (new ModelNotFoundException)->setModel($this->class);
-        }
-
-        if ($results->count() > 1) {
-            throw (new TooManyResultsException)->setModel($this->class, $results->pluck($this->model->getKeyName()));
-        }
-
-        return $results->first();
     }
 }

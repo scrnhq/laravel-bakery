@@ -7,11 +7,18 @@ use Illuminate\Database\Eloquent\Model;
 class CreateMutation extends EntityMutation
 {
     /**
-     * The action name used for building the Mutation name.
+     * Get the name of the mutation.
      *
-     * @var string
+     * @return string
      */
-    protected $action = 'create';
+    protected function name(): string
+    {
+        if (property_exists($this, 'name')) {
+            return $this->name;
+        }
+
+        return 'create'.$this->schema->typename();
+    }
 
     /**
      * Resolve the mutation.
@@ -24,7 +31,7 @@ class CreateMutation extends EntityMutation
      */
     public function resolve($root, array $args, $viewer): Model
     {
-        $this->authorize($this->action, $this->model);
+        $this->authorize('create', $this->model);
 
         $input = $args['input'];
         $model = $this->model->createWithInput($input);

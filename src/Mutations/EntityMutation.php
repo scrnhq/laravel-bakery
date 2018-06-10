@@ -12,22 +12,21 @@ abstract class EntityMutation extends Mutation
 {
     use ModelAware;
     use AuthorizesRequests;
+    use Concerns\QueriesModel;
 
     /**
-     * The action name used for building the Mutation name.
-     *
-     * @var string
-     */
-    protected $action;
-
-    /**
-     * Get the name of the EntityMutation.
+     * Get the name of the Mutation, if no name is specified fall back
+     * on a name based on the class name.
      *
      * @return string
      */
     protected function name(): string
     {
-        return $this->action.$this->schema->typename();
+        if (property_exists($this, 'name')) {
+            return $this->name;
+        }
+
+        return camel_case(str_before(class_basename($this), 'Mutation'));
     }
 
     /**
