@@ -4,8 +4,6 @@ namespace Bakery\Mutations;
 
 use GraphQL\Type\Definition\Type;
 use Illuminate\Database\Eloquent\Model;
-use Bakery\Exceptions\TooManyResultsException;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class DeleteMutation extends EntityMutation
 {

@@ -2,12 +2,8 @@
 
 namespace Bakery\Queries;
 
-use Bakery\Utils\Utils;
 use Bakery\Concerns\ModelAware;
-use GraphQL\Type\Definition\Type;
-use Bakery\Support\Facades\Bakery;
 use Bakery\Traits\JoinsRelationships;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 
 class EntityQuery extends Query
