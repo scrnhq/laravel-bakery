@@ -7,14 +7,15 @@ use Illuminate\Database\Eloquent\Model;
 
 class UpdateMutation extends EntityMutation
 {
-    use Concerns\QueriesModel;
-
     /**
-     * The action name used for building the Mutation name.
+     * Get the name of the mutation.
      *
-     * @var string
+     * @return string
      */
-    protected $action = 'update';
+    protected function name(): string
+    {
+        return 'update'.$this->schema->typename();
+    }
 
     /**
      * Get the arguments of the mutation.
@@ -41,7 +42,7 @@ class UpdateMutation extends EntityMutation
     public function resolve($root, array $args, $viewer): Model
     {
         $model = $this->findOrFail($root, $args, $viewer);
-        $this->authorize($this->action, $model);
+        $this->authorize('update', $model);
 
         $input = $args['input'];
         $model->updateWithInput($input);

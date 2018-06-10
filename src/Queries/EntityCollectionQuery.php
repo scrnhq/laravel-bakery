@@ -7,18 +7,14 @@ use Bakery\Concerns\ModelAware;
 use GraphQL\Type\Definition\Type;
 use Bakery\Support\Facades\Bakery;
 use Illuminate\Support\Facades\DB;
-use Bakery\Traits\JoinsRelationships;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\Grammars;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Bakery\Exceptions\PaginationMaxCountExceededException;
 
-class CollectionQuery extends Query
+class EntityCollectionQuery extends EntityQuery
 {
-    use ModelAware;
-    use JoinsRelationships;
-
     /**
      * The fields to be fulltext searched on.
      *
@@ -106,20 +102,6 @@ class CollectionQuery extends Query
         }
 
         return $query->paginate($count, ['*'], 'page', $page);
-    }
-
-    /**
-     * Scope the query.
-     * This can be overwritten to make your own collection queries.
-     *
-     * @param Builder $query
-     * @param array $args
-     * @param $viewer
-     * @return Builder
-     */
-    protected function scopeQuery(Builder $query, array $args, $viewer): Builder
-    {
-        return $query;
     }
 
     /**
