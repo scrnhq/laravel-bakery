@@ -118,12 +118,13 @@ trait Introspectable
         $relations = collect($this->getRelations())
             ->filter(function ($field) {
                 $field = Type::getNamedType($field['type']);
-                return !$field instanceof UnionType;
+
+                return ! $field instanceof UnionType;
             })
             ->map(function ($field) {
                 $field = Type::getNamedType($field['type']);
                 $lookupTypeName = $field->name.'LookupType';
-                
+
                 try {
                     Bakery::type($lookupTypeName);
                 } catch (\Exception $e) {

@@ -17,7 +17,7 @@ class UpdateMutation extends EntityMutation
         if (property_exists($this, 'name')) {
             return $this->name;
         }
-        
+
         return 'update'.$this->schema->typename();
     }
 

@@ -3,7 +3,6 @@
 namespace Bakery\Queries;
 
 use Bakery\Utils\Utils;
-use Bakery\Types\PolymorhpicType;
 use GraphQL\Type\Definition\Type;
 use Bakery\Support\Facades\Bakery;
 use GraphQL\Type\Definition\UnionType;
@@ -23,7 +22,7 @@ class SingleEntityQuery extends EntityQuery
         if (property_exists($this, 'name')) {
             return $this->name;
         }
-        
+
         return Utils::single($this->model);
     }
 
@@ -52,7 +51,7 @@ class SingleEntityQuery extends EntityQuery
             if ($fieldType instanceof ListofType) {
                 continue;
             }
-            
+
             if ($fieldType instanceof UnionType) {
                 continue;
             }

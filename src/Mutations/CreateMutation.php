@@ -16,7 +16,7 @@ class CreateMutation extends EntityMutation
         if (property_exists($this, 'name')) {
             return $this->name;
         }
-        
+
         return 'create'.$this->schema->typename();
     }
 
