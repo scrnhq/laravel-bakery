@@ -5,6 +5,7 @@ namespace Bakery\Types;
 use Bakery\Concerns\ModelAware;
 use GraphQL\Type\Definition\Type;
 use Bakery\Support\Facades\Bakery;
+use GraphQL\Type\Definition\UnionType;
 
 class CollectionOrderByType extends InputType
 {
@@ -41,8 +42,13 @@ class CollectionOrderByType extends InputType
         }
 
         foreach ($this->schema->getRelations() as $relation => $field) {
-            $type = Type::getNamedType($field['type']);
-            $fields[$relation] = Bakery::getType($type->name.'OrderBy');
+            $fieldType = Type::getNamedType($field['type']);
+
+            if ($fieldType instanceof UnionType) {
+                continue;
+            }
+
+            $fields[$relation] = Bakery::getType($fieldType->name.'OrderBy');
         }
 
         return $fields;

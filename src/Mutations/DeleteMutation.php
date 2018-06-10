@@ -14,6 +14,10 @@ class DeleteMutation extends EntityMutation
      */
     protected function name(): string
     {
+        if (property_exists($this, 'name')) {
+            return $this->name;
+        }
+
         return 'delete'.$this->schema->typename();
     }
 

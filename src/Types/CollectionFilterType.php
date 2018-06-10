@@ -6,6 +6,7 @@ use Bakery\Utils\Utils;
 use Bakery\Concerns\ModelAware;
 use GraphQL\Type\Definition\Type;
 use Bakery\Support\Facades\Bakery;
+use GraphQL\Type\Definition\UnionType;
 
 class CollectionFilterType extends InputType
 {
@@ -35,10 +36,13 @@ class CollectionFilterType extends InputType
         }
 
         foreach ($this->schema->getRelations() as $relation => $field) {
-            $field = Utils::toFieldArray($field);
-            $type = Type::getNamedType($field['type']);
+            $fieldType = Type::getNamedType($field['type']);
 
-            $fields[$relation] = Bakery::type($type->name.'Filter');
+            if ($fieldType instanceof UnionType) {
+                continue;
+            }
+
+            $fields[$relation] = Bakery::type($fieldType->name.'Filter');
         }
 
         $fields['AND'] = Bakery::listOf(Bakery::type($this->name));

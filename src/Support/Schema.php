@@ -100,6 +100,7 @@ class Schema
     public function getQueries()
     {
         $queries = [];
+
         foreach ($this->queries as $name => $query) {
             $query = is_object($query) ?: resolve($query);
             $name = is_string($name) ? $name : $query->name;

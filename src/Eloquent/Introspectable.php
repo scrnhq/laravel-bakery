@@ -6,6 +6,7 @@ use Bakery\Utils\Utils;
 use GraphQL\Type\Definition\Type;
 use Bakery\Support\Facades\Bakery;
 use Illuminate\Support\Collection;
+use GraphQL\Type\Definition\UnionType;
 use GraphQL\Type\Definition\ListOfType;
 use Illuminate\Database\Eloquent\Model;
 
@@ -114,11 +115,23 @@ trait Introspectable
                 return in_array($key, $this->lookupFields ?? []);
             });
 
-        $relations = collect($this->getRelations())->map(function ($field) {
-            $lookupTypeName = Type::getNamedType($field['type'])->name.'LookupType';
+        $relations = collect($this->getRelations())
+            ->filter(function ($field) {
+                $field = Type::getNamedType($field['type']);
+                return !$field instanceof UnionType;
+            })
+            ->map(function ($field) {
+                $field = Type::getNamedType($field['type']);
+                $lookupTypeName = $field->name.'LookupType';
+                
+                try {
+                    Bakery::type($lookupTypeName);
+                } catch (\Exception $e) {
+                    dd($field);
+                }
 
-            return Bakery::type($lookupTypeName);
-        });
+                return Bakery::type($lookupTypeName);
+            });
 
         return Utils::nullifyFields(
             $fields->merge($relations)->merge($this->getKeyField())

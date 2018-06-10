@@ -28,6 +28,10 @@ class EntityCollectionQuery extends EntityQuery
      */
     protected function name(): string
     {
+        if (property_exists($this, 'name')) {
+            return $this->name;
+        }
+
         return Utils::plural($this->model->getModel());
     }
 

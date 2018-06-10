@@ -7,6 +7,7 @@ use Bakery\Concerns\ModelAware;
 use GraphQL\Type\Definition\Type;
 use Bakery\Support\Facades\Bakery;
 use GraphQL\Type\Definition\IDType;
+use GraphQL\Type\Definition\UnionType;
 use GraphQL\Type\Definition\StringType;
 
 class CollectionSearchType extends InputType
@@ -42,8 +43,13 @@ class CollectionSearchType extends InputType
         }
 
         foreach ($this->schema->getRelations() as $relation => $field) {
-            $type = Type::getNamedType($field['type']);
-            $fields[$relation] = Bakery::type($type->name.'Search');
+            $fieldType = Type::getNamedType($field['type']);
+
+            if ($fieldType instanceof UnionType) {
+                continue;
+            }
+
+            $fields[$relation] = Bakery::type($fieldType->name.'Search');
         }
 
         return $fields;
