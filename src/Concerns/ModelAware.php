@@ -3,7 +3,6 @@
 namespace Bakery\Concerns;
 
 use Bakery\Utils\Utils;
-use Bakery\Eloquent\Mutable;
 use Bakery\Eloquent\Introspectable;
 use Illuminate\Database\Eloquent\Model;
 
