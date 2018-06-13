@@ -9,6 +9,8 @@ An on-the-fly GraphQL Schema generator from Eloquent models for Laravel.
 
 ## Getting started
 
+_Docmentation is still in progress._
+
 ### Installation
 
 Install via composer:
