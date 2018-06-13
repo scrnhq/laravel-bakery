@@ -3,8 +3,11 @@
 namespace Bakery\Support;
 
 use Bakery\Types;
+use Bakery\Utils\Utils;
+use Bakery\Eloquent\Mutable;
 use GraphQL\Type\SchemaConfig;
 use Bakery\Support\Facades\Bakery;
+use Bakery\Eloquent\Introspectable;
 use Bakery\Mutations\CreateMutation;
 use Bakery\Mutations\DeleteMutation;
 use Bakery\Mutations\UpdateMutation;
@@ -35,13 +38,25 @@ class Schema
         return [];
     }
 
-    protected function isReadOnly($model)
+    /**
+     * Check if the schema is read only.
+     *
+     * If the schema (the one with the introspectable trait) has a static
+     * property called read only, we will use that to determine.
+     *
+     * Otherwise we check if the underlying model has the mutable trait.
+     *
+     * @param string $class
+     * @return boolean
+     */
+    protected function isReadOnly($class)
     {
-        if (! property_exists($model, 'readOnly')) {
-            return false;
+        if (property_exists($class, 'readOnly')) {
+            return $class::$readOnly;
         }
 
-        return $model::$readOnly;
+        $model = resolve($class)->getModel();
+        return ! Utils::usesTrait($model, Mutable::class);
     }
 
     protected function getModelTypes()
@@ -157,21 +172,33 @@ class Schema
 
     public function toGraphQLSchema(): GraphQLSchema
     {
+        $this->verifyModels();
         Bakery::addTypes($this->getTypes());
         Bakery::addModelSchemas($this->getModels());
 
         $config = SchemaConfig::create();
 
-        $query = $this->makeObjectType($this->fieldsToArray($this->getQueries()), ['name' => 'Query']);
+        // Build the query
+        $query = $this->makeObjectType(
+            $this->fieldsToArray($this->getQueries()),
+            ['name' => 'Query']
+        );
+
         if (count($query->getFields()) > 0) {
             $config->setQuery($query);
         }
 
-        $mutation = $this->makeObjectType($this->fieldsToArray($this->getMutations()), ['name' => 'Mutation']);
+        // Build the mutation
+        $mutation = $this->makeObjectType(
+            $this->fieldsToArray($this->getMutations()),
+            ['name' => 'Mutation']
+        );
+
         if (count($mutation->getFields()) > 0) {
             $config->setMutation($mutation);
         }
 
+        // Set the type loader
         $config->setTypeLoader(function ($name) use ($query, $mutation) {
             if ($name === $query->name) {
                 return $query;
@@ -184,6 +211,21 @@ class Schema
         });
 
         return new GraphQLSchema($config);
+    }
+
+    /**
+     * Verify if the models correctly have the introspectable trait.
+     *
+     * @return void
+     */
+    protected function verifyModels()
+    {
+        foreach ($this->getModels() as $model) {
+            Utils::invariant(
+                Utils::usesTrait($model, Introspectable::class),
+                $model.' does not have the '.Introspectable::class.' trait'
+            );
+        }
     }
 
     protected function makeObjectType($type, $options = []): ObjectType

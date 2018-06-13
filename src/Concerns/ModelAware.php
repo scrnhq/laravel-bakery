@@ -54,10 +54,5 @@ trait ModelAware
         );
 
         $this->model = $this->schema->getModel();
-
-        Utils::invariant(
-            Utils::usesTrait($this->model, Mutable::class),
-            class_basename($this->model).' does not use the '.Mutable::class.' trait.'
-        );
     }
 }
