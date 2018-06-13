@@ -47,7 +47,7 @@ class Schema
      * Otherwise we check if the underlying model has the mutable trait.
      *
      * @param string $class
-     * @return boolean
+     * @return bool
      */
     protected function isReadOnly($class)
     {
@@ -56,6 +56,7 @@ class Schema
         }
 
         $model = resolve($class)->getModel();
+
         return ! Utils::usesTrait($model, Mutable::class);
     }
 
