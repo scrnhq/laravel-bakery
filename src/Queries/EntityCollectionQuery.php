@@ -254,10 +254,11 @@ class EntityCollectionQuery extends EntityQuery
         $needle = $search['query'];
         $fields = $search['fields'];
 
+        $relations = $this->schema->getRelations();
         $qualifiedNeedle = preg_replace('/[*&|:\']+/', ' ', $needle);
 
         foreach ($fields as $key => $value) {
-            if (array_key_exists($key, $this->schema->getRelations())) {
+            if ($relations->keys()->contains($key)) {
                 $this->applyRelationalSearch($query, $this->model, $key, $needle, $value);
             } else {
                 $this->tsFields[] = $this->model->getTable().'.'.$key;
@@ -288,14 +289,16 @@ class EntityCollectionQuery extends EntityQuery
      * @param string $needle
      * @param array $fields
      */
-    protected function applyRelationalSearch(Builder $query, Model $model, string $relationName, string $needle, array $fields)
+    protected function applyRelationalSearch(Builder $query, Model $model, string $relation, string $needle, array $fields)
     {
         $relation = $model->$relation();
         $related = $relation->getRelated();
         $this->joinRelation($query, $relation, 'left');
 
         foreach ($fields as $key => $value) {
-            if (array_key_exists($key, $related->relations())) {
+            $schema = resolve(Bakery::getModelSchema($related));
+            $relations = $schema->getRelations();
+            if ($relations->keys()->contains($key)) {
                 $this->applyRelationalSearch($query, $related, $key, $needle, $value);
             } else {
                 $this->tsFields[] = $related->getTable().'.'.$key;
