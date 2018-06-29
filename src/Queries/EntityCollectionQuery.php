@@ -143,8 +143,8 @@ class EntityCollectionQuery extends EntityQuery
                     }
                 });
             } else {
-                $relations = $query->getModel()->getSchema()->relations();
-                if (in_array($key, array_keys($relations))) {
+                $schema = resolve(Bakery::getModelSchema($query->getModel()));
+                if ($schema->getRelations()->has($key)) {
                     $this->applyRelationFilter($query, $key, $value, $type);
                 } else {
                     $this->filter($query, $key, $value, $type);
