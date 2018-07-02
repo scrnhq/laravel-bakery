@@ -43,7 +43,11 @@ class EntityType extends BaseType
             if (array_key_exists('resolve', $field)) {
                 return $field['resolve']($source, $args, $viewer);
             } else {
-                return $source->getAttribute($key);
+                if (is_array($source) || $source instanceof \ArrayAccess) {
+                    return $source[$key] ?? null;
+                } else {
+                    return $source->{$key};
+                }
             }
         };
     }
