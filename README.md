@@ -64,7 +64,6 @@ Next, add the `Introspectable` trait to that model.
 
 namespace App;
 
-use Bakery\Eloquent\Mutable;
 use Bakery\Eloquent\Introspectable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -95,7 +94,7 @@ class User extends Authenticatable
 ```
 The `Introspectable` trait gives Bakery the power to introspect your model and query it's collection or individual models.
 
-
+#### Queries
 
 To test this out, open up your Laravel application and go to `/graphiql`. Here you will see an interactive playground to execute GraphQL queries and mutations. Now execute the following query (assuming you have made your User model introspectable):
 
@@ -104,7 +103,6 @@ query {
     users {
         items {
             id
-            email
         }
     }
 }
@@ -116,9 +114,49 @@ If everything is set up properly you will get a collection of users in your data
 query {
     user(id: "1") {
         id
-        email
     }
 }
 ```
 
 Just like Laravel, Bakery follows certain naming conventions. It uses Laravel's pluralization library to transform your model name in to queries so you can fetch an individual user by _user_ and a collection of users by _users_.
+
+#### Fields
+
+One of the differences between GraphQL and Eloquent is that GraphQL is a little bit stricter when it comes to defining its schemas than Laravel is to defining its models. To create the types and queries you need to tell us a little bit about which attributes on your model you want to expose! These attributes are called `fields` in GraphQL and you can define them by that name on your model like so:
+
+```php
+<?php
+
+namespace App;
+
++ use GraphQL\Type\Definition\Type;
+use Bakery\Eloquent\Introspectable;
+use Illuminate\Notifications\Notifiable;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+
+class User extends Authenticatable
+{
+    
++    public function fields()
++    {
++        return [
++            'email' => Type::string();
++        ]
++    }
+    
+}
+```
+
+This tells Bakery that there is an email field on the model with the type string. [Here you can see a full overview and documentation of the underlying GraphQL type system](http://webonyx.github.io/graphql-php/type-system/).
+
+Now you are able to query email addresses from your query, like so:
+
+```gql
+query {
+    user(id: "1") {
+        id
+        email
+    }
+}
+```
+
