@@ -59,7 +59,7 @@ return [
 
 Next, add the `Introspectable` trait to that model.
 
-```php
+```diff
 <?php
 
 namespace App;
@@ -124,7 +124,7 @@ Just like Laravel, Bakery follows certain naming conventions. It uses Laravel's 
 
 One of the differences between GraphQL and Eloquent is that GraphQL is a little bit stricter when it comes to defining its schemas than Laravel is to defining its models. To create the types and queries you need to tell us a little bit about which attributes on your model you want to expose! These attributes are called `fields` in GraphQL and you can define them by that name on your model like so:
 
-```php
+```diff
 <?php
 
 namespace App;
