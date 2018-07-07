@@ -39,7 +39,7 @@ Once this has finished, you will need to add the service provider to the provide
 Bakery\BakeryServiceProvider::class,
 ```
 
-### Setting it up
+### Quickstart
 
 First publish the configuration file of Bakery by running the following command in your terminal:
 
@@ -57,7 +57,7 @@ return [
 ];
 ```
 
-The models you define here should have two traits:
+Next, add the `Introspectable` trait to that model.
 
 ```php
 <?php
@@ -71,9 +71,8 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class User extends Authenticatable
 {
-+   use Mutable;
-+   use Notifiable;
-    use Introspectable;
+    use Notifiable;
++   use Introspectable;
 
     /**
      * The attributes that are mass assignable.
@@ -94,3 +93,32 @@ class User extends Authenticatable
     ];
 }
 ```
+The `Introspectable` trait gives Bakery the power to introspect your model and query it's collection or individual models.
+
+
+
+To test this out, open up your Laravel application and go to `/graphiql`. Here you will see an interactive playground to execute GraphQL queries and mutations. Now execute the following query (assuming you have made your User model introspectable):
+
+```gql
+query {
+    users {
+        items {
+            id
+            email
+        }
+    }
+}
+```
+
+If everything is set up properly you will get a collection of users in your database! Now to fetch an individual user you can execute the following query:
+
+```gql
+query {
+    user(id: "1") {
+        id
+        email
+    }
+}
+```
+
+Just like Laravel, Bakery follows certain naming conventions. It uses Laravel's pluralization library to transform your model name in to queries so you can fetch an individual user by _user_ and a collection of users by _users_.
