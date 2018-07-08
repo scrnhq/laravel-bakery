@@ -52,7 +52,7 @@ Now open up `config/bakery.php` and you will see a `model` property that contain
 ```php
 return [
     'models' => [
-        App\Models\User::class,
+        App\User::class,
     ],
 ];
 ```
@@ -160,3 +160,76 @@ query {
 }
 ```
 
+### Relations
+
+Bakery is also capable of returning data of other models related to the model you are querying. Let's say a user has articles, so you have defined a relationship on the model like so:
+
+`User.php`
+```php
+public function articles()
+{
+    return $this->hasMany(Article::class);
+}
+```
+
+`Article.php`
+
+```php
+<?php
+    
+namespace App;
+
+use GraphQL\Type\Definition\Type;
+use Bakery\Eloquent\Introspectable;
+use Illuminate\Database\Eloquent\Model;
+
+class Article extends Model
+{
+    
+	public function fields()
+	{
+		return [
+			'title' => Type::string();
+		]
+	} 
+}
+```
+
+Now we need to tell Bakery about this new article model by updating the config.
+
+`config/bakery.php`
+
+```diff
+return [
+    'models' => [
+        App\User::class,
++		App\Article::class,
+    ],
+];
+```
+
+Once you have set up your relationship in Eloquent, you just need to define it so that Bakery knows about it by setting the relations field on your user model:
+
+`User.php`
+
+```php
+public function relations()
+{
+    return [
+        'articles' => Type::listOf(Bakery::type('Article'))
+    ]
+}
+```
+
+Now you can easily fetch all the articles from a user in a single query like so:
+
+```gql
+query {
+    user(id: "1") {
+        id
+        articles {
+            id
+        }
+    }
+}
+```
