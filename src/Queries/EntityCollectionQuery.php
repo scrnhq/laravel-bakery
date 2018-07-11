@@ -320,7 +320,7 @@ class EntityCollectionQuery extends EntityQuery
             if ($relations->keys()->contains($key)) {
                 $this->applyRelationalOrderBy($query, $this->model, $key, $value);
             } else {
-                $this->orderBy($query, $key, $value);
+                $this->orderBy($query, $query->getModel()->getTable().'.'.$key, $value);
             }
         }
 
@@ -348,7 +348,7 @@ class EntityCollectionQuery extends EntityQuery
             if ($relations->keys()->contains($key)) {
                 $this->applyRelationalOrderBy($query, $related, $key, $value);
             } else {
-                $this->orderBy($query, $key, $value);
+                $this->orderBy($query, $related->getTable().'.'.$key, $value);
             }
         }
     }
