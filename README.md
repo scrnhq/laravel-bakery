@@ -1,9 +1,10 @@
 ![Bakery](artwork.png)
 
-[![Build Status](https://img.shields.io/travis/scrnhq/laravel-bakery/master.svg)](https://travis-ci.org/scrnhq/laravel-bakery)
-[![Latest Stable Version](https://img.shields.io/packagist/v/scrnhq/laravel-bakery.svg)](https://packagist.org/packages/scrnhq/laravel-bakery)
-[![Total Downloads](https://img.shields.io/packagist/dt/scrnhq/laravel-bakery.svg)](https://packagist.org/packages/scrnhq/laravel-bakery)
-[![codecov](https://img.shields.io/codecov/c/github/scrnhq/laravel-bakery.svg)](https://codecov.io/gh/scrnhq/laravel-bakery)
+[![Build Status](https://travis-ci.org/scrnhq/laravel-bakery.svg?branch=master)](https://travis-ci.org/scrnhq/laravel-bakery)
+[![Latest Stable Version](https://poser.pugx.org/scrnhq/laravel-bakery/version)](https://packagist.org/packages/scrnhq/laravel-bakery)
+[![Total Downloads](https://poser.pugx.org/scrnhq/laravel-bakery/downloads)](https://packagist.org/packages/scrnhq/laravel-bakery)
+[![codecov](https://codecov.io/gh/scrnhq/laravel-bakery/branch/master/graph/badge.svg)](https://codecov.io/gh/scrnhq/laravel-bakery)
+[![StyleCI](https://github.styleci.io/repos/109427894/shield?style=flat)](https://github.styleci.io/repos/109427894)
 [![Maintainability](https://api.codeclimate.com/v1/badges/de462571125eb6bf7af2/maintainability)](https://codeclimate.com/github/scrnhq/laravel-bakery/maintainability)
 
 An on-the-fly GraphQL Schema generator from Eloquent models for Laravel.
