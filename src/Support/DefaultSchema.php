@@ -6,6 +6,6 @@ class DefaultSchema extends Schema
 {
     public function models()
     {
-        return config('bakery.types', []);
+        return config('bakery.models', []);
     }
 }
