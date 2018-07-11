@@ -2,6 +2,7 @@
 
 namespace Bakery\Tests;
 
+use Bakery\Support\DefaultSchema;
 use Bakery\Support\Schema;
 use Bakery\Tests\Stubs\DummyType;
 use Bakery\Tests\Stubs\DummyClass;
@@ -54,11 +55,24 @@ class TestSchema extends Schema
 
 class SchemaTest extends FeatureTestCase
 {
-    protected function setUp()
+    /** @test */
+    public function it_throws_exception_when_there_are_no_models_defined_with_default_schema()
     {
-        parent::setUp();
+        app()['config']->set('bakery.models', []);
 
-        app()['config']->set('bakery.types', []);
+        $this->expectException(InvariantViolation::class);
+
+        $schema = new DefaultSchema();
+        $schema->toGraphQLSchema();
+    }
+
+    /** @test */
+    public function it_throws_exception_when_there_are_no_query_fields_defined_in_a_schema()
+    {
+        $this->expectException(InvariantViolation::class);
+
+        $schema = new Schema();
+        $schema->toGraphQLSchema();
     }
 
     /** @test */

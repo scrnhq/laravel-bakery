@@ -185,6 +185,8 @@ class Schema
             ['name' => 'Query']
         );
 
+        Utils::invariant(count($query->getFields()) > 0, 'There must be query fields defined in the schema.');
+
         if (count($query->getFields()) > 0) {
             $config->setQuery($query);
         }
