@@ -2,8 +2,8 @@
 
 namespace Bakery\Tests;
 
-use Bakery\Support\DefaultSchema;
 use Bakery\Support\Schema;
+use Bakery\Support\DefaultSchema;
 use Bakery\Tests\Stubs\DummyType;
 use Bakery\Tests\Stubs\DummyClass;
 use Bakery\Tests\Stubs\DummyModel;
