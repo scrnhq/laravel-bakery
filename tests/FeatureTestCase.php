@@ -42,7 +42,7 @@ class FeatureTestCase extends OrchestraTestCase
         $this->withFactories(__DIR__.'/factories');
 
         // Set up default schema.
-        app()['config']->set('bakery.types', [
+        app()['config']->set('bakery.models', [
             Stubs\BakeryModels\UserBakery::class,
             Stubs\BakeryModels\ArticleBakery::class,
             Stubs\BakeryModels\PhoneBakery::class,
