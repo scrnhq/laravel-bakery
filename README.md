@@ -141,7 +141,7 @@ class User extends Authenticatable
 +    {
 +        return [
 +            'email' => Type::string();
-+        ]
++        ];
 +    }
     
 }
@@ -186,12 +186,12 @@ use Illuminate\Database\Eloquent\Model;
 class Article extends Model
 {
     
-	public function fields()
-	{
-		return [
-			'title' => Type::string();
-		]
-	} 
+    public function fields()
+    {
+        return [
+            'title' => Type::string();
+        ];
+    } 
 }
 ```
 
@@ -203,7 +203,7 @@ Now we need to tell Bakery about this new article model by updating the config.
 return [
     'models' => [
         App\User::class,
-+		App\Article::class,
++       App\Article::class,
     ],
 ];
 ```
@@ -217,7 +217,7 @@ public function relations()
 {
     return [
         'articles' => Type::listOf(Bakery::type('Article'))
-    ]
+    ];
 }
 ```
 
@@ -233,3 +233,4 @@ query {
     }
 }
 ```
+
