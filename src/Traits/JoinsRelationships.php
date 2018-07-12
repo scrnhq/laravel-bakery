@@ -9,7 +9,7 @@ trait JoinsRelationships
 {
     /**
      * @param Builder $query
-     * @param string $relationName
+     * @param \Illuminate\Database\Eloquent\Relations\Relation $relation
      * @param string $type
      * @param bool $where
      * @return Builder
@@ -28,7 +28,7 @@ trait JoinsRelationships
 
             $query->join($relation->getTable(), $relation->getQualifiedParentKeyName(), '=', $foreignPivotKeyName, $type, $where);
             $query->join($related->getTable(), $relatedPivotKeyName, '=', $related->getQualifiedKeyName(), $type, $where);
-        } elseif ($relation instanceof Relations\HasMany) {
+        } elseif ($relation instanceof Relations\HasOneOrMany) {
             $query->join($related->getTable(), $relation->getQualifiedForeignKeyName(), '=', $relation->getQualifiedParentKeyName(), $type, $where);
         }
 
