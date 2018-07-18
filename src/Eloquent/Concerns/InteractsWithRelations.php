@@ -79,7 +79,8 @@ trait InteractsWithRelations
     protected function connectBelongsToRelation(Relations\BelongsTo $relation, $id)
     {
         if (! $id) {
-            return $relation->associate(null);
+            $relation->associate(null);
+            return;
         }
 
         $model = $relation->getRelated()->findOrFail($id);
