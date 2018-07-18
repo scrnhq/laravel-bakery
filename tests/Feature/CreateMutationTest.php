@@ -126,6 +126,30 @@ class CreateMutationTest extends FeatureTestCase
     }
 
     /** @test */
+    public function it_lets_you_set_a_has_one_relationship_to_null()
+    {
+        $user = factory(Models\User::class)->create();
+        $this->actingAs($user);
+
+        $query = '
+            mutation {
+                createUser(input: {
+                    email: "jane.doe@example.com",
+                    name: "Jane Doe",
+                    password: "secret",
+                    phoneId: null, 
+                }) {
+                    id
+                }
+            }
+        ';
+
+        $response = $this->json('GET', '/graphql', ['query' => $query]);
+        $response->assertJsonFragment(['id']);
+        $this->assertDatabaseHas('users', ['email' => 'jane.doe@example.com']);
+    }
+
+    /** @test */
     public function it_lets_you_create_a_belongs_to_relationship()
     {
         $user = factory(Models\User::class)->create();
@@ -269,5 +293,30 @@ class CreateMutationTest extends FeatureTestCase
         $this->assertDatabaseHas('articles', ['title' => 'Hello World!', 'user_id' => '2']);
         $this->assertDatabaseHas('comments', ['body' => 'First!', 'article_id' => '1']);
         $this->assertDatabaseHas('comments', ['body' => 'Great post!', 'article_id' => '1']);
+    }
+
+    /** @test */
+    public function it_lets_you_reset_a_belongs_to_relationship()
+    {
+        $user = factory(Models\User::class)->create();
+        $this->actingAs($user);
+
+        $query = '
+            mutation {
+                createArticle(input: {
+                    userId: "'.$user->id.'",
+                    categoryId: null,
+                    title: "Hello World!"
+                    slug: "hello-world" 
+                    content: "Lorem ipsum"
+                }) {
+                    id
+                }
+            }
+        ';
+
+        $response = $this->json('GET', '/graphql', ['query' => $query]);
+        $response->assertJsonFragment(['id']);
+        $this->assertDatabaseHas('articles', ['title' => 'Hello World!', 'category_id' => null]);
     }
 }

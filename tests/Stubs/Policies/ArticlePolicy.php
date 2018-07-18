@@ -29,6 +29,11 @@ class ArticlePolicy
         return true;
     }
 
+    public function setCategory(): bool
+    {
+        return true;
+    }
+
     public function createComments(): bool
     {
         return true;

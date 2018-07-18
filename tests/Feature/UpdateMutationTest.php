@@ -163,4 +163,25 @@ class UpdateMutationTest extends FeatureTestCase
         $response->assertJsonFragment(['updateUser' => null]);
         $this->assertDatabaseMissing('users', ['type' => 'admin']);
     }
+
+    /** @test */
+    public function it_lets_you_reset_a_has_one_relationship()
+    {
+        $phone = factory(Models\Phone::class)->create();
+        $this->actingAs($phone->user);
+
+        $query = '
+            mutation {
+                updateUser(id: "'.$phone->user->id.'", input: {
+                    phoneId: null, 
+                }) {
+                    id
+                }
+            }
+        ';
+
+        $response = $this->json('GET', '/graphql', ['query' => $query]);
+        $response->assertJsonFragment(['id']);
+        $this->assertDatabaseHas('phones', ['user_id' => null]);
+    }
 }
