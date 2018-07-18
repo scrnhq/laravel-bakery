@@ -78,7 +78,7 @@ trait InteractsWithRelations
      */
     protected function connectBelongsToRelation(Relations\BelongsTo $relation, $id)
     {
-        if (!$id) {
+        if (! $id) {
             return $relation->associate(null);
         }
 
@@ -108,11 +108,12 @@ trait InteractsWithRelations
      */
     protected function connectHasOneRelation(Relations\HasOne $relation, $id)
     {
-        if (!$id) {
+        if (! $id) {
             if ($related = $relation->getResults()) {
                 $related->setAttribute($relation->getForeignKeyName(), null);
                 $related->save();
             }
+
             return;
         }
 

@@ -4,7 +4,6 @@ namespace Bakery\Tests\Stubs\BakeryModels;
 
 use Bakery\Tests\Models\Category;
 use GraphQL\Type\Definition\Type;
-use Bakery\Support\Facades\Bakery;
 use Bakery\Eloquent\Introspectable;
 
 class CategoryBakery
