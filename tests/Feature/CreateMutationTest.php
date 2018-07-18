@@ -317,9 +317,6 @@ class CreateMutationTest extends FeatureTestCase
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
         $response->assertJsonFragment(['id']);
-        // $this->assertDatabaseHas('users', ['email' => 'jane.doe@example.com', 'name' => 'Jane Doe']);
-        // $this->assertDatabaseHas('articles', ['title' => 'Hello World!', 'user_id' => '2']);
-        // $this->assertDatabaseHas('comments', ['body' => 'First!', 'article_id' => '1']);
-        // $this->assertDatabaseHas('comments', ['body' => 'Great post!', 'article_id' => '1']);
+        $this->assertDatabaseHas('articles', ['title' => 'Hello World!', 'category_id' => null]);
     }
 }
