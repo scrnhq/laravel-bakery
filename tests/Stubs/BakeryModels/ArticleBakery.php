@@ -26,6 +26,7 @@ class ArticleBakery
     {
         return [
             'user' => Bakery::type('User'),
+            'category' => Bakery::type('Category'),
             'comments' => Bakery::nonNull(Bakery::listOf(Bakery::type('Comment'))),
         ];
     }

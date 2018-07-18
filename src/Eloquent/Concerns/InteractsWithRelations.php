@@ -78,6 +78,10 @@ trait InteractsWithRelations
      */
     protected function connectBelongsToRelation(Relations\BelongsTo $relation, $id)
     {
+        if (!$id) {
+            return $relation->associate(null);
+        }
+
         $model = $relation->getRelated()->findOrFail($id);
         $relation->associate($model);
     }
@@ -104,9 +108,16 @@ trait InteractsWithRelations
      */
     protected function connectHasOneRelation(Relations\HasOne $relation, $id)
     {
-        $model = $relation->getRelated()->findOrFail($id);
+        if (!$id) {
+            if ($related = $relation->getResults()) {
+                $related->setAttribute($relation->getForeignKeyName(), null);
+                $related->save();
+            }
+            return;
+        }
 
-        $this->transactionQueue[] = function () use ($model, $relation) {
+        $this->transactionQueue[] = function () use ($id, $relation) {
+            $model = $relation->getRelated()->findOrFail($id);
             $model->setAttribute($relation->getForeignKeyName(), $relation->getParentKey());
             $model->save();
         };

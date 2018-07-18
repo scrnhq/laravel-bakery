@@ -17,8 +17,13 @@ class CreateArticlesTable extends Migration
             $table->string('slug');
             $table->text('content');
             $table->timestamp('published_at')->nullable();
+            $table->unsignedInteger('category_id')->nullable();
             $table->unsignedInteger('user_id');
             $table->timestamps();
+
+            $table->foreign('category_id')
+                ->references('id')->on('categories')
+                ->onDelete('set null');
 
             $table->foreign('user_id')
                 ->references('id')->on('users')
