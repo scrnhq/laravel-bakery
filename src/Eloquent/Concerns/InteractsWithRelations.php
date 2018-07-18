@@ -80,6 +80,7 @@ trait InteractsWithRelations
     {
         if (! $id) {
             $relation->associate(null);
+
             return;
         }
 
