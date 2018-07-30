@@ -70,7 +70,7 @@ class CreateMutationTest extends FeatureTestCase
         ';
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $response->assertJsonFragment(['id']);
+        $response->assertJsonKey('id');
         $this->assertDatabaseHas('articles', ['title' => 'Hello world!']);
     }
 
@@ -94,7 +94,7 @@ class CreateMutationTest extends FeatureTestCase
         ';
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $response->assertJsonFragment(['id']);
+        $response->assertJsonKey('id');
         $this->assertDatabaseHas('users', ['email' => 'jane.doe@example.com']);
         $this->assertDatabaseHas('phones', ['number' => '+31612345678', 'user_id' => '2']);
     }
@@ -120,7 +120,7 @@ class CreateMutationTest extends FeatureTestCase
         ';
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $response->assertJsonFragment(['id']);
+        $response->assertJsonKey('id');
         $this->assertDatabaseHas('users', ['email' => 'jane.doe@example.com']);
         $this->assertDatabaseHas('phones', ['user_id' => '2']);
     }
@@ -145,7 +145,7 @@ class CreateMutationTest extends FeatureTestCase
         ';
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $response->assertJsonFragment(['id']);
+        $response->assertJsonKey('id');
         $this->assertDatabaseHas('users', ['email' => 'jane.doe@example.com']);
     }
 
@@ -172,7 +172,7 @@ class CreateMutationTest extends FeatureTestCase
         ';
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $response->assertJsonFragment(['id']);
+        $response->assertJsonKey('id');
         $this->assertDatabaseHas('phones', ['number' => '+31612345678', 'user_id' => '2']);
         $this->assertDatabaseHas('users', ['name' => 'Jane Doe']);
     }
@@ -199,7 +199,7 @@ class CreateMutationTest extends FeatureTestCase
         ';
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $response->assertJsonFragment(['id']);
+        $response->assertJsonKey('id');
         $this->assertDatabaseHas('comments', ['id' => '1', 'article_id' => $article->id, 'user_id' => $user->id]);
     }
 
@@ -225,7 +225,7 @@ class CreateMutationTest extends FeatureTestCase
         ';
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $response->assertJsonFragment(['id']);
+        $response->assertJsonKey('id');
         $this->assertDatabaseHas('role_user', ['role_id' => '1', 'user_id' => '2']);
         $this->assertDatabaseHas('role_user', ['role_id' => '2', 'user_id' => '2']);
     }
@@ -254,7 +254,7 @@ class CreateMutationTest extends FeatureTestCase
         ';
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $response->assertJsonFragment(['id']);
+        $response->assertJsonKey('id');
         $this->assertDatabaseHas('articles', ['title' => 'Hello World', 'user_id' => '1']);
         $this->assertDatabaseHas('comments', ['body' => 'First!', 'article_id' => '1']);
         $this->assertDatabaseHas('comments', ['body' => 'Great post!', 'article_id' => '1']);
@@ -288,7 +288,7 @@ class CreateMutationTest extends FeatureTestCase
         ';
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $response->assertJsonFragment(['id']);
+        $response->assertJsonKey('id');
         $this->assertDatabaseHas('users', ['email' => 'jane.doe@example.com', 'name' => 'Jane Doe']);
         $this->assertDatabaseHas('articles', ['title' => 'Hello World!', 'user_id' => '2']);
         $this->assertDatabaseHas('comments', ['body' => 'First!', 'article_id' => '1']);
@@ -316,7 +316,7 @@ class CreateMutationTest extends FeatureTestCase
         ';
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $response->assertJsonFragment(['id']);
+        $response->assertJsonKey('id');
         $this->assertDatabaseHas('articles', ['title' => 'Hello World!', 'category_id' => null]);
     }
 }
