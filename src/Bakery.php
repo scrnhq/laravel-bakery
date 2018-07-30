@@ -115,7 +115,7 @@ class Bakery
     }
 
     /**
-     * Return if the model has a model schema in Bakery. 
+     * Return if the model has a model schema in Bakery.
      * This can either be an instance or a class name.
      *
      * @param mixed $model

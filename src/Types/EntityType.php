@@ -85,7 +85,7 @@ class EntityType extends BaseType
 
     /**
      * Get the fields of the entity type.
-     * 
+     *
      * @return array
      */
     public function fields(): array
@@ -105,7 +105,7 @@ class EntityType extends BaseType
 
     /**
      * Get the relation fields of the entity.
-     * 
+     *
      * @return array
      */
     protected function getRelationFields(): array
@@ -134,6 +134,7 @@ class EntityType extends BaseType
                     'type' => Type::nonNull(Type::int()),
                     'resolve' => function ($model) use ($key) {
                         $relation = $model->{$key};
+
                         return $relation->count();
                     },
                 ];
@@ -142,6 +143,7 @@ class EntityType extends BaseType
                     'type' => $field instanceof NonNull ? Type::nonNull(Type::ID()) : Type::ID(),
                     'resolve' => function ($model) use ($key) {
                         $relation = $model->{$key};
+
                         return $relation ? $relation->getKey() : null;
                     },
                 ];
@@ -159,13 +161,13 @@ class EntityType extends BaseType
                             'type' => Bakery::type($definition->typename()),
                             'resolve' => function ($model) use ($key) {
                                 return $model->pivot;
-                            }
+                            },
                         ],
                     ];
                     $type->config['fields'] = function () use ($closure, $pivotField) {
                         return array_merge($pivotField, $closure());
                     };
-                    $fields[$key] = Utils::swapWrappedType($field, $type); 
+                    $fields[$key] = Utils::swapWrappedType($field, $type);
                 } else {
                     $fields[$key] = $field;
                 }
