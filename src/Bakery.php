@@ -115,6 +115,20 @@ class Bakery
     }
 
     /**
+     * Return if the model has a model schema in Bakery. 
+     * This can either be an instance or a class name.
+     *
+     * @param mixed $model
+     * @return mixed
+     */
+    public function hasModelSchema($model)
+    {
+        $model = is_string($model) ? $model : get_class($model);
+
+        return array_key_exists($model, $this->modelSchemas);
+    }
+
+    /**
      * Return if the name is registered as a type.
      *
      * @param string $name

@@ -2,8 +2,10 @@
 
 namespace Bakery\Utils;
 
+use GraphQL\Type\Definition\Type;
 use Illuminate\Support\Collection;
 use GraphQL\Type\Definition\NonNull;
+use GraphQL\Type\Definition\ListOfType;
 use Bakery\Exceptions\InvariantViolation;
 use Illuminate\Database\Eloquent\Relations;
 
@@ -93,6 +95,18 @@ class Utils
 
             return $field;
         });
+    }
+
+    public static function swapWrappedType($field, Type $swap): Type
+    {
+        $field = self::toFieldArray($field);
+        $listOf = $field['type'] instanceof ListOf;
+        $nonNull = $field['type'] instanceof NonNull;
+
+        if ($listOf && $nonNull) return Type::nonNull(Type::listOf($swap));
+        if ($nonNull) return Type::nonNull($swap); 
+        if ($listOf) return Type::listOf($swap);
+
     }
 
     public static function usesTrait($class, string $trait)

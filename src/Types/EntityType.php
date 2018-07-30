@@ -6,10 +6,12 @@ use Closure;
 use Bakery\Utils\Utils;
 use Bakery\Concerns\ModelAware;
 use GraphQL\Type\Definition\Type;
+use Bakery\Support\Facades\Bakery;
 use Bakery\Types\Type as BaseType;
 use GraphQL\Type\Definition\NonNull;
 use GraphQL\Type\Definition\ListOfType;
 use Illuminate\Contracts\Auth\Access\Gate;
+use Illuminate\Database\Eloquent\Relations;
 use Illuminate\Auth\Access\AuthorizationException;
 
 class EntityType extends BaseType
@@ -81,12 +83,38 @@ class EntityType extends BaseType
         }
     }
 
+    /**
+     * Get the fields of the entity type.
+     * 
+     * @return array
+     */
     public function fields(): array
     {
         $fields = $this->schema->getFields();
+        $relationFields = $this->getRelationFields();
+
+        return collect($fields)
+            ->merge($relationFields)
+            ->map(function ($field, $key) {
+                $field = Utils::toFieldArray($field);
+                $field['resolve'] = $this->createFieldResolver($field, $key);
+
+                return $field;
+            })->toArray();
+    }
+
+    /**
+     * Get the relation fields of the entity.
+     * 
+     * @return array
+     */
+    protected function getRelationFields(): array
+    {
+        $fields = [];
         $relations = $this->schema->getRelations();
 
         foreach ($relations as $key => $field) {
+            $relationship = $this->model->{$key}();
             $fieldType = Utils::nullifyField($field)['type'];
 
             if ($fieldType instanceof ListOfType) {
@@ -94,35 +122,59 @@ class EntityType extends BaseType
                 $fields[$singularKey.'Ids'] = [
                     'type' => Type::listOf(Type::ID()),
                     'resolve' => function ($model) use ($key) {
-                        $keyName = $model->{$key}()->getRelated()->getKeyName();
+                        $relation = $model->{$key};
+                        $relationship = $model->{$key}();
 
-                        return $model->{$key}->pluck($keyName)->toArray();
+                        return $relation
+                            ->pluck($relationship->getRelated()->getKeyName())
+                            ->toArray();
                     },
                 ];
                 $fields[$key.'_count'] = [
                     'type' => Type::nonNull(Type::int()),
                     'resolve' => function ($model) use ($key) {
-                        return $model->{$key}->count();
+                        $relation = $model->{$key};
+                        return $relation->count();
                     },
                 ];
             } else {
                 $fields[$key.'Id'] = [
                     'type' => $field instanceof NonNull ? Type::nonNull(Type::ID()) : Type::ID(),
                     'resolve' => function ($model) use ($key) {
-                        $instance = $model->{$key};
-
-                        return $instance ? $instance->getKey() : null;
+                        $relation = $model->{$key};
+                        return $relation ? $relation->getKey() : null;
                     },
                 ];
             }
-            $fields[$key] = $field;
+
+            if ($relationship instanceof Relations\BelongsToMany) {
+                $pivot = $relationship->getPivotClass();
+
+                if (Bakery::hasModelSchema($pivot)) {
+                    $type = $field['type']->getWrappedType(true);
+                    $definition = resolve(Bakery::getModelSchema($pivot));
+                    $closure = $type->config['fields'];
+                    $pivotField = [
+                        'pivot' => [
+                            'type' => Bakery::type($definition->typename()),
+                            'resolve' => function ($model) use ($key) {
+                                return $model->pivot;
+                            }
+                        ],
+                    ];
+                    $type->config['fields'] = function () use ($closure, $pivotField) {
+                        return array_merge($pivotField, $closure());
+                    };
+                    $fields[$key] = Utils::swapWrappedType($field, $type); 
+                } else {
+                    $fields[$key] = $field;
+                }
+                $fields[$key] = $field;
+            } else {
+                $fields[$key] = $field;
+            }
         }
 
-        return collect($fields)->map(function ($field, $key) {
-            $field = Utils::toFieldArray($field);
-            $field['resolve'] = $this->createFieldResolver($field, $key);
-
-            return $field;
-        })->toArray();
+        return $fields;
     }
 }

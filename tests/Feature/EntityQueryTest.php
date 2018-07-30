@@ -256,4 +256,28 @@ class EntityQueryTest extends FeatureTestCase
         $response = $this->json('GET', '/graphql', ['query' => $query]);
         $response->assertJsonFragment(['articles_count' => 3]);
     }
+
+    /** @test */
+    public function it_exposes_pivot_data_on_many_to_many_relationships()
+    {
+        $user = factory(Models\User::class)->create();
+        $role = factory(Models\Role::class)->create();
+        $user->roles()->attach($role, ['comment' => 'foobar']);
+
+        $query = '
+            query {
+                user(id: "'.$user->id.'") {
+                    roles {
+                        id
+                        pivot {
+                            comment
+                        }
+                    }
+                }
+            }
+        ';
+
+        $response = $this->json('GET', '/graphql', ['query' => $query]);
+        $response->assertJsonFragment(['comment' => 'foobar']);
+    }
 }

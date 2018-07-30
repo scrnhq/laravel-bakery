@@ -16,4 +16,12 @@ class Role extends Model
     protected $fillable = [
         'name',
     ];
+
+    public function users()
+    {
+        return $this->belongsToMany(User::class)
+            ->using(UserRole::class)
+            ->withPivot('comment')
+            ->withTimestamps();
+    }
 }

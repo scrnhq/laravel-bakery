@@ -49,6 +49,7 @@ class FeatureTestCase extends OrchestraTestCase
             Stubs\BakeryModels\CommentBakery::class,
             Stubs\BakeryModels\RoleBakery::class,
             Stubs\BakeryModels\CategoryBakery::class,
+            Stubs\BakeryModels\UserRoleDefinition::class,
         ]);
     }
 
