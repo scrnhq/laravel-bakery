@@ -26,6 +26,7 @@ class FeatureTestCase extends OrchestraTestCase
 
         $gate = app(Gate::class);
         $gate->policy(Models\User::class, Policies\UserPolicy::class);
+        $gate->policy(Models\Role::class, Policies\RolePolicy::class);
         $gate->policy(Models\Article::class, Policies\ArticlePolicy::class);
         $gate->policy(Models\Phone::class, Policies\PhonePolicy::class);
         $gate->policy(Models\Comment::class, Policies\CommentPolicy::class);
@@ -49,6 +50,7 @@ class FeatureTestCase extends OrchestraTestCase
             Stubs\BakeryModels\CommentBakery::class,
             Stubs\BakeryModels\RoleBakery::class,
             Stubs\BakeryModels\CategoryBakery::class,
+            Stubs\BakeryModels\TagDefinition::class,
             Stubs\BakeryModels\UserRoleDefinition::class,
         ]);
     }

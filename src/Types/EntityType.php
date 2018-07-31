@@ -154,13 +154,14 @@ class EntityType extends BaseType
 
                 if (Bakery::hasModelSchema($pivot)) {
                     $type = $field['type']->getWrappedType(true);
+                    $accessor = $relationship->getPivotAccessor();
                     $definition = resolve(Bakery::getModelSchema($pivot));
                     $closure = $type->config['fields'];
                     $pivotField = [
-                        'pivot' => [
+                        $accessor => [
                             'type' => Bakery::type($definition->typename()),
-                            'resolve' => function ($model) use ($key) {
-                                return $model->pivot;
+                            'resolve' => function ($model) use ($key, $accessor) {
+                                return $model->{$accessor};
                             },
                         ],
                     ];

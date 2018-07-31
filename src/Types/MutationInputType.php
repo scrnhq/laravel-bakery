@@ -8,6 +8,7 @@ use GraphQL\Type\Definition\Type;
 use Bakery\Support\Facades\Bakery;
 use Illuminate\Support\Collection;
 use GraphQL\Type\Definition\ListOfType;
+use Illuminate\Database\Eloquent\Relations;
 
 abstract class MutationInputType extends InputType
 {
@@ -61,22 +62,55 @@ abstract class MutationInputType extends InputType
         $field = Utils::nullifyField($field);
         $fieldType = Type::getNamedType($field['type']);
         $inputType = 'Create'.Utils::typename($fieldType->name).'Input';
+        $relationship = $this->model->{$relation}();
 
         if ($field['type'] instanceof ListOfType) {
             $name = str_singular($relation).'Ids';
-            $fields[$name] = Bakery::listOf(Bakery::ID());
+            $fields[$name] = Type::listOf(Type::ID());
 
             if (Bakery::hasType($inputType)) {
-                $fields[$relation] = Bakery::listOf(Bakery::type($inputType));
+                $fields[$relation] = Type::listOf(Bakery::type($inputType));
             }
         } else {
             $name = str_singular($relation).'Id';
-            $fields[$name] = Bakery::ID();
+            $fields[$name] = Type::ID();
 
             if (Bakery::hasType($inputType)) {
                 $fields[$relation] = Bakery::type($inputType);
             }
         }
+
+        if ($relationship instanceof Relations\BelongsToMany) {
+            $fields = array_merge(
+                $fields,
+                $this->getFieldsForPivot($fieldType, $relation, $relationship)
+            );
+        }
+
+        return $fields;
+    }
+
+    /**
+     * Get the fields for a pivot relation.
+     *
+     * @return array
+     */
+    protected function getFieldsForPivot($fieldType, string $relation, Relations\BelongsToMany $relationship): array
+    {
+        $pivot = $relationship->getPivotClass();
+
+        if (!Bakery::hasModelSchema($pivot)) {
+            return [];
+        }
+
+        $definition = resolve(Bakery::getModelSchema($pivot));
+
+        $inputType = 'Create'.Utils::pluralTypename($relation).'WithPivotInput';
+        $fields[$relation] = Type::listOf(Bakery::type($inputType));
+
+        $name = str_singular($relation).'Ids';
+        $inputType = 'Attach'.$definition->typename().'Input';
+        $fields[$name] = Type::listOf(Bakery::type($inputType));
 
         return $fields;
     }

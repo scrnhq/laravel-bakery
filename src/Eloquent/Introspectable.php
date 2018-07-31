@@ -128,7 +128,7 @@ trait Introspectable
                 try {
                     Bakery::type($lookupTypeName);
                 } catch (\Exception $e) {
-                    dd($field);
+                    //
                 }
 
                 return Bakery::type($lookupTypeName);
@@ -149,6 +149,20 @@ trait Introspectable
         $relations = method_exists($this, 'relations') ? $this->relations() : [];
 
         return Utils::normalizeFields($relations);
+    }
+
+    /**
+     * Get the pivot relational definitions.
+     *
+     * @return Collection
+     */
+    public function getPivotRelations(): Collection
+    {
+        return method_exists($this, 'pivotRelations')
+            ? collect($this->pivotRelations())->map(function ($value, $key) {
+                return ['key' => $key, 'class' => $value];
+            })
+            : collect();
     }
 
     /**

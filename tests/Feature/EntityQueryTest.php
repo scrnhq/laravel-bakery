@@ -266,10 +266,34 @@ class EntityQueryTest extends FeatureTestCase
 
         $query = '
             query {
+                role(id: "'.$role->id.'") {
+                    users {
+                        id
+                        pivot {
+                            comment
+                        }
+                    }
+                }
+            }
+        ';
+
+        $response = $this->json('GET', '/graphql', ['query' => $query]);
+        $response->assertJsonFragment(['comment' => 'foobar']);
+    }
+
+    /** @test */
+    public function it_exposes_pivot_data_on_many_to_many_relationships_with_custom_pivot()
+    {
+        $user = factory(Models\User::class)->create();
+        $role = factory(Models\Role::class)->create();
+        $user->roles()->attach($role, ['comment' => 'foobar']);
+
+        $query = '
+            query {
                 user(id: "'.$user->id.'") {
                     roles {
                         id
-                        pivot {
+                        customPivot {
                             comment
                         }
                     }

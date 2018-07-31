@@ -111,6 +111,8 @@ class Utils
         if ($listOf) {
             return Type::listOf($swap);
         }
+
+        return $swap;
     }
 
     public static function usesTrait($class, string $trait)

@@ -6,6 +6,7 @@ use RuntimeException;
 use Bakery\Utils\Utils;
 use Bakery\Exceptions\InvariantViolation;
 use Illuminate\Database\Eloquent\Relations;
+use Illuminate\Auth\Access\AuthorizationException;
 
 trait InteractsWithRelations
 {
@@ -39,7 +40,13 @@ trait InteractsWithRelations
                 throw new RuntimeException("Unknown or unfillable relation type: {$key} of type ${relationType}");
             }
 
-            $this->gate()->authorize($policyMethod, [$this, $attributes]);
+            $allowed = $this->gate()->allows($policyMethod, [$this, $attributes]);
+
+            if (!$allowed) {
+                throw new AuthorizationException(
+                    'Not allowed to perform '.$policyMethod.' on '.get_class($this)
+                );
+            }
 
             $this->{$method}($relation, $attributes);
         }
@@ -63,7 +70,13 @@ trait InteractsWithRelations
                 throw new RuntimeException("Unknown or unfillable connection type: {$key} of type ${relationType}");
             }
 
-            $this->gate()->authorize($policyMethod, [$this, $attributes]);
+            $allowed = $this->gate()->allows($policyMethod, [$this, $attributes]);
+
+            if (!$allowed) {
+                throw new AuthorizationException(
+                    'Not allowed to perform '.$policyMethod.' on '.get_class($this)
+                );
+            }
 
             $this->{$method}($relation, $attributes);
         }
@@ -187,10 +200,18 @@ trait InteractsWithRelations
      * @param array $ids
      * @return void
      */
-    protected function connectBelongsToManyRelation(Relations\BelongsToMany $relation, array $ids)
+    protected function connectBelongsToManyRelation(Relations\BelongsToMany $relation, array $data)
     {
-        $this->transactionQueue[] = function () use ($relation, $ids) {
-            $relation->sync($ids);
+        $data = collect($data)->mapWithKeys(function ($data, $key) {
+            if (!is_array($data)) {
+                return [$key => $data];
+            }
+
+            return [$data['id'] => $data['pivot']];
+        });
+
+        $this->transactionQueue[] = function () use ($relation, $data) {
+            $relation->sync($data);
         };
     }
 
@@ -203,15 +224,19 @@ trait InteractsWithRelations
      */
     protected function fillBelongsToManyRelation(Relations\BelongsToMany $relation, array $value)
     {
+        $pivots = collect();
         $instances = collect();
         $related = $relation->getRelated();
+        $accessor = $relation->getPivotAccessor();
 
         foreach ($value as $attributes) {
             $instances[] = $related->createWithInput($attributes);
+            $pivots[] = $attributes[$accessor] ?? null;
         }
 
-        $this->transactionQueue[] = function () use ($relation, $instances) {
-            $relation->sync($instances->pluck('id')->all());
+        $this->transactionQueue[] = function () use ($relation, $instances, $pivots) {
+            $data = $instances->pluck('id')->combine($pivots);
+            $relation->sync($data);
         };
     }
 

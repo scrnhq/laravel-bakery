@@ -5,7 +5,7 @@ namespace Bakery\Tests\Models;
 use Bakery\Eloquent\Mutable;
 use Illuminate\Database\Eloquent\Model;
 
-class Role extends Model
+class Tag extends Model
 {
     use Mutable;
 
@@ -15,14 +15,10 @@ class Role extends Model
 
     protected $fillable = [
         'name',
-        'users',
     ];
 
-    public function users()
+    public function articles()
     {
-        return $this->belongsToMany(User::class)
-            ->using(UserRole::class)
-            ->withPivot('comment')
-            ->withTimestamps();
+        return $this->belongsToMany(Article::class);
     }
 }

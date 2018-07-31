@@ -37,8 +37,8 @@ class CreateMutationTest extends FeatureTestCase
 
         $query = '
             mutation {
-                createRole(input: {
-                    name: "admin"
+                createCategory(input: {
+                    name: "some-category"
                 }) {
                     id
                 }
@@ -46,8 +46,8 @@ class CreateMutationTest extends FeatureTestCase
         ';
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $response->assertJsonFragment(['createRole' => null]);
-        $this->assertDatabaseMissing('roles', ['name' => 'admin']);
+        $response->assertJsonFragment(['createCategory' => null]);
+        $this->assertDatabaseMissing('categories', ['name' => 'some-category']);
     }
 
     /** @test */
@@ -209,15 +209,16 @@ class CreateMutationTest extends FeatureTestCase
         $user = factory(Models\User::class)->create();
         $this->actingAs($user);
 
-        $roles = factory(Models\Role::class, 2)->create();
+        $tags = factory(Models\Tag::class, 2)->create();
 
         $query = '
             mutation {
-                createUser(input: {
-                    email: "jane.doe@example.com",
-                    name: "Jane Doe",
-                    password: "secret", 
-                    roleIds: ["'.$roles[0]->id.'", "'.$roles[1]->id.'"]
+                createArticle(input: {
+                    title: "Hello world"
+                    slug: "hello-world"
+                    content: "Hello world"
+                    userId: "'.$user->id.'"
+                    tagIds: ["'.$tags[0]->id.'", "'.$tags[1]->id.'"]
                 }) {
                     id
                 }
@@ -226,8 +227,8 @@ class CreateMutationTest extends FeatureTestCase
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
         $response->assertJsonKey('id');
-        $this->assertDatabaseHas('role_user', ['role_id' => '1', 'user_id' => '2']);
-        $this->assertDatabaseHas('role_user', ['role_id' => '2', 'user_id' => '2']);
+        $this->assertDatabaseHas('article_tag', ['article_id' => '1', 'tag_id' => '1']);
+        $this->assertDatabaseHas('article_tag', ['article_id' => '1', 'tag_id' => '2']);
     }
 
     /** @test */
@@ -318,5 +319,104 @@ class CreateMutationTest extends FeatureTestCase
         $response = $this->json('GET', '/graphql', ['query' => $query]);
         $response->assertJsonKey('id');
         $this->assertDatabaseHas('articles', ['title' => 'Hello World!', 'category_id' => null]);
+    }
+
+    /** @test */
+    public function it_lets_you_set_pivot_data()
+    {
+        $user = factory(Models\User::class)->create();
+        $role = factory(Models\Role::class)->create();
+        $this->actingAs($user);
+
+        $query = '
+            mutation {
+                createUser(input: {
+                    email: "jane.doe@example.com",
+                    name: "Jane Doe",
+                    password: "secret",
+                    roleIds: [
+                        { id: "'.$role->id.'", pivot: { comment: "foobar" } }
+                    ],
+                }) {
+                    id
+                }
+            }
+        ';
+
+        $response = $this->json('GET', '/graphql', ['query' => $query]);
+        $response->assertJsonKey('id');
+        $this->assertDatabaseHas('role_user', [
+            'user_id' => '2',
+            'role_id' => $role->id,
+            'comment' => 'foobar',
+        ]);
+    }
+
+    /** @test */
+    public function it_lets_you_set_pivot_data_while_creating_relation()
+    {
+        $user = factory(Models\User::class)->create();
+        $this->actingAs($user);
+
+        $query = '
+            mutation {
+                createRole(input: {
+                    name: "administrator",
+                    users: [
+                        {
+                            email: "jane.doe@example.com"
+                            name: "Jane Doe"
+                            password: "secret"
+                            pivot: {
+                                comment: "foobar"
+                            }
+                        }
+                    ],
+                }) {
+                    id
+                }
+            }
+        ';
+
+        $response = $this->json('GET', '/graphql', ['query' => $query]);
+        $response->assertJsonKey('id');
+        $this->assertDatabaseHas('roles', ['id' => '1', 'name' => 'administrator']);
+        $this->assertDatabaseHas('users', ['id' => '2', 'email' => 'jane.doe@example.com']);
+        $this->assertDatabaseHas('role_user', [
+            'user_id' => '2',
+            'role_id' => '1',
+            'comment' => 'foobar',
+        ]);
+    }
+
+    /** @test */
+    public function it_lets_you_set_pivot_data_while_creating_relation_with_custom_pivot_accessor()
+    {
+        $user = factory(Models\User::class)->create();
+        $this->actingAs($user);
+
+        $query = '
+            mutation {
+                createUser(input: {
+                    email: "jane.doe@example.com",
+                    name: "Jane Doe",
+                    password: "secret",
+                    roles: [
+                        { name: "administrator", customPivot: { comment: "foobar" } }
+                    ],
+                }) {
+                    id
+                }
+            }
+        ';
+
+        $response = $this->json('GET', '/graphql', ['query' => $query]);
+        $response->assertJsonKey('id');
+        $this->assertDatabaseHas('roles', ['id' => '1', 'name' => 'administrator']);
+        $this->assertDatabaseHas('role_user', [
+            'user_id' => '2',
+            'role_id' => '1',
+            'comment' => 'foobar',
+        ]);
     }
 }

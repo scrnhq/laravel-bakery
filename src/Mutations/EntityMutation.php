@@ -6,12 +6,10 @@ use Bakery\Concerns\ModelAware;
 use GraphQL\Type\Definition\Type;
 use Bakery\Support\Facades\Bakery;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 abstract class EntityMutation extends Mutation
 {
     use ModelAware;
-    use AuthorizesRequests;
     use Concerns\QueriesModel;
 
     /**

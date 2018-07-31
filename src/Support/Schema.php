@@ -6,6 +6,7 @@ use Bakery\Types;
 use Bakery\Utils\Utils;
 use Bakery\Eloquent\Mutable;
 use GraphQL\Type\SchemaConfig;
+use Illuminate\Support\Collection;
 use Bakery\Support\Facades\Bakery;
 use Bakery\Eloquent\Introspectable;
 use Bakery\Mutations\CreateMutation;
@@ -15,6 +16,8 @@ use Bakery\Queries\SingleEntityQuery;
 use GraphQL\Type\Definition\ObjectType;
 use Bakery\Queries\EntityCollectionQuery;
 use GraphQL\Type\Schema as GraphQLSchema;
+use Illuminate\Database\Eloquent\Relations;
+use Illuminate\Database\Eloquent\Relations\Pivot;
 
 class Schema
 {
@@ -63,21 +66,98 @@ class Schema
     protected function getModelTypes()
     {
         $types = [];
-        foreach ($this->getModels() as $model) {
-            $types[] = new Types\EntityType($model);
-            $types[] = new Types\EntityCollectionType($model);
-            $types[] = new Types\EntityLookupType($model);
-            $types[] = new Types\CollectionFilterType($model);
-            $types[] = new Types\CollectionRootSearchType($model);
-            $types[] = new Types\CollectionSearchType($model);
-            $types[] = new Types\CollectionOrderByType($model);
 
-            if (! $this->isReadOnly($model)) {
-                $types[] = new Types\CreateInputType($model);
-                $types[] = new Types\UpdateInputType($model);
+        foreach ($this->getModels() as $model) {
+            $definition = resolve($model);
+
+            if ($definition->getModel() instanceof Pivot) {
+                $pivotTypes = $this->getPivotModelTypes($model, $definition);
+                $types = array_merge($types, $pivotTypes->toArray());
+            } else {
+                $types[] = new Types\EntityType($model);
+                $types[] = new Types\EntityCollectionType($model);
+                $types[] = new Types\EntityLookupType($model);
+                $types[] = new Types\CollectionFilterType($model);
+                $types[] = new Types\CollectionRootSearchType($model);
+                $types[] = new Types\CollectionSearchType($model);
+                $types[] = new Types\CollectionOrderByType($model);
+
+                if (! $this->isReadOnly($model)) {
+                    $types[] = new Types\CreateInputType($model);
+                    $types[] = new Types\UpdateInputType($model);
+                }
             }
         }
 
+        return $types;
+    }
+
+    /**
+     * Get the types for a pivot model.
+     *
+     * @param  mixed model
+     * @param  mixed definition
+     * @return array
+     */
+    public function getPivotModelTypes($model, $definition): collection
+    {
+        $pivotRelations = $definition->getPivotRelations();
+
+        Utils::invariant(
+            count($pivotRelations) === 2,
+            'There should be two relations defined on the pivot model.'
+        );
+
+        $types = collect();
+
+        $types->push(new Types\EntityType($model));
+        $types->push(new Types\CreatePivotInputType($model));
+        $types->push(new Types\AttachPivotInputType($model));
+
+        $one = $pivotRelations->first();
+        $two = $pivotRelations->last();
+
+        $types = $types
+            ->merge($this->getPivotInputTypes($one, $two, $model))
+            ->merge($this->getPivotInputTypes($two, $one, $model));
+
+        return $types;
+    }
+
+    /**
+     * Get the pivot input types.
+     *
+     * @param array parent
+     * @param array related
+     * @param mixed model
+     * @return Collection
+     */
+    protected function getPivotInputTypes(array $parent, array $related, $model): Collection
+    {
+        // Because we need the accessor defined on the related model we get
+        // the relationship from that side and pass that through the input type
+        // so it has all the data it needs.
+        
+        $types = collect();
+        $relation = $parent['key'];
+        $relatedModel = resolve($related['class'])->getModel();
+
+        Utils::invariant(
+            method_exists($relatedModel, $relation),
+            '"'.$relation.'" is not a relationship on '.get_class($relatedModel)
+        );
+
+        $pivotRelation = $relatedModel->{$relation}();
+
+        Utils::invariant(
+            $pivotRelation instanceof Relations\BelongsToMany,
+            '"'.$relation.'" is not an instance of '.Relations\BelongsToMany::class
+        );
+
+        $types->push((new Types\CreateWithPivotInputType($parent['class']))
+            ->setPivot($model)
+            ->setPivotRelation($pivotRelation));
+        
         return $types;
     }
 
@@ -102,12 +182,17 @@ class Schema
     public function getModelQueries()
     {
         $queries = [];
-        foreach ($this->getModels() as $model) {
-            $entityQuery = new SingleEntityQuery($model);
-            $queries[$entityQuery->name] = $entityQuery;
 
-            $collectionQuery = new EntityCollectionQuery($model);
-            $queries[$collectionQuery->name] = $collectionQuery;
+        foreach ($this->getModels() as $model) {
+            $instance = resolve($model)->getModel();
+
+            if (!$instance instanceof Pivot) {
+                $entityQuery = new SingleEntityQuery($model);
+                $queries[$entityQuery->name] = $entityQuery;
+
+                $collectionQuery = new EntityCollectionQuery($model);
+                $queries[$collectionQuery->name] = $collectionQuery;
+            }
         }
 
         return $queries;
@@ -140,7 +225,9 @@ class Schema
     {
         $mutations = [];
         foreach ($this->getModels() as $model) {
-            if (! $this->isReadOnly($model)) {
+            $instance = resolve($model)->getModel();
+
+            if (! $this->isReadOnly($model) && !$instance instanceof Pivot) {
                 $createMutation = new CreateMutation($model);
                 $mutations[$createMutation->name] = $createMutation;
 
