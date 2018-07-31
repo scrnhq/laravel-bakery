@@ -5,7 +5,6 @@ namespace Bakery\Types;
 use Bakery\Utils\Utils;
 use GraphQL\Type\Definition\Type;
 use Bakery\Support\Facades\Bakery;
-use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Relations;
 
 class CreateWithPivotInputType extends CreateInputType
@@ -35,7 +34,7 @@ class CreateWithPivotInputType extends CreateInputType
 
         return 'Create'.$typename.'WithPivotInput';
     }
-    
+
     /**
      * Set the pivot model.
      *

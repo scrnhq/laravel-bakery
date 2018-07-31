@@ -6,8 +6,8 @@ use Bakery\Types;
 use Bakery\Utils\Utils;
 use Bakery\Eloquent\Mutable;
 use GraphQL\Type\SchemaConfig;
-use Illuminate\Support\Collection;
 use Bakery\Support\Facades\Bakery;
+use Illuminate\Support\Collection;
 use Bakery\Eloquent\Introspectable;
 use Bakery\Mutations\CreateMutation;
 use Bakery\Mutations\DeleteMutation;
@@ -137,7 +137,7 @@ class Schema
         // Because we need the accessor defined on the related model we get
         // the relationship from that side and pass that through the input type
         // so it has all the data it needs.
-        
+
         $types = collect();
         $relation = $parent['key'];
         $relatedModel = resolve($related['class'])->getModel();
@@ -157,7 +157,7 @@ class Schema
         $types->push((new Types\CreateWithPivotInputType($parent['class']))
             ->setPivot($model)
             ->setPivotRelation($pivotRelation));
-        
+
         return $types;
     }
 
@@ -186,7 +186,7 @@ class Schema
         foreach ($this->getModels() as $model) {
             $instance = resolve($model)->getModel();
 
-            if (!$instance instanceof Pivot) {
+            if (! $instance instanceof Pivot) {
                 $entityQuery = new SingleEntityQuery($model);
                 $queries[$entityQuery->name] = $entityQuery;
 
@@ -227,7 +227,7 @@ class Schema
         foreach ($this->getModels() as $model) {
             $instance = resolve($model)->getModel();
 
-            if (! $this->isReadOnly($model) && !$instance instanceof Pivot) {
+            if (! $this->isReadOnly($model) && ! $instance instanceof Pivot) {
                 $createMutation = new CreateMutation($model);
                 $mutations[$createMutation->name] = $createMutation;
 

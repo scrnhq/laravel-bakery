@@ -42,7 +42,7 @@ trait InteractsWithRelations
 
             $allowed = $this->gate()->allows($policyMethod, [$this, $attributes]);
 
-            if (!$allowed) {
+            if (! $allowed) {
                 throw new AuthorizationException(
                     'Not allowed to perform '.$policyMethod.' on '.get_class($this)
                 );
@@ -72,7 +72,7 @@ trait InteractsWithRelations
 
             $allowed = $this->gate()->allows($policyMethod, [$this, $attributes]);
 
-            if (!$allowed) {
+            if (! $allowed) {
                 throw new AuthorizationException(
                     'Not allowed to perform '.$policyMethod.' on '.get_class($this)
                 );
@@ -203,7 +203,7 @@ trait InteractsWithRelations
     protected function connectBelongsToManyRelation(Relations\BelongsToMany $relation, array $data)
     {
         $data = collect($data)->mapWithKeys(function ($data, $key) {
-            if (!is_array($data)) {
+            if (! is_array($data)) {
                 return [$key => $data];
             }
 

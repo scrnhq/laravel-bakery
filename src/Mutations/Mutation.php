@@ -55,7 +55,7 @@ class Mutation extends Field
     {
         $allowed = $this->gate()->allows($policyMethod, $instance, ...$other);
 
-        if (!$allowed) {
+        if (! $allowed) {
             throw new AuthorizationException(
                 'Not allowed to perform '.$policyMethod.' on '.get_class($instance)
             );

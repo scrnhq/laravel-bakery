@@ -4,7 +4,6 @@ namespace Bakery\Types;
 
 use GraphQL\Type\Definition\Type;
 use Bakery\Support\Facades\Bakery;
-use Illuminate\Support\Collection;
 
 class AttachPivotInputType extends MutationInputType
 {
