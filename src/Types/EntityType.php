@@ -115,25 +115,41 @@ class EntityType extends BaseType
         $relations = $this->schema->getRelationFields();
 
         foreach ($relations as $key => $field) {
-            $relationship = $this->model->{$key}();
-            $fieldType = Utils::nullifyField($field)['type'];
-
-            $fields->put($key, $field);
-
-            if ($fieldType instanceof ListOfType) {
-                $fields = $fields->merge($this->getPluralRelationFields($key, $field));
-            } else {
-                $fields = $fields->merge($this->getSingularRelationFields($key, $field));
-            }
-
-            if ($relationship instanceof Relations\BelongsToMany) {
-                $fields = $fields->merge(
-                    $this->getBelongsToManyRelationFields($key, $field, $relationship)
-                );
-            }
+            $fields = $fields->merge($this->getFieldsForRelation($key, $field));
         }
 
         return $fields->toArray();
+    }
+
+    /**
+     * Get the fields for a relation.
+     *
+     * @param string $key
+     * @param array $field
+     * @return Collection
+     */
+    protected function getFieldsForRelation(string $key, array $field): Collection
+    {
+        $fields = collect();
+
+        $relationship = $this->model->{$key}();
+        $fieldType = Utils::nullifyField($field)['type'];
+
+        $fields->put($key, $field);
+
+        if ($fieldType instanceof ListOfType) {
+            $fields = $fields->merge($this->getPluralRelationFields($key, $field));
+        } else {
+            $fields = $fields->merge($this->getSingularRelationFields($key, $field));
+        }
+
+        if ($relationship instanceof Relations\BelongsToMany) {
+            $fields = $fields->merge(
+                $this->getBelongsToManyRelationFields($key, $field, $relationship)
+            );
+        }
+
+        return $fields;
     }
 
     /**
