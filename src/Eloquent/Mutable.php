@@ -148,7 +148,7 @@ trait Mutable
     protected function getFillableRelations(array $attributes): array
     {
         return collect($attributes)->filter(function ($value, $key) {
-            $relations = $this->getSchema()->getRelations()->keys();
+            $relations = $this->getSchema()->getRelationFields()->keys();
 
             return $relations->contains($key);
         })->toArray();

@@ -40,7 +40,7 @@ abstract class MutationInputType extends InputType
      */
     protected function getRelationFields(): Collection
     {
-        $relations = $this->schema->getRelations();
+        $relations = $this->schema->getRelationFields();
 
         return $relations->keys()->reduce(function ($fields, $key) use ($relations) {
             $field = $relations[$key];
@@ -107,7 +107,7 @@ abstract class MutationInputType extends InputType
         $fields[$relation] = Type::listOf(Bakery::type($inputType));
 
         $name = str_singular($relation).'Ids';
-        $inputType = 'Attach'.Utils::pluralTypename($relation).'WithPivotInput';
+        $inputType = Utils::pluralTypename($relation).'PivotInput';
         $fields[$name] = Type::listOf(Bakery::type($inputType));
 
         return $fields;

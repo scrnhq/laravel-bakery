@@ -42,7 +42,7 @@ class CollectionSearchType extends InputType
             }
         }
 
-        foreach ($this->schema->getRelations() as $relation => $field) {
+        foreach ($this->schema->getRelationFields() as $relation => $field) {
             $fieldType = Type::getNamedType($field['type']);
 
             if ($fieldType instanceof UnionType) {

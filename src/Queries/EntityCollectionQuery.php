@@ -144,7 +144,7 @@ class EntityCollectionQuery extends EntityQuery
                 });
             } else {
                 $schema = resolve(Bakery::getModelSchema($query->getModel()));
-                if ($schema->getRelations()->has($key)) {
+                if ($schema->getRelationFields()->has($key)) {
                     $this->applyRelationFilter($query, $key, $value, $type);
                 } else {
                     $this->filter($query, $key, $value, $type);
@@ -254,7 +254,7 @@ class EntityCollectionQuery extends EntityQuery
         $needle = $search['query'];
         $fields = $search['fields'];
 
-        $relations = $this->schema->getRelations();
+        $relations = $this->schema->getRelationFields();
         $qualifiedNeedle = preg_replace('/[*&|:\']+/', ' ', $needle);
 
         foreach ($fields as $key => $value) {
@@ -297,7 +297,7 @@ class EntityCollectionQuery extends EntityQuery
 
         foreach ($fields as $key => $value) {
             $schema = resolve(Bakery::getModelSchema($related));
-            $relations = $schema->getRelations();
+            $relations = $schema->getRelationFields();
             if ($relations->keys()->contains($key)) {
                 $this->applyRelationalSearch($query, $related, $key, $needle, $value);
             } else {
@@ -315,7 +315,7 @@ class EntityCollectionQuery extends EntityQuery
      */
     protected function applyOrderBy(Builder $query, array $args)
     {
-        $relations = $this->schema->getRelations();
+        $relations = $this->schema->getRelationFields();
         foreach ($args as $key => $value) {
             if ($relations->keys()->contains($key)) {
                 $this->applyRelationalOrderBy($query, $this->model, $key, $value);
@@ -344,7 +344,7 @@ class EntityCollectionQuery extends EntityQuery
 
         foreach ($args as $key => $value) {
             $schema = resolve(Bakery::getModelSchema($related));
-            $relations = $schema->getRelations();
+            $relations = $schema->getRelationFields();
             if ($relations->keys()->contains($key)) {
                 $this->applyRelationalOrderBy($query, $related, $key, $value);
             } else {

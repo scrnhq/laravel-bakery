@@ -34,7 +34,7 @@ class CollectionFilterType extends InputType
             $fields = array_merge($fields, $this->getFilters($name, $type));
         }
 
-        foreach ($this->schema->getRelations() as $relation => $field) {
+        foreach ($this->schema->getRelationFields() as $relation => $field) {
             $fieldType = Type::getNamedType($field['type']);
 
             if ($fieldType instanceof UnionType) {

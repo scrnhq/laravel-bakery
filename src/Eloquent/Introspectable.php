@@ -115,7 +115,7 @@ trait Introspectable
                 return in_array($key, $this->lookupFields ?? []);
             });
 
-        $relations = collect($this->getRelations())
+        $relations = collect($this->getRelationFields())
             ->filter(function ($field) {
                 $field = Type::getNamedType($field['type']);
 
@@ -140,15 +140,39 @@ trait Introspectable
     }
 
     /**
+     * Define the relation fields of the schema.
+     * This method can be overriden.
+     */
+    public function relations(): array
+    {
+        return [];
+    }
+
+    /**
      * Get the relational fields.
+     *
+     * @return Collection
+     */
+    public function getRelationFields(): Collection
+    {
+        $relations = method_exists($this, 'relations') ? $this->relations() : [];
+
+        return Utils::normalizeFields($relations);
+    }
+
+    /**
+     * Get the Eloquent relations of the model.
+     * This will only return relations that are defined in the model schema.
      *
      * @return Collection
      */
     public function getRelations(): Collection
     {
-        $relations = method_exists($this, 'relations') ? $this->relations() : [];
+        $relations = collect($this->relations());
 
-        return Utils::normalizeFields($relations);
+        return $relations->map(function ($field, $key) {
+            return $this->getModel()->{$key}();
+        });
     }
 
     /**
@@ -172,7 +196,7 @@ trait Introspectable
      */
     public function getConnections(): array
     {
-        return collect($this->getRelations())->map(function ($field, $key) {
+        return collect($this->getRelationFields())->map(function ($field, $key) {
             $field = Utils::nullifyField($field);
 
             if ($field['type'] instanceof ListOfType) {

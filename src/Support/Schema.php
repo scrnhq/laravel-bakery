@@ -14,6 +14,8 @@ use Bakery\Mutations\DeleteMutation;
 use Bakery\Mutations\UpdateMutation;
 use Bakery\Queries\SingleEntityQuery;
 use GraphQL\Type\Definition\ObjectType;
+use Bakery\Mutations\AttachPivotMutation;
+use Bakery\Mutations\DetachPivotMutation;
 use Bakery\Queries\EntityCollectionQuery;
 use GraphQL\Type\Schema as GraphQLSchema;
 use Illuminate\Database\Eloquent\Relations;
@@ -129,11 +131,6 @@ class Schema
     {
         $pivotRelations = $definition->getPivotRelations();
 
-        Utils::invariant(
-            count($pivotRelations) === 2,
-            'There should be two relations defined on the pivot model.'
-        );
-
         $types = collect();
 
         $types->push(new Types\EntityType($model))
@@ -186,7 +183,7 @@ class Schema
         );
 
         $types->push(
-            (new Types\AttachPivotInputType($parent['class']))
+            (new Types\PivotInputType($parent['class']))
                 ->setPivot($model)
                 ->setPivotRelation($pivotRelation)
         );
@@ -279,7 +276,12 @@ class Schema
         $mutations = collect();
 
         foreach ($this->getModels() as $model) {
-            $instance = resolve($model)->getModel();
+            $schema = resolve($model);
+            $instance = $schema->getModel();
+
+            $pivotRelations = $schema->getRelations()->filter(function ($relation) {
+                return $relation instanceof Relations\BelongsToMany;
+            });
 
             if (! $this->isReadOnly($model) && ! $instance instanceof Pivot) {
                 $createMutation = new CreateMutation($model);
@@ -291,7 +293,33 @@ class Schema
                 $deleteMutation = new DeleteMutation($model);
                 $mutations->put($deleteMutation->name, $deleteMutation);
             }
+
+            foreach ($pivotRelations as $relation) {
+                $mutations = $mutations->merge(
+                    $this->getModelPivotMutations($model, $relation)
+                );
+            }
         }
+
+        return $mutations;
+    }
+
+    /**
+     * Get the pivot mutations for a model and a relationship.
+     *
+     * @param  string $model
+     * @param  Relations\BelongsToMany
+     * @return Collection
+     */
+    protected function getModelPivotMutations(string $model, Relations\BelongsToMany $relation): Collection
+    {
+        $mutations = collect();
+
+        $mutation = (new AttachPivotMutation($model))->setPivotRelation($relation);
+        $mutations->put($mutation->name, $mutation);
+
+        $mutation = (new DetachPivotMutation($model))->setPivotRelation($relation);
+        $mutations->put($mutation->name, $mutation);
 
         return $mutations;
     }

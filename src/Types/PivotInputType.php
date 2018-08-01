@@ -7,7 +7,7 @@ use GraphQL\Type\Definition\Type;
 use Bakery\Support\Facades\Bakery;
 use Illuminate\Database\Eloquent\Relations;
 
-class AttachPivotInputType extends MutationInputType
+class PivotInputType extends MutationInputType
 {
     /**
      * The pivot model.
@@ -21,7 +21,7 @@ class AttachPivotInputType extends MutationInputType
      *
      * @var Relations\BelongsToMany
      */
-    protected $pivotRelationship;
+    protected $pivotRelation;
 
     /**
      * Get the name of the input type.
@@ -32,7 +32,7 @@ class AttachPivotInputType extends MutationInputType
     {
         $typename = Utils::pluralTypename($this->schema->typename());
 
-        return 'Attach'.$typename.'WithPivotInput';
+        return $typename.'PivotInput';
     }
 
     /**
@@ -71,9 +71,14 @@ class AttachPivotInputType extends MutationInputType
         $accessor = $this->pivotRelation->getPivotAccessor();
         $relatedKey = $this->pivotRelation->getRelated()->getKeyName();
 
-        return [
+        $fields = collect([
             $relatedKey => Type::ID(),
-            $accessor => Bakery::type('Create'.$this->pivot->typename().'Input'),
-        ];
+        ]);
+
+        if ($this->pivot) {
+            $fields->put($accessor, Bakery::type('Create'.$this->pivot->typename().'Input'));
+        }
+
+        return $fields->toArray();
     }
 }

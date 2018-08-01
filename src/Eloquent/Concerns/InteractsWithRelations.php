@@ -200,7 +200,7 @@ trait InteractsWithRelations
      * @param array $ids
      * @return void
      */
-    protected function connectBelongsToManyRelation(Relations\BelongsToMany $relation, array $data)
+    public function connectBelongsToManyRelation(Relations\BelongsToMany $relation, array $data)
     {
         $accessor = $relation->getPivotAccessor();
         $relatedKey = $relation->getRelated()->getKeyName();

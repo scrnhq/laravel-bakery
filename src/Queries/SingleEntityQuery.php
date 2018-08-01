@@ -45,7 +45,7 @@ class SingleEntityQuery extends EntityQuery
     {
         $args = $this->schema->getLookupFields();
 
-        foreach ($this->schema->getRelations() as $relation => $field) {
+        foreach ($this->schema->getRelationFields() as $relation => $field) {
             $fieldType = Utils::nullifyField($field)['type'];
 
             if ($fieldType instanceof ListofType) {

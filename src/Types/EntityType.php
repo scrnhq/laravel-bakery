@@ -111,7 +111,7 @@ class EntityType extends BaseType
     protected function getRelationFields(): array
     {
         $fields = [];
-        $relations = $this->schema->getRelations();
+        $relations = $this->schema->getRelationFields();
 
         foreach ($relations as $key => $field) {
             $relationship = $this->model->{$key}();
