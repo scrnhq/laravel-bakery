@@ -36,8 +36,6 @@ class Schema
         return array_merge($this->models, $this->models());
     }
 
-
-
     /**
      * Check if the schema is read only.
      *
