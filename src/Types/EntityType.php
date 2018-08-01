@@ -6,6 +6,7 @@ use Closure;
 use Bakery\Utils\Utils;
 use Bakery\Concerns\ModelAware;
 use GraphQL\Type\Definition\Type;
+use Illuminate\Support\Collection;
 use Bakery\Support\Facades\Bakery;
 use Bakery\Types\Type as BaseType;
 use GraphQL\Type\Definition\NonNull;
@@ -110,74 +111,122 @@ class EntityType extends BaseType
      */
     protected function getRelationFields(): array
     {
-        $fields = [];
+        $fields = collect();
         $relations = $this->schema->getRelationFields();
 
         foreach ($relations as $key => $field) {
             $relationship = $this->model->{$key}();
             $fieldType = Utils::nullifyField($field)['type'];
 
+            $fields->put($key, $field);
+
             if ($fieldType instanceof ListOfType) {
-                $singularKey = str_singular($key);
-                $fields[$singularKey.'Ids'] = [
-                    'type' => Type::listOf(Type::ID()),
-                    'resolve' => function ($model) use ($key) {
-                        $relation = $model->{$key};
-                        $relationship = $model->{$key}();
-
-                        return $relation
-                            ->pluck($relationship->getRelated()->getKeyName())
-                            ->toArray();
-                    },
-                ];
-                $fields[$key.'_count'] = [
-                    'type' => Type::nonNull(Type::int()),
-                    'resolve' => function ($model) use ($key) {
-                        $relation = $model->{$key};
-
-                        return $relation->count();
-                    },
-                ];
+                $fields = $fields->merge($this->getPluralRelationFields($key, $field));
             } else {
-                $fields[$key.'Id'] = [
-                    'type' => $field instanceof NonNull ? Type::nonNull(Type::ID()) : Type::ID(),
-                    'resolve' => function ($model) use ($key) {
-                        $relation = $model->{$key};
-
-                        return $relation ? $relation->getKey() : null;
-                    },
-                ];
+                $fields = $fields->merge($this->getSingularRelationFields($key, $field));
             }
 
             if ($relationship instanceof Relations\BelongsToMany) {
-                $pivot = $relationship->getPivotClass();
-
-                if (Bakery::hasModelSchema($pivot)) {
-                    $type = $field['type']->getWrappedType(true);
-                    $accessor = $relationship->getPivotAccessor();
-                    $definition = resolve(Bakery::getModelSchema($pivot));
-                    $closure = $type->config['fields'];
-                    $pivotField = [
-                        $accessor => [
-                            'type' => Bakery::type($definition->typename()),
-                            'resolve' => function ($model) use ($key, $accessor) {
-                                return $model->{$accessor};
-                            },
-                        ],
-                    ];
-                    $type->config['fields'] = function () use ($closure, $pivotField) {
-                        return array_merge($pivotField, $closure());
-                    };
-                    $fields[$key] = Utils::swapWrappedType($field, $type);
-                } else {
-                    $fields[$key] = $field;
-                }
-                $fields[$key] = $field;
-            } else {
-                $fields[$key] = $field;
+                $fields = $fields->merge(
+                    $this->getBelongsToManyRelationFields($key, $field, $relationship)
+                );
             }
         }
 
+        return $fields->toArray();
+    }
+
+    /**
+     * Get the fields for a plural relation.
+     *
+     * @param string $key
+     * @return Collection
+     */
+    protected function getPluralRelationFields(string $key): Collection
+    {
+        $fields = collect();
+        $singularKey = str_singular($key);
+
+        $fields->put($singularKey.'Ids', [
+            'type' => Type::listOf(Type::ID()),
+            'resolve' => function ($model) use ($key) {
+                $relation = $model->{$key};
+                $relationship = $model->{$key}();
+
+                return $relation
+                    ->pluck($relationship->getRelated()->getKeyName())
+                    ->toArray();
+            },
+        ]);
+
+        $fields->put($key.'_count', [
+            'type' => Type::nonNull(Type::int()),
+            'resolve' => function ($model) use ($key) {
+                $relation = $model->{$key};
+
+                return $relation->count();
+            },
+        ]);
+
         return $fields;
+    }
+
+    /**
+     * Get the fields for a singular relation.
+     *
+     * @param string $key
+     * @param array $field
+     * @return Collection
+     */
+    protected function getSingularRelationFields(string $key, array $field): Collection
+    {
+        $fields = collect();
+
+        return $fields->put($key.'Id', [
+            'type' => $field['type'] instanceof NonNull
+                ? Type::nonNull(Type::ID())
+                : Type::ID(),
+            'resolve' => function ($model) use ($key) {
+                $relation = $model->{$key};
+
+                return $relation ? $relation->getKey() : null;
+            },
+        ]);
+    }
+
+    /**
+     * Get the fields for a belongs to many relation.
+     *
+     * @param string $key
+     * @param array $field
+     * @param Relations\BelongsToMany $relation
+     * @return Collection
+     */
+    protected function getBelongsToManyRelationFields(string $key, array $field, Relations\BelongsToMany $relation): Collection
+    {
+        $fields = collect();
+        $pivot = $relation->getPivotClass();
+
+        if (! Bakery::hasModelSchema($pivot)) {
+            return $fields->put($key, $field);
+        }
+
+        $type = $field['type']->getWrappedType(true);
+        $accessor = $relation->getPivotAccessor();
+        $definition = resolve(Bakery::getModelSchema($pivot));
+        $closure = $type->config['fields'];
+        $pivotField = [
+            $accessor => [
+                'type' => Bakery::type($definition->typename()),
+                'resolve' => function ($model) use ($key, $accessor) {
+                    return $model->{$accessor};
+                },
+            ],
+        ];
+        $type->config['fields'] = function () use ($closure, $pivotField) {
+            return array_merge($pivotField, $closure());
+        };
+
+        return $fields->put($key, $field);
     }
 }
