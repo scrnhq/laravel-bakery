@@ -36,10 +36,7 @@ class Schema
         return array_merge($this->models, $this->models());
     }
 
-    protected function types()
-    {
-        return [];
-    }
+
 
     /**
      * Check if the schema is read only.
@@ -63,28 +60,59 @@ class Schema
         return ! Utils::usesTrait($model, Mutable::class);
     }
 
-    protected function getModelTypes()
+    /**
+     * Get a collection of all the types of the schema.
+     *
+     * @return array
+     */
+    public function getTypes(): array
     {
-        $types = [];
+        return collect()
+            ->merge($this->getModelTypes())
+            ->merge($this->getStandardTypes())
+            ->merge($this->types)
+            ->merge($this->types())
+            ->toArray();
+    }
+
+    /**
+     * Returns the types of the schema.
+     * This method can be overriden if you implement a custom schema and the
+     * types here will be added.
+     *
+     * @return array
+     */
+    protected function types(): array
+    {
+        return [];
+    }
+
+    /**
+     * Get all the types for the models in the schema.
+     *
+     * @return Collection
+     */
+    protected function getModelTypes(): Collection
+    {
+        $types = collect();
 
         foreach ($this->getModels() as $model) {
             $definition = resolve($model);
 
             if ($definition->getModel() instanceof Pivot) {
-                $pivotTypes = $this->getPivotModelTypes($model, $definition);
-                $types = array_merge($types, $pivotTypes->toArray());
+                $types = $types->merge($this->getPivotModelTypes($model, $definition));
             } else {
-                $types[] = new Types\EntityType($model);
-                $types[] = new Types\EntityCollectionType($model);
-                $types[] = new Types\EntityLookupType($model);
-                $types[] = new Types\CollectionFilterType($model);
-                $types[] = new Types\CollectionRootSearchType($model);
-                $types[] = new Types\CollectionSearchType($model);
-                $types[] = new Types\CollectionOrderByType($model);
+                $types->push(new Types\EntityType($model))
+                      ->push(new Types\EntityCollectionType($model))
+                      ->push(new Types\EntityLookupType($model))
+                      ->push(new Types\CollectionFilterType($model))
+                      ->push(new Types\CollectionRootSearchType($model))
+                      ->push(new Types\CollectionSearchType($model))
+                      ->push(new Types\CollectionOrderByType($model));
 
                 if (! $this->isReadOnly($model)) {
-                    $types[] = new Types\CreateInputType($model);
-                    $types[] = new Types\UpdateInputType($model);
+                    $types->push(new Types\CreateInputType($model))
+                          ->push(new Types\UpdateInputType($model));
                 }
             }
         }
@@ -110,9 +138,9 @@ class Schema
 
         $types = collect();
 
-        $types->push(new Types\EntityType($model));
-        $types->push(new Types\CreatePivotInputType($model));
-        $types->push(new Types\AttachPivotInputType($model));
+        $types->push(new Types\EntityType($model))
+              ->push(new Types\CreatePivotInputType($model))
+              ->push(new Types\AttachPivotInputType($model));
 
         $one = $pivotRelations->first();
         $two = $pivotRelations->last();
@@ -154,14 +182,21 @@ class Schema
             '"'.$relation.'" is not an instance of '.Relations\BelongsToMany::class
         );
 
-        $types->push((new Types\CreateWithPivotInputType($parent['class']))
-            ->setPivot($model)
-            ->setPivotRelation($pivotRelation));
+        $types->push(
+            (new Types\CreateWithPivotInputType($parent['class']))
+                ->setPivot($model)
+                ->setPivotRelation($pivotRelation)
+        );
 
         return $types;
     }
 
-    public function getStandardTypes()
+    /**
+     * Get the standard types that we use throughout Bakery.
+     *
+     * @return array
+     */
+    public function getStandardTypes(): array
     {
         return [
             Types\PaginationType::class,
@@ -169,95 +204,112 @@ class Schema
         ];
     }
 
-    public function getTypes()
+    /**
+     * Get the queries of the schema.
+     *
+     * @return array
+     */
+    public function getQueries(): array
     {
-        return array_merge(
-            $this->getModelTypes(),
-            $this->types,
-            $this->types(),
-            $this->getStandardTypes()
-        );
+        $queries = collect()
+            ->merge($this->getModelQueries());
+
+        foreach ($this->queries as $name => $query) {
+            $query = is_object($query) ?: resolve($query);
+            $name = is_string($name) ? $name : $query->name;
+            $queries->put($name, $query);
+        }
+
+        return $queries->toArray();
     }
 
-    public function getModelQueries()
+    /**
+     * Get the queries of the models of the schema.
+     *
+     * @return Collection
+     */
+    public function getModelQueries(): Collection
     {
-        $queries = [];
+        $queries = collect();
 
         foreach ($this->getModels() as $model) {
             $instance = resolve($model)->getModel();
 
             if (! $instance instanceof Pivot) {
                 $entityQuery = new SingleEntityQuery($model);
-                $queries[$entityQuery->name] = $entityQuery;
+                $queries->put($entityQuery->name, $entityQuery);
 
                 $collectionQuery = new EntityCollectionQuery($model);
-                $queries[$collectionQuery->name] = $collectionQuery;
+                $queries->put($collectionQuery->name, $collectionQuery);
             }
         }
 
         return $queries;
     }
 
-    public function getQueries()
+    /**
+     * Get the mutation of the schema.
+     *
+     * @return array
+     */
+    public function getMutations(): array
     {
-        $queries = [];
+        $mutations = collect()
+            ->merge($this->getModelMutations());
 
-        foreach ($this->queries as $name => $query) {
-            $query = is_object($query) ?: resolve($query);
-            $name = is_string($name) ? $name : $query->name;
-            $queries[$name] = $query;
+        foreach ($this->mutations as $name => $mutation) {
+            $mutation = is_object($mutation) ?: resolve($mutation);
+            $name = is_string($name) ? $name : $mutation->name;
+            $mutations->put($name, $mutation);
         }
 
-        return array_merge(
-            $this->getModelQueries(),
-            $queries
-        );
+        return $mutations->toArray();
     }
 
-    public function fieldsToArray($fields)
+    /**
+     * Get the mutations of the models of the schema.
+     *
+     * @return Collection
+     */
+    protected function getModelMutations(): Collection
     {
-        return array_map(function ($field) {
-            return $field->toArray();
-        }, $fields);
-    }
+        $mutations = collect();
 
-    protected function getModelMutations()
-    {
-        $mutations = [];
         foreach ($this->getModels() as $model) {
             $instance = resolve($model)->getModel();
 
             if (! $this->isReadOnly($model) && ! $instance instanceof Pivot) {
                 $createMutation = new CreateMutation($model);
-                $mutations[$createMutation->name] = $createMutation;
+                $mutations->put($createMutation->name, $createMutation);
 
                 $updateMutation = new UpdateMutation($model);
-                $mutations[$updateMutation->name] = $updateMutation;
+                $mutations->put($updateMutation->name, $updateMutation);
 
                 $deleteMutation = new DeleteMutation($model);
-                $mutations[$deleteMutation->name] = $deleteMutation;
+                $mutations->put($deleteMutation->name, $deleteMutation);
             }
         }
 
         return $mutations;
     }
 
-    public function getMutations()
+    /**
+     * Convert field sto array.
+     *
+     * @return array
+     */
+    public function fieldsToArray($fields): array
     {
-        $mutations = [];
-
-        foreach ($this->mutations as $name => $mutation) {
-            $mutation = is_object($mutation) ?: resolve($mutation);
-            $name = is_string($name) ? $name : $mutation->name;
-            $mutations[$name] = $mutation;
-        }
-
-        return array_merge(
-            $this->getModelMutations(),
-            $mutations
-        );
+        return array_map(function ($field) {
+            return $field->toArray();
+        }, $fields);
     }
 
+    /**
+     * Convert the bakery schema to a GraphQL schema.
+     *
+     * @return GraphQLSchema
+     */
     public function toGraphQLSchema(): GraphQLSchema
     {
         $this->verifyModels();
