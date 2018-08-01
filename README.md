@@ -9,11 +9,19 @@
 
 An on-the-fly GraphQL Schema generator from Eloquent models for Laravel.
 
-## Getting started
+- [Version Compatibility](#version-compatibility)
+- [Installation](#installation)
+- [Quickstart](#quickstart)
 
-_Docmentation is still in progress._
+## Version Compatibility
 
-### Installation
+| Laravel | Bakery |
+| :------ | :----- |
+| 5.4.x   | 1.0.x  |
+| 5.5.x   | 1.0.x  |
+| 5.6.x   | 2.0.x  |
+
+## Installation
 
 Install via composer:
 
@@ -41,7 +49,7 @@ Once this has finished, you will need to add the service provider to the provide
 Bakery\BakeryServiceProvider::class,
 ```
 
-### Quickstart
+## Quickstart
 
 First publish the configuration file of Bakery by running the following command in your terminal:
 
@@ -94,19 +102,20 @@ class User extends Authenticatable
     ];
 }
 ```
+
 The `Introspectable` trait gives Bakery the power to introspect your model and query it's collection or individual models.
 
-#### Queries
+### Queries
 
 To test this out, open up your Laravel application and go to `/graphiql`. Here you will see an interactive playground to execute GraphQL queries and mutations. Now execute the following query (assuming you have made your User model introspectable):
 
 ```gql
 query {
-    users {
-        items {
-            id
-        }
+  users {
+    items {
+      id
     }
+  }
 }
 ```
 
@@ -114,15 +123,15 @@ If everything is set up properly you will get a collection of users in your data
 
 ```gql
 query {
-    user(id: "1") {
-        id
-    }
+  user(id: "1") {
+    id
+  }
 }
 ```
 
 Just like Laravel, Bakery follows certain naming conventions. It uses Laravel's pluralization library to transform your model name in to queries so you can fetch an individual user by _user_ and a collection of users by _users_.
 
-#### Fields
+### Fields
 
 One of the differences between GraphQL and Eloquent is that GraphQL is a little bit stricter when it comes to defining its schemas than Laravel is to defining its models. To create the types and queries you need to tell us a little bit about which attributes on your model you want to expose! These attributes are called `fields` in GraphQL and you can define them by that name on your model like so:
 
@@ -138,14 +147,14 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class User extends Authenticatable
 {
-    
+
 +    public function fields()
 +    {
 +        return [
 +            'email' => Type::string();
 +        ];
 +    }
-    
+
 }
 ```
 
@@ -155,10 +164,10 @@ Now you are able to query email addresses from your query, like so:
 
 ```gql
 query {
-    user(id: "1") {
-        id
-        email
-    }
+  user(id: "1") {
+    id
+    email
+  }
 }
 ```
 
@@ -167,6 +176,7 @@ query {
 Bakery is also capable of returning data of other models related to the model you are querying. Let's say a user has articles, so you have defined a relationship on the model like so:
 
 `User.php`
+
 ```php
 public function articles()
 {
@@ -178,7 +188,7 @@ public function articles()
 
 ```php
 <?php
-    
+
 namespace App;
 
 use GraphQL\Type\Definition\Type;
@@ -187,13 +197,13 @@ use Illuminate\Database\Eloquent\Model;
 
 class Article extends Model
 {
-    
+
     public function fields()
     {
         return [
             'title' => Type::string();
         ];
-    } 
+    }
 }
 ```
 
@@ -227,12 +237,11 @@ Now you can easily fetch all the articles from a user in a single query like so:
 
 ```gql
 query {
-    user(id: "1") {
-        id
-        articles {
-            id
-        }
+  user(id: "1") {
+    id
+    articles {
+      id
     }
+  }
 }
 ```
-
