@@ -13,4 +13,9 @@ class RolePolicy
     {
         return true;
     }
+
+    public function setUsers()
+    {
+        return true;
+    }
 }

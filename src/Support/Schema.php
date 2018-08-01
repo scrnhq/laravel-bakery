@@ -137,8 +137,7 @@ class Schema
         $types = collect();
 
         $types->push(new Types\EntityType($model))
-              ->push(new Types\CreatePivotInputType($model))
-              ->push(new Types\AttachPivotInputType($model));
+              ->push(new Types\CreatePivotInputType($model));
 
         $one = $pivotRelations->first();
         $two = $pivotRelations->last();
@@ -182,6 +181,12 @@ class Schema
 
         $types->push(
             (new Types\CreateWithPivotInputType($parent['class']))
+                ->setPivot($model)
+                ->setPivotRelation($pivotRelation)
+        );
+
+        $types->push(
+            (new Types\AttachPivotInputType($parent['class']))
                 ->setPivot($model)
                 ->setPivotRelation($pivotRelation)
         );

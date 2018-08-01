@@ -202,12 +202,15 @@ trait InteractsWithRelations
      */
     protected function connectBelongsToManyRelation(Relations\BelongsToMany $relation, array $data)
     {
-        $data = collect($data)->mapWithKeys(function ($data, $key) {
+        $accessor = $relation->getPivotAccessor();
+        $relatedKey = $relation->getRelated()->getKeyName();
+
+        $data = collect($data)->mapWithKeys(function ($data, $key) use ($accessor, $relatedKey) {
             if (! is_array($data)) {
                 return [$key => $data];
             }
 
-            return [$data['id'] => $data['pivot']];
+            return [$data[$relatedKey] => $data[$accessor]];
         });
 
         $this->transactionQueue[] = function () use ($relation, $data) {

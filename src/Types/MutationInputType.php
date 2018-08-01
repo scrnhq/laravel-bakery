@@ -103,13 +103,11 @@ abstract class MutationInputType extends InputType
             return [];
         }
 
-        $definition = resolve(Bakery::getModelSchema($pivot));
-
         $inputType = 'Create'.Utils::pluralTypename($relation).'WithPivotInput';
         $fields[$relation] = Type::listOf(Bakery::type($inputType));
 
         $name = str_singular($relation).'Ids';
-        $inputType = 'Attach'.$definition->typename().'Input';
+        $inputType = 'Attach'.Utils::pluralTypename($relation).'WithPivotInput';
         $fields[$name] = Type::listOf(Bakery::type($inputType));
 
         return $fields;

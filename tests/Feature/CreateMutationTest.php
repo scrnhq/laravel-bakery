@@ -322,7 +322,35 @@ class CreateMutationTest extends FeatureTestCase
     }
 
     /** @test */
-    public function it_lets_you_set_pivot_data()
+    public function it_lets_you_attach_pivot_data()
+    {
+        $user = factory(Models\User::class)->create();
+        $this->actingAs($user);
+
+        $query = '
+            mutation {
+                createRole(input: {
+                    name: "administrator"
+                    userIds: [
+                        { id: "'.$user->id.'", pivot: { comment: "foobar" } }
+                    ],
+                }) {
+                    id
+                }
+            }
+        ';
+
+        $response = $this->json('GET', '/graphql', ['query' => $query]);
+        $response->assertJsonKey('id');
+        $this->assertDatabaseHas('role_user', [
+            'user_id' => '1',
+            'role_id' => '1',
+            'comment' => 'foobar',
+        ]);
+    }
+
+    /** @test */
+    public function it_lets_you_attach_pivot_data_with_custom_pivot()
     {
         $user = factory(Models\User::class)->create();
         $role = factory(Models\Role::class)->create();
@@ -335,7 +363,7 @@ class CreateMutationTest extends FeatureTestCase
                     name: "Jane Doe",
                     password: "secret",
                     roleIds: [
-                        { id: "'.$role->id.'", pivot: { comment: "foobar" } }
+                        { id: "'.$role->id.'", customPivot: { comment: "foobar" } }
                     ],
                 }) {
                     id
