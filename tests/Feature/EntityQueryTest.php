@@ -165,7 +165,7 @@ class EntityQueryTest extends FeatureTestCase
         ';
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $response->assertJsonFragment(['articles' => null]);
+        $response->assertJsonFragment(['user' => null]);
     }
 
     /** @test */
