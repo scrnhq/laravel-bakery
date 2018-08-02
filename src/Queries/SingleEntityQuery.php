@@ -46,18 +46,8 @@ class SingleEntityQuery extends EntityQuery
         $args = $this->schema->getLookupFields();
 
         foreach ($this->schema->getRelationFields() as $relation => $field) {
-            $fieldType = Utils::nullifyField($field)['type'];
-
-            if ($fieldType instanceof ListofType) {
-                continue;
-            }
-
-            if ($fieldType instanceof UnionType) {
-                continue;
-            }
-
-            $lookupTypeName = Type::getNamedType($fieldType)->name.'LookupType';
-            $args[$relation] = Bakery::type($lookupTypeName);
+            $typename = $field->typename('LookupType');
+            $args[$relation] = Bakery::type($typename);
         }
 
         return $args;

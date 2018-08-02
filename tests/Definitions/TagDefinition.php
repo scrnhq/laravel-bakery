@@ -1,6 +1,6 @@
 <?php
 
-namespace Bakery\Tests\Stubs\BakeryModels;
+namespace Bakery\Tests\Definitions;
 
 use Bakery\Tests\Models\Tag;
 use GraphQL\Type\Definition\Type;

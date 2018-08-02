@@ -1,16 +1,17 @@
 <?php
 
-namespace Bakery\Tests\Stubs\BakeryModels;
+namespace Bakery\Tests\Definitions;
 
-use Bakery\Tests\Models\Category;
+use Bakery\Tests\Models\Role;
 use GraphQL\Type\Definition\Type;
+use Bakery\Support\Facades\Bakery;
 use Bakery\Eloquent\Introspectable;
 
-class CategoryBakery
+class RoleDefinition
 {
     use Introspectable;
 
-    public static $model = Category::class;
+    public static $model = Role::class;
 
     public function fields(): array
     {
@@ -21,6 +22,8 @@ class CategoryBakery
 
     public function relations(): array
     {
-        return [];
+        return [
+            'users' => Bakery::collection(UserDefinition::class),
+        ];
     }
 }

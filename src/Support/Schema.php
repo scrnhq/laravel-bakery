@@ -18,8 +18,8 @@ use Bakery\Mutations\AttachPivotMutation;
 use Bakery\Mutations\DetachPivotMutation;
 use Bakery\Queries\EntityCollectionQuery;
 use GraphQL\Type\Schema as GraphQLSchema;
-use Illuminate\Database\Eloquent\Relations;
 use Illuminate\Database\Eloquent\Relations\Pivot;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Schema
 {
@@ -98,8 +98,9 @@ class Schema
 
         foreach ($this->getModels() as $model) {
             $definition = resolve($model);
+            $instance = $definition->getModel();
 
-            if ($definition->getModel() instanceof Pivot) {
+            if ($instance instanceof Pivot) {
                 $types = $types->merge($this->getPivotModelTypes($model, $definition));
             } else {
                 $types->push(new Types\EntityType($model))
@@ -115,6 +116,15 @@ class Schema
                           ->push(new Types\UpdateInputType($model));
                 }
             }
+
+            // Filter through the relations of the model and get the
+            // belongsToMany relations and get the pivot input types
+            // for that relation.
+            $definition->getRelations()->filter(function ($relation) {
+                return $relation instanceof BelongsToMany;
+            })->each(function ($relation) use ($model, &$types) {
+                $types = $types->merge($this->getPivotInputTypes($model, $relation));
+            });
         }
 
         return $types;
@@ -127,23 +137,11 @@ class Schema
      * @param  mixed definition
      * @return array
      */
-    public function getPivotModelTypes($model, $definition): collection
+    public function getPivotModelTypes($model, $definition): Collection
     {
-        $pivotRelations = $definition->getPivotRelations();
-
-        $types = collect();
-
-        $types->push(new Types\EntityType($model))
+        return collect()
+            ->push(new Types\EntityType($model))
               ->push(new Types\CreatePivotInputType($model));
-
-        $one = $pivotRelations->first();
-        $two = $pivotRelations->last();
-
-        $types = $types
-            ->merge($this->getPivotInputTypes($one, $two, $model))
-            ->merge($this->getPivotInputTypes($two, $one, $model));
-
-        return $types;
     }
 
     /**
@@ -154,38 +152,18 @@ class Schema
      * @param mixed model
      * @return Collection
      */
-    protected function getPivotInputTypes(array $parent, array $related, $model): Collection
+    protected function getPivotInputTypes(string $model, BelongsToMany $relation): Collection
     {
-        // Because we need the accessor defined on the related model we get
-        // the relationship from that side and pass that through the input type
-        // so it has all the data it needs.
-
         $types = collect();
-        $relation = $parent['key'];
-        $relatedModel = resolve($related['class'])->getModel();
 
-        Utils::invariant(
-            method_exists($relatedModel, $relation),
-            '"'.$relation.'" is not a relationship on '.get_class($relatedModel)
-        );
-
-        $pivotRelation = $relatedModel->{$relation}();
-
-        Utils::invariant(
-            $pivotRelation instanceof Relations\BelongsToMany,
-            '"'.$relation.'" is not an instance of '.Relations\BelongsToMany::class
+        $types->push(
+            (new Types\CreateWithPivotInputType($model))
+                ->setPivotRelation($relation)
         );
 
         $types->push(
-            (new Types\CreateWithPivotInputType($parent['class']))
-                ->setPivot($model)
-                ->setPivotRelation($pivotRelation)
-        );
-
-        $types->push(
-            (new Types\PivotInputType($parent['class']))
-                ->setPivot($model)
-                ->setPivotRelation($pivotRelation)
+            (new Types\PivotInputType($model))
+                ->setPivotRelation($relation)
         );
 
         return $types;
@@ -280,7 +258,7 @@ class Schema
             $instance = $schema->getModel();
 
             $pivotRelations = $schema->getRelations()->filter(function ($relation) {
-                return $relation instanceof Relations\BelongsToMany;
+                return $relation instanceof BelongsToMany;
             });
 
             if (! $this->isReadOnly($model) && ! $instance instanceof Pivot) {
@@ -311,7 +289,7 @@ class Schema
      * @param  Relations\BelongsToMany
      * @return Collection
      */
-    protected function getModelPivotMutations(string $model, Relations\BelongsToMany $relation): Collection
+    protected function getModelPivotMutations(string $model, BelongsToMany $relation): Collection
     {
         $mutations = collect();
 

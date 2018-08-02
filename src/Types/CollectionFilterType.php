@@ -35,13 +35,7 @@ class CollectionFilterType extends InputType
         }
 
         foreach ($this->schema->getRelationFields() as $relation => $field) {
-            $fieldType = Type::getNamedType($field['type']);
-
-            if ($fieldType instanceof UnionType) {
-                continue;
-            }
-
-            $fields[$relation] = Bakery::type($fieldType->name.'Filter');
+            $fields[$relation] = Bakery::type($field->typename().'Filter');
         }
 
         $fields['AND'] = Bakery::listOf(Bakery::type($this->name));

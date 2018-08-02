@@ -44,14 +44,14 @@ class FeatureTestCase extends OrchestraTestCase
 
         // Set up default schema.
         app()['config']->set('bakery.models', [
-            Stubs\BakeryModels\UserBakery::class,
-            Stubs\BakeryModels\ArticleBakery::class,
-            Stubs\BakeryModels\PhoneBakery::class,
-            Stubs\BakeryModels\CommentBakery::class,
-            Stubs\BakeryModels\RoleBakery::class,
-            Stubs\BakeryModels\CategoryBakery::class,
-            Stubs\BakeryModels\TagDefinition::class,
-            Stubs\BakeryModels\UserRoleDefinition::class,
+            Definitions\UserDefinition::class,
+            Definitions\ArticleDefinition::class,
+            Definitions\PhoneDefinition::class,
+            Definitions\CommentDefinition::class,
+            Definitions\RoleDefinition::class,
+            Definitions\CategoryDefinition::class,
+            Definitions\TagDefinition::class,
+            Definitions\UserRoleDefinition::class,
         ]);
     }
 

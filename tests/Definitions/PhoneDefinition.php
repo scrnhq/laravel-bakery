@@ -1,13 +1,13 @@
 <?php
 
-namespace Bakery\Tests\Stubs\BakeryModels;
+namespace Bakery\Tests\Definitions;
 
 use Bakery\Tests\Models\Phone;
 use GraphQL\Type\Definition\Type;
 use Bakery\Support\Facades\Bakery;
 use Bakery\Eloquent\Introspectable;
 
-class PhoneBakery
+class PhoneDefinition
 {
     use Introspectable;
 
@@ -23,7 +23,7 @@ class PhoneBakery
     public function relations(): array
     {
         return [
-            'user' => Bakery::nonNull(Bakery::type('User')),
+            'user' => Bakery::model(UserDefinition::class),
         ];
     }
 }

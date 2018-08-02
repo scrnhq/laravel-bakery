@@ -42,13 +42,7 @@ class CollectionOrderByType extends InputType
         }
 
         foreach ($this->schema->getRelationFields() as $relation => $field) {
-            $fieldType = Type::getNamedType($field['type']);
-
-            if ($fieldType instanceof UnionType) {
-                continue;
-            }
-
-            $fields[$relation] = Bakery::getType($fieldType->name.'OrderBy');
+            $fields[$relation] = Bakery::getType($field->typename().'OrderBy');
         }
 
         return $fields;

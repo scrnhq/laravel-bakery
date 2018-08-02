@@ -3,25 +3,14 @@
 namespace Bakery\Types;
 
 use Bakery\Utils\Utils;
+use Illuminate\Support\Str;
 use GraphQL\Type\Definition\Type;
 use Bakery\Support\Facades\Bakery;
-use Illuminate\Database\Eloquent\Relations;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class CreateWithPivotInputType extends CreateInputType
 {
-    /**
-     * The pivot model.
-     *
-     * @var mixed
-     */
-    protected $pivot;
-
-    /**
-     * The pivot relationship.
-     *
-     * @var Relations\BelongsToMany
-     */
-    protected $pivotRelationship;
+    use Concerns\InteractsWithPivot;
 
     /**
      * Get the name of the input type.
@@ -36,32 +25,6 @@ class CreateWithPivotInputType extends CreateInputType
     }
 
     /**
-     * Set the pivot model.
-     *
-     * @param string $pivot
-     * @return this
-     */
-    public function setPivot(string $pivot)
-    {
-        $this->pivot = resolve($pivot);
-
-        return $this;
-    }
-
-    /**
-     * Set the pivot relationship.
-     *
-     * @param Relations\BelongsToMany $relation
-     * @return this
-     */
-    public function setPivotRelation(Relations\BelongsToMany $relation)
-    {
-        $this->pivotRelation = $relation;
-
-        return $this;
-    }
-
-    /**
      * Return the fields for the input type.
      *
      * @return array
@@ -70,10 +33,11 @@ class CreateWithPivotInputType extends CreateInputType
     {
         $fields = parent::fields();
 
-        $accessor = $this->pivotRelation->getPivotAccessor();
+        $pivotDefinition = $this->getPivotDefinition();
+        $accessor = $this->guessInverseRelation()->getPivotAccessor();
 
         $fields = array_merge($fields, [
-            $accessor => Bakery::type('Create'.$this->pivot->typename().'Input'),
+            $accessor => Bakery::type('Create'.$pivotDefinition->typename().'Input'),
         ]);
 
         Utils::invariant(

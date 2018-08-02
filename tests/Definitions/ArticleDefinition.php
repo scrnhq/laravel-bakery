@@ -1,13 +1,13 @@
 <?php
 
-namespace Bakery\Tests\Stubs\BakeryModels;
+namespace Bakery\Tests\Definitions;
 
 use Bakery\Tests\Models\Article;
 use GraphQL\Type\Definition\Type;
 use Bakery\Support\Facades\Bakery;
 use Bakery\Eloquent\Introspectable;
 
-class ArticleBakery
+class ArticleDefinition
 {
     use Introspectable;
 
@@ -25,10 +25,10 @@ class ArticleBakery
     public function relations(): array
     {
         return [
-            'user' => Bakery::type('User'),
-            'tags' => Bakery::listOf(Bakery::type('Tag')),
-            'category' => Bakery::type('Category'),
-            'comments' => Bakery::nonNull(Bakery::listOf(Bakery::type('Comment'))),
+            'user' => Bakery::model(UserDefinition::class)->nullable(),
+            'tags' => Bakery::collection(TagDefinition::class)->nullable(),
+            'category' => Bakery::model(CategoryDefinition::class)->nullable(),
+            'comments' => Bakery::collection(CommentDefinition::class),
         ];
     }
 

@@ -114,6 +114,11 @@ class Bakery
         return $this->modelSchemas[$model];
     }
 
+    public function definition($model)
+    {
+        return resolve($this->getModelSchema($model));
+    }
+
     /**
      * Return if the model has a model schema in Bakery.
      * This can either be an instance or a class name.
@@ -255,5 +260,15 @@ class Bakery
         return new ObjectType(array_merge([
             'fields' => $fields,
         ], $options));
+    }
+
+    public function model(string $definition): BakeryField
+    {
+        return (new BakeryField($definition));
+    }
+
+    public function collection(string $definition): BakeryField
+    {
+        return $this->model($definition)->collection();
     }
 }

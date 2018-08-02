@@ -116,14 +116,8 @@ trait Introspectable
             });
 
         $relations = collect($this->getRelationFields())
-            ->filter(function ($field) {
-                $field = Type::getNamedType($field['type']);
-
-                return ! $field instanceof UnionType;
-            })
             ->map(function ($field) {
-                $field = Type::getNamedType($field['type']);
-                $lookupTypeName = $field->name.'LookupType';
+                $lookupTypeName = $field->typename('LookupType');
 
                 try {
                     Bakery::type($lookupTypeName);
@@ -155,9 +149,8 @@ trait Introspectable
      */
     public function getRelationFields(): Collection
     {
-        $relations = method_exists($this, 'relations') ? $this->relations() : [];
-
-        return Utils::normalizeFields($relations);
+        return method_exists($this, 'relations')
+            ? collect($this->relations()) : collect();
     }
 
     /**
@@ -176,20 +169,6 @@ trait Introspectable
     }
 
     /**
-     * Get the pivot relational definitions.
-     *
-     * @return Collection
-     */
-    public function getPivotRelations(): Collection
-    {
-        return method_exists($this, 'pivotRelations')
-            ? collect($this->pivotRelations())->map(function ($value, $key) {
-                return ['key' => $key, 'class' => $value];
-            })
-            : collect();
-    }
-
-    /**
      * Get the connections of the resource.
      *
      * @return array
@@ -197,9 +176,7 @@ trait Introspectable
     public function getConnections(): array
     {
         return collect($this->getRelationFields())->map(function ($field, $key) {
-            $field = Utils::nullifyField($field);
-
-            if ($field['type'] instanceof ListOfType) {
+            if ($field->isCollection()) {
                 return str_singular($key).'Ids';
             }
 

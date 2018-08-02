@@ -1,6 +1,6 @@
 <?php
 
-namespace Bakery\Tests\Stubs\BakeryModels;
+namespace Bakery\Tests\Definitions;
 
 use Bakery\Tests\Models\User;
 use GraphQL\Type\Definition\Type;
@@ -8,7 +8,7 @@ use Bakery\Support\Facades\Bakery;
 use Bakery\Eloquent\Introspectable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
-class UserBakery
+class UserDefinition
 {
     use Introspectable;
 
@@ -38,14 +38,12 @@ class UserBakery
     public function relations(): array
     {
         return [
-            'articles' => [
-                'type' => Type::nonNull(Type::listOf(Bakery::type('Article'))),
-                'policy' => function (User $user, $args, Authenticatable $viewer = null) {
+            'articles' => Bakery::collection(ArticleDefinition::class)
+                ->policy(function (User $user, $args, Authenticatable $viewer = null) {
                     return $viewer && $user->is($viewer);
-                },
-            ],
-            'phone' => Type::nonNull(Bakery::type('Phone')),
-            'roles' => Type::nonNull(Type::listOf(Bakery::type('Role'))),
+                }),
+            'roles' => Bakery::collection(RoleDefinition::class),
+            'phone' => Bakery::model(PhoneDefinition::class),
         ];
     }
 }

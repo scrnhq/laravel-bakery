@@ -43,13 +43,7 @@ class CollectionSearchType extends InputType
         }
 
         foreach ($this->schema->getRelationFields() as $relation => $field) {
-            $fieldType = Type::getNamedType($field['type']);
-
-            if ($fieldType instanceof UnionType) {
-                continue;
-            }
-
-            $fields[$relation] = Bakery::type($fieldType->name.'Search');
+            $fields[$relation] = Bakery::type($field->typename().'Search');
         }
 
         return $fields;

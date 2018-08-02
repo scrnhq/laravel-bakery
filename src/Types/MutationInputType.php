@@ -2,13 +2,14 @@
 
 namespace Bakery\Types;
 
+use Bakery\BakeryField;
 use Bakery\Utils\Utils;
 use Bakery\Concerns\ModelAware;
 use GraphQL\Type\Definition\Type;
 use Bakery\Support\Facades\Bakery;
 use Illuminate\Support\Collection;
 use GraphQL\Type\Definition\ListOfType;
-use Illuminate\Database\Eloquent\Relations;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 abstract class MutationInputType extends InputType
 {
@@ -56,35 +57,30 @@ abstract class MutationInputType extends InputType
      * @param array $field
      * @return array
      */
-    protected function getFieldsForRelation(string $relation, array $field): array
+    protected function getFieldsForRelation(string $relation, BakeryField $field): Collection
     {
-        $fields = [];
-        $field = Utils::nullifyField($field);
-        $fieldType = Type::getNamedType($field['type']);
-        $inputType = 'Create'.Utils::typename($fieldType->name).'Input';
+        $fields = collect();
+        $inputType = 'Create'.$field->typename().'Input';
         $relationship = $this->model->{$relation}();
 
-        if ($field['type'] instanceof ListOfType) {
+        if ($field->isCollection()) {
             $name = str_singular($relation).'Ids';
-            $fields[$name] = Type::listOf(Type::ID());
+            $fields->put($name, Type::listOf(Type::ID()));
 
             if (Bakery::hasType($inputType)) {
-                $fields[$relation] = Type::listOf(Bakery::type($inputType));
+                $fields->put($relation, Type::listOf(Bakery::type($inputType)));
             }
         } else {
             $name = str_singular($relation).'Id';
-            $fields[$name] = Type::ID();
+            $fields->put($name, Type::ID());
 
             if (Bakery::hasType($inputType)) {
-                $fields[$relation] = Bakery::type($inputType);
+                $fields->put($relation, Bakery::type($inputType));
             }
         }
 
-        if ($relationship instanceof Relations\BelongsToMany) {
-            $fields = array_merge(
-                $fields,
-                $this->getFieldsForPivot($fieldType, $relation, $relationship)
-            );
+        if ($relationship instanceof BelongsToMany) {
+            $fields = $fields->merge($this->getFieldsForPivot($field, $relationship));
         }
 
         return $fields;
@@ -95,20 +91,22 @@ abstract class MutationInputType extends InputType
      *
      * @return array
      */
-    protected function getFieldsForPivot($fieldType, string $relation, Relations\BelongsToMany $relationship): array
+    protected function getFieldsForPivot(BakeryField $field, BelongsToMany $relation): Collection
     {
-        $pivot = $relationship->getPivotClass();
+        $fields = collect();
+        $pivot = $relation->getPivotClass();
+        $relationName = $relation->getRelationName();
 
         if (! Bakery::hasModelSchema($pivot)) {
-            return [];
+            return collect();
         }
 
-        $inputType = 'Create'.Utils::pluralTypename($relation).'WithPivotInput';
-        $fields[$relation] = Type::listOf(Bakery::type($inputType));
+        $inputType = 'Create'.Utils::pluralTypename($relationName).'WithPivotInput';
+        $fields->put($relationName, Type::listOf(Bakery::type($inputType)));
 
-        $name = str_singular($relation).'Ids';
-        $inputType = Utils::pluralTypename($relation).'PivotInput';
-        $fields[$name] = Type::listOf(Bakery::type($inputType));
+        $name = str_singular($relationName).'Ids';
+        $inputType = Utils::pluralTypename($relationName).'PivotInput';
+        $fields->put($name, Type::listOf(Bakery::type($inputType)));
 
         return $fields;
     }

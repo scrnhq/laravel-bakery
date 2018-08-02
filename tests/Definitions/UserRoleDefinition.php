@@ -1,6 +1,6 @@
 <?php
 
-namespace Bakery\Tests\Stubs\BakeryModels;
+namespace Bakery\Tests\Definitions;
 
 use Bakery\Tests\Models\UserRole;
 use GraphQL\Type\Definition\Type;
@@ -16,14 +16,6 @@ class UserRoleDefinition
     {
         return [
             'comment' => Type::string(),
-        ];
-    }
-
-    public function pivotRelations(): array
-    {
-        return [
-            'users' => UserBakery::class,
-            'roles' => RoleBakery::class,
         ];
     }
 }

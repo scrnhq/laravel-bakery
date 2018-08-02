@@ -3,6 +3,7 @@
 namespace Bakery\Types;
 
 use Closure;
+use Bakery\BakeryField;
 use Bakery\Utils\Utils;
 use Bakery\Concerns\ModelAware;
 use GraphQL\Type\Definition\Type;
@@ -118,7 +119,9 @@ class EntityType extends BaseType
             $fields = $fields->merge($this->getFieldsForRelation($key, $field));
         }
 
-        return $fields->toArray();
+        return $fields->map(function ($field) {
+            return $field instanceof BakeryField ? $field->toField() : $field;
+        })->toArray();
     }
 
     /**
@@ -128,16 +131,14 @@ class EntityType extends BaseType
      * @param array $field
      * @return Collection
      */
-    protected function getFieldsForRelation(string $key, array $field): Collection
+    protected function getFieldsForRelation(string $key, BakeryField $field): Collection
     {
         $fields = collect();
-
         $relationship = $this->model->{$key}();
-        $fieldType = Utils::nullifyField($field)['type'];
 
         $fields->put($key, $field);
 
-        if ($fieldType instanceof ListOfType) {
+        if ($field->isCollection()) {
             $fields = $fields->merge($this->getPluralRelationFields($key, $field));
         } else {
             $fields = $fields->merge($this->getSingularRelationFields($key, $field));
@@ -156,9 +157,10 @@ class EntityType extends BaseType
      * Get the fields for a plural relation.
      *
      * @param string $key
+     * @param BakeryField $field
      * @return Collection
      */
-    protected function getPluralRelationFields(string $key): Collection
+    protected function getPluralRelationFields(string $key, BakeryField $field): Collection
     {
         $fields = collect();
         $singularKey = str_singular($key);
@@ -191,15 +193,15 @@ class EntityType extends BaseType
      * Get the fields for a singular relation.
      *
      * @param string $key
-     * @param array $field
+     * @param BakeryField $field
      * @return Collection
      */
-    protected function getSingularRelationFields(string $key, array $field): Collection
+    protected function getSingularRelationFields(string $key, BakeryField $field): Collection
     {
         $fields = collect();
 
         return $fields->put($key.'Id', [
-            'type' => $field['type'] instanceof NonNull
+            'type' => $field->isNullable()
                 ? Type::nonNull(Type::ID())
                 : Type::ID(),
             'resolve' => function ($model) use ($key) {
@@ -218,7 +220,7 @@ class EntityType extends BaseType
      * @param Relations\BelongsToMany $relation
      * @return Collection
      */
-    protected function getBelongsToManyRelationFields(string $key, array $field, Relations\BelongsToMany $relation): Collection
+    protected function getBelongsToManyRelationFields(string $key, BakeryField $field, Relations\BelongsToMany $relation): Collection
     {
         $fields = collect();
         $pivot = $relation->getPivotClass();
@@ -227,9 +229,10 @@ class EntityType extends BaseType
             return $fields->put($key, $field);
         }
 
-        $type = $field['type']->getWrappedType(true);
         $accessor = $relation->getPivotAccessor();
         $definition = resolve(Bakery::getModelSchema($pivot));
+        $field = $field->toField();
+        $type = $field['type']->getWrappedType(true);
         $closure = $type->config['fields'];
         $pivotField = [
             $accessor => [

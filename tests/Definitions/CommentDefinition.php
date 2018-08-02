@@ -1,13 +1,13 @@
 <?php
 
-namespace Bakery\Tests\Stubs\BakeryModels;
+namespace Bakery\Tests\Definitions;
 
 use Bakery\Tests\Models\Comment;
 use GraphQL\Type\Definition\Type;
 use Bakery\Support\Facades\Bakery;
 use Bakery\Eloquent\Introspectable;
 
-class CommentBakery
+class CommentDefinition
 {
     use Introspectable;
 
@@ -23,8 +23,8 @@ class CommentBakery
     public function relations(): array
     {
         return [
-            'user' => Bakery::type('User'),
-            'article' => Bakery::type('Article'),
+            'user' => Bakery::model(UserDefinition::class),
+            'article' => Bakery::model(ArticleDefinition::class),
         ];
     }
 
