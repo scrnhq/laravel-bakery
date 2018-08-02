@@ -8,7 +8,6 @@ use Bakery\Concerns\ModelAware;
 use GraphQL\Type\Definition\Type;
 use Bakery\Support\Facades\Bakery;
 use Illuminate\Support\Collection;
-use GraphQL\Type\Definition\ListOfType;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 abstract class MutationInputType extends InputType

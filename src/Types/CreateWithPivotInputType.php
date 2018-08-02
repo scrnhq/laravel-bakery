@@ -3,10 +3,8 @@
 namespace Bakery\Types;
 
 use Bakery\Utils\Utils;
-use Illuminate\Support\Str;
 use GraphQL\Type\Definition\Type;
 use Bakery\Support\Facades\Bakery;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class CreateWithPivotInputType extends CreateInputType
 {

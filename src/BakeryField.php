@@ -27,7 +27,7 @@ class BakeryField
         );
     }
 
-    public function collection(): BakeryField
+    public function collection(): self
     {
         $this->collection = true;
 
@@ -39,7 +39,7 @@ class BakeryField
         return $this->collection;
     }
 
-    public function nullable(): BakeryField
+    public function nullable(): self
     {
         $this->nullable = true;
 
@@ -85,6 +85,7 @@ class BakeryField
         $type = Bakery::type($this->typename());
         $type = $this->collection ? Type::listOf($type) : $type;
         $type = $this->nullable ? Type::nonNull($type) : $type;
+
         return $type;
     }
 }

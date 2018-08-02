@@ -14,7 +14,7 @@ trait InteractsWithPivot
      * @var BelongsToMany
      */
     protected $pivotRelation;
-    
+
     /**
      * Set the pivot relationship.
      *
@@ -29,25 +29,27 @@ trait InteractsWithPivot
     }
 
     /**
-    * Get the pivot definition class.
-    *
-    * @return mixed
-    */
+     * Get the pivot definition class.
+     *
+     * @return mixed
+     */
     protected function getPivotDefinition()
     {
         $class = $this->pivotRelation->getPivotClass();
+
         return Bakery::definition($class);
     }
 
     /**
      * Guess the inverse of a pivot relation.
-
+     *
      * @return BelongsToMany
      */
     protected function guessInverseRelation(): BelongsToMany
     {
         $parent = $this->pivotRelation->getParent();
         $name = Str::camel(Str::plural(class_basename($parent)));
+
         return $this->pivotRelation->getRelated()->{$name}();
     }
 }

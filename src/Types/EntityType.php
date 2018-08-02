@@ -11,7 +11,6 @@ use Bakery\Support\Facades\Bakery;
 use Bakery\Types\Type as BaseType;
 use Illuminate\Support\Collection;
 use GraphQL\Type\Definition\NonNull;
-use GraphQL\Type\Definition\ListOfType;
 use Illuminate\Contracts\Auth\Access\Gate;
 use Illuminate\Database\Eloquent\Relations;
 use Illuminate\Auth\Access\AuthorizationException;

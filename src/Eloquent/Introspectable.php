@@ -6,8 +6,6 @@ use Bakery\Utils\Utils;
 use GraphQL\Type\Definition\Type;
 use Bakery\Support\Facades\Bakery;
 use Illuminate\Support\Collection;
-use GraphQL\Type\Definition\UnionType;
-use GraphQL\Type\Definition\ListOfType;
 use Illuminate\Database\Eloquent\Model;
 
 trait Introspectable

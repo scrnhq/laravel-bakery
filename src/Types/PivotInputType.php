@@ -5,12 +5,11 @@ namespace Bakery\Types;
 use Bakery\Utils\Utils;
 use GraphQL\Type\Definition\Type;
 use Bakery\Support\Facades\Bakery;
-use Illuminate\Database\Eloquent\Relations;
 
 class PivotInputType extends MutationInputType
 {
     use Concerns\InteractsWithPivot;
-    
+
     /**
      * Get the name of the input type.
      *

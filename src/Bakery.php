@@ -264,7 +264,7 @@ class Bakery
 
     public function model(string $definition): BakeryField
     {
-        return (new BakeryField($definition));
+        return new BakeryField($definition);
     }
 
     public function collection(string $definition): BakeryField
