@@ -23,6 +23,23 @@ trait InteractsWithRelations
     ];
 
     /**
+     * Check if the user is authorised to create or update a relationship.
+     *
+     * @param string $policy
+     * @param array $attributes
+     */
+    protected function authorize(string $policy, $attributes = null)
+    {
+        $allowed = $this->gate()->allows($policy, [$this, $attributes]);
+
+        if (! $allowed) {
+            throw new AuthorizationException(
+                'Not allowed to perform '.$policy.' on '.get_class($this)
+            );
+        }
+    }
+
+    /**
      * Fill the relations in the model.
      *
      * @param array $relations
@@ -40,14 +57,7 @@ trait InteractsWithRelations
                 throw new RuntimeException("Unknown or unfillable relation type: {$key} of type ${relationType}");
             }
 
-            $allowed = $this->gate()->allows($policyMethod, [$this, $attributes]);
-
-            if (! $allowed) {
-                throw new AuthorizationException(
-                    'Not allowed to perform '.$policyMethod.' on '.get_class($this)
-                );
-            }
-
+            $this->authorize($policyMethod, $attributes);
             $this->{$method}($relation, $attributes);
         }
     }
@@ -70,14 +80,7 @@ trait InteractsWithRelations
                 throw new RuntimeException("Unknown or unfillable connection type: {$key} of type ${relationType}");
             }
 
-            $allowed = $this->gate()->allows($policyMethod, [$this, $attributes]);
-
-            if (! $allowed) {
-                throw new AuthorizationException(
-                    'Not allowed to perform '.$policyMethod.' on '.get_class($this)
-                );
-            }
-
+            $this->authorize($policyMethod, $attributes);
             $this->{$method}($relation, $attributes);
         }
     }
