@@ -96,25 +96,6 @@ class Utils
         });
     }
 
-    public static function swapWrappedType($field, Type $swap): Type
-    {
-        $field = self::toFieldArray($field);
-        $listOf = $field['type'] instanceof ListOf;
-        $nonNull = $field['type'] instanceof NonNull;
-
-        if ($listOf && $nonNull) {
-            return Type::nonNull(Type::listOf($swap));
-        }
-        if ($nonNull) {
-            return Type::nonNull($swap);
-        }
-        if ($listOf) {
-            return Type::listOf($swap);
-        }
-
-        return $swap;
-    }
-
     public static function usesTrait($class, string $trait)
     {
         $traits = class_uses_deep($class, true);
