@@ -85,7 +85,7 @@ class BakeryField
         $type = Bakery::type($this->typename());
         $type = $this->collection ? Type::listOf($type) : $type;
         $type = $this->nullable ? $type : Type::nonNull($type);
-        
+
         return $type;
     }
 }
