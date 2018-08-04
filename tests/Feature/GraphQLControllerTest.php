@@ -2,6 +2,7 @@
 
 namespace Bakery\Tests\Feature;
 
+use DB;
 use Bakery\Tests\FeatureTestCase;
 
 class GraphQLControllerTest extends FeatureTestCase
@@ -26,7 +27,11 @@ class GraphQLControllerTest extends FeatureTestCase
             }
         ';
 
+        DB::enableQueryLog(); 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
+        DB::disableQueryLog();
+
+        $this->assertCount(0, DB::getQueryLog());
         $response->assertStatus(200);
         $response->assertJsonStructure([
             'data' => [
