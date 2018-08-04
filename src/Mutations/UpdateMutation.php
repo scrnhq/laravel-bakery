@@ -2,7 +2,6 @@
 
 namespace Bakery\Mutations;
 
-use Bakery\Utils\Utils;
 use Illuminate\Database\Eloquent\Model;
 
 class UpdateMutation extends EntityMutation
@@ -21,7 +20,7 @@ class UpdateMutation extends EntityMutation
         return 'update'.$this->schema->typename();
     }
 
-    /** 
+    /**
      * Get the arguments of the mutation.
      *
      * @return array

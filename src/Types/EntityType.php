@@ -3,15 +3,12 @@
 namespace Bakery\Types;
 
 use Closure;
-use Bakery\Utils\Utils;
 use Bakery\Concerns\ModelAware;
 use Bakery\Support\Facades\Bakery;
 use Illuminate\Support\Collection;
 use Bakery\Types\Definitions\ObjectType;
 use Bakery\Types\Definitions\EloquentType;
-use Illuminate\Contracts\Auth\Access\Gate;
 use Illuminate\Database\Eloquent\Relations;
-use Illuminate\Auth\Access\AuthorizationException;
 
 class EntityType extends ObjectType
 {
@@ -157,6 +154,7 @@ class EntityType extends ObjectType
 
         return $fields->put($key.'Id', Bakery::ID()->resolve(function ($model) use ($key) {
             $relation = $Model->{$key};
+
             return $relation ? $relation->getKey() : null;
         }));
     }
@@ -180,7 +178,7 @@ class EntityType extends ObjectType
 
         $accessor = $relation->getPivotAccessor();
         $definition = resolve(Bakery::getModelSchema($pivot));
-        $type = $field->getWrappedType(); 
+        $type = $field->getWrappedType();
         $closure = $type->config['fields'];
         $pivotField = [
             $accessor => [
@@ -193,7 +191,6 @@ class EntityType extends ObjectType
         $type->config['fields'] = function () use ($closure, $pivotField) {
             return array_merge($pivotField, $closure());
         };
-
 
         return $fields;
     }

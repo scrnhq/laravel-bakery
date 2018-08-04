@@ -3,8 +3,8 @@
 namespace Bakery\Types;
 
 use Bakery\Utils\Utils;
-use Illuminate\Support\Collection;
 use Bakery\Types\Definitions\Type;
+use Illuminate\Support\Collection;
 
 class UpdateInputType extends MutationInputType
 {

@@ -4,8 +4,8 @@ namespace Bakery\Eloquent;
 
 use Bakery\Utils\Utils;
 use Bakery\Support\Facades\Bakery;
-use Illuminate\Support\Collection;
 use Bakery\Types\Definitions\Type;
+use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Model;
 
 trait Introspectable
@@ -71,7 +71,7 @@ trait Introspectable
     }
 
     /**
-     * Define the fields of the model. 
+     * Define the fields of the model.
      * This method can be overriden.
      */
     public function fields(): array
@@ -111,7 +111,6 @@ trait Introspectable
      */
     public function getLookupFields(): Collection
     {
-
         $fields = collect($this->getFields())
             ->filter(function (Type $field, $key) {
                 return $field->isUnique();
@@ -121,6 +120,7 @@ trait Introspectable
             ->map(function (Type $field) {
                 'ArticleLookupType';
                 $lookupTypeName = $field->name().'LookupType';
+
                 return Bakery::resolve($lookupTypeName)->nullable();
             });
 

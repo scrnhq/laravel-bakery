@@ -13,10 +13,9 @@ use Bakery\Types\Definitions\EloquentType;
 
 trait BakeryTypes
 {
-
     public function string(): Type
     {
-        return new StringType(); 
+        return new StringType();
     }
 
     public function int(): Type

@@ -30,7 +30,7 @@ class EntityCollectionType extends ObjectType
     {
         return [
             'pagination' => Bakery::resolve('Pagination')->resolve(function (...$args) {
-                return $this->resolvePaginationField(...$args);   
+                return $this->resolvePaginationField(...$args);
             }),
             'items' => Bakery::resolve($this->schema->typename())->list()->resolve(function (...$args) {
                 return $this->resolveItemsField(...$args);

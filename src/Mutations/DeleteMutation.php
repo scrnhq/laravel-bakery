@@ -39,7 +39,7 @@ class DeleteMutation extends EntityMutation
      */
     public function args(): array
     {
-        return $this->schema->getLookupFields()->toArray(); 
+        return $this->schema->getLookupFields()->toArray();
     }
 
     /**

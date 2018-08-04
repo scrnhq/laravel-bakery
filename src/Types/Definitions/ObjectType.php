@@ -10,10 +10,10 @@ class ObjectType extends Type
 {
     /**
      * Define the fields for the type.
-     * 
+     *
      * @return array
      */
-    public function fields(): array    
+    public function fields(): array
     {
         return [];
     }
@@ -33,13 +33,13 @@ class ObjectType extends Type
     }
 
     /**
-    * Get the attributes for the type.
-    *
-    * @return array
-    */
-   public function getAttributes(): array
-   {
-       $attributes = [
+     * Get the attributes for the type.
+     *
+     * @return array
+     */
+    public function getAttributes(): array
+    {
+        $attributes = [
            'name' => $this->name(),
            'resolver' => $this->getResolver(),
            'fields' => function () {
@@ -47,12 +47,12 @@ class ObjectType extends Type
            },
        ];
 
-       return $attributes; 
-   }
+        return $attributes;
+    }
 
     /**
      * Convert the type to a GraphQL Type.
-     * 
+     *
      * @return GraphQLType
      */
     public function toType(): GraphQLType

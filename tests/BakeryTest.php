@@ -6,7 +6,6 @@ use Bakery\Support\Facades\Bakery;
 use Bakery\Types\Definitions\Type;
 use Bakery\Exceptions\TypeNotFound;
 use GraphQL\Type\Definition\ObjectType;
-use GraphQL\Type\Definition\Type as GraphQLType;
 
 class DummyType extends Type
 {

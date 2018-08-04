@@ -3,8 +3,8 @@
 namespace Bakery\Queries;
 
 use Bakery\Utils\Utils;
-use Bakery\Types\Definitions\Type;
 use Bakery\Support\Facades\Bakery;
+use Bakery\Types\Definitions\Type;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\Grammars;

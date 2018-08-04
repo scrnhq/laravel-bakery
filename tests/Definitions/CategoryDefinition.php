@@ -15,7 +15,7 @@ class CategoryDefinition
     public function fields(): array
     {
         return [
-            'name' => Bakery::string(), 
+            'name' => Bakery::string(),
         ];
     }
 

@@ -188,12 +188,11 @@ class Bakery
             return $this->typeInstances[$name];
         }
 
-
         $class = $this->types[$name];
         $type = $this->makeObjectType($class, ['name' => $name]);
         $this->typeInstances[$name] = $type;
 
-        return $type; 
+        return $type;
     }
 
     /**

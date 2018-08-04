@@ -2,7 +2,6 @@
 
 namespace Bakery\Mutations;
 
-use Bakery\Utils\Utils;
 use Bakery\Support\Facades\Bakery;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations;
@@ -68,7 +67,7 @@ class DetachPivotMutation extends EntityMutation
     {
         return collect(['input' => Bakery::ID()->list()])
             ->merge($this->schema->getLookupFields())
-            ->toArray(); 
+            ->toArray();
     }
 
     /**

@@ -17,43 +17,43 @@ abstract class Type
 
     /**
      * Wether the type is nullable.
-     * 
+     *
      * @var bool
      */
     protected $nullable = false;
 
     /**
      * Wether the type is a list.
-     * 
+     *
      * @var bool
      */
     protected $list = false;
 
     /**
      * Define if the type is unique and can be used to lookup a model.
-     * 
+     *
      * @var bool
      */
     protected $unique = false;
 
     /**
      * The resolver for resolving the value of the type.
-     * 
+     *
      * @var mixed
      */
     protected $resolver;
 
     /**
      * The policy for accessing the value of the type.
-     * 
+     *
      * @var mixed
      */
     protected $policy;
 
     /**
      * Construct a new type.
-     * 
-     * @var GraphQLType $type
+     *
+     * @var GraphQLType
      */
     public function __construct(GraphQLType $type = null)
     {
@@ -64,7 +64,7 @@ abstract class Type
 
     /**
      * Define if the type is nullable.
-     * 
+     *
      * @param bool value
      * @return self
      */
@@ -77,8 +77,8 @@ abstract class Type
 
     /**
      * Return if the type is nullable.
-     * 
-     * @return bool 
+     *
+     * @return bool
      */
     public function isNullable(): bool
     {
@@ -86,8 +86,8 @@ abstract class Type
     }
 
     /**
-     * Define if the value of the type is unique. 
-     * 
+     * Define if the value of the type is unique.
+     *
      * @param bool value
      * @return self
      */
@@ -100,8 +100,8 @@ abstract class Type
 
     /**
      * Return if the value of the type is unique.
-     * 
-     * @return bool 
+     *
+     * @return bool
      */
     public function isUnique(): bool
     {
@@ -110,7 +110,7 @@ abstract class Type
 
     /**
      * Define if the type is a list.
-     * 
+     *
      * @param bool value
      * @return self
      */
@@ -123,7 +123,7 @@ abstract class Type
 
     /**
      * Returns if the type is a list.
-     * 
+     *
      * @return bool
      */
     public function isList(): bool
@@ -132,8 +132,8 @@ abstract class Type
     }
 
     /**
-     * Define the resolver. 
-     * 
+     * Define the resolver.
+     *
      * @param mixed resolver
      * @return self
      */
@@ -146,7 +146,7 @@ abstract class Type
 
     /**
      * Get the resolver for the type.
-     * 
+     *
      * @return callable
      */
     protected function getResolver()
@@ -167,12 +167,11 @@ abstract class Type
                 if (isset($source[$fieldName])) {
                     $property = $source[$fieldName];
                 }
-            } else if (is_object($source)) {
+            } elseif (is_object($source)) {
                 if (isset($source->{$fieldName})) {
                     $property = $source->{$fieldName};
                 }
             }
-
 
             return $property instanceof \Closure ? $property($source, $args, $context) : $property;
         };
@@ -180,7 +179,7 @@ abstract class Type
 
     /**
      * Define the policy on the type.
-     * 
+     *
      * @return self
      */
     public function policy($policy): self
@@ -236,7 +235,7 @@ abstract class Type
 
     /**
      * Returns if the underlying type is a leaf type.
-     * 
+     *
      * @return bool
      */
     public function isLeafType(): bool
@@ -245,9 +244,9 @@ abstract class Type
     }
 
     /**
-     * Get the underlying (wrapped) type. 
-     * 
-     * @return GraphQLType 
+     * Get the underlying (wrapped) type.
+     *
+     * @return GraphQLType
      */
     public function getWrappedType(): GraphQLType
     {
@@ -259,30 +258,31 @@ abstract class Type
 
     /**
      * Get the type.
-     * 
-     * @return GraphQLType 
+     *
+     * @return GraphQLType
      */
     public function getType(): GraphQLType
     {
-        $type = $this->getWrappedType(); 
+        $type = $this->getWrappedType();
 
         return $this->list ? GraphQLType::listOf($type) : $type;
     }
 
     /**
      * Convert the type to a GraphQL Type.
-     * 
+     *
      * @return GraphQLType
      */
     public function toType(): GraphQLType
     {
         $type = $this->getType();
+
         return $this->nullable ? $type : GraphQLType::nonNull($type);
     }
 
     /**
      * Convert the type to a field.
-     * 
+     *
      * @return array
      */
     public function toField(): array

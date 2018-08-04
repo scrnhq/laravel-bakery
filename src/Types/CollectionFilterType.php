@@ -3,9 +3,9 @@
 namespace Bakery\Types;
 
 use Bakery\Concerns\ModelAware;
-use Illuminate\Support\Collection;
 use Bakery\Support\Facades\Bakery;
 use Bakery\Types\Definitions\Type;
+use Illuminate\Support\Collection;
 use Bakery\Types\Definitions\ScalarType;
 
 class CollectionFilterType extends InputType
@@ -42,7 +42,7 @@ class CollectionFilterType extends InputType
         $fields->put('AND', Bakery::resolve($this->name())->list());
         $fields->put('OR', Bakery::resolve($this->name())->list());
 
-        return $fields->map(function(Type $field) {
+        return $fields->map(function (Type $field) {
             return $field->nullable();
         })->toArray();
     }

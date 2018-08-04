@@ -9,17 +9,18 @@ use GraphQL\Type\Definition\Type as GraphQLType;
 class InputType extends ObjectType
 {
     /**
-    * Get the attributes for the type.
-    *
-    * @return array
-    */
+     * Get the attributes for the type.
+     *
+     * @return array
+     */
     public function getAttributes(): array
     {
         return [
             'name' => $this->name(),
             'fields' => function () {
-                return $this->getFields()->map(function($field) {
+                return $this->getFields()->map(function ($field) {
                     $field['resolve'] = null;
+
                     return $field;
                 })->toArray();
             },

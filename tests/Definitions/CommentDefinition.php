@@ -3,7 +3,6 @@
 namespace Bakery\Tests\Definitions;
 
 use Bakery\Tests\Models\Comment;
-use GraphQL\Type\Definition\Type;
 use Bakery\Support\Facades\Bakery;
 use Bakery\Eloquent\Introspectable;
 

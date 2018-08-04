@@ -2,9 +2,7 @@
 
 namespace Bakery\Mutations;
 
-use Bakery\Utils\Utils;
 use Bakery\Support\Facades\Bakery;
-use Bakery\Types\Definitions\Type;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations;
 
@@ -74,7 +72,7 @@ class AttachPivotMutation extends EntityMutation
             $typename = studly_case($relation).'PivotInput';
             $args->put('input', Bakery::resolve($typename)->list());
         } else {
-            $args->put('input', Bakery::ID()->list()); 
+            $args->put('input', Bakery::ID()->list());
         }
 
         return $args->toArray();

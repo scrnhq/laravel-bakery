@@ -4,10 +4,9 @@ namespace Bakery\Types;
 
 use Bakery\Utils\Utils;
 use Bakery\Concerns\ModelAware;
-use Bakery\Types\Definitions\Type;
 use Bakery\Support\Facades\Bakery;
+use Bakery\Types\Definitions\Type;
 use Illuminate\Support\Collection;
-use Bakery\Types\Definitions\ScalarType;
 use Bakery\Types\Definitions\EloquentType;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
@@ -29,7 +28,7 @@ abstract class MutationInputType extends InputType
     {
         return $this->schema->getFillableFields()
             ->filter(function (Type $field, $key) {
-                return $field->isLeafType(); 
+                return $field->isLeafType();
             });
     }
 

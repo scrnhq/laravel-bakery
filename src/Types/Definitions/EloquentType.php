@@ -11,7 +11,7 @@ class EloquentType extends Type
 {
     /**
      * Construct a new Eloquent type.
-     * 
+     *
      * @param string $definition
      */
     public function __construct(string $definition)
@@ -26,7 +26,7 @@ class EloquentType extends Type
 
     /**
      * The name of the type.
-     * 
+     *
      * @return string
      */
     public function name(): string
@@ -36,7 +36,7 @@ class EloquentType extends Type
 
     /**
      * Return the underlying, wrapped type.
-     * 
+     *
      * @return GraphQLType
      */
     public function getWrappedType(): GraphQLType
