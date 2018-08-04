@@ -2,7 +2,6 @@
 
 namespace Bakery\Types\Definitions;
 
-use Bakery\Types\Definitions\Type;
 use GraphQL\Type\Definition\Type as BaseType;
 use GraphQL\Type\Definition\EnumType as BaseEnumType;
 
