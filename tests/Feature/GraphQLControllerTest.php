@@ -27,7 +27,7 @@ class GraphQLControllerTest extends FeatureTestCase
             }
         ';
 
-        DB::enableQueryLog(); 
+        DB::enableQueryLog();
         $response = $this->json('GET', '/graphql', ['query' => $query]);
         DB::disableQueryLog();
 
