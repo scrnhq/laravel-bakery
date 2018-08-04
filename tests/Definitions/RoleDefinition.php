@@ -3,7 +3,6 @@
 namespace Bakery\Tests\Definitions;
 
 use Bakery\Tests\Models\Role;
-use GraphQL\Type\Definition\Type;
 use Bakery\Support\Facades\Bakery;
 use Bakery\Eloquent\Introspectable;
 
@@ -16,7 +15,7 @@ class RoleDefinition
     public function fields(): array
     {
         return [
-            'name' => Type::nonNull(Type::string()),
+            'name' => Bakery::string(),
         ];
     }
 

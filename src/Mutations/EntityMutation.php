@@ -3,8 +3,8 @@
 namespace Bakery\Mutations;
 
 use Bakery\Concerns\ModelAware;
-use GraphQL\Type\Definition\Type;
 use Bakery\Support\Facades\Bakery;
+use Bakery\Types\Definitions\Type;
 use Illuminate\Database\Eloquent\Model;
 
 abstract class EntityMutation extends Mutation
@@ -18,7 +18,7 @@ abstract class EntityMutation extends Mutation
      *
      * @return string
      */
-    protected function name(): string
+    public function name(): string
     {
         if (property_exists($this, 'name')) {
             return $this->name;
@@ -34,7 +34,7 @@ abstract class EntityMutation extends Mutation
      */
     public function type(): Type
     {
-        return Bakery::type($this->schema->typename());
+        return Bakery::resolve($this->schema->typename());
     }
 
     /**
@@ -47,7 +47,7 @@ abstract class EntityMutation extends Mutation
         $inputTypeName = studly_case($this->name()).'Input';
 
         return [
-            'input' => Bakery::nonNull(Bakery::type($inputTypeName)),
+            'input' => Bakery::resolve($inputTypeName)->nullable(false)
         ];
     }
 

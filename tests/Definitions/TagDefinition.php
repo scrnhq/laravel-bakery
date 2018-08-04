@@ -3,7 +3,7 @@
 namespace Bakery\Tests\Definitions;
 
 use Bakery\Tests\Models\Tag;
-use GraphQL\Type\Definition\Type;
+use Bakery\Support\Facades\Bakery;
 use Bakery\Eloquent\Introspectable;
 
 class TagDefinition
@@ -15,7 +15,7 @@ class TagDefinition
     public function fields(): array
     {
         return [
-            'name' => Type::string(),
+            'name' => Bakery::string(),
         ];
     }
 }

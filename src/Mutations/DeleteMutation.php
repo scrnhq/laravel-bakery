@@ -2,7 +2,8 @@
 
 namespace Bakery\Mutations;
 
-use GraphQL\Type\Definition\Type;
+use Bakery\Support\Facades\Bakery;
+use Bakery\Types\Definitions\Type;
 use Illuminate\Database\Eloquent\Model;
 
 class DeleteMutation extends EntityMutation
@@ -12,7 +13,7 @@ class DeleteMutation extends EntityMutation
      *
      * @return string
      */
-    protected function name(): string
+    public function name(): string
     {
         if (property_exists($this, 'name')) {
             return $this->name;
@@ -28,7 +29,7 @@ class DeleteMutation extends EntityMutation
      */
     public function type(): Type
     {
-        return Type::boolean();
+        return Bakery::boolean();
     }
 
     /**
@@ -38,7 +39,7 @@ class DeleteMutation extends EntityMutation
      */
     public function args(): array
     {
-        return $this->schema->getLookupFields();
+        return $this->schema->getLookupFields()->toArray(); 
     }
 
     /**

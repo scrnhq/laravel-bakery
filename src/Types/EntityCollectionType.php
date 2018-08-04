@@ -4,9 +4,10 @@ namespace Bakery\Types;
 
 use Bakery\Concerns\ModelAware;
 use Bakery\Support\Facades\Bakery;
+use Bakery\Types\Definitions\ObjectType;
 use Illuminate\Pagination\LengthAwarePaginator;
 
-class EntityCollectionType extends Type
+class EntityCollectionType extends ObjectType
 {
     use ModelAware;
 
@@ -15,7 +16,7 @@ class EntityCollectionType extends Type
      *
      * @return string
      */
-    protected function name(): string
+    public function name(): string
     {
         return $this->schema->typename().'Collection';
     }
@@ -28,8 +29,12 @@ class EntityCollectionType extends Type
     public function fields(): array
     {
         return [
-            'pagination' => Bakery::getType('Pagination'),
-            'items' => Bakery::listOf(Bakery::type($this->schema->typename())),
+            'pagination' => Bakery::resolve('Pagination')->resolve(function (...$args) {
+                return $this->resolvePaginationField(...$args);   
+            }),
+            'items' => Bakery::resolve($this->schema->typename())->list()->resolve(function (...$args) {
+                return $this->resolveItemsField(...$args);
+            }),
         ];
     }
 

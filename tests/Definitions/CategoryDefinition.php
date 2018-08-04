@@ -3,7 +3,7 @@
 namespace Bakery\Tests\Definitions;
 
 use Bakery\Tests\Models\Category;
-use GraphQL\Type\Definition\Type;
+use Bakery\Support\Facades\Bakery;
 use Bakery\Eloquent\Introspectable;
 
 class CategoryDefinition
@@ -15,7 +15,7 @@ class CategoryDefinition
     public function fields(): array
     {
         return [
-            'name' => Type::nonNull(Type::string()),
+            'name' => Bakery::string(), 
         ];
     }
 

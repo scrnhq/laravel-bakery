@@ -3,7 +3,6 @@
 namespace Bakery\Types;
 
 use Bakery\Utils\Utils;
-use GraphQL\Type\Definition\Type;
 use Bakery\Support\Facades\Bakery;
 
 class PivotInputType extends MutationInputType
@@ -15,7 +14,7 @@ class PivotInputType extends MutationInputType
      *
      * @return string
      */
-    protected function name(): string
+    public function name(): string
     {
         $typename = Utils::pluralTypename($this->schema->typename());
 
@@ -33,10 +32,10 @@ class PivotInputType extends MutationInputType
         $accessor = $this->guessInverseRelation()->getPivotAccessor();
         $relatedKey = $this->pivotRelation->getRelated()->getKeyName();
 
-        $fields = collect()->put($relatedKey, Type::ID());
+        $fields = collect()->put($relatedKey, Bakery::ID());
 
         if ($pivot) {
-            $fields->put($accessor, Bakery::type('Create'.$pivot->typename().'Input'));
+            $fields->put($accessor, Bakery::resolve('Create'.$pivot->typename().'Input'));
         }
 
         return $fields->toArray();

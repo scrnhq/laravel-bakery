@@ -3,7 +3,6 @@
 namespace Bakery\Mutations;
 
 use Bakery\Utils\Utils;
-use GraphQL\Type\Definition\Type;
 use Bakery\Support\Facades\Bakery;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations;
@@ -22,7 +21,7 @@ class DetachPivotMutation extends EntityMutation
      *
      * @return string
      */
-    protected function name(): string
+    public function name(): string
     {
         if (property_exists($this, 'name')) {
             return $this->name;
@@ -67,9 +66,9 @@ class DetachPivotMutation extends EntityMutation
      */
     public function args(): array
     {
-        return collect(['input' => Type::nonNull(Type::listOf(Type::ID()))])
-            ->merge(Utils::nullifyFields($this->schema->getLookupFields()))
-            ->toArray();
+        return collect(['input' => Bakery::ID()->list()])
+            ->merge($this->schema->getLookupFields())
+            ->toArray(); 
     }
 
     /**

@@ -2,42 +2,64 @@
 
 namespace Bakery\Traits;
 
-use GraphQL\Type\Definition\Type;
+use Bakery\Types\Definitions\Type;
+use Bakery\Types\Definitions\IDType;
+use Bakery\Types\Definitions\IntType;
+use Bakery\Types\Definitions\ObjectType;
+use Bakery\Types\Definitions\ScalarType;
+use Bakery\Types\Definitions\StringType;
+use Bakery\Types\Definitions\BooleanType;
+use Bakery\Types\Definitions\EloquentType;
 
 trait BakeryTypes
 {
-    public function ID()
+
+    public function string(): Type
     {
-        return Type::ID();
+        return new StringType(); 
     }
 
-    public function string()
+    public function int(): Type
     {
-        return Type::string();
+        return new IntType();
     }
 
-    public function int()
+    public function ID(): Type
     {
-        return Type::int();
+        return new IDType();
     }
 
-    public function boolean()
+    public function boolean(): Type
     {
-        return Type::boolean();
+        return new BooleanType();
     }
 
-    public function float()
+    // public function float()
+    // {
+    //     return Type::float();
+    // }
+
+    public function model(string $definition): Type
     {
-        return Type::float();
+        return new EloquentType($definition);
     }
 
-    public function listOf($wrappedType)
+    public function collection($type): Type
     {
-        return Type::listOf($wrappedType);
+        if ($type instanceof ScalarType) {
+            return $definition->list();
+        }
+
+        return $this->model($type)->list();
     }
 
-    public function nonNull($wrappedType)
+    public function field($type): ObjectType
     {
-        return Type::nonNull($wrappedType);
+        return new ObjectType($type);
+    }
+
+    public function list($type): Type
+    {
+        $this->collection($type);
     }
 }

@@ -3,8 +3,8 @@
 namespace Bakery\Mutations;
 
 use Bakery\Utils\Utils;
-use GraphQL\Type\Definition\Type;
 use Bakery\Support\Facades\Bakery;
+use Bakery\Types\Definitions\Type;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations;
 
@@ -22,7 +22,7 @@ class AttachPivotMutation extends EntityMutation
      *
      * @return string
      */
-    protected function name(): string
+    public function name(): string
     {
         if (property_exists($this, 'name')) {
             return $this->name;
@@ -67,16 +67,14 @@ class AttachPivotMutation extends EntityMutation
      */
     public function args(): array
     {
+        $args = collect($this->schema->getLookupFields());
         $relation = $this->pivotRelation->getRelationName();
-
-        $args = collect()
-            ->merge(Utils::nullifyFields($this->schema->getLookupFields()));
 
         if ($this->getPivotSchema()) {
             $typename = studly_case($relation).'PivotInput';
-            $args->put('input', Type::nonNull(Type::listOf(Bakery::type($typename))));
+            $args->put('input', Bakery::resolve($typename)->list());
         } else {
-            $args->put('input', Type::nonNull(Type::listOf(Type::ID())));
+            $args->put('input', Bakery::ID()->list()); 
         }
 
         return $args->toArray();

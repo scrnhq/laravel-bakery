@@ -22,7 +22,7 @@ class CollectionOrderByType extends InputType
      *
      * @return string
      */
-    protected function name(): string
+    public function name(): string
     {
         return $this->schema->typename().'OrderBy';
     }
@@ -37,11 +37,11 @@ class CollectionOrderByType extends InputType
         $fields = [];
 
         foreach ($this->schema->getFields() as $name => $field) {
-            $fields[$name] = Bakery::getType('Order');
+            $fields[$name] = Bakery::resolve('Order')->nullable();
         }
 
         foreach ($this->schema->getRelationFields() as $relation => $field) {
-            $fields[$relation] = Bakery::getType($field->typename().'OrderBy');
+            $fields[$relation] = Bakery::resolve($field->name().'OrderBy')->nullable();
         }
 
         return $fields;

@@ -6,11 +6,13 @@ use GraphQL\GraphQL;
 use Bakery\Utils\Utils;
 use GraphQL\Type\Schema;
 use Bakery\Traits\BakeryTypes;
+use GraphQL\Type\Definition\Type;
 use Bakery\Exceptions\TypeNotFound;
 use GraphQL\Executor\ExecutionResult;
-use GraphQL\Type\Definition\ObjectType;
 use Illuminate\Database\Eloquent\Model;
+use Bakery\Types\Definitions\ObjectType;
 use Bakery\Support\Schema as BakerySchema;
+use Bakery\Types\Definitions\ReferenceType;
 
 class Bakery
 {
@@ -65,7 +67,7 @@ class Bakery
      */
     public function addType($class, string $name = null)
     {
-        $name = $name ?: $class->name;
+        $name = $name ?: $class->name();
         $this->types[$name] = $class;
     }
 
@@ -176,7 +178,7 @@ class Bakery
      * @return ObjectType
      * @throws TypeNotFound
      */
-    public function getType($name)
+    public function getType($name): Type
     {
         if (! isset($this->types[$name])) {
             throw new TypeNotFound('Type '.$name.' not found.');
@@ -186,11 +188,12 @@ class Bakery
             return $this->typeInstances[$name];
         }
 
+
         $class = $this->types[$name];
         $type = $this->makeObjectType($class, ['name' => $name]);
         $this->typeInstances[$name] = $type;
 
-        return $type;
+        return $type; 
     }
 
     /**
@@ -204,6 +207,11 @@ class Bakery
     public function type($name)
     {
         return $this->getType($name);
+    }
+
+    public function resolve($name): ReferenceType
+    {
+        return new ReferenceType($this->getType($name));
     }
 
     /**
@@ -249,7 +257,7 @@ class Bakery
         } elseif (is_array($type)) {
             $objectType = $this->makeObjectTypeFromFields($type, $options);
         } else {
-            $objectType = $type->toGraphQLType($options);
+            $objectType = $type->toType($options);
         }
 
         return $objectType;
@@ -260,15 +268,5 @@ class Bakery
         return new ObjectType(array_merge([
             'fields' => $fields,
         ], $options));
-    }
-
-    public function model(string $definition): BakeryField
-    {
-        return new BakeryField($definition);
-    }
-
-    public function collection(string $definition): BakeryField
-    {
-        return $this->model($definition)->collection();
     }
 }

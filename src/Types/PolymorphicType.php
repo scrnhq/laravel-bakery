@@ -2,8 +2,8 @@
 
 namespace Bakery\Types;
 
+use Bakery\Types\Definitions\Type;
 use GraphQL\Type\Definition\UnionType;
-use GraphQL\Type\Definition\Type as BaseType;
 
 class PolymorphicType extends Type
 {
@@ -29,7 +29,7 @@ class PolymorphicType extends Type
      * @param array $options
      * @return BaseType
      */
-    public function toGraphQLType(array $options = []): BaseType
+    public function toType(array $options = []): BaseType
     {
         return $this->type = new UnionType(array_merge($this->toArray(), $options));
     }

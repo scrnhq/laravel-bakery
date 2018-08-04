@@ -16,7 +16,7 @@ class CommentDefinition
     public function fields(): array
     {
         return [
-            'body' => Type::nonNull(Type::string()),
+            'body' => Bakery::string(),
         ];
     }
 

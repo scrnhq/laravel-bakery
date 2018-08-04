@@ -16,7 +16,7 @@ class PhoneDefinition
     public function fields(): array
     {
         return [
-            'number' => Type::nonNull(Type::string()),
+            'number' => Bakery::string(),
         ];
     }
 

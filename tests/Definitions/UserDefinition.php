@@ -14,24 +14,17 @@ class UserDefinition
 
     public static $model = User::class;
 
-    public $lookupFields = ['email'];
-
     public function fields(): array
     {
         return [
-            'name' => Type::nonNull(Type::string()),
-            'email' => Type::nonNull(Type::string()),
-            'type' => Type::nonNull(Type::string()),
-            'password' => [
-                'type' => Type::nonNull(Type::string()),
-                'policy' => 'readPassword',
-            ],
-            'secret_information' => [
-                'type' => Type::string(),
-                'policy' => function (User $user, $args, Authenticatable $viewer = null) {
+            'name' => Bakery::string(),
+            'email' => Bakery::string()->unique(),
+            'type' => Bakery::string(),
+            'password' => Bakery::string()->policy('readPassword'),
+            'secret_information' => Bakery::string()
+                ->policy(function (User $user, $args, Authenticatable $viewer = null) {
                     return $viewer && $user->is($viewer);
-                },
-            ],
+                })->nullable(),
         ];
     }
 

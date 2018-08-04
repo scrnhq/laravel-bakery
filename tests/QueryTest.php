@@ -3,13 +3,18 @@
 namespace Bakery\Tests;
 
 use Bakery\Queries\Query;
+use Bakery\Support\Facades\Bakery;
+use Bakery\Types\Definitions\Type;
 
 class CustomQuery extends Query
 {
-    //
+    public function type(): Type
+    {
+        return Bakery::boolean();
+    }
 }
 
-class QueryTest extends TestCase
+class QueryTest extends FeatureTestCase
 {
     /** @test */
     public function it_allows_to_extend_query_to_make_custom_query()

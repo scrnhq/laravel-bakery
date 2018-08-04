@@ -32,6 +32,7 @@ class CollectionQueryTest extends FeatureTestCase
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
         $response->assertStatus(200);
+        $response->assertJsonKey('articles');
         $response->assertJsonStructure([
             'data' => [
                 'articles' => [

@@ -22,7 +22,7 @@ class EntityQueryTest extends FeatureTestCase
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
         $response->assertStatus(200);
-        $response->assertJsonStructure(['data' => ['article']]);
+        $response->assertJsonKey('article');
         $response->assertJsonFragment(['id' => $article->id]);
     }
 
@@ -191,6 +191,7 @@ class EntityQueryTest extends FeatureTestCase
         ';
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
+        $response->assertJsonKey('user');
         $response->assertJsonStructure(['data' => ['user' => ['articles' => 'id']]]);
         $response->assertJsonFragment(['title' => $article->title]);
     }

@@ -16,9 +16,9 @@ class ArticleDefinition
     public function fields(): array
     {
         return [
-            'slug' => Type::nonNull(Type::string()),
-            'title' => Type::nonNull(Type::string()),
-            'content' => Type::nonNull(Type::string()),
+            'slug' => Bakery::string()->unique(),
+            'title' => Bakery::string(),
+            'content' => Bakery::string(),
         ];
     }
 
@@ -31,6 +31,4 @@ class ArticleDefinition
             'comments' => Bakery::collection(CommentDefinition::class),
         ];
     }
-
-    public $lookupFields = ['slug'];
 }

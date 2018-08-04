@@ -3,19 +3,17 @@
 namespace Bakery\Types;
 
 use Closure;
-use Bakery\BakeryField;
 use Bakery\Utils\Utils;
 use Bakery\Concerns\ModelAware;
-use GraphQL\Type\Definition\Type;
 use Bakery\Support\Facades\Bakery;
-use Bakery\Types\Type as BaseType;
 use Illuminate\Support\Collection;
-use GraphQL\Type\Definition\NonNull;
+use Bakery\Types\Definitions\ObjectType;
+use Bakery\Types\Definitions\EloquentType;
 use Illuminate\Contracts\Auth\Access\Gate;
 use Illuminate\Database\Eloquent\Relations;
 use Illuminate\Auth\Access\AuthorizationException;
 
-class EntityType extends BaseType
+class EntityType extends ObjectType
 {
     use ModelAware;
 
@@ -24,7 +22,7 @@ class EntityType extends BaseType
      *
      * @return string
      */
-    protected function name(): string
+    public function name(): string
     {
         return $this->schema->typename();
     }
@@ -56,35 +54,6 @@ class EntityType extends BaseType
     }
 
     /**
-     * Check the policy of a field.
-     *
-     * @param array $field
-     * @param string $key
-     * @param $source
-     * @param $args
-     * @param $viewer
-     * @return void
-     * @throws AuthorizationException
-     */
-    protected function checkPolicy(array $field, string $key, $source, $args, $viewer)
-    {
-        $policy = $field['policy'];
-        $gate = app(Gate::class)->forUser($viewer);
-
-        // Check if the policy method is callable
-        if (is_callable($policy) && ! $policy($source, $args, $viewer)) {
-            throw new AuthorizationException(
-                'Cannot read property '.$key.' of '.$this->name
-            );
-        }
-
-        // Check if there is a policy with this name
-        if (is_string($policy) && ! $gate->check($policy, $source)) {
-            throw new AuthorizationException('Cannot read property '.$key.' of '.$this->name);
-        }
-    }
-
-    /**
      * Get the fields of the entity type.
      *
      * @return array
@@ -96,12 +65,7 @@ class EntityType extends BaseType
 
         return collect($fields)
             ->merge($relationFields)
-            ->map(function ($field, $key) {
-                $field = Utils::toFieldArray($field);
-                $field['resolve'] = $this->createFieldResolver($field, $key);
-
-                return $field;
-            })->toArray();
+            ->toArray();
     }
 
     /**
@@ -109,7 +73,7 @@ class EntityType extends BaseType
      *
      * @return array
      */
-    protected function getRelationFields(): array
+    protected function getRelationFields(): Collection
     {
         $fields = collect();
         $relations = $this->schema->getRelationFields();
@@ -118,9 +82,7 @@ class EntityType extends BaseType
             $fields = $fields->merge($this->getFieldsForRelation($key, $field));
         }
 
-        return $fields->map(function ($field) {
-            return $field instanceof BakeryField ? $field->toField() : $field;
-        })->toArray();
+        return $fields;
     }
 
     /**
@@ -130,14 +92,14 @@ class EntityType extends BaseType
      * @param array $field
      * @return Collection
      */
-    protected function getFieldsForRelation(string $key, BakeryField $field): Collection
+    protected function getFieldsForRelation(string $key, EloquentType $field): Collection
     {
         $fields = collect();
         $relationship = $this->model->{$key}();
 
         $fields->put($key, $field);
 
-        if ($field->isCollection()) {
+        if ($field->isList()) {
             $fields = $fields->merge($this->getPluralRelationFields($key, $field));
         } else {
             $fields = $fields->merge($this->getSingularRelationFields($key, $field));
@@ -156,34 +118,28 @@ class EntityType extends BaseType
      * Get the fields for a plural relation.
      *
      * @param string $key
-     * @param BakeryField $field
+     * @param EloquentType $field
      * @return Collection
      */
-    protected function getPluralRelationFields(string $key, BakeryField $field): Collection
+    protected function getPluralRelationFields(string $key, EloquentType $field): Collection
     {
         $fields = collect();
         $singularKey = str_singular($key);
 
-        $fields->put($singularKey.'Ids', [
-            'type' => Type::listOf(Type::ID()),
-            'resolve' => function ($model) use ($key) {
-                $relation = $model->{$key};
-                $relationship = $model->{$key}();
+        $fields->put($singularKey.'Ids', Bakery::ID()->list()->resolve(function ($model) use ($key) {
+            $relation = $model->{$key};
+            $relationship = $model->{$key}();
 
-                return $relation
-                    ->pluck($relationship->getRelated()->getKeyName())
-                    ->toArray();
-            },
-        ]);
+            return $relation
+                ->pluck($relationship->getRelated()->getKeyName())
+                ->toArray();
+        }));
 
-        $fields->put($key.'_count', [
-            'type' => Type::nonNull(Type::int()),
-            'resolve' => function ($model) use ($key) {
-                $relation = $model->{$key};
+        $fields->put($key.'_count', Bakery::int()->resolve(function ($model) use ($key) {
+            $relation = $model->{$key};
 
-                return $relation->count();
-            },
-        ]);
+            return $relation->count();
+        }));
 
         return $fields;
     }
@@ -192,23 +148,17 @@ class EntityType extends BaseType
      * Get the fields for a singular relation.
      *
      * @param string $key
-     * @param BakeryField $field
+     * @param EloquentType $field
      * @return Collection
      */
-    protected function getSingularRelationFields(string $key, BakeryField $field): Collection
+    protected function getSingularRelationFields(string $key, EloquentType $field): Collection
     {
         $fields = collect();
 
-        return $fields->put($key.'Id', [
-            'type' => $field->isNullable()
-                ? Type::nonNull(Type::ID())
-                : Type::ID(),
-            'resolve' => function ($model) use ($key) {
-                $relation = $model->{$key};
-
-                return $relation ? $relation->getKey() : null;
-            },
-        ]);
+        return $fields->put($key.'Id', Bakery::ID()->resolve(function ($model) use ($key) {
+            $relation = $Model->{$key};
+            return $relation ? $relation->getKey() : null;
+        }));
     }
 
     /**
@@ -219,23 +169,22 @@ class EntityType extends BaseType
      * @param Relations\BelongsToMany $relation
      * @return Collection
      */
-    protected function getBelongsToManyRelationFields(string $key, BakeryField $field, Relations\BelongsToMany $relation): Collection
+    protected function getBelongsToManyRelationFields(string $key, EloquentType $field, Relations\BelongsToMany $relation): Collection
     {
         $fields = collect();
         $pivot = $relation->getPivotClass();
 
         if (! Bakery::hasModelSchema($pivot)) {
-            return $fields->put($key, $field);
+            return $fields;
         }
 
         $accessor = $relation->getPivotAccessor();
         $definition = resolve(Bakery::getModelSchema($pivot));
-        $field = $field->toField();
-        $type = $field['type']->getWrappedType(true);
+        $type = $field->getWrappedType(); 
         $closure = $type->config['fields'];
         $pivotField = [
             $accessor => [
-                'type' => Bakery::type($definition->typename()),
+                'type' => Bakery::resolve($definition->typename())->toType(),
                 'resolve' => function ($model) use ($key, $accessor) {
                     return $model->{$accessor};
                 },
@@ -245,6 +194,7 @@ class EntityType extends BaseType
             return array_merge($pivotField, $closure());
         };
 
-        return $fields->put($key, $field);
+
+        return $fields;
     }
 }

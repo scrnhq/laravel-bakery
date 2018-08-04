@@ -3,6 +3,7 @@
 namespace Bakery\Types;
 
 use Bakery\Utils\Utils;
+use Bakery\Types\Definitions\Type;
 use Illuminate\Support\Collection;
 
 class CreateInputType extends MutationInputType
@@ -12,7 +13,7 @@ class CreateInputType extends MutationInputType
      *
      * @return string
      */
-    protected function name(): string
+    public function name(): string
     {
         return 'Create'.$this->schema->typename().'Input';
     }
@@ -45,12 +46,11 @@ class CreateInputType extends MutationInputType
     protected function getFillableFields(): Collection
     {
         $fields = parent::getFillableFields();
+        $defaults = $this->model->getAttributes();
 
-        return $fields->map(function ($field, $key) {
-            $defaults = $this->model->getAttributes();
-
+        return $fields->map(function (Type $field, $key) use ($defaults) {
             if (in_array($key, array_keys($defaults))) {
-                return Utils::nullifyField($field);
+                return $field->nullable();
             }
 
             return $field;

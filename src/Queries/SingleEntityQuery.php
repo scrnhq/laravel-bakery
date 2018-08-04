@@ -3,8 +3,8 @@
 namespace Bakery\Queries;
 
 use Bakery\Utils\Utils;
-use GraphQL\Type\Definition\Type;
 use Bakery\Support\Facades\Bakery;
+use Bakery\Types\Definitions\Type;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Bakery\Exceptions\TooManyResultsException;
@@ -16,7 +16,7 @@ class SingleEntityQuery extends EntityQuery
      *
      * @return string
      */
-    protected function name(): string
+    public function name(): string
     {
         if (property_exists($this, 'name')) {
             return $this->name;
@@ -30,9 +30,9 @@ class SingleEntityQuery extends EntityQuery
      *
      * @return Type
      */
-    public function type()
+    public function type(): Type
     {
-        return Bakery::type($this->schema->typename());
+        return Bakery::resolve($this->schema->typename())->nullable();
     }
 
     /**
@@ -42,14 +42,7 @@ class SingleEntityQuery extends EntityQuery
      */
     public function args(): array
     {
-        $args = $this->schema->getLookupFields();
-
-        foreach ($this->schema->getRelationFields() as $relation => $field) {
-            $typename = $field->typename('LookupType');
-            $args[$relation] = Bakery::type($typename);
-        }
-
-        return $args;
+        return $this->schema->getLookupFields()->toArray();
     }
 
     /**

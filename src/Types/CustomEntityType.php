@@ -12,7 +12,7 @@ abstract class CustomEntityType extends EntityType
      *
      * @return string
      */
-    protected function name(): string
+    public function name(): string
     {
         if (property_exists($this, 'name')) {
             return $this->name;

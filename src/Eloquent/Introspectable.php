@@ -3,9 +3,9 @@
 namespace Bakery\Eloquent;
 
 use Bakery\Utils\Utils;
-use GraphQL\Type\Definition\Type;
 use Bakery\Support\Facades\Bakery;
 use Illuminate\Support\Collection;
+use Bakery\Types\Definitions\Type;
 use Illuminate\Database\Eloquent\Model;
 
 trait Introspectable
@@ -67,9 +67,16 @@ trait Introspectable
      */
     private function getKeyField(): array
     {
-        return [
-            $this->getKeyName() => ['type' => Type::nonNull(Type::ID())],
-        ];
+        return [$this->getKeyName() => Bakery::ID()];
+    }
+
+    /**
+     * Define the fields of the model. 
+     * This method can be overriden.
+     */
+    public function fields(): array
+    {
+        return [];
     }
 
     /**
@@ -79,11 +86,7 @@ trait Introspectable
      */
     public function getFields(): Collection
     {
-        $fields = method_exists($this, 'fields') ? $this->fields() : [];
-
-        return collect($this->getKeyField())->merge(
-            Utils::normalizeFields($fields)
-        );
+        return collect($this->getKeyField())->merge($this->fields());
     }
 
     /**
@@ -96,7 +99,7 @@ trait Introspectable
      */
     public function getFillableFields(): Collection
     {
-        return Utils::normalizeFields($this->fields() ?? [])->filter(function ($field, $key) {
+        return $this->getFields()->filter(function (Type $field, $key) {
             return collect($this->getFillable())->contains($key);
         });
     }
@@ -104,31 +107,29 @@ trait Introspectable
     /**
      * The fields that can be used to look up this model.
      *
-     * @return array
+     * @return Collection
      */
-    public function getLookupFields(): array
+    public function getLookupFields(): Collection
     {
+
         $fields = collect($this->getFields())
-            ->filter(function ($field, $key) {
-                return in_array($key, $this->lookupFields ?? []);
+            ->filter(function (Type $field, $key) {
+                return $field->isUnique();
             });
 
         $relations = collect($this->getRelationFields())
-            ->map(function ($field) {
-                $lookupTypeName = $field->typename('LookupType');
-
-                try {
-                    Bakery::type($lookupTypeName);
-                } catch (\Exception $e) {
-                    //
-                }
-
-                return Bakery::type($lookupTypeName);
+            ->map(function (Type $field) {
+                'ArticleLookupType';
+                $lookupTypeName = $field->name().'LookupType';
+                return Bakery::resolve($lookupTypeName)->nullable();
             });
 
-        return Utils::nullifyFields(
-            $fields->merge($relations)->merge($this->getKeyField())
-        )->toArray();
+        return collect($this->getKeyField())
+            ->merge($fields)
+            ->merge($relations)
+            ->map(function (Type $field) {
+                return $field->nullable();
+            });
     }
 
     /**
@@ -174,7 +175,7 @@ trait Introspectable
     public function getConnections(): array
     {
         return collect($this->getRelationFields())->map(function ($field, $key) {
-            if ($field->isCollection()) {
+            if ($field->isList()) {
                 return str_singular($key).'Ids';
             }
 

@@ -12,7 +12,7 @@ class UpdateMutation extends EntityMutation
      *
      * @return string
      */
-    protected function name(): string
+    public function name(): string
     {
         if (property_exists($this, 'name')) {
             return $this->name;
@@ -21,7 +21,7 @@ class UpdateMutation extends EntityMutation
         return 'update'.$this->schema->typename();
     }
 
-    /**
+    /** 
      * Get the arguments of the mutation.
      *
      * @return array
@@ -30,7 +30,7 @@ class UpdateMutation extends EntityMutation
     {
         return array_merge(
             parent::args(),
-            Utils::nullifyFields($this->schema->getLookupFields())->toArray()
+            $this->schema->getLookupFields()->toArray()
         );
     }
 

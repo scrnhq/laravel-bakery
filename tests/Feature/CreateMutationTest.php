@@ -25,7 +25,7 @@ class CreateMutationTest extends FeatureTestCase
         ';
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $response->assertJsonFragment(['createArticle' => null]);
+        $response->assertJsonFragment(['data' => []]);
         $this->assertDatabaseMissing('articles', ['title' => 'Hello world!']);
     }
 
@@ -46,7 +46,7 @@ class CreateMutationTest extends FeatureTestCase
         ';
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $response->assertJsonFragment(['createCategory' => null]);
+        $response->assertJsonFragment(['data' => []]);
         $this->assertDatabaseMissing('categories', ['name' => 'some-category']);
     }
 

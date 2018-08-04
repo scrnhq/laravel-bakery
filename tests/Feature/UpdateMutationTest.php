@@ -25,7 +25,7 @@ class UpdateMutationTest extends FeatureTestCase
         ';
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $response->assertJsonFragment(['updateArticle' => null]);
+        $response->assertJsonKey('errors');
         $this->assertDatabaseMissing('articles', ['id' => $article->id, 'title' => 'Hello world! (updated)']);
     }
 
@@ -49,7 +49,7 @@ class UpdateMutationTest extends FeatureTestCase
         ';
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $response->assertJsonFragment(['updateRole' => null]);
+        $response->assertJsonKey('errors');
         $this->assertDatabaseMissing('roles', ['name' => 'moderator']);
     }
 
@@ -99,7 +99,7 @@ class UpdateMutationTest extends FeatureTestCase
         ';
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $response->assertJsonFragment(['updateArticle' => null]);
+        $response->assertJsonFragment(['data' => []]);
         $this->assertDatabaseMissing('articles', ['title' => 'Hello world! (updated)']);
     }
 
@@ -160,7 +160,7 @@ class UpdateMutationTest extends FeatureTestCase
         ';
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $response->assertJsonFragment(['updateUser' => null]);
+        $response->assertJsonKey('errors');
         $this->assertDatabaseMissing('users', ['type' => 'admin']);
     }
 

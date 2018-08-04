@@ -402,6 +402,6 @@ class Schema
 
     protected function makeObjectTypeFromClass($class, $options = [])
     {
-        return $class->toGraphQLType();
+        return $class->toType();
     }
 }

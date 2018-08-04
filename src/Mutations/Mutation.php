@@ -6,7 +6,7 @@ use Bakery\Support\Field;
 use Illuminate\Contracts\Auth\Access\Gate;
 use Illuminate\Auth\Access\AuthorizationException;
 
-class Mutation extends Field
+abstract class Mutation extends Field
 {
     /**
      * Instance of the gate class.
@@ -21,7 +21,7 @@ class Mutation extends Field
      *
      * @return string
      */
-    protected function name(): string
+    public function name(): string
     {
         if (property_exists($this, 'name')) {
             return $this->name;

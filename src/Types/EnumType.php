@@ -51,7 +51,7 @@ class EnumType extends Type
      * @param array $options
      * @return BaseType
      */
-    public function toGraphQLType(array $options = []): BaseType
+    public function toType(array $options = []): BaseType
     {
         return new BaseEnumType($this->toArray());
     }

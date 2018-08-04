@@ -3,8 +3,10 @@
 namespace Bakery\Types;
 
 use Bakery\Concerns\ModelAware;
-use GraphQL\Type\Definition\Type;
+use Illuminate\Support\Collection;
 use Bakery\Support\Facades\Bakery;
+use Bakery\Types\Definitions\Type;
+use Bakery\Types\Definitions\ScalarType;
 
 class CollectionFilterType extends InputType
 {
@@ -15,7 +17,7 @@ class CollectionFilterType extends InputType
      *
      * @return string
      */
-    protected function name(): string
+    public function name(): string
     {
         return $this->schema->typename().'Filter';
     }
@@ -27,20 +29,22 @@ class CollectionFilterType extends InputType
      */
     public function fields(): array
     {
-        $fields = [];
+        $fields = collect();
 
         foreach ($this->schema->getFields() as $name => $type) {
-            $fields = array_merge($fields, $this->getFilters($name, $type));
+            $fields = $fields->merge($this->getFilters($name, $type));
         }
 
         foreach ($this->schema->getRelationFields() as $relation => $field) {
-            $fields[$relation] = Bakery::type($field->typename().'Filter');
+            $fields->put($relation, Bakery::resolve($field->name().'Filter'));
         }
 
-        $fields['AND'] = Bakery::listOf(Bakery::type($this->name));
-        $fields['OR'] = Bakery::listOf(Bakery::type($this->name));
+        $fields->put('AND', Bakery::resolve($this->name())->list());
+        $fields->put('OR', Bakery::resolve($this->name())->list());
 
-        return $fields;
+        return $fields->map(function(Type $field) {
+            return $field->nullable();
+        })->toArray();
     }
 
     /**
@@ -50,34 +54,26 @@ class CollectionFilterType extends InputType
      * @param string $type
      * @return array
      */
-    public function getFilters(string $name, $type): array
+    public function getFilters(string $name, Type $field): Collection
     {
-        if (is_array($type)) {
-            $type = Type::getNamedType($type['type']);
-        } else {
-            $type = Type::getNamedType($type);
-        }
+        $fields = collect();
 
-        $fields = [];
+        $type = $field->getType();
 
-        if (! Type::isLeafType($type)) {
-            return $fields;
-        }
-
-        $fields[$name] = $type;
-        $fields[$name.'_contains'] = $type;
-        $fields[$name.'_not_contains'] = $type;
-        $fields[$name.'_starts_with'] = $type;
-        $fields[$name.'_not_starts_with'] = $type;
-        $fields[$name.'_ends_with'] = $type;
-        $fields[$name.'_not_ends_with'] = $type;
-        $fields[$name.'_not'] = $type;
-        $fields[$name.'_not_in'] = Bakery::listOf($type);
-        $fields[$name.'_in'] = Bakery::listOf($type);
-        $fields[$name.'_lt'] = $type;
-        $fields[$name.'_lte'] = $type;
-        $fields[$name.'_gt'] = $type;
-        $fields[$name.'_gte'] = $type;
+        $fields->put($name, new ScalarType($type));
+        $fields->put($name.'_contains', new ScalarType($type));
+        $fields->put($name.'_not_contains', new ScalarType($type));
+        $fields->put($name.'_starts_with', new ScalarType($type));
+        $fields->put($name.'_not_starts_with', new ScalarType($type));
+        $fields->put($name.'_ends_with', new ScalarType($type));
+        $fields->put($name.'_not_ends_with', new ScalarType($type));
+        $fields->put($name.'_not', new ScalarType($type));
+        $fields->put($name.'_not_in', (new ScalarType($type))->list());
+        $fields->put($name.'_in', (new ScalarType($type))->list());
+        $fields->put($name.'_lt', new ScalarType($type));
+        $fields->put($name.'_lte', new ScalarType($type));
+        $fields->put($name.'_gt', new ScalarType($type));
+        $fields->put($name.'_gte', new ScalarType($type));
 
         return $fields;
     }

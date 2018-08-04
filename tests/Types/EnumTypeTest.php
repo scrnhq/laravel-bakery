@@ -12,7 +12,7 @@ class EnumTypeTest extends TestCase
     public function it_returns_the_enum_object_type()
     {
         $type = new EnumTypeStub();
-        $objectType = $type->toGraphQLType();
+        $objectType = $type->toType();
 
         $this->assertInstanceOf(EnumType::class, $objectType);
         $this->assertEquals($type->name, $objectType->name);

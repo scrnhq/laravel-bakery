@@ -3,7 +3,7 @@
 namespace Bakery\Queries;
 
 use Bakery\Utils\Utils;
-use GraphQL\Type\Definition\Type;
+use Bakery\Types\Definitions\Type;
 use Bakery\Support\Facades\Bakery;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
@@ -26,23 +26,23 @@ class EntityCollectionQuery extends EntityQuery
      *
      * @return string
      */
-    protected function name(): string
+    public function name(): string
     {
         if (property_exists($this, 'name')) {
             return $this->name;
         }
 
-        return Utils::plural($this->model->getModel());
+        return Utils::plural($this->schema->getModel());
     }
 
     /**
      * The type of the CollectionQuery.
      *
-     * @return mixed
+     * @return Type
      */
     public function type(): Type
     {
-        return Bakery::type($this->schema->typename().'Collection');
+        return Bakery::resolve($this->schema->typename().'Collection');
     }
 
     /**
@@ -52,18 +52,18 @@ class EntityCollectionQuery extends EntityQuery
      */
     public function args(): array
     {
-        $args = [
-            'page' => Type::int(),
-            'count' => Type::int(),
-            'filter' => Bakery::type($this->schema->typename().'Filter'),
-            'search' => Bakery::type($this->schema->typename().'RootSearch'),
-        ];
+        $args = collect([
+            'page' => Bakery::int()->nullable(),
+            'count' => Bakery::int()->nullable(),
+            'filter' => Bakery::resolve($this->schema->typename().'Filter')->nullable(),
+            'search' => Bakery::resolve($this->schema->typename().'RootSearch')->nullable(),
+        ]);
 
         if (! empty($this->schema->getFields())) {
-            $args['orderBy'] = Bakery::type($this->schema->typename().'OrderBy');
+            $args->put('orderBy', Bakery::resolve($this->schema->typename().'OrderBy')->nullable());
         }
 
-        return $args;
+        return $args->toArray();
     }
 
     /**

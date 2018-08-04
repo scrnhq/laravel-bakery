@@ -15,7 +15,7 @@ class CreateWithPivotInputType extends CreateInputType
      *
      * @return string
      */
-    protected function name(): string
+    public function name(): string
     {
         $typename = Utils::pluralTypename($this->schema->typename());
 
@@ -33,9 +33,10 @@ class CreateWithPivotInputType extends CreateInputType
 
         $pivotDefinition = $this->getPivotDefinition();
         $accessor = $this->guessInverseRelation()->getPivotAccessor();
+        $typename = 'Create'.$pivotDefinition->typename().'Input';
 
         $fields = array_merge($fields, [
-            $accessor => Bakery::type('Create'.$pivotDefinition->typename().'Input'),
+            $accessor => Bakery::resolve($typename)->nullable(),
         ]);
 
         Utils::invariant(
