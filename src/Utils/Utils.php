@@ -46,17 +46,6 @@ class Utils
         return studly_case(str_plural(class_basename($class)));
     }
 
-    // public static function toFieldArray($field)
-    // {
-    //     if (is_array($field)) {
-    //         return $field;
-    //     }
-
-    //     return [
-    //         'type' => $field,
-    //     ];
-    // }
-
     public static function pluralRelationship($relationship)
     {
         return $relationship instanceof Relations\HasMany ||
@@ -68,33 +57,6 @@ class Utils
         return $relationship instanceof Relations\BelongsTo ||
                $relationship instanceof Relations\HasOne;
     }
-
-    // public static function normalizeFields($fields): Collection
-    // {
-    //     return collect($fields)->map(function ($field) {
-    //         return self::toFieldArray($field);
-    //     });
-    // }
-
-    // public static function nullifyField($field): array
-    // {
-    //     $field = self::toFieldArray($field);
-
-    //     if ($field['type'] instanceof NonNull) {
-    //         $field['type'] = $field['type']->getWrappedType();
-    //     }
-
-    //     return $field;
-    // }
-
-    // public static function nullifyFields($fields): Collection
-    // {
-    //     return collect($fields)->map(function ($field) {
-    //         $field = self::nullifyField($field);
-
-    //         return $field;
-    //     });
-    // }
 
     public static function usesTrait($class, string $trait)
     {
