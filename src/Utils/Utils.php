@@ -2,9 +2,6 @@
 
 namespace Bakery\Utils;
 
-use GraphQL\Type\Definition\Type;
-use Illuminate\Support\Collection;
-use GraphQL\Type\Definition\NonNull;
 use Bakery\Exceptions\InvariantViolation;
 use Illuminate\Database\Eloquent\Relations;
 
