@@ -140,7 +140,7 @@ class Schema
     {
         return collect()
             ->push(new Types\EntityType($model))
-              ->push(new Types\CreatePivotInputType($model));
+            ->push(new Types\CreatePivotInputType($model));
     }
 
     /**
