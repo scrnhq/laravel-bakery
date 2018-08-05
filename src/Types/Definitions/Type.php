@@ -11,19 +11,26 @@ use Illuminate\Auth\Access\AuthorizationException;
 abstract class Type
 {
     /**
+     * The name of the type.
+     *
+     * @var string
+     */
+    protected  $name;
+
+    /**
      * The underlying type.
      */
     protected $type;
 
     /**
-     * Wether the type is nullable.
+     * Whether the type is nullable.
      *
      * @var bool
      */
     protected $nullable = false;
 
     /**
-     * Wether the type is a list.
+     * Whether the type is a list.
      *
      * @var bool
      */
@@ -173,13 +180,14 @@ abstract class Type
                 }
             }
 
-            return $property instanceof \Closure ? $property($source, $args, $context) : $property;
+            return $property instanceof \Closure ? $property($source, $args, $viewer, $info) : $property;
         };
     }
 
     /**
      * Define the policy on the type.
      *
+     * @param $policy
      * @return self
      */
     public function policy($policy): self
@@ -226,7 +234,7 @@ abstract class Type
      */
     public function name(): string
     {
-        if (property_exists($this, 'name')) {
+        if (isset($this->name)) {
             return $this->name;
         }
 
@@ -251,7 +259,7 @@ abstract class Type
     public function getWrappedType(): GraphQLType
     {
         $type = method_exists($this, 'type') ? $this->type() : $this->type;
-        Utils::invariant($type, 'No type defined for '.get_class($this));
+        Utils::invariant($type, 'No type defined on '.get_class($this));
 
         return $type;
     }

@@ -36,7 +36,7 @@ class CreateWithPivotInputType extends CreateInputType
         $typename = 'Create'.$pivotDefinition->typename().'Input';
 
         $fields = array_merge($fields, [
-            $accessor => Bakery::resolve($typename)->nullable(),
+            $accessor => Bakery::type($typename)->nullable(),
         ]);
 
         Utils::invariant(

@@ -7,6 +7,7 @@ use Bakery\Concerns\ModelAware;
 use Bakery\Support\Facades\Bakery;
 use Bakery\Types\Definitions\Type;
 use Illuminate\Support\Collection;
+use Bakery\Types\Definitions\InputType;
 use Bakery\Types\Definitions\EloquentType;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
@@ -66,14 +67,14 @@ abstract class MutationInputType extends InputType
             $fields->put($name, Bakery::ID()->list()->nullable());
 
             if (Bakery::hasType($inputType)) {
-                $fields->put($relation, Bakery::resolve($inputType)->list()->nullable());
+                $fields->put($relation, Bakery::type($inputType)->list()->nullable());
             }
         } else {
             $name = str_singular($relation).'Id';
             $fields->put($name, Bakery::ID()->nullable());
 
             if (Bakery::hasType($inputType)) {
-                $fields->put($relation, Bakery::resolve($inputType)->nullable());
+                $fields->put($relation, Bakery::type($inputType)->nullable());
             }
         }
 
@@ -100,11 +101,11 @@ abstract class MutationInputType extends InputType
         }
 
         $inputType = 'Create'.Utils::pluralTypename($relationName).'WithPivotInput';
-        $fields->put($relationName, Bakery::resolve($inputType)->list()->nullable());
+        $fields->put($relationName, Bakery::type($inputType)->list()->nullable());
 
         $name = str_singular($relationName).'Ids';
         $inputType = Utils::pluralTypename($relationName).'PivotInput';
-        $fields->put($name, Bakery::resolve($inputType)->list()->nullable());
+        $fields->put($name, Bakery::type($inputType)->list()->nullable());
 
         return $fields;
     }

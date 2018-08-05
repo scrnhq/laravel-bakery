@@ -2,7 +2,53 @@
 
 namespace Bakery\Types\Definitions;
 
-class ScalarType extends Type
+use GraphQL\Error\Error;
+use GraphQL\Type\Definition\CustomScalarType;
+use GraphQL\Type\Definition\Type as GraphQLType;
+
+abstract class ScalarType extends Type
 {
-    //
+    /**
+     * Serializes an internal value to include in a response.
+     *
+     * @param string $value
+     * @return string
+     */
+    abstract public function serialize($value);
+
+    /**
+     * Parses an externally provided value (query variable) to use as an input
+     *
+     * @param mixed $value
+     * @return mixed
+     */
+    abstract public function parseValue($value);
+
+    /**
+     * Parses an externally provided literal value (hardcoded in GraphQL query) to use as an input.
+     *
+     * E.g.
+     * {
+     *   user(email: "user@example.com")
+     * }
+     *
+     * @param \GraphQL\Language\AST\Node $valueNode
+     * @return string
+     * @throws Error
+     */
+    abstract public function parseLiteral($valueNode);
+    /**
+     * Convert the type to a GraphQL Type.
+     *
+     * @return GraphQLType
+     */
+    public function toType(): GraphQLType
+    {
+        return new CustomScalarType([
+            'name' => $this->name(),
+            'serialize' => function(...$args) { $this->serialize(...$args); },
+            'parseValue' => function(...$args) { $this->parseValue(...$args); },
+            'parseLiteral' => function(...$args) { $this->parseLiteral(...$args); },
+        ]);
+    }
 }

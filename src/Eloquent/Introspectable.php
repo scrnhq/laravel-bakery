@@ -118,10 +118,9 @@ trait Introspectable
 
         $relations = collect($this->getRelationFields())
             ->map(function (Type $field) {
-                'ArticleLookupType';
                 $lookupTypeName = $field->name().'LookupType';
 
-                return Bakery::resolve($lookupTypeName)->nullable();
+                return Bakery::type($lookupTypeName)->nullable();
             });
 
         return collect($this->getKeyField())
@@ -163,6 +162,11 @@ trait Introspectable
         $relations = collect($this->relations());
 
         return $relations->map(function ($field, $key) {
+            Utils::invariant(
+                method_exists($this->getModel(), $key),
+                'Relation "'.$key.'" is not defined on "'.get_class($this->getModel()).'".'
+            );
+
             return $this->getModel()->{$key}();
         });
     }

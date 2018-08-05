@@ -41,6 +41,6 @@ class EloquentType extends Type
      */
     public function getWrappedType(): GraphQLType
     {
-        return Bakery::resolve($this->name())->getType();
+        return Bakery::type($this->name())->getType();
     }
 }

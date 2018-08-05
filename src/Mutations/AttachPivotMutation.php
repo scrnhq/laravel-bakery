@@ -70,7 +70,7 @@ class AttachPivotMutation extends EntityMutation
 
         if ($this->getPivotSchema()) {
             $typename = studly_case($relation).'PivotInput';
-            $args->put('input', Bakery::resolve($typename)->list());
+            $args->put('input', Bakery::type($typename)->list());
         } else {
             $args->put('input', Bakery::ID()->list());
         }

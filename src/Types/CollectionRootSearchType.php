@@ -3,8 +3,8 @@
 namespace Bakery\Types;
 
 use Bakery\Concerns\ModelAware;
-use GraphQL\Type\Definition\Type;
 use Bakery\Support\Facades\Bakery;
+use Bakery\Types\Definitions\InputType;
 
 class CollectionRootSearchType extends InputType
 {
@@ -29,7 +29,7 @@ class CollectionRootSearchType extends InputType
     {
         return [
             'query' => Bakery::string(),
-            'fields' => Bakery::resolve($this->schema->typename().'Search'),
+            'fields' => Bakery::type($this->schema->typename().'Search'),
         ];
     }
 }

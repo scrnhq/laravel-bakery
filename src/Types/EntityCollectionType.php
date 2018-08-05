@@ -29,10 +29,10 @@ class EntityCollectionType extends ObjectType
     public function fields(): array
     {
         return [
-            'pagination' => Bakery::resolve('Pagination')->resolve(function (...$args) {
+            'pagination' => Bakery::type('Pagination')->resolve(function (...$args) {
                 return $this->resolvePaginationField(...$args);
             }),
-            'items' => Bakery::resolve($this->schema->typename())->list()->resolve(function (...$args) {
+            'items' => Bakery::type($this->schema->typename())->list()->resolve(function (...$args) {
                 return $this->resolveItemsField(...$args);
             }),
         ];

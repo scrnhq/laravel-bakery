@@ -4,9 +4,19 @@ namespace Bakery\Types;
 
 use Bakery\Types\Definitions\Type;
 use GraphQL\Type\Definition\UnionType;
+use GraphQL\Type\Definition\Type as GraphQLType;
 
-class PolymorphicType extends Type
+abstract class PolymorphicType extends Type
 {
+    protected $types;
+
+    abstract public function resolveType($value);
+
+    public function types()
+    {
+        return $this->types;
+    }
+
     /**
      * Get the attributes for the type.
      *
@@ -15,8 +25,8 @@ class PolymorphicType extends Type
     public function getAttributes(): array
     {
         return [
-            'name' => $this->name,
-            'types' => $this->types,
+            'name' => $this->name(),
+            'types' => $this->types(),
             'resolveType' => function ($value) {
                 return $this->resolveType($value);
             },
@@ -26,11 +36,10 @@ class PolymorphicType extends Type
     /**
      * Convert the Bakery type to a GraphQL type.
      *
-     * @param array $options
-     * @return BaseType
+     * @return GraphQLType
      */
-    public function toType(array $options = []): BaseType
+    public function toType(): GraphQLType
     {
-        return $this->type = new UnionType(array_merge($this->toArray(), $options));
+        return $this->type = new UnionType($this->getAttributes());
     }
 }

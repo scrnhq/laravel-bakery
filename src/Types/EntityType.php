@@ -182,7 +182,7 @@ class EntityType extends ObjectType
         $closure = $type->config['fields'];
         $pivotField = [
             $accessor => [
-                'type' => Bakery::resolve($definition->typename())->toType(),
+                'type' => Bakery::type($definition->typename())->toType(),
                 'resolve' => function ($model) use ($key, $accessor) {
                     return $model->{$accessor};
                 },

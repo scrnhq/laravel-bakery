@@ -60,7 +60,12 @@ abstract class Field
     public function getArgs(): array
     {
         return collect($this->args())->map(function (Type $field, $key) {
-            return $field->toType();
+            try {
+                return $field->toType();
+            } Catch(\Exception $e) {
+                // dd($key);
+                dd($field);
+            }
         })->toArray();
     }
 

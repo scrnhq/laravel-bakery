@@ -77,7 +77,7 @@ class Schema
 
     /**
      * Returns the types of the schema.
-     * This method can be overriden if you implement a custom schema and the
+     * This method can be overridden if you implement a custom schema and the
      * types here will be added.
      *
      * @return array
@@ -101,7 +101,7 @@ class Schema
             $instance = $definition->getModel();
 
             if ($instance instanceof Pivot) {
-                $types = $types->merge($this->getPivotModelTypes($model, $definition));
+                $types = $types->merge($this->getPivotModelTypes($model));
             } else {
                 $types->push(new Types\EntityType($model))
                       ->push(new Types\EntityCollectionType($model))
@@ -133,11 +133,10 @@ class Schema
     /**
      * Get the types for a pivot model.
      *
-     * @param  mixed model
-     * @param  mixed definition
-     * @return array
+     * @param $model
+     * @return Collection
      */
-    public function getPivotModelTypes($model, $definition): Collection
+    public function getPivotModelTypes($model): Collection
     {
         return collect()
             ->push(new Types\EntityType($model))
@@ -147,9 +146,8 @@ class Schema
     /**
      * Get the pivot input types.
      *
-     * @param array parent
-     * @param array related
-     * @param mixed model
+     * @param string $model
+     * @param BelongsToMany $relation
      * @return Collection
      */
     protected function getPivotInputTypes(string $model, BelongsToMany $relation): Collection
@@ -286,7 +284,7 @@ class Schema
      * Get the pivot mutations for a model and a relationship.
      *
      * @param  string $model
-     * @param  Relations\BelongsToMany
+     * @param BelongsToMany $relation
      * @return Collection
      */
     protected function getModelPivotMutations(string $model, BelongsToMany $relation): Collection
@@ -358,7 +356,7 @@ class Schema
                 return $mutation;
             }
 
-            return Bakery::type($name);
+            return Bakery::resolve($name);
         });
 
         return new GraphQLSchema($config);

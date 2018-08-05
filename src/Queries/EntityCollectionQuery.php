@@ -42,7 +42,7 @@ class EntityCollectionQuery extends EntityQuery
      */
     public function type(): Type
     {
-        return Bakery::resolve($this->schema->typename().'Collection');
+        return Bakery::type($this->schema->typename().'Collection');
     }
 
     /**
@@ -55,12 +55,12 @@ class EntityCollectionQuery extends EntityQuery
         $args = collect([
             'page' => Bakery::int()->nullable(),
             'count' => Bakery::int()->nullable(),
-            'filter' => Bakery::resolve($this->schema->typename().'Filter')->nullable(),
-            'search' => Bakery::resolve($this->schema->typename().'RootSearch')->nullable(),
+            'filter' => Bakery::type($this->schema->typename().'Filter')->nullable(),
+            'search' => Bakery::type($this->schema->typename().'RootSearch')->nullable(),
         ]);
 
         if (! empty($this->schema->getFields())) {
-            $args->put('orderBy', Bakery::resolve($this->schema->typename().'OrderBy')->nullable());
+            $args->put('orderBy', Bakery::type($this->schema->typename().'OrderBy')->nullable());
         }
 
         return $args->toArray();

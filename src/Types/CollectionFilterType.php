@@ -4,9 +4,10 @@ namespace Bakery\Types;
 
 use Bakery\Concerns\ModelAware;
 use Bakery\Support\Facades\Bakery;
+use Bakery\Types\Definitions\ReferenceType;
 use Bakery\Types\Definitions\Type;
 use Illuminate\Support\Collection;
-use Bakery\Types\Definitions\ScalarType;
+use Bakery\Types\Definitions\InputType;
 
 class CollectionFilterType extends InputType
 {
@@ -36,11 +37,11 @@ class CollectionFilterType extends InputType
         }
 
         foreach ($this->schema->getRelationFields() as $relation => $field) {
-            $fields->put($relation, Bakery::resolve($field->name().'Filter'));
+            $fields->put($relation, Bakery::type($field->name().'Filter'));
         }
 
-        $fields->put('AND', Bakery::resolve($this->name())->list());
-        $fields->put('OR', Bakery::resolve($this->name())->list());
+        $fields->put('AND', Bakery::type($this->name())->list());
+        $fields->put('OR', Bakery::type($this->name())->list());
 
         return $fields->map(function (Type $field) {
             return $field->nullable();
@@ -51,8 +52,8 @@ class CollectionFilterType extends InputType
      * Return the filters for a field.
      *
      * @param string $name
-     * @param string $type
-     * @return array
+     * @param Type $field
+     * @return Collection
      */
     public function getFilters(string $name, Type $field): Collection
     {
@@ -60,20 +61,20 @@ class CollectionFilterType extends InputType
 
         $type = $field->getType();
 
-        $fields->put($name, new ScalarType($type));
-        $fields->put($name.'_contains', new ScalarType($type));
-        $fields->put($name.'_not_contains', new ScalarType($type));
-        $fields->put($name.'_starts_with', new ScalarType($type));
-        $fields->put($name.'_not_starts_with', new ScalarType($type));
-        $fields->put($name.'_ends_with', new ScalarType($type));
-        $fields->put($name.'_not_ends_with', new ScalarType($type));
-        $fields->put($name.'_not', new ScalarType($type));
-        $fields->put($name.'_not_in', (new ScalarType($type))->list());
-        $fields->put($name.'_in', (new ScalarType($type))->list());
-        $fields->put($name.'_lt', new ScalarType($type));
-        $fields->put($name.'_lte', new ScalarType($type));
-        $fields->put($name.'_gt', new ScalarType($type));
-        $fields->put($name.'_gte', new ScalarType($type));
+        $fields->put($name, new ReferenceType($type));
+        $fields->put($name.'_contains', new ReferenceType($type));
+        $fields->put($name.'_not_contains', new ReferenceType($type));
+        $fields->put($name.'_starts_with', new ReferenceType($type));
+        $fields->put($name.'_not_starts_with', new ReferenceType($type));
+        $fields->put($name.'_ends_with', new ReferenceType($type));
+        $fields->put($name.'_not_ends_with', new ReferenceType($type));
+        $fields->put($name.'_not', new ReferenceType($type));
+        $fields->put($name.'_not_in', (new ReferenceType($type))->list());
+        $fields->put($name.'_in', (new ReferenceType($type))->list());
+        $fields->put($name.'_lt', new ReferenceType($type));
+        $fields->put($name.'_lte', new ReferenceType($type));
+        $fields->put($name.'_gt', new ReferenceType($type));
+        $fields->put($name.'_gte', new ReferenceType($type));
 
         return $fields;
     }

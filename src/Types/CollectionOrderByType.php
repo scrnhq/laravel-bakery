@@ -3,8 +3,8 @@
 namespace Bakery\Types;
 
 use Bakery\Concerns\ModelAware;
-use GraphQL\Type\Definition\Type;
 use Bakery\Support\Facades\Bakery;
+use Bakery\Types\Definitions\InputType;
 
 class CollectionOrderByType extends InputType
 {
@@ -37,11 +37,11 @@ class CollectionOrderByType extends InputType
         $fields = [];
 
         foreach ($this->schema->getFields() as $name => $field) {
-            $fields[$name] = Bakery::resolve('Order')->nullable();
+            $fields[$name] = Bakery::type('Order')->nullable();
         }
 
         foreach ($this->schema->getRelationFields() as $relation => $field) {
-            $fields[$relation] = Bakery::resolve($field->name().'OrderBy')->nullable();
+            $fields[$relation] = Bakery::type($field->name().'OrderBy')->nullable();
         }
 
         return $fields;

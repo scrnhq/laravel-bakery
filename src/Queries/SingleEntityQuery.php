@@ -32,7 +32,7 @@ class SingleEntityQuery extends EntityQuery
      */
     public function type(): Type
     {
-        return Bakery::resolve($this->schema->typename())->nullable();
+        return Bakery::type($this->schema->typename())->nullable();
     }
 
     /**

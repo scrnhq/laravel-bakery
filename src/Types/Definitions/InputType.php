@@ -1,8 +1,7 @@
 <?php
 
-namespace Bakery\Types;
+namespace Bakery\Types\Definitions;
 
-use Bakery\Types\Definitions\ObjectType;
 use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\Type as GraphQLType;
 
@@ -31,7 +30,7 @@ class InputType extends ObjectType
      * Convert the Bakery type to a GraphQL type.
      *
      * @param array $options
-     * @return BaseType
+     * @return GraphQLType
      */
     public function toType(array $options = []): GraphQLType
     {

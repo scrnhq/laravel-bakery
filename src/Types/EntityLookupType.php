@@ -3,6 +3,7 @@
 namespace Bakery\Types;
 
 use Bakery\Concerns\ModelAware;
+use Bakery\Types\Definitions\InputType;
 
 class EntityLookupType extends InputType
 {

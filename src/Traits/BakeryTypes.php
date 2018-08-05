@@ -3,40 +3,38 @@
 namespace Bakery\Traits;
 
 use Bakery\Types\Definitions\Type;
-use Bakery\Types\Definitions\IDType;
-use Bakery\Types\Definitions\IntType;
 use Bakery\Types\Definitions\ObjectType;
 use Bakery\Types\Definitions\ScalarType;
-use Bakery\Types\Definitions\StringType;
-use Bakery\Types\Definitions\BooleanType;
 use Bakery\Types\Definitions\EloquentType;
+use Bakery\Types\Definitions\ReferenceType;
+use GraphQL\Type\Definition\Type as GraphQLType;
 
 trait BakeryTypes
 {
     public function string(): Type
     {
-        return new StringType();
+        return new ReferenceType(GraphQLType::string());
     }
 
     public function int(): Type
     {
-        return new IntType();
+        return new ReferenceType(GraphQLType::int());
     }
 
     public function ID(): Type
     {
-        return new IDType();
+        return new ReferenceType(GraphQLType::ID());
     }
 
     public function boolean(): Type
     {
-        return new BooleanType();
+        return new ReferenceType(GraphQLType::boolean());
     }
 
-    // public function float()
-    // {
-    //     return Type::float();
-    // }
+     public function float()
+     {
+         return new ReferenceType(GraphQLType::float());
+     }
 
     public function model(string $definition): Type
     {
@@ -45,10 +43,6 @@ trait BakeryTypes
 
     public function collection($type): Type
     {
-        if ($type instanceof ScalarType) {
-            return $definition->list();
-        }
-
         return $this->model($type)->list();
     }
 
@@ -59,6 +53,6 @@ trait BakeryTypes
 
     public function list($type): Type
     {
-        $this->collection($type);
+        return $this->type($type)->list();
     }
 }

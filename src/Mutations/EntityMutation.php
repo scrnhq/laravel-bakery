@@ -34,7 +34,7 @@ abstract class EntityMutation extends Mutation
      */
     public function type(): Type
     {
-        return Bakery::resolve($this->schema->typename());
+        return Bakery::type($this->schema->typename());
     }
 
     /**
@@ -47,7 +47,7 @@ abstract class EntityMutation extends Mutation
         $inputTypeName = studly_case($this->name()).'Input';
 
         return [
-            'input' => Bakery::resolve($inputTypeName)->nullable(false),
+            'input' => Bakery::type($inputTypeName)->nullable(false),
         ];
     }
 

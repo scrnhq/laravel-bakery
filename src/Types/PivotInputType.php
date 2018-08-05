@@ -35,7 +35,7 @@ class PivotInputType extends MutationInputType
         $fields = collect()->put($relatedKey, Bakery::ID());
 
         if ($pivot) {
-            $fields->put($accessor, Bakery::resolve('Create'.$pivot->typename().'Input'));
+            $fields->put($accessor, Bakery::type('Create'.$pivot->typename().'Input'));
         }
 
         return $fields->toArray();

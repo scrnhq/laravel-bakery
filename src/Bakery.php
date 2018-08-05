@@ -6,13 +6,14 @@ use GraphQL\GraphQL;
 use Bakery\Utils\Utils;
 use GraphQL\Type\Schema;
 use Bakery\Traits\BakeryTypes;
-use GraphQL\Type\Definition\Type;
+use Bakery\Types\Definitions\Type;
 use Bakery\Exceptions\TypeNotFound;
 use GraphQL\Executor\ExecutionResult;
 use Illuminate\Database\Eloquent\Model;
 use Bakery\Types\Definitions\ObjectType;
 use Bakery\Support\Schema as BakerySchema;
 use Bakery\Types\Definitions\ReferenceType;
+use GraphQL\Type\Definition\Type as GraphQLType;
 
 class Bakery
 {
@@ -62,13 +63,13 @@ class Bakery
     /**
      * Add a type to the registry.
      *
-     * @param $class
+     * @param Type $type
      * @param string|null $name
      */
-    public function addType($class, string $name = null)
+    public function addType(Type $type, string $name = null)
     {
-        $name = $name ?: $class->name();
-        $this->types[$name] = $class;
+        $name = $name ?: $type->name();
+        $this->types[$name] = $type;
     }
 
     /**
@@ -175,24 +176,12 @@ class Bakery
      * Get the GraphQL type.
      *
      * @param $name
-     * @return ObjectType
+     * @return ReferenceType
      * @throws TypeNotFound
      */
-    public function getType($name): Type
+    public function getType($name): ReferenceType
     {
-        if (! isset($this->types[$name])) {
-            throw new TypeNotFound('Type '.$name.' not found.');
-        }
-
-        if (isset($this->typeInstances[$name])) {
-            return $this->typeInstances[$name];
-        }
-
-        $class = $this->types[$name];
-        $type = $this->makeObjectType($class, ['name' => $name]);
-        $this->typeInstances[$name] = $type;
-
-        return $type;
+        return new ReferenceType($this->resolve($name));
     }
 
     /**
@@ -200,17 +189,47 @@ class Bakery
      *
      * @api
      * @param $name
-     * @return ObjectType
+     * @return ReferenceType
      * @throws TypeNotFound
      */
-    public function type($name)
+    public function type($name): ReferenceType
     {
         return $this->getType($name);
     }
 
-    public function resolve($name): ReferenceType
+    /**
+     * Resolve a type from the registry.
+     *
+     * @param $name
+     * @return GraphQLType
+     * @throws TypeNotFound
+     */
+    public function resolve(string $name): GraphQLType
     {
-        return new ReferenceType($this->getType($name));
+        $type = null;
+
+        if (isset($this->types[$name])) {
+            $type = $this->types[$name];
+        } else if (class_exists($name)) {
+            $instance = resolve($name);
+            if ($instance instanceof Type) {
+                $name = $instance->name();
+                return $this->resolve($name);
+            }
+        }
+
+        if (!$type) {
+            throw new TypeNotFound('Type ' . $name . ' not found.');
+        }
+
+        if (isset($this->typeInstances[$name])) {
+            return $this->typeInstances[$name];
+        }
+
+        $type = $this->makeObjectType($type, ['name' => $name]);
+        $this->typeInstances[$name] = $type;
+
+        return $type;
     }
 
     /**

@@ -5,8 +5,7 @@ namespace Bakery\Types;
 use Bakery\Concerns\ModelAware;
 use Bakery\Support\Facades\Bakery;
 use Bakery\Types\Definitions\Type;
-use GraphQL\Type\Definition\IDType;
-use GraphQL\Type\Definition\StringType;
+use Bakery\Types\Definitions\InputType;
 
 class CollectionSearchType extends InputType
 {
@@ -45,7 +44,7 @@ class CollectionSearchType extends InputType
         // }
 
         // foreach ($this->schema->getRelationFields() as $relation => $field) {
-        //     $fields[$relation] = Bakery::resolve($field->typename().'Search');
+        //     $fields[$relation] = Bakery::type($field->typename().'Search');
         // }
 
         return $fields->toArray();
