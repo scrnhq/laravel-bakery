@@ -35,7 +35,7 @@ abstract class Field
     /**
      * Get the underlying field of the type and convert it to a type.
      *
-     * @return Type
+     * @return GraphQLType
      */
     public function getType(): GraphQLType
     {
@@ -59,13 +59,8 @@ abstract class Field
      */
     public function getArgs(): array
     {
-        return collect($this->args())->map(function (Type $field, $key) {
-            try {
-                return $field->toType();
-            } catch (\Exception $e) {
-                // dd($key);
-                dd($field);
-            }
+        return collect($this->args())->map(function (Type $field) {
+            return $field->toType();
         })->toArray();
     }
 
