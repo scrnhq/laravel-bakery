@@ -148,19 +148,6 @@ class Bakery
     }
 
     /**
-     * Return the types that should be included in all schemas.
-     *
-     * @return array
-     */
-    public function getStandardTypes()
-    {
-        return [
-            new Types\PaginationType(),
-            new Types\OrderType(),
-        ];
-    }
-
-    /**
      * Get the default GraphQL schema.
      *
      * @return Schema
