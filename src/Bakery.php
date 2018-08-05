@@ -210,16 +210,17 @@ class Bakery
 
         if (isset($this->types[$name])) {
             $type = $this->types[$name];
-        } else if (class_exists($name)) {
+        } elseif (class_exists($name)) {
             $instance = resolve($name);
             if ($instance instanceof Type) {
                 $name = $instance->name();
+
                 return $this->resolve($name);
             }
         }
 
-        if (!$type) {
-            throw new TypeNotFound('Type ' . $name . ' not found.');
+        if (! $type) {
+            throw new TypeNotFound('Type '.$name.' not found.');
         }
 
         if (isset($this->typeInstances[$name])) {

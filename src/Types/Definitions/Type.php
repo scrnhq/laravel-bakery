@@ -15,7 +15,7 @@ abstract class Type
      *
      * @var string
      */
-    protected  $name;
+    protected $name;
 
     /**
      * The underlying type.

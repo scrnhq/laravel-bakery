@@ -4,7 +4,6 @@ namespace Bakery\Traits;
 
 use Bakery\Types\Definitions\Type;
 use Bakery\Types\Definitions\ObjectType;
-use Bakery\Types\Definitions\ScalarType;
 use Bakery\Types\Definitions\EloquentType;
 use Bakery\Types\Definitions\ReferenceType;
 use GraphQL\Type\Definition\Type as GraphQLType;
@@ -31,10 +30,10 @@ trait BakeryTypes
         return new ReferenceType(GraphQLType::boolean());
     }
 
-     public function float()
-     {
-         return new ReferenceType(GraphQLType::float());
-     }
+    public function float()
+    {
+        return new ReferenceType(GraphQLType::float());
+    }
 
     public function model(string $definition): Type
     {

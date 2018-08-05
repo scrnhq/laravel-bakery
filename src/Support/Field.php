@@ -62,7 +62,7 @@ abstract class Field
         return collect($this->args())->map(function (Type $field, $key) {
             try {
                 return $field->toType();
-            } Catch(\Exception $e) {
+            } catch (\Exception $e) {
                 // dd($key);
                 dd($field);
             }

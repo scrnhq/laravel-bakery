@@ -17,7 +17,7 @@ abstract class ScalarType extends Type
     abstract public function serialize($value);
 
     /**
-     * Parses an externally provided value (query variable) to use as an input
+     * Parses an externally provided value (query variable) to use as an input.
      *
      * @param mixed $value
      * @return mixed
@@ -37,6 +37,7 @@ abstract class ScalarType extends Type
      * @throws Error
      */
     abstract public function parseLiteral($valueNode);
+
     /**
      * Convert the type to a GraphQL Type.
      *
@@ -46,9 +47,15 @@ abstract class ScalarType extends Type
     {
         return new CustomScalarType([
             'name' => $this->name(),
-            'serialize' => function(...$args) { $this->serialize(...$args); },
-            'parseValue' => function(...$args) { $this->parseValue(...$args); },
-            'parseLiteral' => function(...$args) { $this->parseLiteral(...$args); },
+            'serialize' => function (...$args) {
+                $this->serialize(...$args);
+            },
+            'parseValue' => function (...$args) {
+                $this->parseValue(...$args);
+            },
+            'parseLiteral' => function (...$args) {
+                $this->parseLiteral(...$args);
+            },
         ]);
     }
 }
