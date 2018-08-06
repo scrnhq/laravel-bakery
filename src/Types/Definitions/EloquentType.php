@@ -46,6 +46,10 @@ class EloquentType extends Type
      */
     public function name(): string
     {
+        if (isset($this->name)) {
+            return $this->name;
+        }
+
         return $this->definition->typename();
     }
 
