@@ -27,6 +27,7 @@ trait InteractsWithRelations
      *
      * @param string $policy
      * @param array $attributes
+     * @throws AuthorizationException
      */
     protected function authorize(string $policy, $attributes = null)
     {
@@ -44,6 +45,7 @@ trait InteractsWithRelations
      *
      * @param array $relations
      * @return void
+     * @throws AuthorizationException
      */
     protected function fillRelations(array $relations)
     {
@@ -67,6 +69,7 @@ trait InteractsWithRelations
      *
      * @param array $connections
      * @return void
+     * @throws AuthorizationException
      */
     protected function fillConnections(array $connections)
     {
@@ -241,7 +244,14 @@ trait InteractsWithRelations
         }
 
         $this->transactionQueue[] = function () use ($relation, $instances, $pivots) {
-            $data = $instances->pluck('id')->combine($pivots);
+            $data = $instances->pluck('id')->mapWithKeys(function ($id, $key) use ($pivots) {
+                if ($pivot = $pivots[$key]) {
+                    return [$pivot => $id];
+                }
+
+                return [$key => $id];
+            });
+
             $relation->sync($data);
         };
     }
