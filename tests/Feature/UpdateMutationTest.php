@@ -99,7 +99,7 @@ class UpdateMutationTest extends FeatureTestCase
         ';
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $response->assertJsonFragment(['data' => []]);
+        $response->assertJsonMissing(['data']);
         $this->assertDatabaseMissing('articles', ['title' => 'Hello world! (updated)']);
     }
 

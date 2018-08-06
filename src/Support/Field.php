@@ -39,7 +39,7 @@ abstract class Field
      */
     public function getType(): GraphQLType
     {
-        return $this->type()->toType();
+        return $this->type()->toFieldType();
     }
 
     /**

@@ -3,6 +3,7 @@
 namespace Bakery\Types\Definitions;
 
 use Bakery\Utils\Utils;
+use GraphQL\Type\Definition\NonNull;
 use GraphQL\Type\Definition\ResolveInfo;
 use Illuminate\Contracts\Auth\Access\Gate;
 use GraphQL\Type\Definition\Type as GraphQLType;
@@ -16,6 +17,13 @@ abstract class Type
      * @var string
      */
     protected $name;
+
+    /**
+     * The description of the type.
+     *
+     * @var string
+     */
+    protected $description;
 
     /**
      * The underlying type.
@@ -60,13 +68,29 @@ abstract class Type
     /**
      * Construct a new type.
      *
-     * @var GraphQLType
+     * @param null $type
      */
-    public function __construct(GraphQLType $type = null)
+    public function __construct($type = null)
     {
         if ($type) {
             $this->type = $type;
+            if ($type instanceof NonNull) {
+                $var = foo;
+            }
         }
+    }
+
+    /**
+     * Set a description.
+     *
+     * @param string $value
+     * @return self
+     */
+    public function description(string $value): self
+    {
+        $this->description = $value;
+
+        return $this;
     }
 
     /**
@@ -283,7 +307,18 @@ abstract class Type
      */
     public function toType(): GraphQLType
     {
-        $type = $this->getType();
+        return $this->getType();
+    }
+
+    /**
+     * Convert the type to a type that can be used in a field.
+     * This checks if the type is nullable and if so, wrap it in a nullable type.
+     *
+     * @return GraphQLType
+     */
+    public function toFieldType(): GraphQLType
+    {
+        $type = $this->toType();
 
         return $this->nullable ? $type : GraphQLType::nonNull($type);
     }
@@ -296,8 +331,8 @@ abstract class Type
     public function toField(): array
     {
         return [
-            'type' => $this->toType(),
             'policy' => $this->policy,
+            'type' => $this->toFieldType(),
             'resolve' => $this->getResolver(),
         ];
     }

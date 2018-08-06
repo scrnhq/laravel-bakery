@@ -199,6 +199,7 @@ class Bakery
             $type = $this->types[$name];
         } elseif (class_exists($name)) {
             $instance = resolve($name);
+
             if ($instance instanceof Type) {
                 $name = $instance->name();
 
@@ -255,18 +256,9 @@ class Bakery
         );
     }
 
-    protected function makeObjectType($type, $options = [])
+    protected function makeObjectType(Type $type)
     {
-        $objectType = null;
-        if ($type instanceof \GraphQL\Type\Definition\Type) {
-            $objectType = $type;
-        } elseif (is_array($type)) {
-            $objectType = $this->makeObjectTypeFromFields($type, $options);
-        } else {
-            $objectType = $type->toType($options);
-        }
-
-        return $objectType;
+        return $type->toType();
     }
 
     protected function makeObjectTypeFromFields($fields, $options = [])

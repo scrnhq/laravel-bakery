@@ -34,7 +34,7 @@ abstract class EntityMutation extends Mutation
      */
     public function type(): Type
     {
-        return Bakery::type($this->schema->typename());
+        return Bakery::type($this->schema->typename())->nullable(false);
     }
 
     /**

@@ -33,7 +33,9 @@ class CollectionFilterType extends InputType
         $fields = collect();
 
         foreach ($this->schema->getFields() as $name => $type) {
-            $fields = $fields->merge($this->getFilters($name, $type));
+            if ($type->isLeafType()) {
+                $fields = $fields->merge($this->getFilters($name, $type));
+            }
         }
 
         foreach ($this->schema->getRelationFields() as $relation => $field) {

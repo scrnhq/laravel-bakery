@@ -47,17 +47,27 @@ abstract class Mutation extends Field
     /**
      * Authorize an action.
      *
-     * @param  string $policyMethod
+     * @param  string $ability
      * @param  array $args
      * @return void
+     * @throws AuthorizationException
      */
-    protected function authorize(string $policyMethod, $instance, ...$other)
+    protected function authorize(string $ability, $args)
     {
-        $allowed = $this->gate()->allows($policyMethod, $instance, ...$other);
+        if (! is_array($args)) {
+            $args = [$args];
+        }
+
+        $user = auth()->user();
+
+        $allowed = optional($user)->can($ability, $args);
 
         if (! $allowed) {
+            $model = $args[0];
+            $model = is_object($model) ? get_class($model) : $model;
+
             throw new AuthorizationException(
-                'Not allowed to perform '.$policyMethod.' on '.get_class($instance)
+                'Not allowed to perform "'.$ability.'" on '.$model
             );
         }
     }
