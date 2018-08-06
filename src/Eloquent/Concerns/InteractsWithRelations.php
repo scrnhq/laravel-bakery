@@ -245,11 +245,9 @@ trait InteractsWithRelations
 
         $this->transactionQueue[] = function () use ($relation, $instances, $pivots) {
             $data = $instances->pluck('id')->mapWithKeys(function ($id, $key) use ($pivots) {
-                if ($pivot = $pivots[$key]) {
-                    return [$pivot => $id];
-                }
+                $pivot = $pivots[$key] ?? null;
 
-                return [$key => $id];
+                return $pivot ? [$id => $pivot] : [$key => $id];
             });
 
             $relation->sync($data);
