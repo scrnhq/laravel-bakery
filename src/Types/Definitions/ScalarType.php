@@ -6,7 +6,7 @@ use GraphQL\Error\Error;
 use GraphQL\Type\Definition\CustomScalarType;
 use GraphQL\Type\Definition\Type as GraphQLType;
 
-abstract class ScalarType extends Type
+abstract class ScalarType extends Type implements NamedType
 {
     /**
      * Serializes an internal value to include in a response.
@@ -48,13 +48,13 @@ abstract class ScalarType extends Type
         return new CustomScalarType([
             'name' => $this->name(),
             'serialize' => function (...$args) {
-                $this->serialize(...$args);
+                return $this->serialize(...$args);
             },
             'parseValue' => function (...$args) {
-                $this->parseValue(...$args);
+                return $this->parseValue(...$args);
             },
             'parseLiteral' => function (...$args) {
-                $this->parseLiteral(...$args);
+                return $this->parseLiteral(...$args);
             },
         ]);
     }
