@@ -7,8 +7,8 @@ use GraphQL\Type\Definition\ResolveInfo;
 use Illuminate\Contracts\Auth\Access\Gate;
 use GraphQL\Type\Definition\Type as GraphQLType;
 use Illuminate\Auth\Access\AuthorizationException;
-use GraphQL\Type\Definition\NamedType as GraphQLNamedType;
 use GraphQL\Type\Definition\InputType as GraphQLInputType;
+use GraphQL\Type\Definition\NamedType as GraphQLNamedType;
 use GraphQL\Type\Definition\OutputType as GraphQLOutputType;
 
 abstract class Type

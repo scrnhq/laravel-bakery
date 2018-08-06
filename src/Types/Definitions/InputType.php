@@ -2,9 +2,9 @@
 
 namespace Bakery\Types\Definitions;
 
+use Illuminate\Support\Collection;
 use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\Type as GraphQLType;
-use Illuminate\Support\Collection;
 
 class InputType extends ObjectType
 {
