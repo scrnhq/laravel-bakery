@@ -39,7 +39,7 @@ class DeleteMutationTest extends FeatureTestCase
         ';
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $response->assertJsonMissing('data');
+        $response->assertJsonMissing(['data']);
         $this->assertDatabaseHas('roles', ['id' => $role->id]);
     }
 

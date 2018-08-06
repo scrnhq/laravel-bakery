@@ -2,8 +2,8 @@
 
 namespace Bakery\Tests\Stubs;
 
-use Bakery\Types\Definitions\Type;
+use Bakery\Types\Definitions\ObjectType;
 
-class DummyType extends Type
+class DummyType extends ObjectType
 {
 }
