@@ -3,11 +3,10 @@
 namespace Bakery\Tests;
 
 use Bakery\Support\Facades\Bakery;
-use Bakery\Types\Definitions\Type;
 use Bakery\Exceptions\TypeNotFound;
-use GraphQL\Type\Definition\ObjectType;
+use Bakery\Types\Definitions\ObjectType;
 
-class DummyType extends Type
+class DummyType extends ObjectType
 {
     //
 }
@@ -15,14 +14,14 @@ class DummyType extends Type
 class BakeryTest extends FeatureTestCase
 {
     /** @test */
-    // public function it_returns_the_type()
-    // {
-    //     Bakery::addType(new DummyType(), 'Type');
-
-    //     $type = Bakery::type('Type');
-
-    //     $this->assertInstanceOf(ObjectType::class, $type);
-    // }
+//     public function it_returns_the_type()
+//     {
+//         Bakery::addType(new DummyType(), 'Type');
+//
+//         $type = Bakery::type('Type');
+//
+//         $this->assertInstanceOf(ObjectType::class, $type);
+//     }
 
     /** @test */
     public function it_throws_exception_for_unregistered_type()

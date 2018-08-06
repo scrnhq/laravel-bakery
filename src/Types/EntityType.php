@@ -178,7 +178,7 @@ class EntityType extends ObjectType
 
         $accessor = $relation->getPivotAccessor();
         $definition = resolve(Bakery::getModelSchema($pivot));
-        $type = $field->getWrappedType();
+        $type = $field->getNamedType();
         $closure = $type->config['fields'];
         $pivotField = [
             $accessor => [

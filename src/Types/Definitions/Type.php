@@ -3,11 +3,13 @@
 namespace Bakery\Types\Definitions;
 
 use Bakery\Utils\Utils;
-use GraphQL\Type\Definition\NonNull;
 use GraphQL\Type\Definition\ResolveInfo;
 use Illuminate\Contracts\Auth\Access\Gate;
 use GraphQL\Type\Definition\Type as GraphQLType;
 use Illuminate\Auth\Access\AuthorizationException;
+use GraphQL\Type\Definition\NamedType as GraphQLNamedType;
+use GraphQL\Type\Definition\InputType as GraphQLInputType;
+use GraphQL\Type\Definition\OutputType as GraphQLOutputType;
 
 abstract class Type
 {
@@ -74,9 +76,6 @@ abstract class Type
     {
         if ($type) {
             $this->type = $type;
-            if ($type instanceof NonNull) {
-                $var = foo;
-            }
         }
     }
 
@@ -278,9 +277,9 @@ abstract class Type
     /**
      * Get the underlying (wrapped) type.
      *
-     * @return GraphQLType
+     * @return GraphQLNamedType
      */
-    public function getWrappedType(): GraphQLType
+    public function getNamedType(): GraphQLNamedType
     {
         $type = method_exists($this, 'type') ? $this->type() : $this->type;
         Utils::invariant($type, 'No type defined on '.get_class($this));
@@ -295,7 +294,7 @@ abstract class Type
      */
     public function getType(): GraphQLType
     {
-        $type = $this->getWrappedType();
+        $type = $this->getNamedType();
 
         return $this->list ? GraphQLType::listOf($type) : $type;
     }
@@ -311,12 +310,25 @@ abstract class Type
     }
 
     /**
-     * Convert the type to a type that can be used in a field.
+     * Get the output type.
      * This checks if the type is nullable and if so, wrap it in a nullable type.
      *
-     * @return GraphQLType
+     * @return GraphQLOutputType
      */
-    public function toFieldType(): GraphQLType
+    public function getOutputType(): GraphQLOutputType
+    {
+        $type = $this->toType();
+
+        return $this->nullable ? $type : GraphQLType::nonNull($type);
+    }
+
+    /**
+     * Get the input type.
+     * This checks if the type is nullable and if so, wrap it in a nullable type.
+     *
+     * @return GraphQLInputType
+     */
+    public function getInputType(): GraphQLInputType
     {
         $type = $this->toType();
 
@@ -332,8 +344,20 @@ abstract class Type
     {
         return [
             'policy' => $this->policy,
-            'type' => $this->toFieldType(),
+            'type' => $this->getOutputType(),
             'resolve' => $this->getResolver(),
+        ];
+    }
+
+    /**
+     * Convert the type to an input field.
+     *
+     * @return array
+     */
+    public function toInputField(): array
+    {
+        return [
+            'type' => $this->getInputType(),
         ];
     }
 }

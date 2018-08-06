@@ -5,7 +5,7 @@ namespace Bakery\Types\Definitions;
 use Bakery\Utils\Utils;
 use Bakery\Support\Facades\Bakery;
 use Bakery\Eloquent\Introspectable;
-use GraphQL\Type\Definition\Type as GraphQlType;
+use GraphQL\Type\Definition\NamedType as GraphQLNamedType;
 
 class EloquentType extends Type
 {
@@ -54,12 +54,12 @@ class EloquentType extends Type
     }
 
     /**
-     * Return the underlying, wrapped type.
+     * Return the underlying, named type.
      *
-     * @return GraphQLType
+     * @return GraphQLNamedType
      */
-    public function getWrappedType(): GraphQLType
+    public function getNamedType(): GraphQLNamedType
     {
-        return Bakery::type($this->definition->typename())->getType();
+        return Bakery::type($this->definition->typename())->getNamedType();
     }
 }

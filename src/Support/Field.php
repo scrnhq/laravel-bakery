@@ -4,7 +4,7 @@ namespace Bakery\Support;
 
 use Bakery\Types\Definitions\Type;
 use Bakery\Exceptions\InvalidFieldException;
-use GraphQL\Type\Definition\Type as GraphQLType;
+use GraphQL\Type\Definition\OutputType as GraphQLOutputType;
 
 abstract class Field
 {
@@ -35,11 +35,11 @@ abstract class Field
     /**
      * Get the underlying field of the type and convert it to a type.
      *
-     * @return GraphQLType
+     * @return GraphQLOutputType
      */
-    public function getType(): GraphQLType
+    public function getType(): GraphQLOutputType
     {
-        return $this->type()->toFieldType();
+        return $this->type()->getOutputType();
     }
 
     /**
