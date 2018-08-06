@@ -5,7 +5,7 @@ namespace Bakery\Types\Definitions;
 use GraphQL\Type\Definition\Type as BaseType;
 use GraphQL\Type\Definition\EnumType as BaseEnumType;
 
-class EnumType extends Type
+class EnumType extends Type implements NamedType
 {
     /**
      * Return the values for the enum.

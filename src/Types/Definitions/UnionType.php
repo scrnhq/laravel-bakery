@@ -6,7 +6,7 @@ use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type as GraphQLType;
 use GraphQL\Type\Definition\UnionType as GraphQLUnionType;
 
-abstract class UnionType extends Type
+abstract class UnionType extends Type implements NamedType
 {
     protected $types;
 

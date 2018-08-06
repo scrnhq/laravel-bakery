@@ -9,6 +9,7 @@ use Bakery\Traits\BakeryTypes;
 use Bakery\Types\Definitions\Type;
 use Bakery\Exceptions\TypeNotFound;
 use GraphQL\Executor\ExecutionResult;
+use Bakery\Types\Definitions\NamedType;
 use Illuminate\Database\Eloquent\Model;
 use Bakery\Types\Definitions\ObjectType;
 use Bakery\Support\Schema as BakerySchema;
@@ -63,10 +64,10 @@ class Bakery
     /**
      * Add a type to the registry.
      *
-     * @param Type $type
+     * @param NamedType $type
      * @param string|null $name
      */
-    public function addType(Type $type, string $name = null)
+    public function addType(NamedType $type, string $name = null)
     {
         $name = $name ?: $type->name();
         $this->types[$name] = $type;
