@@ -39,7 +39,7 @@ abstract class UnionType extends Type
     {
         return [
             'name' => $this->name(),
-            'types' => collect($this->types())->map(function(Type $type) {
+            'types' => collect($this->types())->map(function (Type $type) {
                 return $type->toType();
             })->toArray(),
             'resolveType' => function ($value, $context, ResolveInfo $info) {
