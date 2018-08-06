@@ -76,10 +76,10 @@ trait Mutable
      * Update the model with GraphQL input.
      *
      * @param array $attributes
-     * @param array $options
      * @return self
+     * @throws \Throwable
      */
-    public function updateWithInput(array $attributes = [], array $options = [])
+    public function updateWithInput(array $attributes = [])
     {
         return DB::transaction(function () use ($attributes) {
             $this->fillWithInput($attributes);
@@ -94,6 +94,7 @@ trait Mutable
      *
      * @param array $input
      * @return self
+     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     public function fillWithInput(array $input)
     {
