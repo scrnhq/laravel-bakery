@@ -3,7 +3,7 @@
 namespace Bakery\Types\Definitions;
 
 /**
- * A named type is one of the following types:
+ * A named type is one of the following types:.
  *
  * - ScalarType
  * - UnionType
