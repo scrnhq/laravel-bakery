@@ -20,7 +20,7 @@ class UpvoteDefinition
     public function relations(): array
     {
         return [
-            'upvoteable' => Bakery::polymorhpic([ArticleDefinition::class, CommentDefinition::class]),
+            'upvoteable' => Bakery::polymorphic([ArticleDefinition::class, CommentDefinition::class]),
         ];
     }
 }

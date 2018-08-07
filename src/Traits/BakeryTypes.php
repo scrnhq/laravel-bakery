@@ -56,7 +56,7 @@ trait BakeryTypes
         return $this->type($type)->list();
     }
 
-    public function polymorhpic(array $definitions): PolymorphicType
+    public function polymorphic(array $definitions): PolymorphicType
     {
         return new PolymorphicType($definitions);
     }
