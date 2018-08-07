@@ -52,6 +52,7 @@ class FeatureTestCase extends OrchestraTestCase
             Definitions\CategoryDefinition::class,
             Definitions\TagDefinition::class,
             Definitions\UserRoleDefinition::class,
+            Definitions\UpvoteDefinition::class,
         ]);
     }
 

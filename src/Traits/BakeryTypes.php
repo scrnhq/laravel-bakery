@@ -6,6 +6,7 @@ use Bakery\Types\Definitions\Type;
 use Bakery\Types\Definitions\ObjectType;
 use Bakery\Types\Definitions\EloquentType;
 use Bakery\Types\Definitions\ReferenceType;
+use Bakery\Types\PolymorphicType;
 use GraphQL\Type\Definition\Type as GraphQLType;
 
 trait BakeryTypes
@@ -53,5 +54,10 @@ trait BakeryTypes
     public function list($type): Type
     {
         return $this->type($type)->list();
+    }
+
+    public function polymorhpic(array $definitions): PolymorphicType
+    {
+        return new PolymorphicType($definitions);
     }
 }

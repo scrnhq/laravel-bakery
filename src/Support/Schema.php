@@ -7,6 +7,7 @@ use Bakery\Utils\Utils;
 use Bakery\Eloquent\Mutable;
 use GraphQL\Type\SchemaConfig;
 use Bakery\Support\Facades\Bakery;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Collection;
 use Bakery\Eloquent\Introspectable;
 use Bakery\Mutations\CreateMutation;
@@ -125,6 +126,15 @@ class Schema
             })->each(function ($relation) use ($model, &$types) {
                 $types = $types->merge($this->getPivotInputTypes($model, $relation));
             });
+
+            // Filter through the relations of the model and get the
+            // polymorphic relations and get union type for that relation.
+            $definition->getRelations()->filter(function ($relation) {
+                return $relation instanceof MorphTo;
+            })->each(function ($relation, $key) use ($model, $definition, &$types) {
+                $type = $definition->getRelationFields()->get($key);
+                $types = $types->put($key, $this->getMorphToType($key, $type));
+            });
         }
 
         return $types;
@@ -165,6 +175,19 @@ class Schema
         );
 
         return $types;
+    }
+
+    /**
+     * Get the type for a morph to relationship.
+     * 
+     * @param string $key
+     * @param Types\PolymorphicType $type
+     * @return Types\UnionEntityType
+     */
+    protected function getMorphToType(string $key, Types\PolymorphicType $type): Types\UnionEntityType
+    {
+        $definitions = $type->getDefinitions();
+        return (new Types\UnionEntityType($definitions))->setName(Utils::typename($key));
     }
 
     /**
@@ -303,6 +326,7 @@ class Schema
     /**
      * Convert field sto array.
      *
+     * @param $fields
      * @return array
      */
     public function fieldsToArray($fields): array

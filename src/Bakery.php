@@ -124,6 +124,18 @@ class Bakery
     }
 
     /**
+     * Resolve the type of a definition of a model.
+     *
+     * @param $model
+     * @return GraphQLType
+     * @throws TypeNotFound
+     */
+    public function resolveDefinitionType($model): GraphQLType
+    {
+        return $this->resolve($this->definition($model)->typename());
+    }
+
+    /**
      * Return if the model has a model schema in Bakery.
      * This can either be an instance or a class name.
      *
@@ -167,7 +179,7 @@ class Bakery
      * @return ReferenceType
      * @throws TypeNotFound
      */
-    public function getType($name): ReferenceType
+    public function getType(string $name): ReferenceType
     {
         return new ReferenceType($this->resolve($name));
     }
@@ -180,7 +192,7 @@ class Bakery
      * @return ReferenceType
      * @throws TypeNotFound
      */
-    public function type($name): ReferenceType
+    public function type(string $name): ReferenceType
     {
         return $this->getType($name);
     }

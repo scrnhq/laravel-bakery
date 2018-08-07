@@ -305,4 +305,62 @@ class EntityQueryTest extends FeatureTestCase
         $response = $this->json('GET', '/graphql', ['query' => $query]);
         $response->assertJsonFragment(['comment' => 'foobar']);
     }
+
+    /** @test */
+    public function it_returns_data_for_a_morph_to_relationship()
+    {
+        $article = factory(Models\Article::class)->create();
+        $upvote = $article->upvotes()->create();
+
+        $query = '
+            query {
+                upvote(id: "'.$upvote->id.'") {
+                    upvoteable {
+                        ... on Comment {
+                            __typename
+                            id
+                        }
+                        ... on Article {
+                            __typename
+                            id
+                            title
+                        }
+                    }
+                }
+            }
+        ';
+
+        $response = $this->json('GET', '/graphql', ['query' => $query]);
+        $response->assertJsonFragment([
+            '__typename' => 'Article',
+            'id' => $article->id,
+            'title' => $article->title
+        ]);
+    }
+
+    /** @test */
+    public function it_returns_data_for_a_morph_many_relationship()
+    {
+        $article = factory(Models\Article::class)->create();
+        $article->upvotes()->create();
+        $article->upvotes()->create();
+
+        $query = '
+            query {
+                article(id: "'.$article->id.'") {
+                    upvotes {
+                        id
+                    }
+                }
+            }
+        ';
+
+        $response = $this->json('GET', '/graphql', ['query' => $query]);
+        $response->assertJsonFragment([
+            'upvotes' => [
+                ['id' => '1'],
+                ['id' => '2'],
+            ]
+        ]);
+    }
 }

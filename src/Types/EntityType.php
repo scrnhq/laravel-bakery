@@ -2,6 +2,7 @@
 
 namespace Bakery\Types;
 
+use Bakery\Utils\Utils;
 use Closure;
 use Bakery\Concerns\ModelAware;
 use Bakery\Support\Facades\Bakery;
@@ -68,15 +69,20 @@ class EntityType extends ObjectType
     /**
      * Get the relation fields of the entity.
      *
-     * @return array
+     * @return Collection
      */
     protected function getRelationFields(): Collection
     {
         $fields = collect();
+
         $relations = $this->schema->getRelationFields();
 
         foreach ($relations as $key => $field) {
-            $fields = $fields->merge($this->getFieldsForRelation($key, $field));
+            if ($field instanceof EloquentType) {
+                $fields = $fields->merge($this->getFieldsForRelation($key, $field));
+            } elseif ($field instanceof PolymorphicType) {
+                $fields = $fields->merge($this->getFieldsForPolymorphicRelation($key, $field));
+            }
         }
 
         return $fields;
@@ -86,7 +92,7 @@ class EntityType extends ObjectType
      * Get the fields for a relation.
      *
      * @param string $key
-     * @param array $field
+     * @param EloquentType $field
      * @return Collection
      */
     protected function getFieldsForRelation(string $key, EloquentType $field): Collection
@@ -153,7 +159,7 @@ class EntityType extends ObjectType
         $fields = collect();
 
         return $fields->put($key.'Id', Bakery::ID()->resolve(function ($model) use ($key) {
-            $relation = $Model->{$key};
+            $relation = $model->{$key};
 
             return $relation ? $relation->getKey() : null;
         }));
@@ -163,7 +169,7 @@ class EntityType extends ObjectType
      * Get the fields for a belongs to many relation.
      *
      * @param string $key
-     * @param array $field
+     * @param EloquentType $field
      * @param Relations\BelongsToMany $relation
      * @return Collection
      */
@@ -193,5 +199,17 @@ class EntityType extends ObjectType
         };
 
         return $fields;
+    }
+
+    /**
+     * Get the fields for a polymorphic relation.
+     *
+     * @param string $key
+     * @param PolymorphicType $field
+     * @return Collection
+     */
+    public function getFieldsForPolymorphicRelation(string $key, PolymorphicType $field): Collection
+    {
+        return collect([$key => $field->setName(Utils::typename($key))]);
     }
 }

@@ -265,6 +265,19 @@ abstract class Type
     }
 
     /**
+     * Set a name on the type.
+     *
+     * @param $name
+     * @return Type
+     */
+    public function  setName($name): self
+    {
+        $this->name = $name;
+
+        return $this;
+    }
+
+    /**
      * Returns if the underlying type is a leaf type.
      *
      * @return bool

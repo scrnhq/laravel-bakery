@@ -2,6 +2,7 @@
 
 namespace Bakery\Eloquent;
 
+use Bakery\Types\Definitions\EloquentType;
 use Bakery\Utils\Utils;
 use Bakery\Support\Facades\Bakery;
 use Bakery\Types\Definitions\Type;
@@ -33,7 +34,7 @@ trait Introspectable
      * Get the underlying model.
      *
      * If $this is already an Eloquent model, we just return this.
-     * Otherwise we boot up an intance of that model and return it.
+     * Otherwise we boot up an instance of that model and return it.
      *
      * @return mixed
      */
@@ -72,7 +73,7 @@ trait Introspectable
 
     /**
      * Define the fields of the model.
-     * This method can be overriden.
+     * This method can be overridden.
      */
     public function fields(): array
     {
@@ -112,12 +113,15 @@ trait Introspectable
     public function getLookupFields(): Collection
     {
         $fields = collect($this->getFields())
-            ->filter(function (Type $field, $key) {
+            ->filter(function (Type $field) {
                 return $field->isUnique();
             });
 
         $relations = collect($this->getRelationFields())
-            ->map(function (Type $field) {
+            ->filter(function (Type $field) {
+                return $field instanceof EloquentType;
+            })
+            ->map(function (EloquentType $field) {
                 $lookupTypeName = $field->name().'LookupType';
 
                 return Bakery::type($lookupTypeName)->nullable();
@@ -133,7 +137,7 @@ trait Introspectable
 
     /**
      * Define the relation fields of the schema.
-     * This method can be overriden.
+     * This method can be overridden.
      */
     public function relations(): array
     {

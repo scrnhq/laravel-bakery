@@ -40,4 +40,9 @@ class Article extends Model
     {
         return $this->belongsToMany(Tag::class);
     }
+
+    public function upvotes()
+    {
+        return $this->morphMany(Upvote::class, 'upvoteable');
+    }
 }

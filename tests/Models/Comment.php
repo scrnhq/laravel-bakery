@@ -28,4 +28,9 @@ class Comment extends Model
     {
         return $this->belongsTo(Article::class);
     }
+
+    public function upvotes()
+    {
+        return $this->morphMany(Upvote::class, 'upvoteable');
+    }
 }

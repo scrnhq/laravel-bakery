@@ -4,6 +4,7 @@ namespace Bakery\Types;
 
 use Bakery\Concerns\ModelAware;
 use Bakery\Support\Facades\Bakery;
+use Bakery\Types\Definitions\EloquentType;
 use Bakery\Types\Definitions\Type;
 use Illuminate\Support\Collection;
 use Bakery\Types\Definitions\InputType;
@@ -38,9 +39,11 @@ class CollectionFilterType extends InputType
             }
         }
 
-        foreach ($this->schema->getRelationFields() as $relation => $field) {
+        $this->schema->getRelationFields()->filter(function (Type $field) {
+            return $field instanceof EloquentType;
+        })->each(function (EloquentType $field, $relation) use ($fields) {
             $fields->put($relation, Bakery::type($field->name().'Filter'));
-        }
+        });
 
         $fields->put('AND', Bakery::type($this->name())->list());
         $fields->put('OR', Bakery::type($this->name())->list());

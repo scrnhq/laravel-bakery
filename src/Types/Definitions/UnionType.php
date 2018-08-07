@@ -27,7 +27,11 @@ abstract class UnionType extends Type implements NamedType
      */
     public function types(): array
     {
-        return $this->types;
+        if (isset($this->types)) {
+            return $this->types;
+        }
+
+        return [];
     }
 
     /**
@@ -55,6 +59,6 @@ abstract class UnionType extends Type implements NamedType
      */
     public function toType(): GraphQLType
     {
-        return $this->type = new GraphQLUnionType($this->getAttributes());
+        return new GraphQLUnionType($this->getAttributes());
     }
 }

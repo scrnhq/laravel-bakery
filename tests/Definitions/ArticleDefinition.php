@@ -28,6 +28,7 @@ class ArticleDefinition
             'tags' => Bakery::collection(TagDefinition::class)->nullable(),
             'category' => Bakery::model(CategoryDefinition::class)->nullable(),
             'comments' => Bakery::collection(CommentDefinition::class),
+            'upvotes' => Bakery::collection(UpvoteDefinition::class),
         ];
     }
 }

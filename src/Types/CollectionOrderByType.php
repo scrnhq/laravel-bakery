@@ -4,7 +4,9 @@ namespace Bakery\Types;
 
 use Bakery\Concerns\ModelAware;
 use Bakery\Support\Facades\Bakery;
+use Bakery\Types\Definitions\Type;
 use Bakery\Types\Definitions\InputType;
+use Bakery\Types\Definitions\EloquentType;
 
 class CollectionOrderByType extends InputType
 {
@@ -34,16 +36,18 @@ class CollectionOrderByType extends InputType
      */
     public function fields(): array
     {
-        $fields = [];
+        $fields = collect();
 
         foreach ($this->schema->getFields() as $name => $field) {
-            $fields[$name] = Bakery::type('Order')->nullable();
+            $fields->put($name, Bakery::type('Order')->nullable());
         }
 
-        foreach ($this->schema->getRelationFields() as $relation => $field) {
-            $fields[$relation] = Bakery::type($field->name().'OrderBy')->nullable();
-        }
+        $this->schema->getRelationFields()->filter(function (Type $field) {
+            return $field instanceof EloquentType;
+        })->each(function (EloquentType $field, $relation) use ($fields) {
+            $fields->put($relation, Bakery::type($field->name().'OrderBy')->nullable());
+        });
 
-        return $fields;
+        return $fields->toArray();
     }
 }
