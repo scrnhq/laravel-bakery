@@ -334,7 +334,7 @@ class EntityQueryTest extends FeatureTestCase
         $response->assertJsonFragment([
             '__typename' => 'Article',
             'id' => $article->id,
-            'title' => $article->title
+            'title' => $article->title,
         ]);
     }
 
@@ -360,7 +360,7 @@ class EntityQueryTest extends FeatureTestCase
             'upvotes' => [
                 ['id' => '1'],
                 ['id' => '2'],
-            ]
+            ],
         ]);
     }
 }

@@ -7,7 +7,6 @@ use Bakery\Utils\Utils;
 use Bakery\Eloquent\Mutable;
 use GraphQL\Type\SchemaConfig;
 use Bakery\Support\Facades\Bakery;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Collection;
 use Bakery\Eloquent\Introspectable;
 use Bakery\Mutations\CreateMutation;
@@ -20,6 +19,7 @@ use Bakery\Mutations\DetachPivotMutation;
 use Bakery\Queries\EntityCollectionQuery;
 use GraphQL\Type\Schema as GraphQLSchema;
 use Illuminate\Database\Eloquent\Relations\Pivot;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Schema
@@ -179,7 +179,7 @@ class Schema
 
     /**
      * Get the type for a morph to relationship.
-     * 
+     *
      * @param string $key
      * @param Types\PolymorphicType $type
      * @return Types\UnionEntityType
@@ -187,6 +187,7 @@ class Schema
     protected function getMorphToType(string $key, Types\PolymorphicType $type): Types\UnionEntityType
     {
         $definitions = $type->getDefinitions();
+
         return (new Types\UnionEntityType($definitions))->setName(Utils::typename($key));
     }
 

@@ -2,15 +2,16 @@
 
 namespace Bakery\Types;
 
-use Bakery\Support\Facades\Bakery;
 use Bakery\Utils\Utils;
+use Bakery\Support\Facades\Bakery;
 use Bakery\Eloquent\Introspectable;
 use Bakery\Types\Definitions\UnionType;
 use GraphQL\Type\Definition\ResolveInfo;
 
 class UnionEntityType extends UnionType
 {
-    protected  $definitions;
+    protected $definitions;
+
     /**
      * Construct a new union entity type.
      *
@@ -23,15 +24,15 @@ class UnionEntityType extends UnionType
         }
 
         Utils::invariant(
-            !empty($this->definitions),
+            ! empty($this->definitions),
             'No definitions defined on "'.get_class($this).'"'
         );
 
-        foreach($this->definitions as $definition) {
+        foreach ($this->definitions as $definition) {
             $schema = resolve($definition);
             Utils::invariant(
                 Utils::usesTrait($schema, Introspectable::class),
-                class_basename($schema) . ' does not use the ' . Introspectable::class . ' trait.'
+                class_basename($schema).' does not use the '.Introspectable::class.' trait.'
             );
         }
     }

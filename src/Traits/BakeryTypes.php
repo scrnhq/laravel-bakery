@@ -2,11 +2,11 @@
 
 namespace Bakery\Traits;
 
+use Bakery\Types\PolymorphicType;
 use Bakery\Types\Definitions\Type;
 use Bakery\Types\Definitions\ObjectType;
 use Bakery\Types\Definitions\EloquentType;
 use Bakery\Types\Definitions\ReferenceType;
-use Bakery\Types\PolymorphicType;
 use GraphQL\Type\Definition\Type as GraphQLType;
 
 trait BakeryTypes

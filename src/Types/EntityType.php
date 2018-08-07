@@ -2,8 +2,8 @@
 
 namespace Bakery\Types;
 
-use Bakery\Utils\Utils;
 use Closure;
+use Bakery\Utils\Utils;
 use Bakery\Concerns\ModelAware;
 use Bakery\Support\Facades\Bakery;
 use Illuminate\Support\Collection;

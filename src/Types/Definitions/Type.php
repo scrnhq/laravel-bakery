@@ -270,7 +270,7 @@ abstract class Type
      * @param $name
      * @return Type
      */
-    public function  setName($name): self
+    public function setName($name): self
     {
         $this->name = $name;
 

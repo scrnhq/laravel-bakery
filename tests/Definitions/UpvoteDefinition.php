@@ -2,8 +2,8 @@
 
 namespace Bakery\Tests\Definitions;
 
-use Bakery\Support\Facades\Bakery;
 use Bakery\Tests\Models\Upvote;
+use Bakery\Support\Facades\Bakery;
 use Bakery\Eloquent\Introspectable;
 
 class UpvoteDefinition

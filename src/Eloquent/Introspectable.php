@@ -2,12 +2,12 @@
 
 namespace Bakery\Eloquent;
 
-use Bakery\Types\Definitions\EloquentType;
 use Bakery\Utils\Utils;
 use Bakery\Support\Facades\Bakery;
 use Bakery\Types\Definitions\Type;
 use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Bakery\Types\Definitions\EloquentType;
 
 trait Introspectable
 {
