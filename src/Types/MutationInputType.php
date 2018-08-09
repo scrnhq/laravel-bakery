@@ -51,6 +51,7 @@ abstract class MutationInputType extends InputType
             } elseif ($field instanceof PolymorphicType) {
                 return $fields->merge($this->getFieldsForPolymorphicRelation($key, $field));
             }
+
             return $fields;
         }, collect());
     }
@@ -92,7 +93,7 @@ abstract class MutationInputType extends InputType
     }
 
     /**
-     * Get the polymorphic relation fields
+     * Get the polymorphic relation fields.
      *
      * @param string $relation
      * @param \Bakery\Types\Definitions\PolymorphicType $field
