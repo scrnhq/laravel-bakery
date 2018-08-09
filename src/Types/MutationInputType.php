@@ -9,6 +9,7 @@ use Bakery\Types\Definitions\Type;
 use Illuminate\Support\Collection;
 use Bakery\Types\Definitions\InputType;
 use Bakery\Types\Definitions\EloquentType;
+use Bakery\Types\Definitions\PolymorphicType;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 abstract class MutationInputType extends InputType
@@ -42,10 +43,15 @@ abstract class MutationInputType extends InputType
     {
         $relations = $this->schema->getRelationFields();
 
-        return $relations->keys()->reduce(function ($fields, $key) use ($relations) {
+        return $relations->keys()->reduce(function (Collection $fields, $key) use ($relations) {
             $field = $relations[$key];
 
-            return $fields->merge($this->getFieldsForRelation($key, $field));
+            if ($field instanceof EloquentType) {
+                return $fields->merge($this->getFieldsForRelation($key, $field));
+            } elseif ($field instanceof PolymorphicType) {
+                return $fields->merge($this->getFieldsForPolymorphicRelation($key, $field));
+            }
+            return $fields;
         }, collect());
     }
 
@@ -53,8 +59,8 @@ abstract class MutationInputType extends InputType
      * Set the relation fields.
      *
      * @param string $relation
-     * @param array $field
-     * @return array
+     * @param \Bakery\Types\Definitions\EloquentType|\Bakery\Types\Definitions\PolymorphicType $field
+     * @return Collection
      */
     protected function getFieldsForRelation(string $relation, EloquentType $field): Collection
     {
@@ -86,11 +92,32 @@ abstract class MutationInputType extends InputType
     }
 
     /**
+     * Get the polymorphic relation fields
+     *
+     * @param string $relation
+     * @param \Bakery\Types\Definitions\PolymorphicType $field
+     * @return Collection
+     */
+    protected function getFieldsForPolymorphicRelation(string $relation, PolymorphicType $field)
+    {
+        return collect($field->getDefinitions())->reduce(function (Collection $fields, string $definition) use ($field) {
+            $definition = resolve($definition);
+            $inputType = 'Create'.$definition->typename().'Input';
+
+            if ($field->isList()) {
+                return $fields->put(Utils::single($definition->typename()), Bakery::type($inputType)->nullable());
+            } else {
+                return $fields->put(Utils::plural($definition->typename()), Bakery::type($inputType)->nullable()->list());
+            }
+        }, collect());
+    }
+
+    /**
      * Get the fields for a pivot relation.
      *
      * @return array
      */
-    protected function getFieldsForPivot(EloquentType $field, BelongsToMany $relation): Collection
+    protected function getFieldsForPivot($field, BelongsToMany $relation): Collection
     {
         $fields = collect();
         $pivot = $relation->getPivotClass();
