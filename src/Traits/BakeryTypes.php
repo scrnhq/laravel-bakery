@@ -2,7 +2,6 @@
 
 namespace Bakery\Traits;
 
-use Bakery\Types\Definitions\Type;
 use Bakery\Types\Definitions\ObjectType;
 use Bakery\Types\Definitions\EloquentType;
 use Bakery\Types\Definitions\ReferenceType;
@@ -11,37 +10,37 @@ use GraphQL\Type\Definition\Type as GraphQLType;
 
 trait BakeryTypes
 {
-    public function string(): Type
+    public function string(): ReferenceType
     {
         return new ReferenceType(GraphQLType::string());
     }
 
-    public function int(): Type
+    public function int(): ReferenceType
     {
         return new ReferenceType(GraphQLType::int());
     }
 
-    public function ID(): Type
+    public function ID(): ReferenceType
     {
         return new ReferenceType(GraphQLType::ID());
     }
 
-    public function boolean(): Type
+    public function boolean(): ReferenceType
     {
         return new ReferenceType(GraphQLType::boolean());
     }
 
-    public function float()
+    public function float(): ReferenceType
     {
         return new ReferenceType(GraphQLType::float());
     }
 
-    public function model(string $definition): Type
+    public function model(string $definition): EloquentType
     {
         return new EloquentType($definition);
     }
 
-    public function collection($type): Type
+    public function collection($type): EloquentType
     {
         return $this->model($type)->list();
     }
@@ -51,7 +50,7 @@ trait BakeryTypes
         return new ObjectType($type);
     }
 
-    public function list($type): Type
+    public function list($type): ReferenceType
     {
         return $this->type($type)->list();
     }

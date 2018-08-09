@@ -56,14 +56,14 @@ abstract class Type
     /**
      * The resolver for resolving the value of the type.
      *
-     * @var mixed
+     * @var callable
      */
     protected $resolver;
 
     /**
      * The policy for accessing the value of the type.
      *
-     * @var mixed
+     * @var callable|string
      */
     protected $policy;
 
@@ -83,9 +83,9 @@ abstract class Type
      * Set a description.
      *
      * @param string $value
-     * @return self
+     * @return $this
      */
-    public function description(string $value): self
+    public function description(string $value)
     {
         $this->description = $value;
 
@@ -96,9 +96,9 @@ abstract class Type
      * Define if the type is nullable.
      *
      * @param bool value
-     * @return self
+     * @return $this
      */
-    public function nullable(bool $value = true): self
+    public function nullable(bool $value = true)
     {
         $this->nullable = $value;
 
@@ -118,10 +118,10 @@ abstract class Type
     /**
      * Define if the value of the type is unique.
      *
-     * @param bool value
-     * @return self
+     * @param bool|null value
+     * @return $this
      */
-    public function unique(bool $value = true): self
+    public function unique(bool $value = true)
     {
         $this->unique = $value;
 
@@ -141,10 +141,10 @@ abstract class Type
     /**
      * Define if the type is a list.
      *
-     * @param bool value
-     * @return self
+     * @param bool|null $value
+     * @return $this
      */
-    public function list(bool $value = true): self
+    public function list(bool $value = true)
     {
         $this->list = $value;
 
@@ -164,10 +164,10 @@ abstract class Type
     /**
      * Define the resolver.
      *
-     * @param mixed resolver
-     * @return self
+     * @param callable resolver
+     * @return $this
      */
-    public function resolve($resolver): self
+    public function resolve($resolver)
     {
         $this->resolver = $resolver;
 
@@ -210,10 +210,10 @@ abstract class Type
     /**
      * Define the policy on the type.
      *
-     * @param $policy
-     * @return self
+     * @param callable|string $policy
+     * @return $this
      */
-    public function policy($policy): self
+    public function policy($policy)
     {
         $this->policy = $policy;
 
@@ -238,9 +238,7 @@ abstract class Type
 
         // Check if the policy method is callable
         if (is_callable($policy) && ! $policy($source, $args, $viewer, $info)) {
-            throw new AuthorizationException(
-                'Cannot read property "'.$fieldName.'" of '.get_class($source)
-            );
+            throw new AuthorizationException('Cannot read property "'.$fieldName.'" of '.get_class($source));
         }
 
         // Check if there is a policy with this name
@@ -268,9 +266,9 @@ abstract class Type
      * Set a name on the type.
      *
      * @param $name
-     * @return Type
+     * @return $this
      */
-    public function setName($name): self
+    public function setName($name)
     {
         $this->name = $name;
 

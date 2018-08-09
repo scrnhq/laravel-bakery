@@ -56,7 +56,7 @@ class EloquentType extends Type
     /**
      * Return the underlying, named type.
      *
-     * @return GraphQLNamedType
+     * @return \GraphQL\Type\Definition\NamedType
      */
     public function getNamedType(): GraphQLNamedType
     {

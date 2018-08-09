@@ -64,7 +64,7 @@ class Bakery
     /**
      * Add a type to the registry.
      *
-     * @param NamedType $type
+     * @param \Bakery\Types\Definitions\NamedType $type
      * @param string|null $name
      */
     public function addType(NamedType $type, string $name = null)
@@ -127,8 +127,8 @@ class Bakery
      * Resolve the type of a definition of a model.
      *
      * @param $model
-     * @return GraphQLType
-     * @throws TypeNotFound
+     * @return \GraphQL\Type\Definition\Type
+     * @throws \Bakery\Exceptions\TypeNotFound
      */
     public function resolveDefinitionType($model): GraphQLType
     {
@@ -140,7 +140,7 @@ class Bakery
      * This can either be an instance or a class name.
      *
      * @param mixed $model
-     * @return mixed
+     * @return bool
      */
     public function hasModelSchema($model)
     {
@@ -163,9 +163,9 @@ class Bakery
     /**
      * Get the default GraphQL schema.
      *
-     * @return Schema
+     * @return \GraphQL\Type\Schema
      */
-    public function schema()
+    public function schema(): Schema
     {
         $schema = new Support\DefaultSchema();
 
@@ -176,8 +176,8 @@ class Bakery
      * Get the GraphQL type.
      *
      * @param $name
-     * @return ReferenceType
-     * @throws TypeNotFound
+     * @return \Bakery\Types\Definitions\ReferenceType
+     * @throws \Bakery\Exceptions\TypeNotFound
      */
     public function getType(string $name): ReferenceType
     {
@@ -189,8 +189,8 @@ class Bakery
      *
      * @api
      * @param $name
-     * @return ReferenceType
-     * @throws TypeNotFound
+     * @return \Bakery\Types\Definitions\ReferenceType
+     * @throws \Bakery\Exceptions\TypeNotFound
      */
     public function type(string $name): ReferenceType
     {
@@ -201,8 +201,8 @@ class Bakery
      * Resolve a type from the registry.
      *
      * @param $name
-     * @return GraphQLType
-     * @throws TypeNotFound
+     * @return \GraphQL\Type\Definition\Type
+     * @throws \Bakery\Exceptions\TypeNotFound
      */
     public function resolve(string $name): GraphQLType
     {
@@ -238,8 +238,8 @@ class Bakery
      * Execute the GraphQL query.
      *
      * @param array $input
-     * @param Schema|BakerySchema $schema
-     * @return ExecutionResult
+     * @param \GraphQL\Type\Schema|\Bakery\Support\Schema $schema
+     * @return \GraphQL\Executor\ExecutionResult
      */
     public function executeQuery($input, $schema = null): ExecutionResult
     {
