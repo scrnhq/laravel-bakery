@@ -1,9 +1,8 @@
 <?php
 
-namespace Bakery\Types;
+namespace Bakery\Types\Definitions;
 
 use Bakery\Support\Facades\Bakery;
-use Bakery\Types\Definitions\ReferenceType;
 use GraphQL\Type\Definition\NamedType as GraphQLNamedType;
 
 class PolymorphicType extends ReferenceType

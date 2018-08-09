@@ -10,6 +10,7 @@ use Illuminate\Support\Collection;
 use Bakery\Types\Definitions\ObjectType;
 use Bakery\Types\Definitions\EloquentType;
 use Illuminate\Database\Eloquent\Relations;
+use Bakery\Types\Definitions\PolymorphicType;
 
 class EntityType extends ObjectType
 {
@@ -205,7 +206,7 @@ class EntityType extends ObjectType
      * Get the fields for a polymorphic relation.
      *
      * @param string $key
-     * @param PolymorphicType $field
+     * @param \Bakery\Types\Definitions\PolymorphicType $field
      * @return Collection
      */
     public function getFieldsForPolymorphicRelation(string $key, PolymorphicType $field): Collection

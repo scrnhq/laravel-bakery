@@ -181,10 +181,10 @@ class Schema
      * Get the type for a morph to relationship.
      *
      * @param string $key
-     * @param Types\PolymorphicType $type
+     * @param \Bakery\Types\Definitions\PolymorphicType $type
      * @return Types\UnionEntityType
      */
-    protected function getMorphToType(string $key, Types\PolymorphicType $type): Types\UnionEntityType
+    protected function getMorphToType(string $key, Types\Definitions\PolymorphicType $type): Types\UnionEntityType
     {
         $definitions = $type->getDefinitions();
 
