@@ -101,24 +101,28 @@ abstract class MutationInputType extends InputType
      */
     protected function getFieldsForPolymorphicRelation(string $relation, PolymorphicType $field)
     {
-        return collect($field->getDefinitions())->reduce(function (Collection $fields, string $definition) use ($field) {
-            $definition = resolve($definition);
-            $inputType = 'Create'.$definition->typename().'Input';
+        $fields = collect();
+        $inputType = 'Create' . Utils::typename($relation) . 'Input';
 
+        if (Bakery::hasType($inputType)) {
             if ($field->isList()) {
-                return $fields->put(Utils::single($definition->typename()), Bakery::type($inputType)->nullable());
+                $fields->put($relation, Bakery::type($inputType)->list()->nullable());
             } else {
-                return $fields->put(Utils::plural($definition->typename()), Bakery::type($inputType)->nullable()->list());
+                $fields->put($relation, Bakery::type($inputType)->nullable());
             }
-        }, collect());
+        }
+
+        return $fields;
     }
 
     /**
      * Get the fields for a pivot relation.
      *
-     * @return array
+     * @param \Bakery\Types\Definitions\EloquentType|\Bakery\Types\Definitions\PolymorphicType $field
+     * @param \Illuminate\Database\Eloquent\Relations\BelongsToMany $relation
+     * @return Collection
      */
-    protected function getFieldsForPivot($field, BelongsToMany $relation): Collection
+    protected function getFieldsForPivot(EloquentType $field, BelongsToMany $relation): Collection
     {
         $fields = collect();
         $pivot = $relation->getPivotClass();
