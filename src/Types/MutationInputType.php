@@ -102,7 +102,7 @@ abstract class MutationInputType extends InputType
     protected function getFieldsForPolymorphicRelation(string $relation, PolymorphicType $field)
     {
         $fields = collect();
-        $inputType = 'Create' . Utils::typename($relation) . 'Input';
+        $inputType = 'Create'.Utils::typename($relation).'Input';
 
         if (Bakery::hasType($inputType)) {
             if ($field->isList()) {

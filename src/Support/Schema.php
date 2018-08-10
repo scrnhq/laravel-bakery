@@ -20,8 +20,8 @@ use Bakery\Queries\EntityCollectionQuery;
 use GraphQL\Type\Schema as GraphQLSchema;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Schema
 {
@@ -194,7 +194,7 @@ class Schema
 
         $types->push((new Types\UnionEntityType($definitions))->setName(Utils::typename($key)));
 
-        if (!$this->isReadOnly($model)) {
+        if (! $this->isReadOnly($model)) {
             $types->push((new Types\CreateUnionEntityInputType($definitions))->setName(Utils::typename($key)));
         }
 
