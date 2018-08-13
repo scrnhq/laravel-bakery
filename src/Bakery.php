@@ -13,7 +13,6 @@ use Bakery\Types\Definitions\NamedType;
 use Illuminate\Database\Eloquent\Model;
 use Bakery\Types\Definitions\ObjectType;
 use Bakery\Support\Schema as BakerySchema;
-use Bakery\Types\Definitions\ReferenceType;
 use GraphQL\Type\Definition\Type as GraphQLType;
 
 class Bakery
@@ -184,7 +183,7 @@ class Bakery
 
         // If the string is a class, we resolve it, check if it is an instance of type and grab it's name.
         // and then call this method again to check.
-        if(class_exists($name)) {
+        if (class_exists($name)) {
             $instance = resolve($name);
 
             if ($instance instanceof Type) {
@@ -230,7 +229,7 @@ class Bakery
         }
 
         // Otherwise we create it and store it for future references.
-        $type = $this->makeObjectType($type, ['name' => $name]);
+        $type = $type->toType();
         $this->typeInstances[$name] = $type;
 
         return $type;
@@ -263,23 +262,18 @@ class Bakery
         return GraphQL::executeQuery($schema, $query, $root, $context, $variables, $operationName);
     }
 
+    /**
+     * Serve the GraphiQL tool.
+     *
+     * @param $route
+     * @param array $headers
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     */
     public function graphiql($route, $headers = [])
     {
         return view(
             'bakery::graphiql',
             ['endpoint' => route($route), 'headers' => $headers]
         );
-    }
-
-    protected function makeObjectType(Type $type)
-    {
-        return $type->toType();
-    }
-
-    protected function makeObjectTypeFromFields($fields, $options = [])
-    {
-        return new ObjectType(array_merge([
-            'fields' => $fields,
-        ], $options));
     }
 }
