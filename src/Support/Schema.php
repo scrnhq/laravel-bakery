@@ -117,6 +117,13 @@ class Schema
                 }
             }
 
+            // Filter through the regular fields and get the polymorphic types.
+            $definition->getFields()->filter(function ($field) {
+                return $field instanceof Types\Definitions\PolymorphicType;
+            })->each(function ($field, $key) use ($definition, &$types) {
+                $types = $types->merge($this->getPolymorphicFieldTypes($definition, $key, $field));
+            });
+
             // Filter through the relations of the model and get the
             // belongsToMany relations and get the pivot input types
             // for that relation.
@@ -131,7 +138,7 @@ class Schema
             $definition->getRelationFields()->filter(function ($field) {
                 return $field instanceof Types\Definitions\PolymorphicType;
             })->each(function ($field, $key) use ($definition, &$types) {
-                $types = $types->merge($this->getPolymorphicTypes($definition, $key, $field));
+                $types = $types->merge($this->getPolymorphicRelationshipTypes($definition, $key, $field));
             });
         }
 
@@ -176,25 +183,37 @@ class Schema
     }
 
     /**
-     * Get the types for a morph to relationship.
+     * Get the types for a polymorphic field.
      *
-     * @param string $model
+     * @param $definition
      * @param string $key
      * @param \Bakery\Types\Definitions\PolymorphicType $type
      * @return Collection
      */
-    protected function getPolymorphicTypes($definition, string $key, Types\Definitions\PolymorphicType $type): Collection
+    protected function getPolymorphicFieldTypes($definition, string $key, Types\Definitions\PolymorphicType $type): Collection
     {
-        $types = collect();
-
         $typename = Utils::typename($key).'On'.$definition->typename();
-
         $definitions = $type->getDefinitions();
 
+        return collect((new Types\UnionEntityType($definitions))->setName($typename));
+    }
+
+    /**
+     * Get the types for a polymorphic relationship.
+     *
+     * @param $definition
+     * @param string $key
+     * @param \Bakery\Types\Definitions\PolymorphicType $type
+     * @return Collection
+     */
+    protected function getPolymorphicRelationshipTypes($definition, string $key, Types\Definitions\PolymorphicType $type): Collection
+    {
+        $typename = Utils::typename($key).'On'.$definition->typename();
+        $definitions = $type->getDefinitions();
+
+        $types = collect();
         $types->push((new Types\UnionEntityType($definitions))->setName($typename));
-
         $types->push((new Types\CreateUnionEntityInputType($definitions))->setName($typename));
-
         $types->push((new Types\AttachUnionEntityInputType($definitions))->setName($typename));
 
         return $types;
