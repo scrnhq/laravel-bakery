@@ -2,8 +2,8 @@
 
 namespace Bakery\Types\Concerns;
 
-use Bakery\Concerns\ModelAware;
 use Bakery\Utils\Utils;
+use Bakery\Concerns\ModelAware;
 use Bakery\Eloquent\Introspectable;
 
 trait InteractsWithPolymorphism
@@ -31,7 +31,6 @@ trait InteractsWithPolymorphism
         if (Utils::usesTrait($this, ModelAware::class)) {
             $this->checkIntrospectable();
         }
-
     }
 
     /**
