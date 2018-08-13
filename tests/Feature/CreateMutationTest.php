@@ -447,4 +447,27 @@ class CreateMutationTest extends FeatureTestCase
             'comment' => 'foobar',
         ]);
     }
+
+    /** @test */
+    public function it_lets_you_attach_polymorphic_relation()
+    {
+        $user = factory(Models\User::class)->create();
+        $this->actingAs($user);
+
+        $article = factory(Models\Article::class)->create();
+
+        $query = '
+            mutation {
+                createUpvote(input: {
+                    upvoteableId: { article: "'.$article->id.'" }
+                }) {
+                    id
+                }
+            }
+        ';
+
+        $response = $this->json('GET', '/graphql', ['query' => $query]);
+        $response->assertJsonKey('id');
+        $this->assertDatabaseHas('upvotes', ['upvoteable_id' => $article->id]);
+    }
 }

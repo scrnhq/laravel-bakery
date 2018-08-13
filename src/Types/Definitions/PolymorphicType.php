@@ -3,6 +3,7 @@
 namespace Bakery\Types\Definitions;
 
 use Bakery\Support\Facades\Bakery;
+use Bakery\Utils\Utils;
 use GraphQL\Type\Definition\NamedType as GraphQLNamedType;
 
 class PolymorphicType extends ReferenceType
@@ -32,6 +33,19 @@ class PolymorphicType extends ReferenceType
     public function getDefinitions(): array
     {
         return $this->definitions;
+    }
+
+    /**
+     * Get the definition by key.
+     *
+     * @param string $key
+     * @return mixed
+     */
+    public function getDefinitionByKey(string $key)
+    {
+        return collect($this->definitions)->first(function ($definition) use ($key) {
+            return Utils::single(resolve($definition)->getModel()) === $key;
+        });
     }
 
     /**

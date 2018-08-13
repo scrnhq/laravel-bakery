@@ -156,6 +156,18 @@ trait Introspectable
     }
 
     /**
+     * Get the fillable relational fields.
+     *
+     * @return Collection
+     */
+    public function getFillableRelationFields(): Collection
+    {
+        return $this->getRelationFields()->filter(function (Type $field, $key) {
+            return collect($this->getFillable())->contains($key);
+        });
+    }
+
+    /**
      * Get the Eloquent relations of the model.
      * This will only return relations that are defined in the model schema.
      *

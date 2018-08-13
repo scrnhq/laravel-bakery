@@ -7,10 +7,9 @@ use Bakery\BakeryServiceProvider;
 use Bakery\Support\Facades\Bakery;
 use Illuminate\Contracts\Auth\Access\Gate;
 use Orchestra\Database\ConsoleServiceProvider;
-use Orchestra\Testbench\TestCase as OrchestraTestCase;
 use Illuminate\Foundation\Testing\Concerns\InteractsWithDatabase;
 
-class FeatureTestCase extends OrchestraTestCase
+class FeatureTestCase extends TestCase
 {
     use InteractsWithDatabase;
     use InteractsWithExceptionHandling;
@@ -30,6 +29,7 @@ class FeatureTestCase extends OrchestraTestCase
         $gate->policy(Models\Article::class, Policies\ArticlePolicy::class);
         $gate->policy(Models\Phone::class, Policies\PhonePolicy::class);
         $gate->policy(Models\Comment::class, Policies\CommentPolicy::class);
+        $gate->policy(Models\Upvote::class, Policies\UpvotePolicy::class);
     }
 
     protected function setUp()

@@ -41,7 +41,7 @@ abstract class MutationInputType extends InputType
      */
     protected function getRelationFields(): Collection
     {
-        $relations = $this->schema->getRelationFields();
+        $relations = $this->schema->getFillableRelationFields();
 
         return $relations->keys()->reduce(function (Collection $fields, $key) use ($relations) {
             $field = $relations[$key];
@@ -102,13 +102,17 @@ abstract class MutationInputType extends InputType
     protected function getFieldsForPolymorphicRelation(string $relation, PolymorphicType $field)
     {
         $fields = collect();
-        $inputType = 'Create'.Utils::typename($relation).'Input';
+        $typename = Utils::typename($relation).'On'.$this->schema->typename();
+        $createInputType = 'Create'.$typename.'Input';
+        $attachInputType = 'Attach'.$typename.'Input';
 
-        if (Bakery::hasType($inputType)) {
+        if (Bakery::hasType($createInputType)) {
             if ($field->isList()) {
-                $fields->put($relation, Bakery::type($inputType)->list()->nullable());
+                $fields->put($relation, Bakery::type($createInputType)->list()->nullable());
+                $fields->put($relation.'Ids', Bakery::type($attachInputType)->list()->nullable());
             } else {
-                $fields->put($relation, Bakery::type($inputType)->nullable());
+                $fields->put($relation, Bakery::type($createInputType)->nullable());
+                $fields->put($relation.'Id', Bakery::type($attachInputType)->nullable());
             }
         }
 

@@ -19,6 +19,8 @@ class Article extends Model
         'user',
         'slug',
         'comments',
+        'category',
+        'tags',
     ];
 
     public function user()

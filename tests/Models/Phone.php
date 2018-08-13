@@ -15,6 +15,7 @@ class Phone extends Model
 
     protected $fillable = [
         'number',
+        'user',
     ];
 
     public function user()

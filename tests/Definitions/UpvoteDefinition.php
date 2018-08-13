@@ -14,7 +14,9 @@ class UpvoteDefinition
 
     public function fields(): array
     {
-        return [];
+        return [
+            'id' => Bakery::ID(),
+        ];
     }
 
     public function relations(): array

@@ -20,6 +20,8 @@ trait InteractsWithRelations
         Relations\HasMany::class,
         Relations\BelongsTo::class,
         Relations\BelongsToMany::class,
+        Relations\MorphTo::class,
+        //Relations\MorphToMany::class,
     ];
 
     /**
@@ -252,6 +254,75 @@ trait InteractsWithRelations
 
             $relation->sync($data);
         };
+    }
+
+    /**
+     * Connect a belongs to relation.
+     *
+     * @param \Illuminate\Database\Eloquent\Relations\MorphTo $relation
+     * @param $data
+     * @return void
+     */
+    protected function connectMorphToRelation(Relations\MorphTo $relation, $data)
+    {
+        if (! $data) {
+            $relation->associate(null);
+
+            return;
+        }
+
+        if (is_array($data)) {
+            $data = collect($data);
+
+            Utils::invariant($data->count() === 1, "something");
+
+            // Get the polymorphic type that belongs to the relation so we can figure out which model we should connect.
+            $type = array_get($this->getSchema()->getRelationFields(), $relation->getRelation());
+
+            [$key, $id] = $data->mapWithKeys(function ($item, $key) {
+                return [$key, $item];
+            });
+
+            $model = resolve($type->getDefinitionByKey($key))->getModel();
+
+            $instance = $model->findOrFail($id);
+            $relation->associate($instance);
+        }
+    }
+
+    /**
+     * Fill a belongs to relation.
+     *
+     * @param \Illuminate\Database\Eloquent\Relations\MorphTo $relation
+     * @param array $attributes
+     * @return void
+     */
+    protected function fillMorphToRelation(Relations\MorphTo $relation, $attributes = [])
+    {
+        // TODO
+    }
+
+    /**
+     * Connect the belongs to many relation.
+     *
+     * @param \Illuminate\Database\Eloquent\Relations\MorphToMany $relation
+     * @param array $data
+     * @return void
+     */
+    public function connectMorphToManyRelation(Relations\MorphToMany $relation, array $data)
+    {
+        // TODO
+    }
+
+    /**
+     * Fill the morph to many relation.
+     *
+     * @param \Illuminate\Database\Eloquent\Relations\MorphToMany $relation
+     * @param array $values
+     */
+    protected function fillMorphToManyRelation(Relations\MorphToMany $relation, array $values)
+    {
+        // TODO
     }
 
     /**
