@@ -63,12 +63,12 @@ class BakeryServiceProvider extends ServiceProvider
 
         $router->any(
             $this->app['config']->get('bakery.route'),
-            '\Bakery\Http\Controller\BakeryController@graphql'
+            $this->app['config']->get('bakery.controller')
         )->name('graphql');
 
         $router->get(
             $this->app['config']->get('bakery.graphiqlRoute'),
-            '\Bakery\Http\Controller\BakeryController@graphiql'
+            $this->app['config']->get('bakery.graphiqlController')
         )->name('graphiql');
     }
 
