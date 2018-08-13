@@ -190,21 +190,36 @@ abstract class Type
                 return call_user_func_array($this->resolver, [$source, $args, $viewer]);
             }
 
-            $fieldName = $info->fieldName;
-            $property = null;
-
-            if (is_array($source) || $source instanceof \ArrayAccess) {
-                if (isset($source[$fieldName])) {
-                    $property = $source[$fieldName];
-                }
-            } elseif (is_object($source)) {
-                if (isset($source->{$fieldName})) {
-                    $property = $source->{$fieldName};
-                }
-            }
-
-            return $property instanceof \Closure ? $property($source, $args, $viewer, $info) : $property;
+            return $this->defaultResolver($source, $args, $viewer, $info);
         };
+    }
+
+    /**
+     * The default resolver for resolving the value of the type.
+     * This gets called when there is no custom resolver defined.
+     *
+     * @param $source
+     * @param $args
+     * @param $viewer
+     * @param ResolveInfo $info
+     * @return mixed|null
+     */
+    protected function defaultResolver($source, $args, $viewer, ResolveInfo $info)
+    {
+        $fieldName = $info->fieldName;
+        $property = null;
+
+        if (is_array($source) || $source instanceof \ArrayAccess) {
+            if (isset($source[$fieldName])) {
+                $property = $source[$fieldName];
+            }
+        } elseif (is_object($source)) {
+            if (isset($source->{$fieldName})) {
+                $property = $source->{$fieldName};
+            }
+        }
+
+        return $property instanceof \Closure ? $property($source, $args, $viewer, $info) : $property;
     }
 
     /**
