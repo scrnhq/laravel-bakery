@@ -19,8 +19,6 @@ use Bakery\Mutations\DetachPivotMutation;
 use Bakery\Queries\EntityCollectionQuery;
 use GraphQL\Type\Schema as GraphQLSchema;
 use Illuminate\Database\Eloquent\Relations\Pivot;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
-use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Schema
@@ -57,7 +55,7 @@ class Schema
             return $class::$readOnly;
         }
 
-        $model = resolve($class)->getModel();
+        $model = is_string($class) ? resolve($class)->getModel() : $class;
 
         return ! Utils::usesTrait($model, Mutable::class);
     }
@@ -128,13 +126,12 @@ class Schema
                 $types = $types->merge($this->getPivotInputTypes($model, $relation));
             });
 
-            // Filter through the relations of the model and get the
-            // polymorphic relations and get union type for that relation.
-            $definition->getRelations()->filter(function ($relation) {
-                return $relation instanceof MorphTo || $relation instanceof MorphToMany;
-            })->each(function ($relation, $key) use ($model, $definition, &$types) {
-                $type = $definition->getRelationFields()->get($key);
-                $types = $types->merge($this->getMorphToTypes($model, $key, $type));
+            // Filter through the relation fields and get the the
+            // polymorphic types for the relations.
+            $definition->getRelationFields()->filter(function ($field) {
+                return $field instanceof Types\Definitions\PolymorphicType;
+            })->each(function ($field, $key) use ($definition, &$types) {
+                $types = $types->merge($this->getPolymorphicTypes($definition, $key, $field));
             });
         }
 
@@ -186,17 +183,19 @@ class Schema
      * @param \Bakery\Types\Definitions\PolymorphicType $type
      * @return Collection
      */
-    protected function getMorphToTypes(string $model, string $key, Types\Definitions\PolymorphicType $type): Collection
+    protected function getPolymorphicTypes($definition, string $key, Types\Definitions\PolymorphicType $type): Collection
     {
         $types = collect();
 
+        $typename = Utils::typename($key).'On'.$definition->typename();
+
         $definitions = $type->getDefinitions();
 
-        $types->push((new Types\UnionEntityType($definitions))->setName(Utils::typename($key)));
+        $types->push((new Types\UnionEntityType($definitions))->setName($typename));
 
-        if (! $this->isReadOnly($model)) {
-            $types->push((new Types\CreateUnionEntityInputType($definitions))->setName(Utils::typename($key)));
-        }
+        $types->push((new Types\CreateUnionEntityInputType($definitions))->setName($typename));
+
+        $types->push((new Types\AttachUnionEntityInputType($definitions))->setName($typename));
 
         return $types;
     }
