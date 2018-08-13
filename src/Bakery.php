@@ -11,7 +11,6 @@ use Bakery\Exceptions\TypeNotFound;
 use GraphQL\Executor\ExecutionResult;
 use Bakery\Types\Definitions\NamedType;
 use Illuminate\Database\Eloquent\Model;
-use Bakery\Types\Definitions\ObjectType;
 use Bakery\Support\Schema as BakerySchema;
 use GraphQL\Type\Definition\Type as GraphQLType;
 
