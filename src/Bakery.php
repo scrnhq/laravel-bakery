@@ -118,6 +118,12 @@ class Bakery
         return $this->modelSchemas[$model];
     }
 
+    /**
+     * Return the definition of a model.
+     *
+     * @param $model
+     * @return mixed
+     */
     public function definition($model)
     {
         return resolve($this->getModelSchema($model));
@@ -161,6 +167,35 @@ class Bakery
     }
 
     /**
+     * Get a type by name.
+     * This can be a string or a class path of a Type that has that name.
+     *
+     * @param string $name
+     * @return Type|null
+     */
+    public function getType(string $name): ?Type
+    {
+        // If the string is the name of the type we return it straight away.
+        if ($this->hasType($name)) {
+            return $this->types[$name];
+        }
+
+        // If the string is a class, we resolve it, check if it is an instance of type and grab it's name.
+        // and then call this method again to check.
+        if(class_exists($name)) {
+            $instance = resolve($name);
+
+            if ($instance instanceof Type) {
+                $name = $instance->name();
+
+                return $this->getType($name);
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * Get the default GraphQL schema.
      *
      * @return \GraphQL\Type\Schema
@@ -173,31 +208,6 @@ class Bakery
     }
 
     /**
-     * Get the GraphQL type.
-     *
-     * @param $name
-     * @return \Bakery\Types\Definitions\ReferenceType
-     * @throws \Bakery\Exceptions\TypeNotFound
-     */
-    public function getType(string $name): ReferenceType
-    {
-        return new ReferenceType($this->resolve($name));
-    }
-
-    /**
-     * Get the GraphQL type, alias for getType().
-     *
-     * @api
-     * @param $name
-     * @return \Bakery\Types\Definitions\ReferenceType
-     * @throws \Bakery\Exceptions\TypeNotFound
-     */
-    public function type(string $name): ReferenceType
-    {
-        return $this->getType($name);
-    }
-
-    /**
      * Resolve a type from the registry.
      *
      * @param $name
@@ -206,28 +216,18 @@ class Bakery
      */
     public function resolve(string $name): GraphQLType
     {
-        $type = null;
-
-        if (isset($this->types[$name])) {
-            $type = $this->types[$name];
-        } elseif (class_exists($name)) {
-            $instance = resolve($name);
-
-            if ($instance instanceof Type) {
-                $name = $instance->name();
-
-                return $this->resolve($name);
-            }
-        }
+        $type = $this->getType($name);
 
         if (! $type) {
             throw new TypeNotFound('Type '.$name.' not found.');
         }
 
+        // If we already have an instance of this type, return it.
         if (isset($this->typeInstances[$name])) {
             return $this->typeInstances[$name];
         }
 
+        // Otherwise we create it and store it for future references.
         $type = $this->makeObjectType($type, ['name' => $name]);
         $this->typeInstances[$name] = $type;
 

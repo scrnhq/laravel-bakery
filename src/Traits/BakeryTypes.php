@@ -59,4 +59,16 @@ trait BakeryTypes
     {
         return new PolymorphicType($definitions);
     }
+
+    /**
+     * Get a reference to a registered type.
+     *
+     * @api
+     * @param string $name
+     * @return \Bakery\Types\Definitions\ReferenceType
+     */
+    public function type(string $name): ReferenceType
+    {
+        return new ReferenceType($this->resolve($name));
+    }
 }
