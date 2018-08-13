@@ -30,7 +30,7 @@ class TimestampType extends ScalarType
     }
 
     /**
-     * Parses an externally provided value (query variable) to use as an input
+     * Parses an externally provided value (query variable) to use as an input.
      *
      * @param mixed $value
      * @return mixed
@@ -41,7 +41,7 @@ class TimestampType extends ScalarType
     }
 
     /**
-     * Parses an externally provided literal value (hardcoded in GraphQL query) to use as an input
+     * Parses an externally provided literal value (hardcoded in GraphQL query) to use as an input.
      *
      * @param \GraphQL\Language\AST\Node $ast
      * @return mixed
