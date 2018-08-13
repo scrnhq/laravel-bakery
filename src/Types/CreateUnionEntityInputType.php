@@ -4,30 +4,11 @@ namespace Bakery\Types;
 
 use Bakery\Utils\Utils;
 use Bakery\Support\Facades\Bakery;
-use Bakery\Eloquent\Introspectable;
+use Bakery\Types\Concerns\InteractsWithPolymorphism;
 
 class CreateUnionEntityInputType extends MutationInputType
 {
-    protected $definitions;
-
-    /**
-     * Construct a new union entity type.
-     *
-     * @param array $definitions
-     */
-    public function __construct(array $definitions = [])
-    {
-        if (isset($definitions)) {
-            $this->definitions = $definitions;
-        }
-
-        Utils::invariant(! empty($this->definitions), 'No definitions defined on "'.get_class($this).'"');
-
-        foreach ($this->definitions as $definition) {
-            $schema = resolve($definition);
-            Utils::invariant(Utils::usesTrait($schema, Introspectable::class), class_basename($schema).' does not use the '.Introspectable::class.' trait.');
-        }
-    }
+    use InteractsWithPolymorphism;
 
     /**
      * Define the fields for the type.

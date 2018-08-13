@@ -2,41 +2,20 @@
 
 namespace Bakery\Types;
 
-use Bakery\Utils\Utils;
 use Bakery\Support\Facades\Bakery;
-use Bakery\Eloquent\Introspectable;
 use Bakery\Types\Definitions\UnionType;
 use GraphQL\Type\Definition\ResolveInfo;
+use Bakery\Types\Concerns\InteractsWithPolymorphism;
 
 class UnionEntityType extends UnionType
 {
-    protected $definitions;
+    use InteractsWithPolymorphism;
 
     /**
-     * Construct a new union entity type.
+     * Get the types of the union type.
      *
-     * @param array $definitions
+     * @return array
      */
-    public function __construct(array $definitions = [])
-    {
-        if (isset($definitions)) {
-            $this->definitions = $definitions;
-        }
-
-        Utils::invariant(
-            ! empty($this->definitions),
-            'No definitions defined on "'.get_class($this).'"'
-        );
-
-        foreach ($this->definitions as $definition) {
-            $schema = resolve($definition);
-            Utils::invariant(
-                Utils::usesTrait($schema, Introspectable::class),
-                class_basename($schema).' does not use the '.Introspectable::class.' trait.'
-            );
-        }
-    }
-
     public function types(): array
     {
         return collect($this->definitions)->map(function (string $definition) {
