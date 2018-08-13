@@ -59,12 +59,30 @@ class EntityType extends ObjectType
      */
     public function fields(): array
     {
-        $fields = $this->schema->getFields();
-        $relationFields = $this->getRelationFields();
-
-        return collect($fields)
-            ->merge($relationFields)
+        return collect()
+            ->merge($this->getRegularFields())
+            ->merge($this->getRelationFields())
             ->toArray();
+    }
+
+    /**
+     * Get the regular fields for the entity.
+     *
+     * @return Collection
+     */
+    protected function getRegularFields(): Collection
+    {
+        $fields = collect();
+
+        foreach ($this->schema->getFields() as $key => $field) {
+            if ($field instanceof PolymorphicType) {
+                $fields = $fields->merge($this->getFieldsForPolymorphicField($key, $field));
+            } else {
+                $fields->put($key, $field);
+            }
+        }
+
+        return $fields;
     }
 
     /**
@@ -82,7 +100,7 @@ class EntityType extends ObjectType
             if ($field instanceof EloquentType) {
                 $fields = $fields->merge($this->getFieldsForRelation($key, $field));
             } elseif ($field instanceof PolymorphicType) {
-                $fields = $fields->merge($this->getFieldsForPolymorphicRelation($key, $field));
+                $fields = $fields->merge($this->getFieldsForPolymorphicField($key, $field));
             }
         }
 
@@ -209,7 +227,7 @@ class EntityType extends ObjectType
      * @param \Bakery\Types\Definitions\PolymorphicType $field
      * @return Collection
      */
-    public function getFieldsForPolymorphicRelation(string $key, PolymorphicType $field): Collection
+    public function getFieldsForPolymorphicField(string $key, PolymorphicType $field): Collection
     {
         $typename = Utils::typename($key).'On'.$this->schema->typename();
 
