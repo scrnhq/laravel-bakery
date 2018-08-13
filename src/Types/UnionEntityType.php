@@ -3,6 +3,7 @@
 namespace Bakery\Types;
 
 use Bakery\Support\Facades\Bakery;
+use Bakery\Types\Definitions\Type;
 use Bakery\Types\Definitions\UnionType;
 use GraphQL\Type\Definition\ResolveInfo;
 use Bakery\Types\Concerns\InteractsWithPolymorphism;
@@ -18,8 +19,8 @@ class UnionEntityType extends UnionType
      */
     public function types(): array
     {
-        return collect($this->definitions)->map(function (string $definition) {
-            return Bakery::type(resolve($definition)->typename());
+        return collect($this->definitions)->map(function ($definition) {
+            return $definition instanceof Type ? $definition : Bakery::type(resolve($definition)->typename());
         })->toArray();
     }
 

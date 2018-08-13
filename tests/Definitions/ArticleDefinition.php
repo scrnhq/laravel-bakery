@@ -19,6 +19,7 @@ class ArticleDefinition
             'title' => Bakery::string(),
             'content' => Bakery::string(),
             'created_at' => Bakery::type('Timestamp'),
+            'polymorphic' => Bakery::polymorphic([Bakery::string(), Bakery::int()]),
         ];
     }
 

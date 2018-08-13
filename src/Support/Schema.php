@@ -195,7 +195,7 @@ class Schema
         $typename = Utils::typename($key).'On'.$definition->typename();
         $definitions = $type->getDefinitions();
 
-        return collect((new Types\UnionEntityType($definitions))->setName($typename));
+        return collect([(new Types\UnionEntityType($definitions))->setName($typename)]);
     }
 
     /**
