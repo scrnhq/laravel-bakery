@@ -8,7 +8,6 @@ use Bakery\Types\Definitions\Type;
 use Illuminate\Support\Collection;
 use Bakery\Types\Definitions\InputType;
 use Bakery\Types\Definitions\EloquentType;
-use Bakery\Types\Definitions\ReferenceType;
 
 class CollectionFilterType extends InputType
 {

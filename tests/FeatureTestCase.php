@@ -5,8 +5,8 @@ namespace Bakery\Tests;
 use Bakery\Tests\Stubs\Policies;
 use Bakery\BakeryServiceProvider;
 use Bakery\Support\Facades\Bakery;
-use Bakery\Tests\Stubs\Types\TimestampType;
 use Illuminate\Contracts\Auth\Access\Gate;
+use Bakery\Tests\Stubs\Types\TimestampType;
 use Orchestra\Database\ConsoleServiceProvider;
 use Illuminate\Foundation\Testing\Concerns\InteractsWithDatabase;
 

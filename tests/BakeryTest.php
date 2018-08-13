@@ -4,7 +4,6 @@ namespace Bakery\Tests;
 
 use Bakery\Support\Facades\Bakery;
 use Bakery\Exceptions\TypeNotFound;
-use Bakery\Types\Definitions\ObjectType;
 
 class BakeryTest extends FeatureTestCase
 {
