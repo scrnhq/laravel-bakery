@@ -13,7 +13,6 @@ use Bakery\Types\Definitions\NamedType;
 use Illuminate\Database\Eloquent\Model;
 use Bakery\Types\Definitions\ObjectType;
 use Bakery\Support\Schema as BakerySchema;
-use Bakery\Types\Definitions\ReferenceType;
 use GraphQL\Type\Definition\Type as GraphQLType;
 
 class Bakery
@@ -184,7 +183,7 @@ class Bakery
 
         // If the string is a class, we resolve it, check if it is an instance of type and grab it's name.
         // and then call this method again to check.
-        if(class_exists($name)) {
+        if (class_exists($name)) {
             $instance = resolve($name);
 
             if ($instance instanceof Type) {
