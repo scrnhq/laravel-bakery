@@ -2,6 +2,7 @@
 
 namespace Bakery\Types\Concerns;
 
+use Bakery\Concerns\ModelAware;
 use Bakery\Utils\Utils;
 use Bakery\Eloquent\Introspectable;
 
@@ -14,8 +15,7 @@ trait InteractsWithPolymorphism
     protected $definitions;
 
     /**
-     * Construct a new union entity type.
-     *
+     * InteractsWithPolymorphism constructor.
      * @param array $definitions
      */
     public function __construct(array $definitions = [])
@@ -26,6 +26,21 @@ trait InteractsWithPolymorphism
 
         Utils::invariant(! empty($this->definitions), 'No definitions defined on "'.get_class($this).'"');
 
+        // If this type uses the model aware trait it is doing something
+        // with relationships and we want to check the definitions to use the introspectable trait.
+        if (Utils::usesTrait($this, ModelAware::class)) {
+            $this->checkIntrospectable();
+        }
+
+    }
+
+    /**
+     * Check if the definitions use the introspectable trait.
+     *
+     * @return void
+     */
+    protected function checkIntrospectable(): void
+    {
         foreach ($this->definitions as $definition) {
             $schema = resolve($definition);
             Utils::invariant(
