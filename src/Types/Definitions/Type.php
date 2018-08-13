@@ -11,7 +11,7 @@ use GraphQL\Type\Definition\InputType as GraphQLInputType;
 use GraphQL\Type\Definition\NamedType as GraphQLNamedType;
 use GraphQL\Type\Definition\OutputType as GraphQLOutputType;
 
-abstract class Type
+class Type
 {
     /**
      * The name of the type.

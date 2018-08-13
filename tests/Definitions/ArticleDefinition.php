@@ -18,6 +18,7 @@ class ArticleDefinition
             'slug' => Bakery::string()->unique(),
             'title' => Bakery::string(),
             'content' => Bakery::string(),
+            'created_at' => Bakery::type('Timestamp'),
         ];
     }
 

@@ -66,20 +66,20 @@ class CollectionFilterType extends InputType
 
         $type = $field->getType();
 
-        $fields->put($name, new ReferenceType($type));
-        $fields->put($name.'_contains', new ReferenceType($type));
-        $fields->put($name.'_not_contains', new ReferenceType($type));
-        $fields->put($name.'_starts_with', new ReferenceType($type));
-        $fields->put($name.'_not_starts_with', new ReferenceType($type));
-        $fields->put($name.'_ends_with', new ReferenceType($type));
-        $fields->put($name.'_not_ends_with', new ReferenceType($type));
-        $fields->put($name.'_not', new ReferenceType($type));
-        $fields->put($name.'_not_in', (new ReferenceType($type))->list());
-        $fields->put($name.'_in', (new ReferenceType($type))->list());
-        $fields->put($name.'_lt', new ReferenceType($type));
-        $fields->put($name.'_lte', new ReferenceType($type));
-        $fields->put($name.'_gt', new ReferenceType($type));
-        $fields->put($name.'_gte', new ReferenceType($type));
+        $fields->put($name, new Type($type));
+        $fields->put($name.'_contains', new Type($type));
+        $fields->put($name.'_not_contains', new Type($type));
+        $fields->put($name.'_starts_with', new Type($type));
+        $fields->put($name.'_not_starts_with', new Type($type));
+        $fields->put($name.'_ends_with', new Type($type));
+        $fields->put($name.'_not_ends_with', new Type($type));
+        $fields->put($name.'_not', new Type($type));
+        $fields->put($name.'_not_in', (new Type($type))->list());
+        $fields->put($name.'_in', (new Type($type))->list());
+        $fields->put($name.'_lt', new Type($type));
+        $fields->put($name.'_lte', new Type($type));
+        $fields->put($name.'_gt', new Type($type));
+        $fields->put($name.'_gte', new Type($type));
 
         return $fields;
     }

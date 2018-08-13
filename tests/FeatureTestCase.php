@@ -5,6 +5,7 @@ namespace Bakery\Tests;
 use Bakery\Tests\Stubs\Policies;
 use Bakery\BakeryServiceProvider;
 use Bakery\Support\Facades\Bakery;
+use Bakery\Tests\Stubs\Types\TimestampType;
 use Illuminate\Contracts\Auth\Access\Gate;
 use Orchestra\Database\ConsoleServiceProvider;
 use Illuminate\Foundation\Testing\Concerns\InteractsWithDatabase;
@@ -36,7 +37,7 @@ class FeatureTestCase extends TestCase
     {
         parent::setUp();
 
-        // Disable exception handling for easer testing.
+        // Disable exception handling for easier testing.
         $this->withoutExceptionHandling();
 
         $this->loadMigrationsFrom(__DIR__.'/migrations');
@@ -53,6 +54,10 @@ class FeatureTestCase extends TestCase
             Definitions\TagDefinition::class,
             Definitions\UserRoleDefinition::class,
             Definitions\UpvoteDefinition::class,
+        ]);
+
+        app()['config']->set('bakery.types', [
+            TimestampType::class,
         ]);
     }
 
