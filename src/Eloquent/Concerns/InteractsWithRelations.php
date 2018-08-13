@@ -274,7 +274,7 @@ trait InteractsWithRelations
         if (is_array($data)) {
             $data = collect($data);
 
-            Utils::invariant($data->count() === 1, "something");
+            Utils::invariant($data->count() === 1, 'something');
 
             // Get the polymorphic type that belongs to the relation so we can figure out which model we should connect.
             $type = array_get($this->getSchema()->getRelationFields(), $relation->getRelation());

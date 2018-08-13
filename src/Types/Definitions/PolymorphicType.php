@@ -2,8 +2,8 @@
 
 namespace Bakery\Types\Definitions;
 
-use Bakery\Support\Facades\Bakery;
 use Bakery\Utils\Utils;
+use Bakery\Support\Facades\Bakery;
 use GraphQL\Type\Definition\NamedType as GraphQLNamedType;
 
 class PolymorphicType extends ReferenceType

@@ -211,7 +211,8 @@ class EntityType extends ObjectType
      */
     public function getFieldsForPolymorphicRelation(string $key, PolymorphicType $field): Collection
     {
-        $typename = Utils::typename($key) . 'On' . $this->schema->typename();
+        $typename = Utils::typename($key).'On'.$this->schema->typename();
+
         return collect([$key => $field->setName($typename)]);
     }
 }
