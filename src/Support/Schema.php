@@ -19,8 +19,6 @@ use Bakery\Mutations\DetachPivotMutation;
 use Bakery\Queries\EntityCollectionQuery;
 use GraphQL\Type\Schema as GraphQLSchema;
 use Illuminate\Database\Eloquent\Relations\Pivot;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
-use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Schema
@@ -189,7 +187,7 @@ class Schema
     {
         $types = collect();
 
-        $typename = Utils::typename($key) . 'On' . $definition->typename();
+        $typename = Utils::typename($key).'On'.$definition->typename();
 
         $definitions = $type->getDefinitions();
 
