@@ -96,6 +96,8 @@ class Bakery
     {
         if (! is_subclass_of($model, Model::class)) {
             $this->modelSchemas[$model::$model] = $model;
+        } else {
+            $this->modelSchemas[$model] = $model;
         }
     }
 
