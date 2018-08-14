@@ -1,8 +1,7 @@
 <?php
 
-use Bakery\Tests\Models\Article;
 use Bakery\Tests\Models\Upvote;
-use Bakery\Tests\Models\User;
+use Bakery\Tests\Models\Article;
 
 /*
 |--------------------------------------------------------------------------
@@ -21,6 +20,6 @@ $factory->define(Upvote::class, function (Faker\Generator $faker) {
         'upvoteable_type' => Article::class,
         'upvoteable_id' => function () {
             return factory(Article::class)->create()->id;
-        }
+        },
     ];
 });
