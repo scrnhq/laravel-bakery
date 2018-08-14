@@ -24,6 +24,7 @@ class CommentDefinition
         return [
             'user' => Bakery::model(UserDefinition::class),
             'article' => Bakery::model(ArticleDefinition::class),
+            'upvotes' => Bakery::collection(UpvoteDefinition::class),
         ];
     }
 

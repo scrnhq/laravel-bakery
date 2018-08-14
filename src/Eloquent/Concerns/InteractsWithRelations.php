@@ -4,6 +4,7 @@ namespace Bakery\Eloquent\Concerns;
 
 use RuntimeException;
 use Bakery\Utils\Utils;
+use Illuminate\Database\Eloquent\Model;
 use Bakery\Exceptions\InvariantViolation;
 use Illuminate\Database\Eloquent\Relations;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -21,7 +22,8 @@ trait InteractsWithRelations
         Relations\BelongsTo::class,
         Relations\BelongsToMany::class,
         Relations\MorphTo::class,
-        //Relations\MorphToMany::class,
+        Relations\MorphMany::class,
+        Relations\MorphToMany::class,
     ];
 
     /**
@@ -300,6 +302,52 @@ trait InteractsWithRelations
     protected function fillMorphToRelation(Relations\MorphTo $relation, $attributes = [])
     {
         // TODO
+    }
+
+    /**
+     * Connect a morph many relation.
+     *
+     * @param \Illuminate\Database\Eloquent\Relations\MorphMany $relation
+     * @param array $ids
+     * @return void
+     */
+    protected function connectMorphManyRelation(Relations\MorphMany $relation, array $ids)
+    {
+        $this->transactionQueue[] = function () use ($relation, $ids) {
+            $relation->each(function (Model $model) use ($relation) {
+                $model->setAttribute($relation->getMorphType(), null);
+                $model->setAttribute($relation->getForeignKeyName(), null);
+
+                $model->save();
+            });
+
+            $models = $relation->getRelated()->newQuery()->whereIn($relation->getRelated()->getKeyName(), $ids)->get();
+
+            $relation->saveMany($models);
+        };
+    }
+
+    /**
+     * Fill a morph many relation.
+     *
+     * @param \Illuminate\Database\Eloquent\Relations\MorphMany $relation
+     * @param array $values
+     * @return void
+     */
+    protected function fillMorphManyRelation(Relations\MorphMany $relation, array $values)
+    {
+        $this->transactionQueue[] = function () use ($relation, $values) {
+            $related = $relation->getRelated();
+            $relation->delete();
+
+            foreach ($values as $attributes) {
+                $model = $related->newInstance();
+                $model->fillWithInput($attributes);
+                $model->setAttribute($relation->getMorphType(), $relation->getMorphClass());
+                $model->setAttribute($relation->getForeignKeyName(), $relation->getParentKey());
+                $model->save();
+            }
+        };
     }
 
     /**

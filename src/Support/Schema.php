@@ -7,6 +7,7 @@ use Bakery\Utils\Utils;
 use Bakery\Eloquent\Mutable;
 use GraphQL\Type\SchemaConfig;
 use Bakery\Support\Facades\Bakery;
+use Bakery\Types\Definitions\Type;
 use Illuminate\Support\Collection;
 use Bakery\Eloquent\Introspectable;
 use Bakery\Mutations\CreateMutation;
@@ -451,7 +452,7 @@ class Schema
         ], $options));
     }
 
-    protected function makeObjectTypeFromClass($class, $options = [])
+    protected function makeObjectTypeFromClass(Type $class, $options = [])
     {
         return $class->toType();
     }

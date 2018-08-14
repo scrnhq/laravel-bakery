@@ -13,6 +13,7 @@ use Bakery\Types\Definitions\NamedType;
 use Illuminate\Database\Eloquent\Model;
 use Bakery\Support\Schema as BakerySchema;
 use GraphQL\Type\Definition\Type as GraphQLType;
+use GraphQL\Type\Definition\NamedType as GraphQLNamedType;
 
 class Bakery
 {
@@ -173,7 +174,7 @@ class Bakery
      * @param string $name
      * @return Type|null
      */
-    public function getType(string $name): ?Type
+    public function getType(string $name): ?NamedType
     {
         // If the string is the name of the type we return it straight away.
         if ($this->hasType($name)) {
@@ -210,11 +211,11 @@ class Bakery
     /**
      * Resolve a type from the registry.
      *
-     * @param $name
-     * @return \GraphQL\Type\Definition\Type
+     * @param string $name
+     * @return \GraphQL\Type\Definition\NamedType
      * @throws \Bakery\Exceptions\TypeNotFound
      */
-    public function resolve(string $name): GraphQLType
+    public function resolve(string $name): GraphQLNamedType
     {
         $type = $this->getType($name);
 

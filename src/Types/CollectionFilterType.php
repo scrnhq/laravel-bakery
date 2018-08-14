@@ -63,7 +63,7 @@ class CollectionFilterType extends InputType
     {
         $fields = collect();
 
-        $type = $field->getType();
+        $type = $field->toType();
 
         $fields->put($name, new Type($type));
         $fields->put($name.'_contains', new Type($type));

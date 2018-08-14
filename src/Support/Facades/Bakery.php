@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static \Bakery\Types\Definitions\ReferenceType list(string $definition)
  * @method static \Bakery\Types\Definitions\ReferenceType type(string $definition)
  * @method static \Bakery\Types\Definitions\PolymorphicType polymorphic(array $definitions)
- * @method static \GraphQL\Type\Definition\Type resolve(string $definition)
+ * @method static \GraphQL\Type\Definition\NamedType resolve(string $definition)
  */
 class Bakery extends Facade
 {
