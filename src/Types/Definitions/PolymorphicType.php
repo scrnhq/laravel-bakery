@@ -51,10 +51,20 @@ class PolymorphicType extends ReferenceType
     /**
      * Get the underlying (wrapped) type.
      *
-     * @return GraphQLNamedType
+     * @return \GraphQL\Type\Definition\NamedType
      */
     public function getNamedType(): GraphQLNamedType
     {
         return Bakery::resolve($this->name);
+    }
+
+    /**
+     * Returns if the underlying type is a leaf type.
+     *
+     * @return bool
+     */
+    public function isLeafType(): bool
+    {
+        return false;
     }
 }

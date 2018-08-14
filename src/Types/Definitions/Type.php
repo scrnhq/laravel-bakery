@@ -190,36 +190,8 @@ class Type
                 return call_user_func_array($this->resolver, [$source, $args, $viewer]);
             }
 
-            return $this->defaultResolver($source, $args, $viewer, $info);
-        };
-    }
-
-    /**
-     * The default resolver for resolving the value of the type.
-     * This gets called when there is no custom resolver defined.
-     *
-     * @param $source
-     * @param $args
-     * @param $viewer
-     * @param ResolveInfo $info
-     * @return mixed|null
-     */
-    protected function defaultResolver($source, $args, $viewer, ResolveInfo $info)
-    {
-        $fieldName = $info->fieldName;
-        $property = null;
-
-        if (is_array($source) || $source instanceof \ArrayAccess) {
-            if (isset($source[$fieldName])) {
-                $property = $source[$fieldName];
-            }
-        } elseif (is_object($source)) {
-            if (isset($source->{$fieldName})) {
-                $property = $source->{$fieldName};
-            }
-        }
-
-        return $property instanceof \Closure ? $property($source, $args, $viewer, $info) : $property;
+            return self::defaultResolver($source, $args, $viewer, $info);
+    };
     }
 
     /**
@@ -297,7 +269,7 @@ class Type
      */
     public function isLeafType(): bool
     {
-        return GraphQLType::isLeafType($this->type);
+        return GraphQLType::isLeafType($this->getNamedType());
     }
 
     /**
@@ -318,47 +290,37 @@ class Type
      *
      * @return GraphQLType
      */
-    public function getType(): GraphQLType
+    public function toType(): GraphQLType
     {
         $type = $this->getNamedType();
 
-        return $this->list ? GraphQLType::listOf($type) : $type;
-    }
-
-    /**
-     * Convert the type to a GraphQL Type.
-     *
-     * @return GraphQLType
-     */
-    public function toType(): GraphQLType
-    {
-        return $this->getType();
+        return $this->isList() ? GraphQLType::listOf($type) : $type;
     }
 
     /**
      * Get the output type.
      * This checks if the type is nullable and if so, wrap it in a nullable type.
      *
-     * @return GraphQLOutputType
+     * @return \GraphQL\Type\Definition\OutputType
      */
-    public function getOutputType(): GraphQLOutputType
+    public function toOutputType(): GraphQLOutputType
     {
         $type = $this->toType();
 
-        return $this->nullable ? $type : GraphQLType::nonNull($type);
+        return $this->isNullable() ? $type : GraphQLType::nonNull($type);
     }
 
     /**
      * Get the input type.
      * This checks if the type is nullable and if so, wrap it in a nullable type.
      *
-     * @return GraphQLInputType
+     * @return \GraphQL\Type\Definition\InputType
      */
-    public function getInputType(): GraphQLInputType
+    public function toInputType(): GraphQLInputType
     {
         $type = $this->toType();
 
-        return $this->nullable ? $type : GraphQLType::nonNull($type);
+        return $this->isNullable() ? $type : GraphQLType::nonNull($type);
     }
 
     /**
@@ -370,7 +332,7 @@ class Type
     {
         return [
             'policy' => $this->policy,
-            'type' => $this->getOutputType(),
+            'type' => $this->toOutputType(),
             'resolve' => $this->getResolver(),
         ];
     }
@@ -383,7 +345,35 @@ class Type
     public function toInputField(): array
     {
         return [
-            'type' => $this->getInputType(),
+            'type' => $this->toInputType(),
         ];
+    }
+
+    /**
+     * The default resolver for resolving the value of the type.
+     * This gets called when there is no custom resolver defined.
+     *
+     * @param $source
+     * @param $args
+     * @param $viewer
+     * @param \GraphQL\Type\Definition\ResolveInfo $info
+     * @return mixed|null
+     */
+    protected static function defaultResolver($source, $args, $viewer, ResolveInfo $info)
+    {
+        $fieldName = $info->fieldName;
+        $property = null;
+
+        if (is_array($source) || $source instanceof \ArrayAccess) {
+            if (isset($source[$fieldName])) {
+                $property = $source[$fieldName];
+            }
+        } elseif (is_object($source)) {
+            if (isset($source->{$fieldName})) {
+                $property = $source->{$fieldName};
+            }
+        }
+
+        return $property instanceof \Closure ? $property($source, $args, $viewer, $info) : $property;
     }
 }

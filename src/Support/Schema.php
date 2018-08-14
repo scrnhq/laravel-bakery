@@ -3,6 +3,7 @@
 namespace Bakery\Support;
 
 use Bakery\Types;
+use Bakery\Types\Definitions\Type;
 use Bakery\Utils\Utils;
 use Bakery\Eloquent\Mutable;
 use GraphQL\Type\SchemaConfig;
@@ -451,7 +452,7 @@ class Schema
         ], $options));
     }
 
-    protected function makeObjectTypeFromClass($class, $options = [])
+    protected function makeObjectTypeFromClass(Type $class, $options = [])
     {
         return $class->toType();
     }
