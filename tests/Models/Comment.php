@@ -17,6 +17,7 @@ class Comment extends Model
         'body',
         'user',
         'article',
+        'upvotes',
     ];
 
     public function user()

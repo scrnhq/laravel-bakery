@@ -3,6 +3,7 @@
 namespace Bakery\Tests\Feature;
 
 use Bakery\Tests\Models;
+use Bakery\Tests\Models\Comment;
 use Bakery\Tests\FeatureTestCase;
 
 class CreateMutationTest extends FeatureTestCase
@@ -449,7 +450,7 @@ class CreateMutationTest extends FeatureTestCase
     }
 
     /** @test */
-    public function it_lets_you_attach_polymorphic_relation()
+    public function it_lets_you_attach_a_morph_to_relation()
     {
         $user = factory(Models\User::class)->create();
         $this->actingAs($user);
@@ -469,5 +470,127 @@ class CreateMutationTest extends FeatureTestCase
         $response = $this->json('GET', '/graphql', ['query' => $query]);
         $response->assertJsonKey('id');
         $this->assertDatabaseHas('upvotes', ['upvoteable_id' => $article->id]);
+    }
+
+    /** @test */
+    public function it_lets_you_create_a_morph_to_relation()
+    {
+        $user = factory(Models\User::class)->create();
+        $this->actingAs($user);
+
+        $article = factory(Models\Article::class)->create();
+
+        $query = '
+            mutation {
+                createUpvote(input: {
+                    upvoteable: { comment: {
+                        body: "Cool story bro"
+                        userId: "'.$user->id.'"
+                        articleId: "'.$article->id.'"
+                    } }
+                }) {
+                    id
+                }
+            }
+        ';
+
+        $response = $this->json('GET', '/graphql', ['query' => $query]);
+        $response->assertJsonKey('id');
+        $this->assertDatabaseHas('comments', ['body' => 'Cool story bro']);
+        $this->assertDatabaseHas('upvotes', ['upvoteable_id' => '1']);
+    }
+
+    /** @test */
+    public function it_lets_you_attach_a_morph_many_relation()
+    {
+        $user = factory(Models\User::class)->create();
+        $this->actingAs($user);
+
+        $article = factory(Models\Article::class)->create();
+        $upvote = factory(Models\Upvote::class)->create();
+
+        $query = '
+            mutation {
+                createComment(input: {
+                    body: "Cool story bro"
+                    userId: "'.$user->id.'"
+                    articleId: "'.$article->id.'"
+                    upvoteIds: ["'.$upvote->id.'"]
+                }) {
+                    id
+                }
+            }
+        ';
+
+        $response = $this->json('GET', '/graphql', ['query' => $query]);
+        $response->assertJsonKey('id');
+        $this->assertDatabaseHas('comments', ['article_id' => $article->id]);
+        $this->assertDatabaseHas('upvotes', ['upvoteable_id' => '1', 'upvoteable_type' => Comment::class]);
+    }
+
+    /** @test */
+    public function it_lets_you_create_a_morph_many_relation()
+    {
+        $user = factory(Models\User::class)->create();
+        $this->actingAs($user);
+
+        $article = factory(Models\Article::class)->create();
+
+        $query = '
+            mutation {
+                createComment(input: {
+                    body: "Cool story bro"
+                    userId: "'.$user->id.'"
+                    articleId: "'.$article->id.'"
+                    upvotes: [
+                        {  }
+                    ]
+                }) {
+                    id
+                }
+            }
+        ';
+
+        $response = $this->json('GET', '/graphql', ['query' => $query]);
+        $response->assertJsonKey('id');
+        $this->assertDatabaseHas('comments', ['article_id' => $article->id]);
+        $this->assertDatabaseHas('upvotes', ['upvoteable_id' => '1', 'upvoteable_type' => Comment::class]);
+    }
+
+    /** @test */
+    public function it_throws_exception_when_supplying_multiple_keys_to_polymorphic_input_field()
+    {
+        $this->markTestIncomplete();
+
+        $user = factory(Models\User::class)->create();
+        $this->actingAs($user);
+
+        $article = factory(Models\Article::class)->create();
+
+        $query = '
+            mutation {
+                createUpvote(input: {
+                    upvoteable: { comment: {
+                        body: "Cool story bro"
+                        userId: "'.$user->id.'"
+                        articleId: "'.$article->id.'"
+                    }, article: {
+                        title: "This is wrong"
+                        slug: "this-is-wrong"
+                        content: "Lorem ipsum"
+                    }}
+                }) {
+                    id
+                }
+            }
+        ';
+
+        // TODO: Check for exception
+
+        $response = $this->json('GET', '/graphql', ['query' => $query]);
+        $response->assertJsonKey('id');
+        $this->assertDatabaseMissing('comments', ['body' => 'Cool story bro']);
+        $this->assertDatabaseMissing('articles', ['title' => 'This is wrong']);
+        $this->assertDatabaseMissing('upvotes', ['upvoteable_id' => '1']);
     }
 }

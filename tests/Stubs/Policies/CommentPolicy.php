@@ -23,4 +23,14 @@ class CommentPolicy
     {
         return true;
     }
+
+    public function createUpvotes(): bool
+    {
+        return true;
+    }
+
+    public function setUpvotes(): bool
+    {
+        return true;
+    }
 }
