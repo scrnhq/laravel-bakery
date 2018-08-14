@@ -191,7 +191,7 @@ class Type
             }
 
             return self::defaultResolver($source, $args, $viewer, $info);
-    };
+        };
     }
 
     /**
