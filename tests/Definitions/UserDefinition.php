@@ -7,8 +7,9 @@ use GraphQL\Type\Definition\Type;
 use Bakery\Support\Facades\Bakery;
 use Bakery\Eloquent\Introspectable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Bakery\Contracts\Introspectable as IntrospectableContract;
 
-class UserDefinition
+class UserDefinition implements IntrospectableContract
 {
     use Introspectable;
 

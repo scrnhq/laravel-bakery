@@ -5,8 +5,9 @@ namespace Bakery\Tests\Definitions;
 use Bakery\Tests\Models\Phone;
 use Bakery\Support\Facades\Bakery;
 use Bakery\Eloquent\Introspectable;
+use Bakery\Contracts\Introspectable as IntrospectableContract;
 
-class PhoneDefinition
+class PhoneDefinition implements IntrospectableContract
 {
     use Introspectable;
 

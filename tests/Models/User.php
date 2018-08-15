@@ -4,8 +4,9 @@ namespace Bakery\Tests\Models;
 
 use Bakery\Eloquent\Mutable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Bakery\Contracts\Mutable as MutableContract;
 
-class User extends Authenticatable
+class User extends Authenticatable implements MutableContract
 {
     use Mutable;
 

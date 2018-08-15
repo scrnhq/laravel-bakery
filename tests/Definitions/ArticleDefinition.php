@@ -5,8 +5,9 @@ namespace Bakery\Tests\Definitions;
 use Bakery\Tests\Models\Article;
 use Bakery\Support\Facades\Bakery;
 use Bakery\Eloquent\Introspectable;
+use Bakery\Contracts\Introspectable as IntrospectableContract;
 
-class ArticleDefinition
+class ArticleDefinition implements IntrospectableContract
 {
     use Introspectable;
 

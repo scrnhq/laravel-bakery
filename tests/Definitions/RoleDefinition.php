@@ -5,8 +5,9 @@ namespace Bakery\Tests\Definitions;
 use Bakery\Tests\Models\Role;
 use Bakery\Support\Facades\Bakery;
 use Bakery\Eloquent\Introspectable;
+use Bakery\Contracts\Introspectable as IntrospectableContract;
 
-class RoleDefinition
+class RoleDefinition implements IntrospectableContract
 {
     use Introspectable;
 

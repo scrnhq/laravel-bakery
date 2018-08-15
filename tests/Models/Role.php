@@ -4,8 +4,9 @@ namespace Bakery\Tests\Models;
 
 use Bakery\Eloquent\Mutable;
 use Illuminate\Database\Eloquent\Model;
+use Bakery\Contracts\Mutable as MutableContract;
 
-class Role extends Model
+class Role extends Model implements MutableContract
 {
     use Mutable;
 

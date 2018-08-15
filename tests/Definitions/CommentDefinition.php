@@ -5,8 +5,9 @@ namespace Bakery\Tests\Definitions;
 use Bakery\Tests\Models\Comment;
 use Bakery\Support\Facades\Bakery;
 use Bakery\Eloquent\Introspectable;
+use Bakery\Contracts\Introspectable as IntrospectableContract;
 
-class CommentDefinition
+class CommentDefinition implements IntrospectableContract
 {
     use Introspectable;
 
