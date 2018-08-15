@@ -2,22 +2,22 @@
 
 namespace Bakery\Contracts;
 
-use Illuminate\Contracts\Auth\Authenticatable;
+use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Collection;
+use Illuminate\Contracts\Auth\Authenticatable;
 
 interface Introspectable
 {
     public function getModel(): Model;
 
-    function fields(): array;
+    public function fields(): array;
 
     public function getFields(): Collection;
 
     public function getFillableFields(): Collection;
 
-    function relations(): array;
+    public function relations(): array;
 
     public function getRelationFields(): Collection;
 
