@@ -30,22 +30,11 @@ class CollectionFilterType extends InputType
      */
     public function fields(): array
     {
-        $fields = collect();
-
-        foreach ($this->schema->getFields() as $name => $type) {
-            if ($type->isLeafType()) {
-                $fields = $fields->merge($this->getFilters($name, $type));
-            }
-        }
-
-        $this->schema->getRelationFields()->filter(function (Type $field) {
-            return $field instanceof EloquentType;
-        })->each(function (EloquentType $field, $relation) use ($fields) {
-            $fields->put($relation, Bakery::type($field->name().'Filter'));
-        });
-
-        $fields->put('AND', Bakery::type($this->name())->list());
-        $fields->put('OR', Bakery::type($this->name())->list());
+        $fields = collect()
+            ->merge($this->getScalarFilters())
+            ->merge($this->getRelationFilters())
+            ->put('AND', Bakery::type($this->name())->list())
+            ->put('OR', Bakery::type($this->name())->list());
 
         return $fields->map(function (Type $field) {
             return $field->nullable();
@@ -53,13 +42,47 @@ class CollectionFilterType extends InputType
     }
 
     /**
+     * Return the filters for the scalar fields.
+     *
+     * @return \Illuminate\Support\Collection
+     */
+    protected function getScalarFilters(): Collection
+    {
+        $fields = $this->schema->getFields();
+
+        return $fields->keys()->reduce(function (Collection $result, string $name) use ($fields) {
+            $type = $fields->get($name);
+
+            return $type->isLeafType() ? $result->merge($this->getFilters($name, $type)) : $result;
+        }, collect());
+    }
+
+    /**
+     * Return the filters for the relation fields.
+     *
+     * @return \Illuminate\Support\Collection
+     */
+    protected function getRelationFilters(): Collection
+    {
+        $fields = $this->schema->getRelationFields();
+
+        return $fields->filter(function (Type $field) {
+            return $field instanceof EloquentType;
+        })->keys()->reduce(function (Collection $result, string $name) use ($fields) {
+            $type = $fields->get($name);
+
+            return $result->put($name, Bakery::type($type->name().'Filter'));
+        }, collect());
+    }
+
+    /**
      * Return the filters for a field.
      *
      * @param string $name
-     * @param Type $field
-     * @return Collection
+     * @param \Bakery\Types\Definitions\Type $field
+     * @return \Illuminate\Support\Collection
      */
-    public function getFilters(string $name, Type $field): Collection
+    protected function getFilters(string $name, Type $field): Collection
     {
         $fields = collect();
 

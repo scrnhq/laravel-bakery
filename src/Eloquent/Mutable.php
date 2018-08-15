@@ -20,7 +20,7 @@ trait Mutable
     /**
      * Return an instance of the Gate class.
      *
-     * @return Gate
+     * @return \Illuminate\Contracts\Auth\Access\Gate
      */
     protected function gate(): Gate
     {
@@ -44,7 +44,7 @@ trait Mutable
     /**
      * Get the Bakery model schema that belongs to this model.
      *
-     * @return mixed
+     * @return \Bakery\Contracts\Introspectable
      */
     public function getSchema()
     {
@@ -59,9 +59,9 @@ trait Mutable
      * Create a new instance with GraphQL input.
      *
      * @param array $input
-     * @return self
+     * @return $this
      */
-    public function createWithInput(array $input)
+    public function createWithInput(array $input = [])
     {
         return DB::transaction(function () use ($input) {
             $model = new static();
@@ -75,14 +75,14 @@ trait Mutable
     /**
      * Update the model with GraphQL input.
      *
-     * @param array $attributes
-     * @return self
+     * @param array $input
+     * @return $this
      * @throws \Throwable
      */
-    public function updateWithInput(array $attributes = [])
+    public function updateWithInput(array $input = [])
     {
-        return DB::transaction(function () use ($attributes) {
-            $this->fillWithInput($attributes);
+        return DB::transaction(function () use ($input) {
+            $this->fillWithInput($input);
             $this->save();
 
             return $this;
@@ -93,10 +93,10 @@ trait Mutable
      * Fill the underlying model with input.
      *
      * @param array $input
-     * @return self
+     * @return $this
      * @throws \Illuminate\Auth\Access\AuthorizationException
      */
-    public function fillWithInput(array $input)
+    public function fillWithInput(array $input = [])
     {
         $scalars = $this->getFillableScalars($input);
         $relations = $this->getFillableRelations($input);
@@ -113,7 +113,7 @@ trait Mutable
      * Save the underlying model.
      *
      * @param array $options
-     * @return self
+     * @return $this
      */
     public function save(array $options = [])
     {
@@ -124,48 +124,44 @@ trait Mutable
     }
 
     /**
-     * Get the attributes that are mass assignable by
-     * cross referencing the attributes with the GraphQL fields.
+     * Get the attributes that are mass assignable by cross
+     * referencing the attributes with the GraphQL fields.
      *
      * @param array $attributes
      * @return array
      */
     protected function getFillableScalars(array $attributes): array
     {
-        return collect($attributes)->filter(function ($value, $key) {
-            $fields = $this->getSchema()->getFillableFields()->keys();
+        $fields = $this->getSchema()->getFillableFields();
 
-            return $fields->contains($key);
-        })->toArray();
+        return collect($attributes)->intersectByKeys($fields)->toArray();
     }
 
     /**
-     * Get the relations that are assignable by
-     * cross referencing the attributes with the GraphQL relations.
+     * Get the relations that are assignable by cross referencing
+     * the attributes with the GraphQL relations.
      *
      * @param array $attributes
      * @return array
      */
     protected function getFillableRelations(array $attributes): array
     {
-        return collect($attributes)->filter(function ($value, $key) {
-            $relations = $this->getSchema()->getRelationFields()->keys();
+        $relations = $this->getSchema()->getRelationFields();
 
-            return $relations->contains($key);
-        })->toArray();
+        return collect($attributes)->intersectByKeys($relations)->toArray();
     }
 
     /**
-     * Get the relations that are assignable by
-     * cross referencing the attributes with the GraphQL relations.
+     * Get the relations that are assignable by cross referencing
+     * the attributes with the GraphQL connections.
      *
      * @param array $attributes
      * @return array
      */
     protected function getFillableConnections(array $attributes): array
     {
-        return collect($attributes)->filter(function ($value, $key) {
-            return in_array($key, $this->getSchema()->getConnections());
-        })->toArray();
+        $connections = $this->getSchema()->getConnections();
+
+        return collect($attributes)->intersectByKeys($connections->flip())->toArray();
     }
 }

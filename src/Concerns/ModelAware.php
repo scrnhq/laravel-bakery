@@ -4,7 +4,6 @@ namespace Bakery\Concerns;
 
 use Bakery\Utils\Utils;
 use Bakery\Eloquent\Introspectable;
-use Illuminate\Database\Eloquent\Model;
 
 trait ModelAware
 {
@@ -18,14 +17,14 @@ trait ModelAware
     /**
      * A reference to the model.
      *
-     * @var Model
+     * @var \Illuminate\Database\Eloquent\Model
      */
     protected $model;
 
     /**
      * A reference to the schema.
      *
-     * @var
+     * @var \Bakery\Contracts\Introspectable
      */
     protected $schema;
 

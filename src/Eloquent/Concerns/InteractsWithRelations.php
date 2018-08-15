@@ -296,12 +296,31 @@ trait InteractsWithRelations
      * Fill a belongs to relation.
      *
      * @param \Illuminate\Database\Eloquent\Relations\MorphTo $relation
-     * @param array $attributes
+     * @param array $data
      * @return void
      */
-    protected function fillMorphToRelation(Relations\MorphTo $relation, $attributes = [])
+    protected function fillMorphToRelation(Relations\MorphTo $relation, $data)
     {
-        // TODO
+        if (! $data) {
+            $relation->associate(null);
+
+            return;
+        }
+
+        if (is_array($data)) {
+            $data = collect($data);
+
+            $type = array_get($this->getSchema()->getRelationFields(), $relation->getRelation());
+
+            [$key, $attributes] = $data->mapWithKeys(function ($value, $key) {
+                return [$key, $value];
+            });
+
+            $model = resolve($type->getDefinitionByKey($key))->getModel();
+
+            $instance = $model->createWithInput($attributes);
+            $relation->associate($instance);
+        }
     }
 
     /**

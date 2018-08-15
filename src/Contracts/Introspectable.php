@@ -25,6 +25,8 @@ interface Introspectable
 
     public function getRelations(): Collection;
 
+    public function getConnections(): Collection;
+
     public function getBakeryQuery(?Authenticatable $viewer): Builder;
 
     public function scopeQuery(Builder $builder): Builder;

@@ -16,7 +16,7 @@ trait Introspectable
     /**
      * A reference to the underlying Eloquent instance.
      *
-     * @var mixed
+     * @var \Illuminate\Database\Eloquent\Model
      */
     protected $instance = null;
 
@@ -36,9 +36,9 @@ trait Introspectable
      * If $this is already an Eloquent model, we just return this.
      * Otherwise we boot up an instance of that model and return it.
      *
-     * @return mixed
+     * @return \Illuminate\Database\Eloquent\Model
      */
-    public function getModel()
+    public function getModel(): Model
     {
         if ($this instanceof Model) {
             return $this;
@@ -74,6 +74,8 @@ trait Introspectable
     /**
      * Define the fields of the model.
      * This method can be overridden.
+     *
+     * @return array
      */
     public function fields(): array
     {
@@ -83,7 +85,7 @@ trait Introspectable
     /**
      * Get all the readable fields.
      *
-     * @return Collection
+     * @return \Illuminate\Support\Collection
      */
     public function getFields(): Collection
     {
@@ -96,7 +98,7 @@ trait Introspectable
      * This excludes the ID field and other fields that are guarded from
      * mass assignment exceptions.
      *
-     * @return Collection
+     * @return \Illuminate\Support\Collection
      */
     public function getFillableFields(): Collection
     {
@@ -108,7 +110,7 @@ trait Introspectable
     /**
      * The fields that can be used to look up this model.
      *
-     * @return Collection
+     * @return \Illuminate\Support\Collection
      */
     public function getLookupFields(): Collection
     {
@@ -138,6 +140,8 @@ trait Introspectable
     /**
      * Define the relation fields of the schema.
      * This method can be overridden.
+     *
+     * @return array
      */
     public function relations(): array
     {
@@ -147,18 +151,17 @@ trait Introspectable
     /**
      * Get the relational fields.
      *
-     * @return Collection
+     * @return \Illuminate\Support\Collection
      */
     public function getRelationFields(): Collection
     {
-        return method_exists($this, 'relations')
-            ? collect($this->relations()) : collect();
+        return collect($this->relations());
     }
 
     /**
      * Get the fillable relational fields.
      *
-     * @return Collection
+     * @return \Illuminate\Support\Collection
      */
     public function getFillableRelationFields(): Collection
     {
@@ -171,7 +174,7 @@ trait Introspectable
      * Get the Eloquent relations of the model.
      * This will only return relations that are defined in the model schema.
      *
-     * @return Collection
+     * @return \Illuminate\Support\Collection
      */
     public function getRelations(): Collection
     {
@@ -190,17 +193,13 @@ trait Introspectable
     /**
      * Get the connections of the resource.
      *
-     * @return array
+     * @return \Illuminate\Support\Collection
      */
-    public function getConnections(): array
+    public function getConnections(): Collection
     {
-        return collect($this->getRelationFields())->map(function ($field, $key) {
-            if ($field->isList()) {
-                return str_singular($key).'Ids';
-            }
-
-            return $key.'Id';
-        })->all();
+        return collect($this->getRelationFields())->map(function (Type $field, $key) {
+            return $field->isList() ? str_singular($key).'Ids' : $key.'Id';
+        });
     }
 
     /**
