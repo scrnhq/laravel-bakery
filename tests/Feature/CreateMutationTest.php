@@ -3,6 +3,7 @@
 namespace Bakery\Tests\Feature;
 
 use Bakery\Tests\Models;
+use Bakery\Tests\Models\Article;
 use Bakery\Tests\Models\Comment;
 use Bakery\Tests\FeatureTestCase;
 
@@ -202,34 +203,6 @@ class CreateMutationTest extends FeatureTestCase
         $response = $this->json('GET', '/graphql', ['query' => $query]);
         $response->assertJsonKey('id');
         $this->assertDatabaseHas('comments', ['id' => '1', 'article_id' => $article->id, 'user_id' => $user->id]);
-    }
-
-    /** @test */
-    public function it_lets_you_assign_a_many_to_many_relationship()
-    {
-        $user = factory(Models\User::class)->create();
-        $this->actingAs($user);
-
-        $tags = factory(Models\Tag::class, 2)->create();
-
-        $query = '
-            mutation {
-                createArticle(input: {
-                    title: "Hello world"
-                    slug: "hello-world"
-                    content: "Hello world"
-                    userId: "'.$user->id.'"
-                    tagIds: ["'.$tags[0]->id.'", "'.$tags[1]->id.'"]
-                }) {
-                    id
-                }
-            }
-        ';
-
-        $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $response->assertJsonKey('id');
-        $this->assertDatabaseHas('article_tag', ['article_id' => '1', 'tag_id' => '1']);
-        $this->assertDatabaseHas('article_tag', ['article_id' => '1', 'tag_id' => '2']);
     }
 
     /** @test */
@@ -555,6 +528,60 @@ class CreateMutationTest extends FeatureTestCase
         $response->assertJsonKey('id');
         $this->assertDatabaseHas('comments', ['article_id' => $article->id]);
         $this->assertDatabaseHas('upvotes', ['upvoteable_id' => '1', 'upvoteable_type' => Comment::class]);
+    }
+
+    /** @test */
+    public function it_lets_you_attach_a_morphed_by_many_relation()
+    {
+        $user = factory(Models\User::class)->create();
+        $this->actingAs($user);
+
+        $article = factory(Article::class)->create();
+
+        $query = '
+            mutation {
+                createTag(input: {
+                    name: "News"
+                    articleIds: ["'.$article->id.'"]
+                }) {
+                    id
+                }
+            }
+        ';
+
+        $response = $this->json('GET', '/graphql', ['query' => $query]);
+        $response->assertJsonKey('id');
+        $this->assertDatabaseHas('tags', ['name' => 'News']);
+        $this->assertDatabaseHas('taggables', ['tag_id' => '1', 'taggable_type' => Article::class, 'taggable_id' => '1']);
+    }
+
+    /** @test */
+    public function it_lets_you_create_a_morphed_by_many_relation()
+    {
+        $user = factory(Models\User::class)->create();
+        $this->actingAs($user);
+
+        $query = '
+            mutation {
+                createTag(input: {
+                    name: "News"
+                    articles: [{
+                        title: "Hello world"
+                        slug: "hello-world"
+                        content: "Lorem ipsum"
+                        userId: "'.$user->id.'"
+                    }]
+                }) {
+                    id
+                }
+            }
+        ';
+
+        $response = $this->json('GET', '/graphql', ['query' => $query]);
+        $response->assertJsonKey('id');
+        $this->assertDatabaseHas('articles', ['title' => 'Hello world']);
+        $this->assertDatabaseHas('tags', ['name' => 'News']);
+        $this->assertDatabaseHas('taggables', ['tag_id' => '1', 'taggable_type' => Article::class, 'taggable_id' => '1']);
     }
 
     /** @test */

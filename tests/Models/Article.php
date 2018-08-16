@@ -41,7 +41,7 @@ class Article extends Model implements MutableContract
 
     public function tags()
     {
-        return $this->belongsToMany(Tag::class);
+        return $this->morphToMany(Tag::class, 'taggable');
     }
 
     public function upvotes()

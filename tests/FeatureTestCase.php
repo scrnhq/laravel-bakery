@@ -31,6 +31,7 @@ class FeatureTestCase extends TestCase
         $gate->policy(Models\Phone::class, Policies\PhonePolicy::class);
         $gate->policy(Models\Comment::class, Policies\CommentPolicy::class);
         $gate->policy(Models\Upvote::class, Policies\UpvotePolicy::class);
+        $gate->policy(Models\Tag::class, Policies\TagPolicy::class);
     }
 
     protected function setUp()

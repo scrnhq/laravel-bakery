@@ -16,10 +16,11 @@ class Tag extends Model implements MutableContract
 
     protected $fillable = [
         'name',
+        'articles',
     ];
 
     public function articles()
     {
-        return $this->belongsToMany(Article::class);
+        return $this->morphedByMany(Article::class, 'taggable');
     }
 }

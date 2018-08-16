@@ -10,14 +10,11 @@ class CreateArticleTagTable extends Migration
      */
     public function up()
     {
-        Schema::create('article_tag', function ($table) {
+        Schema::create('taggables', function ($table) {
             $table->increments('id');
-            $table->unsignedInteger('article_id');
             $table->unsignedInteger('tag_id');
-
-            $table->foreign('article_id')
-                ->references('id')->on('articles')
-                ->onDelete('cascade');
+            $table->unsignedInteger('taggable_id');
+            $table->string('taggable_type');
 
             $table->foreign('tag_id')
                 ->references('id')->on('tags')
@@ -27,6 +24,6 @@ class CreateArticleTagTable extends Migration
 
     public function down()
     {
-        Schema::drop('article_tag');
+        Schema::drop('taggables');
     }
 }

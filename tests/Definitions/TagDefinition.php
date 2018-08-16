@@ -19,4 +19,11 @@ class TagDefinition implements IntrospectableContract
             'name' => Bakery::string(),
         ];
     }
+
+    public function relations(): array
+    {
+        return [
+            'articles' => Bakery::collection(ArticleDefinition::class),
+        ];
+    }
 }

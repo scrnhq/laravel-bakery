@@ -23,7 +23,6 @@ trait InteractsWithRelations
         Relations\BelongsToMany::class,
         Relations\MorphTo::class,
         Relations\MorphMany::class,
-        Relations\MorphToMany::class,
     ];
 
     /**
@@ -274,18 +273,15 @@ trait InteractsWithRelations
         }
 
         if (is_array($data)) {
+            Utils::invariant(count($data) === 1, 'There must be only one key for polymorphic input.');
+
             $data = collect($data);
-
-            Utils::invariant($data->count() === 1, 'something');
-
-            // Get the polymorphic type that belongs to the relation so we can figure out which model we should connect.
-            $type = array_get($this->getSchema()->getRelationFields(), $relation->getRelation());
 
             [$key, $id] = $data->mapWithKeys(function ($item, $key) {
                 return [$key, $item];
             });
 
-            $model = resolve($type->getDefinitionByKey($key))->getModel();
+            $model = $this->getPolymorphicModel($relation, $key);
 
             $instance = $model->findOrFail($id);
             $relation->associate($instance);
@@ -308,19 +304,34 @@ trait InteractsWithRelations
         }
 
         if (is_array($data)) {
+            Utils::invariant(count($data) === 1, 'There must be only one key for polymorphic input.');
+
             $data = collect($data);
 
-            $type = array_get($this->getSchema()->getRelationFields(), $relation->getRelation());
-
-            [$key, $attributes] = $data->mapWithKeys(function ($value, $key) {
-                return [$key, $value];
+            [$key, $attributes] = $data->mapWithKeys(function ($item, $key) {
+                return [$key, $item];
             });
 
-            $model = resolve($type->getDefinitionByKey($key))->getModel();
+            $model = $this->getPolymorphicModel($relation, $key);
 
             $instance = $model->createWithInput($attributes);
             $relation->associate($instance);
         }
+    }
+
+    /**
+     * Get the polymorphic type that belongs to the relation so we can figure
+     * out the model..
+     *
+     * @param \Illuminate\Database\Eloquent\Relations\MorphTo $relation
+     * @param string $key
+     * @return \Illuminate\Database\Eloquent\Model|\Bakery\Contracts\Mutable
+     */
+    protected function getPolymorphicModel(Relations\MorphTo $relation, string $key): Model
+    {
+        $type = array_get($this->getSchema()->getRelationFields(), $relation->getRelation());
+
+        return resolve($type->getDefinitionByKey($key))->getModel();
     }
 
     /**
@@ -367,29 +378,6 @@ trait InteractsWithRelations
                 $model->save();
             }
         };
-    }
-
-    /**
-     * Connect the belongs to many relation.
-     *
-     * @param \Illuminate\Database\Eloquent\Relations\MorphToMany $relation
-     * @param array $data
-     * @return void
-     */
-    public function connectMorphToManyRelation(Relations\MorphToMany $relation, array $data)
-    {
-        // TODO
-    }
-
-    /**
-     * Fill the morph to many relation.
-     *
-     * @param \Illuminate\Database\Eloquent\Relations\MorphToMany $relation
-     * @param array $values
-     */
-    protected function fillMorphToManyRelation(Relations\MorphToMany $relation, array $values)
-    {
-        // TODO
     }
 
     /**
