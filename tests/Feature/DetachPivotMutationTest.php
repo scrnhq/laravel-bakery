@@ -31,9 +31,9 @@ class DetachPivotMutationTest extends FeatureTestCase
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
         $response->assertJsonKey('id');
-        $this->assertDatabaseMissing('article_tag', ['article_id' => '1', 'tag_id' => '1']);
-        $this->assertDatabaseMissing('article_tag', ['article_id' => '1', 'tag_id' => '2']);
-        $this->assertDatabaseHas('article_tag', ['article_id' => '1', 'tag_id' => '3']);
+        $this->assertDatabaseMissing('taggables', ['taggable_id' => '1', 'tag_id' => '1']);
+        $this->assertDatabaseMissing('taggables', ['taggable_id' => '1', 'tag_id' => '2']);
+        $this->assertDatabaseHas('taggables', ['taggable_id' => '1', 'tag_id' => '3']);
     }
 
     /** @test */

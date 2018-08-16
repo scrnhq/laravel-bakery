@@ -587,7 +587,7 @@ class CreateMutationTest extends FeatureTestCase
     /** @test */
     public function it_throws_exception_when_supplying_multiple_keys_to_polymorphic_input_field()
     {
-        $this->markTestIncomplete();
+        $this->withExceptionHandling();
 
         $user = factory(Models\User::class)->create();
         $this->actingAs($user);
@@ -612,10 +612,8 @@ class CreateMutationTest extends FeatureTestCase
             }
         ';
 
-        // TODO: Check for exception
-
         $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $response->assertJsonKey('id');
+        $response->assertJsonFragment(['message' => 'There must be only one key with polymorphic input. 2 given for relation upvoteable.']);
         $this->assertDatabaseMissing('comments', ['body' => 'Cool story bro']);
         $this->assertDatabaseMissing('articles', ['title' => 'This is wrong']);
         $this->assertDatabaseMissing('upvotes', ['upvoteable_id' => '1']);

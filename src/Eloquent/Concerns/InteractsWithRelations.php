@@ -2,6 +2,7 @@
 
 namespace Bakery\Eloquent\Concerns;
 
+use GraphQL\Error\UserError;
 use RuntimeException;
 use Bakery\Utils\Utils;
 use Illuminate\Database\Eloquent\Model;
@@ -273,7 +274,9 @@ trait InteractsWithRelations
         }
 
         if (is_array($data)) {
-            Utils::invariant(count($data) === 1, 'There must be only one key for polymorphic input.');
+            if (count($data) !== 1) {
+                throw new UserError(sprintf('There must be only one key with polymorphic input. %s given for relation %s.', count($data), $relation->getRelation()));
+            }
 
             $data = collect($data);
 
@@ -304,7 +307,9 @@ trait InteractsWithRelations
         }
 
         if (is_array($data)) {
-            Utils::invariant(count($data) === 1, 'There must be only one key for polymorphic input.');
+            if (count($data) !== 1) {
+                throw new UserError(sprintf('There must be only one key with polymorphic input. %s given for relation %s.', count($data), $relation->getRelation()));
+            }
 
             $data = collect($data);
 
