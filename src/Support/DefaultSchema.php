@@ -11,7 +11,7 @@ class DefaultSchema extends Schema
      *
      * @return array|\Illuminate\Config\Repository|mixed
      */
-    public function models()
+    public function models(): array
     {
         $models = config('bakery.models');
 

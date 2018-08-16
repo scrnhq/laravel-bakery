@@ -25,18 +25,21 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 class Schema
 {
     protected $models = [];
+
     protected $queries = [];
+
     protected $mutations = [];
+
     protected $types = [];
 
-    protected function models()
+    protected function models(): array
     {
         return [];
     }
 
-    public function getModels()
+    protected function getModels(): Collection
     {
-        return array_merge($this->models, $this->models());
+        return collect($this->models)->merge($this->models());
     }
 
     /**
@@ -47,7 +50,7 @@ class Schema
      *
      * Otherwise we check if the underlying model has the mutable trait.
      *
-     * @param string $class
+     * @param mixed $class
      * @return bool
      */
     protected function isReadOnly($class)
@@ -95,9 +98,7 @@ class Schema
      */
     protected function getModelTypes(): Collection
     {
-        $types = collect();
-
-        foreach ($this->getModels() as $model) {
+        return $this->getModels()->reduce(function (Collection $types, string $model) {
             $definition = resolve($model);
             $instance = $definition->getModel();
 
@@ -141,22 +142,23 @@ class Schema
             })->each(function ($field, $key) use ($definition, &$types) {
                 $types = $types->merge($this->getPolymorphicRelationshipTypes($definition, $key, $field));
             });
-        }
 
-        return $types;
+            return $types;
+        }, collect());
     }
 
     /**
      * Get the types for a pivot model.
      *
      * @param $model
-     * @return Collection
+     * @return array
      */
-    public function getPivotModelTypes($model): Collection
+    protected function getPivotModelTypes($model): array
     {
-        return collect()
-            ->push(new Types\EntityType($model))
-            ->push(new Types\CreatePivotInputType($model));
+        return [
+            new Types\EntityType($model),
+            new Types\CreatePivotInputType($model),
+        ];
     }
 
     /**
@@ -164,60 +166,50 @@ class Schema
      *
      * @param string $model
      * @param BelongsToMany $relation
-     * @return Collection
+     * @return array
      */
-    protected function getPivotInputTypes(string $model, BelongsToMany $relation): Collection
+    protected function getPivotInputTypes(string $model, BelongsToMany $relation): array
     {
-        $types = collect();
-
-        $types->push(
-            (new Types\CreateWithPivotInputType($model))
-                ->setPivotRelation($relation)
-        );
-
-        $types->push(
-            (new Types\PivotInputType($model))
-                ->setPivotRelation($relation)
-        );
-
-        return $types;
+        return [
+            (new Types\CreateWithPivotInputType($model))->setPivotRelation($relation),
+            (new Types\PivotInputType($model))->setPivotRelation($relation),
+        ];
     }
 
     /**
      * Get the types for a polymorphic field.
      *
-     * @param $definition
+     * @param \Bakery\Contracts\Introspectable $definition
      * @param string $key
      * @param \Bakery\Types\Definitions\PolymorphicType $type
-     * @return Collection
+     * @return array
      */
-    protected function getPolymorphicFieldTypes($definition, string $key, Types\Definitions\PolymorphicType $type): Collection
+    protected function getPolymorphicFieldTypes($definition, string $key, Types\Definitions\PolymorphicType $type): array
     {
         $typename = Utils::typename($key).'On'.$definition->typename();
         $definitions = $type->getDefinitions();
 
-        return collect([(new Types\UnionEntityType($definitions))->setName($typename)]);
+        return [(new Types\UnionEntityType($definitions))->setName($typename)];
     }
 
     /**
      * Get the types for a polymorphic relationship.
      *
-     * @param $definition
+     * @param \Bakery\Contracts\Introspectable $definition
      * @param string $key
      * @param \Bakery\Types\Definitions\PolymorphicType $type
-     * @return Collection
+     * @return array
      */
-    protected function getPolymorphicRelationshipTypes($definition, string $key, Types\Definitions\PolymorphicType $type): Collection
+    protected function getPolymorphicRelationshipTypes($definition, string $key, Types\Definitions\PolymorphicType $type): array
     {
         $typename = Utils::typename($key).'On'.$definition->typename();
         $definitions = $type->getDefinitions();
 
-        $types = collect();
-        $types->push((new Types\UnionEntityType($definitions))->setName($typename));
-        $types->push((new Types\CreateUnionEntityInputType($definitions))->setName($typename));
-        $types->push((new Types\AttachUnionEntityInputType($definitions))->setName($typename));
-
-        return $types;
+        return [
+            (new Types\UnionEntityType($definitions))->setName($typename),
+            (new Types\CreateUnionEntityInputType($definitions))->setName($typename),
+            (new Types\AttachUnionEntityInputType($definitions))->setName($typename),
+        ];
     }
 
     /**

@@ -2,17 +2,21 @@
 
 namespace Bakery\Events;
 
-use Illuminate\Database\Eloquent\Model;
-
 class BakeryModelSaved
 {
     protected $model;
 
-    public function __construct(Model $model)
+    /**
+     * @param \Bakery\Eloquent\Mutable $model
+     */
+    public function __construct($model)
     {
         $this->model = $model;
     }
 
+    /**
+     * @return \Bakery\Eloquent\Mutable
+     */
     public function getModel()
     {
         return $this->model;

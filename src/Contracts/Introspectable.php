@@ -9,6 +9,8 @@ use Illuminate\Contracts\Auth\Authenticatable;
 
 interface Introspectable
 {
+    public function typename(): string;
+
     public function getModel(): Model;
 
     public function fields(): array;

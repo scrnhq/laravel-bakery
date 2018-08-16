@@ -75,10 +75,9 @@ class Bakery
     /**
      * Add the models as model schemas to the registry.
      *
-     * @param array $models
-     * @return void
+     * @param \ArrayAccess|array $models
      */
-    public function addModelSchemas(array $models)
+    public function addModelSchemas($models)
     {
         foreach ($models as $model) {
             $this->addModelSchema($model);
@@ -89,7 +88,6 @@ class Bakery
      * Add a single model schema to the registry.
      *
      * @param mixed $model
-     * @return void
      */
     public function addModelSchema($model)
     {
@@ -134,10 +132,10 @@ class Bakery
      * Resolve the type of a definition of a model.
      *
      * @param $model
-     * @return \GraphQL\Type\Definition\Type
+     * @return \GraphQL\Type\Definition\NamedType
      * @throws \Bakery\Exceptions\TypeNotFound
      */
-    public function resolveDefinitionType($model): GraphQLType
+    public function resolveDefinitionType($model): GraphQLNamedType
     {
         return $this->resolve($this->definition($model)->typename());
     }
