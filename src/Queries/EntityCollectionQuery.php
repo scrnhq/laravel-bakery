@@ -8,12 +8,16 @@ use Bakery\Types\Definitions\Type;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\Grammars;
+use GraphQL\Type\Definition\ResolveInfo;
 use Illuminate\Database\Eloquent\Builder;
+use Bakery\Queries\Concerns\EagerLoadRelationships;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Bakery\Exceptions\PaginationMaxCountExceededException;
 
 class EntityCollectionQuery extends EntityQuery
 {
+    use EagerLoadRelationships;
+
     /**
      * The fields to be fulltext searched on.
      *
@@ -72,10 +76,11 @@ class EntityCollectionQuery extends EntityQuery
      * @param mixed $root
      * @param array $args
      * @param mixed $context
-     * @return LengthAwarePaginator
-     * @throws PaginationMaxCountExceededException
+     * @param \GraphQL\Type\Definition\ResolveInfo $info
+     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
+     * @throws \Bakery\Exceptions\PaginationMaxCountExceededException
      */
-    public function resolve($root, array $args, $context)
+    public function resolve($root, array $args, $context, ResolveInfo $info): LengthAwarePaginator
     {
         $page = array_get($args, 'page', 1);
         $count = array_get($args, 'count', 15);
@@ -91,6 +96,9 @@ class EntityCollectionQuery extends EntityQuery
             $args,
             $context
         );
+
+        $fields = $info->getFieldSelection($depth = 5);
+        $this->eagerLoadRelations($query, $fields['items'], $this->schema);
 
         if (array_key_exists('filter', $args) && ! empty($args['filter'])) {
             $query = $this->applyFilters($query, $args['filter']);
@@ -285,7 +293,7 @@ class EntityCollectionQuery extends EntityQuery
      *
      * @param Builder $query
      * @param Model $model
-     * @param string $relationName
+     * @param string $relation
      * @param string $needle
      * @param array $fields
      */
@@ -310,7 +318,7 @@ class EntityCollectionQuery extends EntityQuery
      * Apply ordering on the query.
      *
      * @param Builder $query
-     * @param string $orderBy
+     * @param array $args
      * @return Builder
      */
     protected function applyOrderBy(Builder $query, array $args)
@@ -354,7 +362,7 @@ class EntityCollectionQuery extends EntityQuery
     }
 
     /**
-     * Apply the ordening.
+     * Apply the ordering.
      *
      * @param Builder $query
      * @param string $column
