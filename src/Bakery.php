@@ -12,7 +12,6 @@ use GraphQL\Executor\ExecutionResult;
 use Bakery\Types\Definitions\NamedType;
 use Illuminate\Database\Eloquent\Model;
 use Bakery\Support\Schema as BakerySchema;
-use GraphQL\Type\Definition\Type as GraphQLType;
 use GraphQL\Type\Definition\NamedType as GraphQLNamedType;
 
 class Bakery

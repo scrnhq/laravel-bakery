@@ -2,9 +2,9 @@
 
 namespace Bakery\Eloquent\Concerns;
 
-use GraphQL\Error\UserError;
 use RuntimeException;
 use Bakery\Utils\Utils;
+use GraphQL\Error\UserError;
 use Illuminate\Database\Eloquent\Model;
 use Bakery\Exceptions\InvariantViolation;
 use Illuminate\Database\Eloquent\Relations;
