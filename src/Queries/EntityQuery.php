@@ -3,9 +3,9 @@
 namespace Bakery\Queries;
 
 use Bakery\Concerns\ModelAware;
-use Bakery\Queries\Concerns\EagerLoadRelationships;
 use Bakery\Traits\JoinsRelationships;
 use Illuminate\Database\Eloquent\Builder;
+use Bakery\Queries\Concerns\EagerLoadRelationships;
 
 abstract class EntityQuery extends Query
 {

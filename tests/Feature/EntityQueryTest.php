@@ -284,7 +284,7 @@ class EntityQueryTest extends FeatureTestCase
         $user = factory(Models\User::class)->create();
         $articles = factory(Models\Article::class, 25)->create(['user_id' => $user->id]);
 
-        foreach($articles as $article) {
+        foreach ($articles as $article) {
             factory(Models\Comment::class, 3)->create(['article_id' => $article->id]);
         }
 

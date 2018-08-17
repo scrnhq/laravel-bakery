@@ -434,7 +434,7 @@ class CollectionQueryTest extends FeatureTestCase
         $user = factory(Models\User::class)->create();
         $articles = factory(Models\Article::class, 25)->create();
 
-        foreach($articles as $article) {
+        foreach ($articles as $article) {
             factory(Models\Comment::class, 3)->create(['article_id' => $article->id]);
         }
 
