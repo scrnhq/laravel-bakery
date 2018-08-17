@@ -10,14 +10,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\Grammars;
 use GraphQL\Type\Definition\ResolveInfo;
 use Illuminate\Database\Eloquent\Builder;
-use Bakery\Queries\Concerns\EagerLoadRelationships;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Bakery\Exceptions\PaginationMaxCountExceededException;
 
 class EntityCollectionQuery extends EntityQuery
 {
-    use EagerLoadRelationships;
-
     /**
      * The fields to be fulltext searched on.
      *

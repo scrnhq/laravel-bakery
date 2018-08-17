@@ -9,12 +9,9 @@ use Illuminate\Database\Eloquent\Model;
 use GraphQL\Type\Definition\ResolveInfo;
 use Illuminate\Database\Eloquent\Builder;
 use Bakery\Exceptions\TooManyResultsException;
-use Bakery\Queries\Concerns\EagerLoadRelationships;
 
 class SingleEntityQuery extends EntityQuery
 {
-    use EagerLoadRelationships;
-
     /**
      * Get the name of the query.
      *

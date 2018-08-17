@@ -3,6 +3,7 @@
 namespace Bakery\Queries;
 
 use Bakery\Concerns\ModelAware;
+use Bakery\Queries\Concerns\EagerLoadRelationships;
 use Bakery\Traits\JoinsRelationships;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -10,6 +11,7 @@ abstract class EntityQuery extends Query
 {
     use ModelAware;
     use JoinsRelationships;
+    use EagerLoadRelationships;
 
     /**
      * Scope the query.
