@@ -2,8 +2,8 @@
 
 namespace Bakery\Tests\Traits;
 
-use Bakery\Tests\Models\Role;
 use Bakery\Tests\TestCase;
+use Bakery\Tests\Models\Role;
 use Bakery\Tests\Models\User;
 use Bakery\Tests\Models\Article;
 use Bakery\Traits\JoinsRelationships;
