@@ -16,6 +16,13 @@ class PolymorphicType extends ReferenceType
     protected $definitions;
 
     /**
+     * The type resolver.
+     *
+     * @var callable
+     */
+    protected $typeResolver;
+
+    /**
      * PolymorphicType constructor.
      *
      * @param array $definitions
@@ -46,6 +53,29 @@ class PolymorphicType extends ReferenceType
         return collect($this->definitions)->first(function ($definition) use ($key) {
             return Utils::single(resolve($definition)->getModel()) === $key;
         });
+    }
+
+    /**
+     * Define the type resolver.
+     *
+     * @param callable $resolver
+     * @return $this
+     */
+    public function typeResolver(callable $resolver)
+    {
+        $this->typeResolver = $resolver;
+
+        return $this;
+    }
+
+    /**
+     * Get the type resolver.
+     *
+     * @return callable
+     */
+    public function getTypeResolver()
+    {
+        return $this->typeResolver;
     }
 
     /**

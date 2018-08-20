@@ -188,8 +188,9 @@ class Schema
     {
         $typename = Utils::typename($key).'On'.$definition->typename();
         $definitions = $type->getDefinitions();
+        $typeResolver = $type->getTypeResolver();
 
-        return [(new Types\UnionEntityType($definitions))->setName($typename)];
+        return [(new Types\UnionEntityType($definitions))->setName($typename)->typeResolver($typeResolver)];
     }
 
     /**
@@ -204,9 +205,10 @@ class Schema
     {
         $typename = Utils::typename($key).'On'.$definition->typename();
         $definitions = $type->getDefinitions();
+        $typeResolver = $type->getTypeResolver();
 
         return [
-            (new Types\UnionEntityType($definitions))->setName($typename),
+            (new Types\UnionEntityType($definitions))->setName($typename)->typeResolver($typeResolver),
             (new Types\CreateUnionEntityInputType($definitions))->setName($typename),
             (new Types\AttachUnionEntityInputType($definitions))->setName($typename),
         ];

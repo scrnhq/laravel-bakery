@@ -10,6 +10,8 @@ abstract class UnionType extends Type implements NamedType
 {
     protected $types;
 
+    protected $typeResolver;
+
     /**
      * Receives $value from resolver of the parent field and returns concrete Object Type for this $value.
      *
@@ -18,7 +20,7 @@ abstract class UnionType extends Type implements NamedType
      * @param ResolveInfo $info
      * @return mixed
      */
-    abstract public function resolveType($value, $context, ResolveInfo $info);
+    abstract protected function resolveType($value, $context, ResolveInfo $info);
 
     /**
      * Get the types of the union type.
@@ -35,6 +37,35 @@ abstract class UnionType extends Type implements NamedType
     }
 
     /**
+     * Define the type resolver.
+     *
+     * @param callable $resolver
+     * @return $this
+     */
+    public function typeResolver($resolver)
+    {
+        $this->typeResolver = $resolver;
+
+        return $this;
+    }
+
+    /**
+     * Get the type resolver.
+     *
+     * @return callable
+     */
+    public function getTypeResolver(): callable
+    {
+        return function ($value, $context, ResolveInfo $info) {
+            if (isset($this->typeResolver)) {
+                return call_user_func_array($this->typeResolver, [$value, $context, $info]);
+            }
+
+            return $this->resolveType($value, $context, $info);
+        };
+    }
+
+    /**
      * Get the attributes for the type.
      *
      * @return array
@@ -46,9 +77,7 @@ abstract class UnionType extends Type implements NamedType
             'types' => collect($this->types())->map(function (Type $type) {
                 return $type->toType();
             })->toArray(),
-            'resolveType' => function ($value, $context, ResolveInfo $info) {
-                return $this->resolveType($value, $context, $info);
-            },
+            'resolveType' => $this->getTypeResolver(),
         ];
     }
 
