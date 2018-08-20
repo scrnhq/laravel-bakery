@@ -49,16 +49,16 @@ trait Introspectable
         }
 
         Utils::invariant(
-            isset(self::$model),
+            isset(static::$model),
             'No model defined on '.class_basename($this)
         );
 
         Utils::invariant(
-            is_subclass_of(self::$model, Model::class),
+            is_subclass_of(static::$model, Model::class),
             'Defined model on '.class_basename($this).' is not an instance of '.Model::class
         );
 
-        return $this->instance = resolve(self::$model);
+        return $this->instance = resolve(static::$model);
     }
 
     /**
