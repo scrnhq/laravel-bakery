@@ -148,7 +148,7 @@ class EntityType extends ObjectType
         $fields = collect();
         $singularKey = str_singular($key);
 
-        $fields->put($singularKey.'Ids',Bakery::ID()
+        $fields->put($singularKey.'Ids', Bakery::ID()
             ->list()
             ->nullable($field->isNullable())
             ->resolve(function ($model) use ($key) {
