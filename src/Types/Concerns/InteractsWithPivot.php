@@ -49,17 +49,4 @@ trait InteractsWithPivot
 
         return Bakery::definition($class);
     }
-
-    /**
-     * Guess the inverse of a pivot relation.
-     *
-     * @return BelongsToMany
-     */
-    protected function guessInverseRelation(): BelongsToMany
-    {
-        $parent = $this->pivotRelation->getParent();
-        $name = Str::camel(Str::plural(class_basename($parent)));
-
-        return $this->pivotRelation->getRelated()->{$name}();
-    }
 }
