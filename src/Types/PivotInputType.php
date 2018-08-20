@@ -16,7 +16,8 @@ class PivotInputType extends MutationInputType
      */
     public function name(): string
     {
-        $typename = Utils::pluralTypename($this->schema->typename());
+        $relation = $this->getPivotRelation()->getRelationName();
+        $typename = Utils::pluralTypename($relation);
 
         return $typename.'PivotInput';
     }
@@ -29,7 +30,7 @@ class PivotInputType extends MutationInputType
     public function fields(): array
     {
         $pivot = $this->getPivotDefinition();
-        $accessor = $this->guessInverseRelation()->getPivotAccessor();
+        $accessor = $this->getPivotRelation()->getPivotAccessor();
         $relatedKey = $this->pivotRelation->getRelated()->getKeyName();
 
         $fields = collect()->put($relatedKey, Bakery::ID());

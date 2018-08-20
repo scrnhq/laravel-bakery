@@ -136,7 +136,7 @@ abstract class MutationInputType extends InputType
             return collect();
         }
 
-        $inputType = 'Create'.Utils::pluralTypename($relationName).'WithPivotInput';
+        $inputType = 'Create'.Utils::typename($relationName).'On'.$this->schema->typename().'WithPivotInput';
         $fields->put($relationName, Bakery::type($inputType)->list()->nullable());
 
         $name = str_singular($relationName).'Ids';

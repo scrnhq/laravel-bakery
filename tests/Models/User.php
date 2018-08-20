@@ -25,7 +25,7 @@ class User extends Authenticatable implements MutableContract
         'password',
         'phone',
         'type',
-        'roles',
+        'customRoles',
         'articles',
     ];
 
@@ -39,7 +39,7 @@ class User extends Authenticatable implements MutableContract
         return $this->hasOne(Phone::class);
     }
 
-    public function roles()
+    public function customRoles()
     {
         return $this->belongsToMany(Role::class)
             ->as('customPivot')

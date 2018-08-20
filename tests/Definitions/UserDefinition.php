@@ -36,7 +36,7 @@ class UserDefinition implements IntrospectableContract
                 ->policy(function (User $user, $args, Authenticatable $viewer = null) {
                     return $viewer && $user->is($viewer);
                 }),
-            'roles' => Bakery::collection(RoleDefinition::class),
+            'customRoles' => Bakery::collection(RoleDefinition::class),
             'phone' => Bakery::model(PhoneDefinition::class),
         ];
     }

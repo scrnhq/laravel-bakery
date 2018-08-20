@@ -35,7 +35,7 @@ class AttachPivotMutation extends EntityMutation
      * Set the pivot relation.
      *
      * @param Relations\BelongsToMany $relation
-     * @return this
+     * @return \Bakery\Mutations\AttachPivotMutation
      */
     public function setPivotRelation(Relations\BelongsToMany $relation)
     {

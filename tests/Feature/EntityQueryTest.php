@@ -263,7 +263,7 @@ class EntityQueryTest extends FeatureTestCase
     {
         $user = factory(Models\User::class)->create();
         $role = factory(Models\Role::class)->create();
-        $user->roles()->attach($role, ['comment' => 'foobar']);
+        $user->customRoles()->attach($role, ['comment' => 'foobar']);
 
         $query = '
             query {
@@ -283,16 +283,16 @@ class EntityQueryTest extends FeatureTestCase
     }
 
     /** @test */
-    public function it_exposes_pivot_data_on_many_to_many_relationships_with_custom_pivot()
+    public function it_exposes_pivot_data_on_many_to_many_relationships_with_custom_pivot_and_custom_relation_name()
     {
         $user = factory(Models\User::class)->create();
         $role = factory(Models\Role::class)->create();
-        $user->roles()->attach($role, ['comment' => 'foobar']);
+        $user->customRoles()->attach($role, ['comment' => 'foobar']);
 
         $query = '
             query {
                 user(id: "'.$user->id.'") {
-                    roles {
+                    customRoles {
                         id
                         customPivot {
                             comment

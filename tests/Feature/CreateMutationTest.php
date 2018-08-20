@@ -336,7 +336,7 @@ class CreateMutationTest extends FeatureTestCase
                     email: "jane.doe@example.com",
                     name: "Jane Doe",
                     password: "secret",
-                    roleIds: [
+                    customRoleIds: [
                         { id: "'.$role->id.'", customPivot: { comment: "foobar" } }
                     ],
                 }) {
@@ -392,7 +392,7 @@ class CreateMutationTest extends FeatureTestCase
     }
 
     /** @test */
-    public function it_lets_you_set_pivot_data_while_creating_relation_with_custom_pivot_accessor()
+    public function it_lets_you_set_pivot_data_while_creating_relation_with_custom_pivot_accessor_and_relation_name()
     {
         $user = factory(Models\User::class)->create();
         $this->actingAs($user);
@@ -403,7 +403,7 @@ class CreateMutationTest extends FeatureTestCase
                     email: "jane.doe@example.com",
                     name: "Jane Doe",
                     password: "secret",
-                    roles: [
+                    customRoles: [
                         { name: "administrator", customPivot: { comment: "foobar" } }
                     ],
                 }) {

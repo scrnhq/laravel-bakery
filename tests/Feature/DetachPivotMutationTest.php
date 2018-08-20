@@ -42,12 +42,38 @@ class DetachPivotMutationTest extends FeatureTestCase
         $user = factory(Models\User::class)->create();
         $role = factory(Models\Role::class)->create();
         $this->actingAs($user);
-        $user->roles()->sync($role);
+        $user->customRoles()->sync($role);
 
         $query = '
             mutation {
-                detachRolesOnUser(id: "'.$user->id.'", input: [
+                detachCustomRolesOnUser(id: "'.$user->id.'", input: [
                     "'.$role->id.'"
+                ]) {
+                    id
+                }
+            }
+        ';
+
+        $response = $this->json('GET', '/graphql', ['query' => $query]);
+        $response->assertJsonKey('id');
+        $this->assertDatabaseMissing('role_user', [
+            'user_id' => '1',
+            'role_id' => '1',
+        ]);
+    }
+
+    /** @test */
+    public function it_lets_you_detach_pivot_ids_with_pivot_data_inversed()
+    {
+        $user = factory(Models\User::class)->create();
+        $role = factory(Models\Role::class)->create();
+        $this->actingAs($user);
+        $role->users()->sync($role);
+
+        $query = '
+            mutation {
+                detachUsersOnRole(id: "'.$role->id.'", input: [
+                    "'.$user->id.'"
                 ]) {
                     id
                 }

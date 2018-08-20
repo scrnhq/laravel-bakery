@@ -170,9 +170,14 @@ class Schema
      */
     protected function getPivotInputTypes(string $model, BelongsToMany $relation): array
     {
+        // We actually want to create pivot input types for the reverse side here, but we approach
+        // it from this side because we have the relevant information here (relation name, pivot accessor)
+        // so we grab the model schema from the related one and pass it through.
+        $related = Bakery::getModelSchema($relation->getRelated());
+
         return [
-            (new Types\CreateWithPivotInputType($model))->setPivotRelation($relation),
-            (new Types\PivotInputType($model))->setPivotRelation($relation),
+            (new Types\CreateWithPivotInputType($related))->setPivotRelation($relation),
+            (new Types\PivotInputType($related))->setPivotRelation($relation),
         ];
     }
 
@@ -368,8 +373,8 @@ class Schema
     public function toGraphQLSchema(): GraphQLSchema
     {
         $this->verifyModels();
-        Bakery::addTypes($this->getTypes());
         Bakery::addModelSchemas($this->getModels());
+        Bakery::addTypes($this->getTypes());
 
         $config = SchemaConfig::create();
 

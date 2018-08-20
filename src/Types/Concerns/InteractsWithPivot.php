@@ -19,13 +19,23 @@ trait InteractsWithPivot
      * Set the pivot relationship.
      *
      * @param BelongsToMany $relation
-     * @return this
+     * @return \Bakery\Types\Concerns\InteractsWithPivot
      */
     public function setPivotRelation(BelongsToMany $relation)
     {
         $this->pivotRelation = $relation;
 
         return $this;
+    }
+
+    /**
+     * Get the pivot relationship.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
+    public function getPivotRelation(): BelongsToMany
+    {
+        return $this->pivotRelation;
     }
 
     /**

@@ -32,12 +32,12 @@ class UserPolicy
         return true;
     }
 
-    public function createRoles(): bool
+    public function createCustomRoles(): bool
     {
         return true;
     }
 
-    public function setRoles(): bool
+    public function setCustomRoles(): bool
     {
         return true;
     }

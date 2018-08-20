@@ -42,8 +42,34 @@ class AttachPivotMutationTest extends FeatureTestCase
 
         $query = '
             mutation {
-                attachRolesOnUser(id: "'.$user->id.'", input: [
+                attachCustomRolesOnUser(id: "'.$user->id.'", input: [
                     { id: "'.$role->id.'", customPivot: { comment: "foobar" } }
+                ]) {
+                    id
+                }
+            }
+        ';
+
+        $response = $this->json('GET', '/graphql', ['query' => $query]);
+        $response->assertJsonKey('id');
+        $this->assertDatabaseHas('role_user', [
+            'user_id' => '1',
+            'role_id' => '1',
+            'comment' => 'foobar',
+        ]);
+    }
+
+    /** @test */
+    public function it_lets_you_attach_pivot_ids_with_pivot_data_inversed()
+    {
+        $user = factory(Models\User::class)->create();
+        $role = factory(Models\Role::class)->create();
+        $this->actingAs($user);
+
+        $query = '
+            mutation {
+                attachUsersOnRole(id: "'.$role->id.'", input: [
+                    { id: "'.$user->id.'", pivot: { comment: "foobar" } }
                 ]) {
                     id
                 }

@@ -184,4 +184,39 @@ class UpdateMutationTest extends FeatureTestCase
         $response->assertJsonKey('id');
         $this->assertDatabaseHas('phones', ['user_id' => null]);
     }
+
+    /** @test */
+    public function it_lets_you_set_pivot_data_while_updating_a_model()
+    {
+        $user = factory(Models\User::class)->create();
+        $this->actingAs($user);
+
+        $query = '
+            mutation {
+                updateUser(id: "'.$user->id.'", input: {
+                    email: "jane.doe@example.com",
+                    customRoles: [
+                        {
+                            name: "administrator"
+                            customPivot: {
+                                comment: "foobar"
+                            }
+                        }
+                    ],
+                }) {
+                    id
+                }
+            }
+        ';
+
+        $response = $this->json('GET', '/graphql', ['query' => $query]);
+        $response->assertJsonKey('id');
+        $this->assertDatabaseHas('roles', ['id' => '1', 'name' => 'administrator']);
+        $this->assertDatabaseHas('users', ['id' => '1', 'email' => 'jane.doe@example.com']);
+        $this->assertDatabaseHas('role_user', [
+            'user_id' => '1',
+            'role_id' => '1',
+            'comment' => 'foobar',
+        ]);
+    }
 }
