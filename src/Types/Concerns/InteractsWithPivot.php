@@ -2,7 +2,6 @@
 
 namespace Bakery\Types\Concerns;
 
-use Illuminate\Support\Str;
 use Bakery\Support\Facades\Bakery;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
