@@ -220,6 +220,8 @@ class Bakery
             throw new TypeNotFound('Type '.$name.' not found.');
         }
 
+        $name = $type->name();
+
         // If we already have an instance of this type, return it.
         if (isset($this->typeInstances[$name])) {
             return $this->typeInstances[$name];
