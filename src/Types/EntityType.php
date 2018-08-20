@@ -148,20 +148,27 @@ class EntityType extends ObjectType
         $fields = collect();
         $singularKey = str_singular($key);
 
-        $fields->put($singularKey.'Ids', Bakery::ID()->list()->resolve(function ($model) use ($key) {
-            $relation = $model->{$key};
-            $relationship = $model->{$key}();
+        $fields->put($singularKey.'Ids', Bakery::ID()
+            ->list()
+            ->nullable($field->isNullable())
+            ->resolve(function ($model) use ($key) {
+                $relation = $model->{$key};
+                $relationship = $model->{$key}();
 
-            return $relation
-                ->pluck($relationship->getRelated()->getKeyName())
-                ->toArray();
-        }));
+                return $relation
+                    ->pluck($relationship->getRelated()->getKeyName())
+                    ->toArray();
+            })
+        );
 
-        $fields->put($key.'_count', Bakery::int()->resolve(function ($model) use ($key) {
-            $relation = $model->{$key};
+        $fields->put($key.'_count', Bakery::int()
+            ->nullable($field->isNullable())
+            ->resolve(function ($model) use ($key) {
+                $relation = $model->{$key};
 
-            return $relation->count();
-        }));
+                return $relation->count();
+            })
+        );
 
         return $fields;
     }
@@ -177,11 +184,14 @@ class EntityType extends ObjectType
     {
         $fields = collect();
 
-        return $fields->put($key.'Id', Bakery::ID()->resolve(function ($model) use ($key) {
-            $relation = $model->{$key};
+        return $fields->put($key.'Id', Bakery::ID()
+            ->nullable($field->isNullable())
+            ->resolve(function ($model) use ($key) {
+                $relation = $model->{$key};
 
-            return $relation ? $relation->getKey() : null;
-        }));
+                return $relation ? $relation->getKey() : null;
+            })
+        );
     }
 
     /**
