@@ -12,6 +12,8 @@ class TestCase extends OrchestraTestCase
 {
     public function __construct()
     {
+        parent::__construct();
+
         TestResponse::macro('assertJsonKey', function (string $key) {
             $actual = json_encode(Arr::sortRecursive(
                 (array) $this->decodeResponseJson()

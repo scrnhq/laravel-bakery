@@ -4,10 +4,13 @@ namespace Bakery\Types;
 
 use Bakery\Utils\Utils;
 use Bakery\Concerns\ModelAware;
-use GraphQL\Type\Definition\Type;
 use Bakery\Support\Facades\Bakery;
+use Bakery\Types\Definitions\Type;
 use Illuminate\Support\Collection;
-use GraphQL\Type\Definition\ListOfType;
+use Bakery\Types\Definitions\InputType;
+use Bakery\Types\Definitions\EloquentType;
+use Bakery\Types\Definitions\PolymorphicType;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 abstract class MutationInputType extends InputType
 {
@@ -25,11 +28,10 @@ abstract class MutationInputType extends InputType
      */
     protected function getFillableFields(): Collection
     {
-        return $this->schema->getFillableFields()->filter(function ($field, $key) {
-            $fieldType = Type::getNamedType($field['type']);
-
-            return Type::isLeafType($fieldType);
-        });
+        return $this->schema->getFillableFields()
+            ->filter(function (Type $field, $key) {
+                return $field->isLeafType();
+            });
     }
 
     /**
@@ -39,12 +41,18 @@ abstract class MutationInputType extends InputType
      */
     protected function getRelationFields(): Collection
     {
-        $relations = $this->schema->getRelations();
+        $relations = $this->schema->getFillableRelationFields();
 
-        return $relations->keys()->reduce(function ($fields, $key) use ($relations) {
+        return $relations->keys()->reduce(function (Collection $fields, $key) use ($relations) {
             $field = $relations[$key];
 
-            return $fields->merge($this->getFieldsForRelation($key, $field));
+            if ($field instanceof EloquentType) {
+                return $fields->merge($this->getFieldsForRelation($key, $field));
+            } elseif ($field instanceof PolymorphicType) {
+                return $fields->merge($this->getFieldsForPolymorphicRelation($key, $field));
+            }
+
+            return $fields;
         }, collect());
     }
 
@@ -52,31 +60,88 @@ abstract class MutationInputType extends InputType
      * Set the relation fields.
      *
      * @param string $relation
-     * @param array $field
-     * @return array
+     * @param \Bakery\Types\Definitions\EloquentType|\Bakery\Types\Definitions\PolymorphicType $field
+     * @return Collection
      */
-    protected function getFieldsForRelation(string $relation, array $field): array
+    protected function getFieldsForRelation(string $relation, EloquentType $field): Collection
     {
-        $fields = [];
-        $field = Utils::nullifyField($field);
-        $fieldType = Type::getNamedType($field['type']);
-        $inputType = 'Create'.Utils::typename($fieldType->name).'Input';
+        $fields = collect();
+        $inputType = 'Create'.$field->name().'Input';
+        $relationship = $this->model->{$relation}();
 
-        if ($field['type'] instanceof ListOfType) {
+        if ($field->isList()) {
             $name = str_singular($relation).'Ids';
-            $fields[$name] = Bakery::listOf(Bakery::ID());
+            $fields->put($name, Bakery::ID()->list()->nullable());
 
             if (Bakery::hasType($inputType)) {
-                $fields[$relation] = Bakery::listOf(Bakery::type($inputType));
+                $fields->put($relation, Bakery::type($inputType)->list()->nullable());
             }
         } else {
             $name = str_singular($relation).'Id';
-            $fields[$name] = Bakery::ID();
+            $fields->put($name, Bakery::ID()->nullable());
 
             if (Bakery::hasType($inputType)) {
-                $fields[$relation] = Bakery::type($inputType);
+                $fields->put($relation, Bakery::type($inputType)->nullable());
             }
         }
+
+        if ($relationship instanceof BelongsToMany) {
+            $fields = $fields->merge($this->getFieldsForPivot($field, $relationship));
+        }
+
+        return $fields;
+    }
+
+    /**
+     * Get the polymorphic relation fields.
+     *
+     * @param string $relation
+     * @param \Bakery\Types\Definitions\PolymorphicType $field
+     * @return Collection
+     */
+    protected function getFieldsForPolymorphicRelation(string $relation, PolymorphicType $field)
+    {
+        $fields = collect();
+        $typename = Utils::typename($relation).'On'.$this->schema->typename();
+        $createInputType = 'Create'.$typename.'Input';
+        $attachInputType = 'Attach'.$typename.'Input';
+
+        if (Bakery::hasType($createInputType)) {
+            if ($field->isList()) {
+                $fields->put($relation, Bakery::type($createInputType)->list()->nullable());
+                $fields->put($relation.'Ids', Bakery::type($attachInputType)->list()->nullable());
+            } else {
+                $fields->put($relation, Bakery::type($createInputType)->nullable());
+                $fields->put($relation.'Id', Bakery::type($attachInputType)->nullable());
+            }
+        }
+
+        return $fields;
+    }
+
+    /**
+     * Get the fields for a pivot relation.
+     *
+     * @param \Bakery\Types\Definitions\EloquentType|\Bakery\Types\Definitions\PolymorphicType $field
+     * @param \Illuminate\Database\Eloquent\Relations\BelongsToMany $relation
+     * @return Collection
+     */
+    protected function getFieldsForPivot(EloquentType $field, BelongsToMany $relation): Collection
+    {
+        $fields = collect();
+        $pivot = $relation->getPivotClass();
+        $relationName = $relation->getRelationName();
+
+        if (! Bakery::hasModelSchema($pivot)) {
+            return collect();
+        }
+
+        $inputType = 'Create'.Utils::typename($relationName).'On'.$this->schema->typename().'WithPivotInput';
+        $fields->put($relationName, Bakery::type($inputType)->list()->nullable());
+
+        $name = str_singular($relationName).'Ids';
+        $inputType = Utils::pluralTypename($relationName).'PivotInput';
+        $fields->put($name, Bakery::type($inputType)->list()->nullable());
 
         return $fields;
     }

@@ -3,6 +3,7 @@
 namespace Bakery\Types;
 
 use Bakery\Utils\Utils;
+use Bakery\Types\Definitions\Type;
 use Illuminate\Support\Collection;
 
 class UpdateInputType extends MutationInputType
@@ -12,7 +13,7 @@ class UpdateInputType extends MutationInputType
      *
      * @return string
      */
-    protected function name(): string
+    public function name(): string
     {
         return 'Update'.$this->schema->typename().'Input';
     }
@@ -48,8 +49,8 @@ class UpdateInputType extends MutationInputType
      */
     protected function getFillableFields(): Collection
     {
-        $fields = parent::getFillableFields();
-
-        return Utils::nullifyFields($fields);
+        return parent::getFillableFields()->map(function (Type $field) {
+            return $field->nullable();
+        });
     }
 }

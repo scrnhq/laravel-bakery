@@ -1,13 +1,13 @@
 <?php
 
-namespace Bakery\Tests\Stubs\BakeryModels;
+namespace Bakery\Tests\Definitions;
 
 use Bakery\Tests\Models\Phone;
-use GraphQL\Type\Definition\Type;
 use Bakery\Support\Facades\Bakery;
 use Bakery\Eloquent\Introspectable;
+use Bakery\Contracts\Introspectable as IntrospectableContract;
 
-class PhoneBakery
+class PhoneDefinition implements IntrospectableContract
 {
     use Introspectable;
 
@@ -16,14 +16,14 @@ class PhoneBakery
     public function fields(): array
     {
         return [
-            'number' => Type::nonNull(Type::string()),
+            'number' => Bakery::string(),
         ];
     }
 
     public function relations(): array
     {
         return [
-            'user' => Bakery::nonNull(Bakery::type('User')),
+            'user' => Bakery::model(UserDefinition::class),
         ];
     }
 }

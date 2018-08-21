@@ -6,7 +6,7 @@ use Bakery\Concerns\ModelAware;
 use Bakery\Traits\JoinsRelationships;
 use Illuminate\Database\Eloquent\Builder;
 
-class EntityQuery extends Query
+abstract class EntityQuery extends Query
 {
     use ModelAware;
     use JoinsRelationships;

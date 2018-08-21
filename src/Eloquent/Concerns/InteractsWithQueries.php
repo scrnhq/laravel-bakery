@@ -10,10 +10,10 @@ trait InteractsWithQueries
     /**
      * Boot the query builder on the underlying model.
      *
-     * @param Authenticatable $viewer
+     * @param \Illuminate\Contracts\Auth\Authenticatable|null $viewer
      * @return Builder
      */
-    public function getBakeryQuery($viewer): Builder
+    public function getBakeryQuery(?Authenticatable $viewer): Builder
     {
         $model = $this->getModel();
         $query = $model->query();

@@ -22,7 +22,7 @@ class EntityQueryTest extends FeatureTestCase
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
         $response->assertStatus(200);
-        $response->assertJsonStructure(['data' => ['article']]);
+        $response->assertJsonKey('article');
         $response->assertJsonFragment(['id' => $article->id]);
     }
 
@@ -191,6 +191,7 @@ class EntityQueryTest extends FeatureTestCase
         ';
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
+        $response->assertJsonKey('user');
         $response->assertJsonStructure(['data' => ['user' => ['articles' => 'id']]]);
         $response->assertJsonFragment(['title' => $article->title]);
     }
@@ -255,5 +256,111 @@ class EntityQueryTest extends FeatureTestCase
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
         $response->assertJsonFragment(['articles_count' => 3]);
+    }
+
+    /** @test */
+    public function it_exposes_pivot_data_on_many_to_many_relationships()
+    {
+        $user = factory(Models\User::class)->create();
+        $role = factory(Models\Role::class)->create();
+        $user->customRoles()->attach($role, ['comment' => 'foobar']);
+
+        $query = '
+            query {
+                role(id: "'.$role->id.'") {
+                    users {
+                        id
+                        pivot {
+                            comment
+                        }
+                    }
+                }
+            }
+        ';
+
+        $response = $this->json('GET', '/graphql', ['query' => $query]);
+        $response->assertJsonFragment(['comment' => 'foobar']);
+    }
+
+    /** @test */
+    public function it_exposes_pivot_data_on_many_to_many_relationships_with_custom_pivot_and_custom_relation_name()
+    {
+        $user = factory(Models\User::class)->create();
+        $role = factory(Models\Role::class)->create();
+        $user->customRoles()->attach($role, ['comment' => 'foobar']);
+
+        $query = '
+            query {
+                user(id: "'.$user->id.'") {
+                    customRoles {
+                        id
+                        customPivot {
+                            comment
+                        }
+                    }
+                }
+            }
+        ';
+
+        $response = $this->json('GET', '/graphql', ['query' => $query]);
+        $response->assertJsonFragment(['comment' => 'foobar']);
+    }
+
+    /** @test */
+    public function it_returns_data_for_a_morph_to_relationship()
+    {
+        $article = factory(Models\Article::class)->create();
+        $upvote = $article->upvotes()->create();
+
+        $query = '
+            query {
+                upvote(id: "'.$upvote->id.'") {
+                    upvoteable {
+                        ... on Comment {
+                            __typename
+                            id
+                        }
+                        ... on Article {
+                            __typename
+                            id
+                            title
+                        }
+                    }
+                }
+            }
+        ';
+
+        $response = $this->json('GET', '/graphql', ['query' => $query]);
+        $response->assertJsonFragment([
+            '__typename' => 'Article',
+            'id' => $article->id,
+            'title' => $article->title,
+        ]);
+    }
+
+    /** @test */
+    public function it_returns_data_for_a_morph_many_relationship()
+    {
+        $article = factory(Models\Article::class)->create();
+        $article->upvotes()->create();
+        $article->upvotes()->create();
+
+        $query = '
+            query {
+                article(id: "'.$article->id.'") {
+                    upvotes {
+                        id
+                    }
+                }
+            }
+        ';
+
+        $response = $this->json('GET', '/graphql', ['query' => $query]);
+        $response->assertJsonFragment([
+            'upvotes' => [
+                ['id' => '1'],
+                ['id' => '2'],
+            ],
+        ]);
     }
 }

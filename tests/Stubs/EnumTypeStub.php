@@ -2,8 +2,8 @@
 
 namespace Bakery\Tests\Stubs;
 
-use Bakery\Types\EnumType;
 use GraphQL\Type\Definition\Type;
+use Bakery\Types\Definitions\EnumType;
 
 class EnumTypeStub extends EnumType
 {

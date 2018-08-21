@@ -1,12 +1,13 @@
 <?php
 
-namespace Bakery\Tests\Stubs\BakeryModels;
+namespace Bakery\Tests\Definitions;
 
 use Bakery\Tests\Models\Category;
-use GraphQL\Type\Definition\Type;
+use Bakery\Support\Facades\Bakery;
 use Bakery\Eloquent\Introspectable;
+use Bakery\Contracts\Introspectable as IntrospectableContract;
 
-class CategoryBakery
+class CategoryDefinition implements IntrospectableContract
 {
     use Introspectable;
 
@@ -15,7 +16,7 @@ class CategoryBakery
     public function fields(): array
     {
         return [
-            'name' => Type::nonNull(Type::string()),
+            'name' => Bakery::string(),
         ];
     }
 

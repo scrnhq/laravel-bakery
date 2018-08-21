@@ -3,9 +3,11 @@
 namespace Bakery\Types;
 
 use Bakery\Concerns\ModelAware;
-use GraphQL\Type\Definition\Type;
 use Bakery\Support\Facades\Bakery;
-use GraphQL\Type\Definition\UnionType;
+use Bakery\Types\Definitions\Type;
+use Illuminate\Support\Collection;
+use Bakery\Types\Definitions\InputType;
+use Bakery\Types\Definitions\EloquentType;
 
 class CollectionFilterType extends InputType
 {
@@ -16,7 +18,7 @@ class CollectionFilterType extends InputType
      *
      * @return string
      */
-    protected function name(): string
+    public function name(): string
     {
         return $this->schema->typename().'Filter';
     }
@@ -28,63 +30,78 @@ class CollectionFilterType extends InputType
      */
     public function fields(): array
     {
-        $fields = [];
+        $fields = collect()
+            ->merge($this->getScalarFilters())
+            ->merge($this->getRelationFilters())
+            ->put('AND', Bakery::type($this->name())->list())
+            ->put('OR', Bakery::type($this->name())->list());
 
-        foreach ($this->schema->getFields() as $name => $type) {
-            $fields = array_merge($fields, $this->getFilters($name, $type));
-        }
+        return $fields->map(function (Type $field) {
+            return $field->nullable();
+        })->toArray();
+    }
 
-        foreach ($this->schema->getRelations() as $relation => $field) {
-            $fieldType = Type::getNamedType($field['type']);
+    /**
+     * Return the filters for the scalar fields.
+     *
+     * @return \Illuminate\Support\Collection
+     */
+    protected function getScalarFilters(): Collection
+    {
+        $fields = $this->schema->getFields();
 
-            if ($fieldType instanceof UnionType) {
-                continue;
-            }
+        return $fields->keys()->reduce(function (Collection $result, string $name) use ($fields) {
+            $type = $fields->get($name);
 
-            $fields[$relation] = Bakery::type($fieldType->name.'Filter');
-        }
+            return $type->isLeafType() ? $result->merge($this->getFilters($name, $type)) : $result;
+        }, collect());
+    }
 
-        $fields['AND'] = Bakery::listOf(Bakery::type($this->name));
-        $fields['OR'] = Bakery::listOf(Bakery::type($this->name));
+    /**
+     * Return the filters for the relation fields.
+     *
+     * @return \Illuminate\Support\Collection
+     */
+    protected function getRelationFilters(): Collection
+    {
+        $fields = $this->schema->getRelationFields();
 
-        return $fields;
+        return $fields->filter(function (Type $field) {
+            return $field instanceof EloquentType;
+        })->keys()->reduce(function (Collection $result, string $name) use ($fields) {
+            $type = $fields->get($name);
+
+            return $result->put($name, Bakery::type($type->name().'Filter'));
+        }, collect());
     }
 
     /**
      * Return the filters for a field.
      *
      * @param string $name
-     * @param string $type
-     * @return array
+     * @param \Bakery\Types\Definitions\Type $field
+     * @return \Illuminate\Support\Collection
      */
-    public function getFilters(string $name, $type): array
+    protected function getFilters(string $name, Type $field): Collection
     {
-        if (is_array($type)) {
-            $type = Type::getNamedType($type['type']);
-        } else {
-            $type = Type::getNamedType($type);
-        }
+        $fields = collect();
 
-        $fields = [];
+        $type = $field->toType();
 
-        if (! Type::isLeafType($type)) {
-            return $fields;
-        }
-
-        $fields[$name] = $type;
-        $fields[$name.'_contains'] = $type;
-        $fields[$name.'_not_contains'] = $type;
-        $fields[$name.'_starts_with'] = $type;
-        $fields[$name.'_not_starts_with'] = $type;
-        $fields[$name.'_ends_with'] = $type;
-        $fields[$name.'_not_ends_with'] = $type;
-        $fields[$name.'_not'] = $type;
-        $fields[$name.'_not_in'] = Bakery::listOf($type);
-        $fields[$name.'_in'] = Bakery::listOf($type);
-        $fields[$name.'_lt'] = $type;
-        $fields[$name.'_lte'] = $type;
-        $fields[$name.'_gt'] = $type;
-        $fields[$name.'_gte'] = $type;
+        $fields->put($name, new Type($type));
+        $fields->put($name.'_contains', new Type($type));
+        $fields->put($name.'_not_contains', new Type($type));
+        $fields->put($name.'_starts_with', new Type($type));
+        $fields->put($name.'_not_starts_with', new Type($type));
+        $fields->put($name.'_ends_with', new Type($type));
+        $fields->put($name.'_not_ends_with', new Type($type));
+        $fields->put($name.'_not', new Type($type));
+        $fields->put($name.'_not_in', (new Type($type))->list());
+        $fields->put($name.'_in', (new Type($type))->list());
+        $fields->put($name.'_lt', new Type($type));
+        $fields->put($name.'_lte', new Type($type));
+        $fields->put($name.'_gt', new Type($type));
+        $fields->put($name.'_gte', new Type($type));
 
         return $fields;
     }

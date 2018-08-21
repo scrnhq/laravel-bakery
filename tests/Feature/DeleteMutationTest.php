@@ -39,7 +39,7 @@ class DeleteMutationTest extends FeatureTestCase
         ';
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $response->assertJsonFragment(['deleteRole' => null]);
+        $response->assertJsonMissing(['data']);
         $this->assertDatabaseHas('roles', ['id' => $role->id]);
     }
 
@@ -81,7 +81,7 @@ class DeleteMutationTest extends FeatureTestCase
         ';
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $response->assertJsonFragment(['deleteArticle' => null]);
+        $response->assertJsonMissing(['data']);
         $this->assertDatabaseHas('articles', ['slug' => 'hello-world']);
     }
 }

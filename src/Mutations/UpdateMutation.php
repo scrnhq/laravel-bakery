@@ -2,7 +2,6 @@
 
 namespace Bakery\Mutations;
 
-use Bakery\Utils\Utils;
 use Illuminate\Database\Eloquent\Model;
 
 class UpdateMutation extends EntityMutation
@@ -12,7 +11,7 @@ class UpdateMutation extends EntityMutation
      *
      * @return string
      */
-    protected function name(): string
+    public function name(): string
     {
         if (property_exists($this, 'name')) {
             return $this->name;
@@ -30,7 +29,7 @@ class UpdateMutation extends EntityMutation
     {
         return array_merge(
             parent::args(),
-            Utils::nullifyFields($this->schema->getLookupFields())->toArray()
+            $this->schema->getLookupFields()->toArray()
         );
     }
 

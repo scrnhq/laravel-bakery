@@ -3,9 +3,8 @@
 namespace Bakery\Queries;
 
 use Bakery\Utils\Utils;
-use GraphQL\Type\Definition\Type;
 use Bakery\Support\Facades\Bakery;
-use GraphQL\Type\Definition\UnionType;
+use Bakery\Types\Definitions\Type;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Bakery\Exceptions\TooManyResultsException;
@@ -17,7 +16,7 @@ class SingleEntityQuery extends EntityQuery
      *
      * @return string
      */
-    protected function name(): string
+    public function name(): string
     {
         if (property_exists($this, 'name')) {
             return $this->name;
@@ -31,9 +30,9 @@ class SingleEntityQuery extends EntityQuery
      *
      * @return Type
      */
-    public function type()
+    public function type(): Type
     {
-        return Bakery::type($this->schema->typename());
+        return Bakery::type($this->schema->typename())->nullable();
     }
 
     /**
@@ -43,24 +42,7 @@ class SingleEntityQuery extends EntityQuery
      */
     public function args(): array
     {
-        $args = $this->schema->getLookupFields();
-
-        foreach ($this->schema->getRelations() as $relation => $field) {
-            $fieldType = Utils::nullifyField($field)['type'];
-
-            if ($fieldType instanceof ListofType) {
-                continue;
-            }
-
-            if ($fieldType instanceof UnionType) {
-                continue;
-            }
-
-            $lookupTypeName = Type::getNamedType($fieldType)->name.'LookupType';
-            $args[$relation] = Bakery::type($lookupTypeName);
-        }
-
-        return $args;
+        return $this->schema->getLookupFields()->toArray();
     }
 
     /**

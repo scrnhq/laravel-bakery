@@ -3,13 +3,18 @@
 namespace Bakery\Tests;
 
 use Bakery\Mutations\Mutation;
+use Bakery\Support\Facades\Bakery;
+use Bakery\Types\Definitions\Type;
 
 class CreateCustomMutation extends Mutation
 {
-    //
+    public function type(): Type
+    {
+        return Bakery::boolean();
+    }
 }
 
-class MutationTest extends TestCase
+class MutationTest extends FeatureTestCase
 {
     /** @test */
     public function it_allows_to_extend_mutation_to_make_custom_mutation()

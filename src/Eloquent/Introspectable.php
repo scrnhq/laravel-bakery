@@ -3,12 +3,11 @@
 namespace Bakery\Eloquent;
 
 use Bakery\Utils\Utils;
-use GraphQL\Type\Definition\Type;
 use Bakery\Support\Facades\Bakery;
+use Bakery\Types\Definitions\Type;
 use Illuminate\Support\Collection;
-use GraphQL\Type\Definition\UnionType;
-use GraphQL\Type\Definition\ListOfType;
 use Illuminate\Database\Eloquent\Model;
+use Bakery\Types\Definitions\EloquentType;
 
 trait Introspectable
 {
@@ -17,7 +16,7 @@ trait Introspectable
     /**
      * A reference to the underlying Eloquent instance.
      *
-     * @var mixed
+     * @var \Illuminate\Database\Eloquent\Model
      */
     protected $instance = null;
 
@@ -35,11 +34,11 @@ trait Introspectable
      * Get the underlying model.
      *
      * If $this is already an Eloquent model, we just return this.
-     * Otherwise we boot up an intance of that model and return it.
+     * Otherwise we boot up an instance of that model and return it.
      *
-     * @return mixed
+     * @return \Illuminate\Database\Eloquent\Model
      */
-    public function getModel()
+    public function getModel(): Model
     {
         if ($this instanceof Model) {
             return $this;
@@ -50,16 +49,16 @@ trait Introspectable
         }
 
         Utils::invariant(
-            isset(self::$model),
+            isset(static::$model),
             'No model defined on '.class_basename($this)
         );
 
         Utils::invariant(
-            is_subclass_of(self::$model, Model::class),
+            is_subclass_of(static::$model, Model::class),
             'Defined model on '.class_basename($this).' is not an instance of '.Model::class
         );
 
-        return $this->instance = resolve(self::$model);
+        return $this->instance = resolve(static::$model);
     }
 
     /**
@@ -69,23 +68,28 @@ trait Introspectable
      */
     private function getKeyField(): array
     {
-        return [
-            $this->getKeyName() => ['type' => Type::nonNull(Type::ID())],
-        ];
+        return [$this->getKeyName() => Bakery::ID()];
+    }
+
+    /**
+     * Define the fields of the model.
+     * This method can be overridden.
+     *
+     * @return array
+     */
+    public function fields(): array
+    {
+        return [];
     }
 
     /**
      * Get all the readable fields.
      *
-     * @return Collection
+     * @return \Illuminate\Support\Collection
      */
     public function getFields(): Collection
     {
-        $fields = method_exists($this, 'fields') ? $this->fields() : [];
-
-        return collect($this->getKeyField())->merge(
-            Utils::normalizeFields($fields)
-        );
+        return collect($this->getKeyField())->merge($this->fields());
     }
 
     /**
@@ -94,11 +98,11 @@ trait Introspectable
      * This excludes the ID field and other fields that are guarded from
      * mass assignment exceptions.
      *
-     * @return Collection
+     * @return \Illuminate\Support\Collection
      */
     public function getFillableFields(): Collection
     {
-        return Utils::normalizeFields($this->fields() ?? [])->filter(function ($field, $key) {
+        return $this->getFields()->filter(function (Type $field, $key) {
             return collect($this->getFillable())->contains($key);
         });
     }
@@ -106,67 +110,96 @@ trait Introspectable
     /**
      * The fields that can be used to look up this model.
      *
-     * @return array
+     * @return \Illuminate\Support\Collection
      */
-    public function getLookupFields(): array
+    public function getLookupFields(): Collection
     {
         $fields = collect($this->getFields())
-            ->filter(function ($field, $key) {
-                return in_array($key, $this->lookupFields ?? []);
+            ->filter(function (Type $field) {
+                return $field->isUnique();
             });
 
-        $relations = collect($this->getRelations())
-            ->filter(function ($field) {
-                $field = Type::getNamedType($field['type']);
-
-                return ! $field instanceof UnionType;
+        $relations = collect($this->getRelationFields())
+            ->filter(function (Type $field) {
+                return $field instanceof EloquentType;
             })
-            ->map(function ($field) {
-                $field = Type::getNamedType($field['type']);
-                $lookupTypeName = $field->name.'LookupType';
+            ->map(function (EloquentType $field) {
+                $lookupTypeName = $field->name().'LookupType';
 
-                try {
-                    Bakery::type($lookupTypeName);
-                } catch (\Exception $e) {
-                    dd($field);
-                }
-
-                return Bakery::type($lookupTypeName);
+                return Bakery::type($lookupTypeName)->nullable();
             });
 
-        return Utils::nullifyFields(
-            $fields->merge($relations)->merge($this->getKeyField())
-        )->toArray();
+        return collect($this->getKeyField())
+            ->merge($fields)
+            ->merge($relations)
+            ->map(function (Type $field) {
+                return $field->nullable();
+            });
+    }
+
+    /**
+     * Define the relation fields of the schema.
+     * This method can be overridden.
+     *
+     * @return array
+     */
+    public function relations(): array
+    {
+        return [];
     }
 
     /**
      * Get the relational fields.
      *
-     * @return Collection
+     * @return \Illuminate\Support\Collection
+     */
+    public function getRelationFields(): Collection
+    {
+        return collect($this->relations());
+    }
+
+    /**
+     * Get the fillable relational fields.
+     *
+     * @return \Illuminate\Support\Collection
+     */
+    public function getFillableRelationFields(): Collection
+    {
+        return $this->getRelationFields()->filter(function (Type $field, $key) {
+            return collect($this->getFillable())->contains($key);
+        });
+    }
+
+    /**
+     * Get the Eloquent relations of the model.
+     * This will only return relations that are defined in the model schema.
+     *
+     * @return \Illuminate\Support\Collection
      */
     public function getRelations(): Collection
     {
-        $relations = method_exists($this, 'relations') ? $this->relations() : [];
+        $relations = collect($this->relations());
 
-        return Utils::normalizeFields($relations);
+        return $relations->map(function ($field, $key) {
+            Utils::invariant(
+                method_exists($this->getModel(), $key),
+                'Relation "'.$key.'" is not defined on "'.get_class($this->getModel()).'".'
+            );
+
+            return $this->getModel()->{$key}();
+        });
     }
 
     /**
      * Get the connections of the resource.
      *
-     * @return array
+     * @return \Illuminate\Support\Collection
      */
-    public function getConnections(): array
+    public function getConnections(): Collection
     {
-        return collect($this->getRelations())->map(function ($field, $key) {
-            $field = Utils::nullifyField($field);
-
-            if ($field['type'] instanceof ListOfType) {
-                return str_singular($key).'Ids';
-            }
-
-            return $key.'Id';
-        })->all();
+        return collect($this->getRelationFields())->map(function (Type $field, $key) {
+            return $field->isList() ? str_singular($key).'Ids' : $key.'Id';
+        });
     }
 
     /**

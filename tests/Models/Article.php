@@ -4,8 +4,9 @@ namespace Bakery\Tests\Models;
 
 use Bakery\Eloquent\Mutable;
 use Illuminate\Database\Eloquent\Model;
+use Bakery\Contracts\Mutable as MutableContract;
 
-class Article extends Model
+class Article extends Model implements MutableContract
 {
     use Mutable;
 
@@ -19,6 +20,8 @@ class Article extends Model
         'user',
         'slug',
         'comments',
+        'category',
+        'tags',
     ];
 
     public function user()
@@ -34,5 +37,15 @@ class Article extends Model
     public function category()
     {
         return $this->belongsTo(Category::class);
+    }
+
+    public function tags()
+    {
+        return $this->morphToMany(Tag::class, 'taggable');
+    }
+
+    public function upvotes()
+    {
+        return $this->morphMany(Upvote::class, 'upvoteable');
     }
 }

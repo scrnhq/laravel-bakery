@@ -3,9 +3,10 @@
 namespace Bakery\Types;
 
 use Bakery\Concerns\ModelAware;
-use GraphQL\Type\Definition\Type;
 use Bakery\Support\Facades\Bakery;
-use GraphQL\Type\Definition\UnionType;
+use Bakery\Types\Definitions\Type;
+use Bakery\Types\Definitions\InputType;
+use Bakery\Types\Definitions\EloquentType;
 
 class CollectionOrderByType extends InputType
 {
@@ -23,7 +24,7 @@ class CollectionOrderByType extends InputType
      *
      * @return string
      */
-    protected function name(): string
+    public function name(): string
     {
         return $this->schema->typename().'OrderBy';
     }
@@ -35,22 +36,18 @@ class CollectionOrderByType extends InputType
      */
     public function fields(): array
     {
-        $fields = [];
+        $fields = collect();
 
         foreach ($this->schema->getFields() as $name => $field) {
-            $fields[$name] = Bakery::getType('Order');
+            $fields->put($name, Bakery::type('Order')->nullable());
         }
 
-        foreach ($this->schema->getRelations() as $relation => $field) {
-            $fieldType = Type::getNamedType($field['type']);
+        $this->schema->getRelationFields()->filter(function (Type $field) {
+            return $field instanceof EloquentType;
+        })->each(function (EloquentType $field, $relation) use ($fields) {
+            $fields->put($relation, Bakery::type($field->name().'OrderBy')->nullable());
+        });
 
-            if ($fieldType instanceof UnionType) {
-                continue;
-            }
-
-            $fields[$relation] = Bakery::getType($fieldType->name.'OrderBy');
-        }
-
-        return $fields;
+        return $fields->toArray();
     }
 }

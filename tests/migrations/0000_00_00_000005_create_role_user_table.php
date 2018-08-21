@@ -14,6 +14,7 @@ class CreateRoleUserTable extends Migration
             $table->increments('id');
             $table->unsignedInteger('user_id');
             $table->unsignedInteger('role_id');
+            $table->text('comment')->nullable();
             $table->timestamps();
 
             $table->foreign('user_id')

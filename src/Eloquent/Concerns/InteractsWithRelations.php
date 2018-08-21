@@ -4,8 +4,11 @@ namespace Bakery\Eloquent\Concerns;
 
 use RuntimeException;
 use Bakery\Utils\Utils;
+use GraphQL\Error\UserError;
+use Illuminate\Database\Eloquent\Model;
 use Bakery\Exceptions\InvariantViolation;
 use Illuminate\Database\Eloquent\Relations;
+use Illuminate\Auth\Access\AuthorizationException;
 
 trait InteractsWithRelations
 {
@@ -19,13 +22,34 @@ trait InteractsWithRelations
         Relations\HasMany::class,
         Relations\BelongsTo::class,
         Relations\BelongsToMany::class,
+        Relations\MorphTo::class,
+        Relations\MorphMany::class,
     ];
+
+    /**
+     * Check if the user is authorised to create or update a relationship.
+     *
+     * @param string $policy
+     * @param array $attributes
+     * @throws AuthorizationException
+     */
+    protected function authorize(string $policy, $attributes = null)
+    {
+        $allowed = $this->gate()->allows($policy, [$this, $attributes]);
+
+        if (! $allowed) {
+            throw new AuthorizationException(
+                'Not allowed to perform '.$policy.' on '.get_class($this)
+            );
+        }
+    }
 
     /**
      * Fill the relations in the model.
      *
      * @param array $relations
      * @return void
+     * @throws AuthorizationException
      */
     protected function fillRelations(array $relations)
     {
@@ -39,8 +63,7 @@ trait InteractsWithRelations
                 throw new RuntimeException("Unknown or unfillable relation type: {$key} of type ${relationType}");
             }
 
-            $this->gate()->authorize($policyMethod, [$this, $attributes]);
-
+            $this->authorize($policyMethod, $attributes);
             $this->{$method}($relation, $attributes);
         }
     }
@@ -50,6 +73,7 @@ trait InteractsWithRelations
      *
      * @param array $connections
      * @return void
+     * @throws AuthorizationException
      */
     protected function fillConnections(array $connections)
     {
@@ -63,8 +87,7 @@ trait InteractsWithRelations
                 throw new RuntimeException("Unknown or unfillable connection type: {$key} of type ${relationType}");
             }
 
-            $this->gate()->authorize($policyMethod, [$this, $attributes]);
-
+            $this->authorize($policyMethod, $attributes);
             $this->{$method}($relation, $attributes);
         }
     }
@@ -187,10 +210,21 @@ trait InteractsWithRelations
      * @param array $ids
      * @return void
      */
-    protected function connectBelongsToManyRelation(Relations\BelongsToMany $relation, array $ids)
+    public function connectBelongsToManyRelation(Relations\BelongsToMany $relation, array $data)
     {
-        $this->transactionQueue[] = function () use ($relation, $ids) {
-            $relation->sync($ids);
+        $accessor = $relation->getPivotAccessor();
+        $relatedKey = $relation->getRelated()->getKeyName();
+
+        $data = collect($data)->mapWithKeys(function ($data, $key) use ($accessor, $relatedKey) {
+            if (! is_array($data)) {
+                return [$key => $data];
+            }
+
+            return [$data[$relatedKey] => $data[$accessor]];
+        });
+
+        $this->transactionQueue[] = function () use ($relation, $data) {
+            $relation->sync($data);
         };
     }
 
@@ -203,15 +237,151 @@ trait InteractsWithRelations
      */
     protected function fillBelongsToManyRelation(Relations\BelongsToMany $relation, array $value)
     {
+        $pivots = collect();
         $instances = collect();
         $related = $relation->getRelated();
+        $accessor = $relation->getPivotAccessor();
 
         foreach ($value as $attributes) {
             $instances[] = $related->createWithInput($attributes);
+            $pivots[] = $attributes[$accessor] ?? null;
         }
 
-        $this->transactionQueue[] = function () use ($relation, $instances) {
-            $relation->sync($instances->pluck('id')->all());
+        $this->transactionQueue[] = function () use ($relation, $instances, $pivots) {
+            $data = $instances->pluck('id')->mapWithKeys(function ($id, $key) use ($pivots) {
+                $pivot = $pivots[$key] ?? null;
+
+                return $pivot ? [$id => $pivot] : [$key => $id];
+            });
+
+            $relation->sync($data);
+        };
+    }
+
+    /**
+     * Connect a belongs to relation.
+     *
+     * @param \Illuminate\Database\Eloquent\Relations\MorphTo $relation
+     * @param $data
+     * @return void
+     */
+    protected function connectMorphToRelation(Relations\MorphTo $relation, $data)
+    {
+        if (! $data) {
+            $relation->associate(null);
+
+            return;
+        }
+
+        if (is_array($data)) {
+            if (count($data) !== 1) {
+                throw new UserError(sprintf('There must be only one key with polymorphic input. %s given for relation %s.', count($data), $relation->getRelation()));
+            }
+
+            $data = collect($data);
+
+            [$key, $id] = $data->mapWithKeys(function ($item, $key) {
+                return [$key, $item];
+            });
+
+            $model = $this->getPolymorphicModel($relation, $key);
+
+            $instance = $model->findOrFail($id);
+            $relation->associate($instance);
+        }
+    }
+
+    /**
+     * Fill a belongs to relation.
+     *
+     * @param \Illuminate\Database\Eloquent\Relations\MorphTo $relation
+     * @param array $data
+     * @return void
+     */
+    protected function fillMorphToRelation(Relations\MorphTo $relation, $data)
+    {
+        if (! $data) {
+            $relation->associate(null);
+
+            return;
+        }
+
+        if (is_array($data)) {
+            if (count($data) !== 1) {
+                throw new UserError(sprintf('There must be only one key with polymorphic input. %s given for relation %s.', count($data), $relation->getRelation()));
+            }
+
+            $data = collect($data);
+
+            [$key, $attributes] = $data->mapWithKeys(function ($item, $key) {
+                return [$key, $item];
+            });
+
+            $model = $this->getPolymorphicModel($relation, $key);
+
+            $instance = $model->createWithInput($attributes);
+            $relation->associate($instance);
+        }
+    }
+
+    /**
+     * Get the polymorphic type that belongs to the relation so we can figure
+     * out the model..
+     *
+     * @param \Illuminate\Database\Eloquent\Relations\MorphTo $relation
+     * @param string $key
+     * @return \Illuminate\Database\Eloquent\Model|\Bakery\Contracts\Mutable
+     */
+    protected function getPolymorphicModel(Relations\MorphTo $relation, string $key): Model
+    {
+        $type = array_get($this->getSchema()->getRelationFields(), $relation->getRelation());
+
+        return resolve($type->getDefinitionByKey($key))->getModel();
+    }
+
+    /**
+     * Connect a morph many relation.
+     *
+     * @param \Illuminate\Database\Eloquent\Relations\MorphMany $relation
+     * @param array $ids
+     * @return void
+     */
+    protected function connectMorphManyRelation(Relations\MorphMany $relation, array $ids)
+    {
+        $this->transactionQueue[] = function () use ($relation, $ids) {
+            $relation->each(function (Model $model) use ($relation) {
+                $model->setAttribute($relation->getMorphType(), null);
+                $model->setAttribute($relation->getForeignKeyName(), null);
+
+                $model->save();
+            });
+
+            $models = $relation->getRelated()->newQuery()->whereIn($relation->getRelated()->getKeyName(), $ids)->get();
+
+            $relation->saveMany($models);
+        };
+    }
+
+    /**
+     * Fill a morph many relation.
+     *
+     * @param \Illuminate\Database\Eloquent\Relations\MorphMany $relation
+     * @param array $values
+     * @return void
+     */
+    protected function fillMorphManyRelation(Relations\MorphMany $relation, array $values)
+    {
+        $this->transactionQueue[] = function () use ($relation, $values) {
+            $related = $relation->getRelated();
+            $relation->delete();
+
+            foreach ($values as $attributes) {
+                $model = $related->newInstance();
+                $model->fillWithInput($attributes);
+                $model->setAttribute($relation->getMorphType(), $relation->getMorphClass());
+                $model->setAttribute($relation->getForeignKeyName(), $relation->getParentKey());
+                $model->save();
+            }
         };
     }
 

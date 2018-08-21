@@ -2,10 +2,11 @@
 
 namespace Bakery\Support;
 
-use Bakery\Contracts\FieldContract;
+use Bakery\Types\Definitions\Type;
 use Bakery\Exceptions\InvalidFieldException;
+use GraphQL\Type\Definition\OutputType as GraphQLOutputType;
 
-abstract class Field implements FieldContract
+abstract class Field
 {
     /**
      * The attributes of the Field.
@@ -25,13 +26,20 @@ abstract class Field implements FieldContract
     }
 
     /**
-     * The type of the Field.
+     * Define the type of the Field.
      *
-     * @return mixed
+     * @return Type
      */
-    public function type()
+    abstract public function type(): Type;
+
+    /**
+     * Get the underlying field of the type and convert it to a type.
+     *
+     * @return GraphQLOutputType
+     */
+    public function getType(): GraphQLOutputType
     {
-        return null;
+        return $this->type()->toOutputType();
     }
 
     /**
@@ -39,9 +47,21 @@ abstract class Field implements FieldContract
      *
      * @return array
      */
-    public function args()
+    public function args(): array
     {
         return [];
+    }
+
+    /**
+     * Get the arguments of the field and convert them to types.
+     *
+     * @return array
+     */
+    public function getArgs(): array
+    {
+        return collect($this->args())->map(function (Type $field) {
+            return $field->toType();
+        })->toArray();
     }
 
     /**
@@ -72,8 +92,8 @@ abstract class Field implements FieldContract
 
         return [
             'name' => $this->name,
-            'args' => $this->args,
-            'type' => $this->type,
+            'args' => $this->getArgs(),
+            'type' => $this->getType(),
             'fields' => $this->fields,
             'description' => $this->description,
             'resolve' => $this->getResolver(),

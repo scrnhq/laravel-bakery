@@ -2,42 +2,75 @@
 
 namespace Bakery\Traits;
 
-use GraphQL\Type\Definition\Type;
+use Bakery\Types\Definitions\Type;
+use Bakery\Types\Definitions\BaseType;
+use Bakery\Types\Definitions\ObjectType;
+use Bakery\Types\Definitions\EloquentType;
+use Bakery\Types\Definitions\ReferenceType;
+use Bakery\Types\Definitions\PolymorphicType;
+use GraphQL\Type\Definition\Type as GraphQLType;
 
 trait BakeryTypes
 {
-    public function ID()
+    public function string(): BaseType
     {
-        return Type::ID();
+        return new BaseType(GraphQLType::string());
     }
 
-    public function string()
+    public function int(): BaseType
     {
-        return Type::string();
+        return new BaseType(GraphQLType::int());
     }
 
-    public function int()
+    public function ID(): BaseType
     {
-        return Type::int();
+        return new BaseType(GraphQLType::ID());
     }
 
-    public function boolean()
+    public function boolean(): BaseType
     {
-        return Type::boolean();
+        return new BaseType(GraphQLType::boolean());
     }
 
-    public function float()
+    public function float(): BaseType
     {
-        return Type::float();
+        return new BaseType(GraphQLType::float());
     }
 
-    public function listOf($wrappedType)
+    public function model(string $definition): EloquentType
     {
-        return Type::listOf($wrappedType);
+        return new EloquentType($definition);
     }
 
-    public function nonNull($wrappedType)
+    public function collection($type): EloquentType
     {
-        return Type::nonNull($wrappedType);
+        return $this->model($type)->list();
+    }
+
+    public function field($type): ObjectType
+    {
+        return new ObjectType($type);
+    }
+
+    public function list($type): ReferenceType
+    {
+        return $this->type($type)->list();
+    }
+
+    public function polymorphic(array $definitions): PolymorphicType
+    {
+        return new PolymorphicType($definitions);
+    }
+
+    /**
+     * Get a reference to a registered type.
+     *
+     * @api
+     * @param string $name
+     * @return \Bakery\Types\Definitions\ReferenceType
+     */
+    public function type(string $name): ReferenceType
+    {
+        return new ReferenceType($name);
     }
 }

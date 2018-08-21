@@ -3,8 +3,8 @@
 namespace Bakery\Queries;
 
 use Bakery\Utils\Utils;
-use GraphQL\Type\Definition\Type;
 use Bakery\Support\Facades\Bakery;
+use Bakery\Types\Definitions\Type;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\Grammars;
@@ -26,19 +26,19 @@ class EntityCollectionQuery extends EntityQuery
      *
      * @return string
      */
-    protected function name(): string
+    public function name(): string
     {
         if (property_exists($this, 'name')) {
             return $this->name;
         }
 
-        return Utils::plural($this->model->getModel());
+        return Utils::plural($this->schema->getModel());
     }
 
     /**
      * The type of the CollectionQuery.
      *
-     * @return mixed
+     * @return Type
      */
     public function type(): Type
     {
@@ -52,18 +52,18 @@ class EntityCollectionQuery extends EntityQuery
      */
     public function args(): array
     {
-        $args = [
-            'page' => Type::int(),
-            'count' => Type::int(),
-            'filter' => Bakery::type($this->schema->typename().'Filter'),
-            'search' => Bakery::type($this->schema->typename().'RootSearch'),
-        ];
+        $args = collect([
+            'page' => Bakery::int()->nullable(),
+            'count' => Bakery::int()->nullable(),
+            'filter' => Bakery::type($this->schema->typename().'Filter')->nullable(),
+            'search' => Bakery::type($this->schema->typename().'RootSearch')->nullable(),
+        ]);
 
         if (! empty($this->schema->getFields())) {
-            $args['orderBy'] = Bakery::type($this->schema->typename().'OrderBy');
+            $args->put('orderBy', Bakery::type($this->schema->typename().'OrderBy')->nullable());
         }
 
-        return $args;
+        return $args->toArray();
     }
 
     /**
@@ -144,7 +144,7 @@ class EntityCollectionQuery extends EntityQuery
                 });
             } else {
                 $schema = resolve(Bakery::getModelSchema($query->getModel()));
-                if ($schema->getRelations()->has($key)) {
+                if ($schema->getRelationFields()->has($key)) {
                     $this->applyRelationFilter($query, $key, $value, $type);
                 } else {
                     $this->filter($query, $key, $value, $type);
@@ -254,7 +254,7 @@ class EntityCollectionQuery extends EntityQuery
         $needle = $search['query'];
         $fields = $search['fields'];
 
-        $relations = $this->schema->getRelations();
+        $relations = $this->schema->getRelationFields();
         $qualifiedNeedle = preg_replace('/[*&|:\']+/', ' ', $needle);
 
         foreach ($fields as $key => $value) {
@@ -297,7 +297,7 @@ class EntityCollectionQuery extends EntityQuery
 
         foreach ($fields as $key => $value) {
             $schema = resolve(Bakery::getModelSchema($related));
-            $relations = $schema->getRelations();
+            $relations = $schema->getRelationFields();
             if ($relations->keys()->contains($key)) {
                 $this->applyRelationalSearch($query, $related, $key, $needle, $value);
             } else {
@@ -315,7 +315,7 @@ class EntityCollectionQuery extends EntityQuery
      */
     protected function applyOrderBy(Builder $query, array $args)
     {
-        $relations = $this->schema->getRelations();
+        $relations = $this->schema->getRelationFields();
         foreach ($args as $key => $value) {
             if ($relations->keys()->contains($key)) {
                 $this->applyRelationalOrderBy($query, $this->model, $key, $value);
@@ -344,7 +344,7 @@ class EntityCollectionQuery extends EntityQuery
 
         foreach ($args as $key => $value) {
             $schema = resolve(Bakery::getModelSchema($related));
-            $relations = $schema->getRelations();
+            $relations = $schema->getRelationFields();
             if ($relations->keys()->contains($key)) {
                 $this->applyRelationalOrderBy($query, $related, $key, $value);
             } else {

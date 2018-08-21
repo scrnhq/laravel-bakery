@@ -6,11 +6,11 @@ use Bakery\Tests\Stubs\Policies;
 use Bakery\BakeryServiceProvider;
 use Bakery\Support\Facades\Bakery;
 use Illuminate\Contracts\Auth\Access\Gate;
+use Bakery\Tests\Stubs\Types\TimestampType;
 use Orchestra\Database\ConsoleServiceProvider;
-use Orchestra\Testbench\TestCase as OrchestraTestCase;
 use Illuminate\Foundation\Testing\Concerns\InteractsWithDatabase;
 
-class FeatureTestCase extends OrchestraTestCase
+class FeatureTestCase extends TestCase
 {
     use InteractsWithDatabase;
     use InteractsWithExceptionHandling;
@@ -26,16 +26,19 @@ class FeatureTestCase extends OrchestraTestCase
 
         $gate = app(Gate::class);
         $gate->policy(Models\User::class, Policies\UserPolicy::class);
+        $gate->policy(Models\Role::class, Policies\RolePolicy::class);
         $gate->policy(Models\Article::class, Policies\ArticlePolicy::class);
         $gate->policy(Models\Phone::class, Policies\PhonePolicy::class);
         $gate->policy(Models\Comment::class, Policies\CommentPolicy::class);
+        $gate->policy(Models\Upvote::class, Policies\UpvotePolicy::class);
+        $gate->policy(Models\Tag::class, Policies\TagPolicy::class);
     }
 
     protected function setUp()
     {
         parent::setUp();
 
-        // Disable exception handling for easer testing.
+        // Disable exception handling for easier testing.
         $this->withoutExceptionHandling();
 
         $this->loadMigrationsFrom(__DIR__.'/migrations');
@@ -43,12 +46,19 @@ class FeatureTestCase extends OrchestraTestCase
 
         // Set up default schema.
         app()['config']->set('bakery.models', [
-            Stubs\BakeryModels\UserBakery::class,
-            Stubs\BakeryModels\ArticleBakery::class,
-            Stubs\BakeryModels\PhoneBakery::class,
-            Stubs\BakeryModels\CommentBakery::class,
-            Stubs\BakeryModels\RoleBakery::class,
-            Stubs\BakeryModels\CategoryBakery::class,
+            Definitions\UserDefinition::class,
+            Definitions\ArticleDefinition::class,
+            Definitions\PhoneDefinition::class,
+            Definitions\CommentDefinition::class,
+            Definitions\RoleDefinition::class,
+            Definitions\CategoryDefinition::class,
+            Definitions\TagDefinition::class,
+            Definitions\UserRoleDefinition::class,
+            Definitions\UpvoteDefinition::class,
+        ]);
+
+        app()['config']->set('bakery.types', [
+            TimestampType::class,
         ]);
     }
 

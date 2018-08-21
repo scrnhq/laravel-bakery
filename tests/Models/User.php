@@ -3,9 +3,10 @@
 namespace Bakery\Tests\Models;
 
 use Bakery\Eloquent\Mutable;
+use Bakery\Contracts\Mutable as MutableContract;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
-class User extends Authenticatable
+class User extends Authenticatable implements MutableContract
 {
     use Mutable;
 
@@ -24,7 +25,7 @@ class User extends Authenticatable
         'password',
         'phone',
         'type',
-        'roles',
+        'customRoles',
         'articles',
     ];
 
@@ -38,8 +39,12 @@ class User extends Authenticatable
         return $this->hasOne(Phone::class);
     }
 
-    public function roles()
+    public function customRoles()
     {
-        return $this->belongsToMany(Role::class);
+        return $this->belongsToMany(Role::class)
+            ->as('customPivot')
+            ->using(UserRole::class)
+            ->withPivot('comment')
+            ->withTimestamps();
     }
 }

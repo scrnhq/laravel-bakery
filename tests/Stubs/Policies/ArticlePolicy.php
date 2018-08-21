@@ -38,4 +38,9 @@ class ArticlePolicy
     {
         return true;
     }
+
+    public function setTags(): bool
+    {
+        return true;
+    }
 }

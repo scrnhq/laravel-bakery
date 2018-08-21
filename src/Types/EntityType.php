@@ -5,14 +5,14 @@ namespace Bakery\Types;
 use Closure;
 use Bakery\Utils\Utils;
 use Bakery\Concerns\ModelAware;
-use GraphQL\Type\Definition\Type;
-use Bakery\Types\Type as BaseType;
-use GraphQL\Type\Definition\NonNull;
-use GraphQL\Type\Definition\ListOfType;
-use Illuminate\Contracts\Auth\Access\Gate;
-use Illuminate\Auth\Access\AuthorizationException;
+use Bakery\Support\Facades\Bakery;
+use Illuminate\Support\Collection;
+use Bakery\Types\Definitions\ObjectType;
+use Bakery\Types\Definitions\EloquentType;
+use Illuminate\Database\Eloquent\Relations;
+use Bakery\Types\Definitions\PolymorphicType;
 
-class EntityType extends BaseType
+class EntityType extends ObjectType
 {
     use ModelAware;
 
@@ -21,7 +21,7 @@ class EntityType extends BaseType
      *
      * @return string
      */
-    protected function name(): string
+    public function name(): string
     {
         return $this->schema->typename();
     }
@@ -53,76 +53,194 @@ class EntityType extends BaseType
     }
 
     /**
-     * Check the policy of a field.
+     * Get the fields of the entity type.
      *
-     * @param array $field
-     * @param string $key
-     * @param $source
-     * @param $args
-     * @param $viewer
-     * @return void
-     * @throws AuthorizationException
+     * @return array
      */
-    protected function checkPolicy(array $field, string $key, $source, $args, $viewer)
+    public function fields(): array
     {
-        $policy = $field['policy'];
-        $gate = app(Gate::class)->forUser($viewer);
+        return collect()
+            ->merge($this->getRegularFields())
+            ->merge($this->getRelationFields())
+            ->toArray();
+    }
 
-        // Check if the policy method is callable
-        if (is_callable($policy) && ! $policy($source, $args, $viewer)) {
-            throw new AuthorizationException(
-                'Cannot read property '.$key.' of '.$this->name
+    /**
+     * Get the regular fields for the entity.
+     *
+     * @return Collection
+     */
+    protected function getRegularFields(): Collection
+    {
+        $fields = collect();
+
+        foreach ($this->schema->getFields() as $key => $field) {
+            if ($field instanceof PolymorphicType) {
+                $fields = $fields->merge($this->getFieldsForPolymorphicField($key, $field));
+            } else {
+                $fields->put($key, $field);
+            }
+        }
+
+        return $fields;
+    }
+
+    /**
+     * Get the relation fields of the entity.
+     *
+     * @return Collection
+     */
+    protected function getRelationFields(): Collection
+    {
+        $fields = collect();
+
+        $relations = $this->schema->getRelationFields();
+
+        foreach ($relations as $key => $field) {
+            if ($field instanceof EloquentType) {
+                $fields = $fields->merge($this->getFieldsForRelation($key, $field));
+            } elseif ($field instanceof PolymorphicType) {
+                $fields = $fields->merge($this->getFieldsForPolymorphicField($key, $field));
+            }
+        }
+
+        return $fields;
+    }
+
+    /**
+     * Get the fields for a relation.
+     *
+     * @param string $key
+     * @param EloquentType $field
+     * @return Collection
+     */
+    protected function getFieldsForRelation(string $key, EloquentType $field): Collection
+    {
+        $fields = collect();
+        $relationship = $this->model->{$key}();
+
+        $fields->put($key, $field);
+
+        if ($field->isList()) {
+            $fields = $fields->merge($this->getPluralRelationFields($key, $field));
+        } else {
+            $fields = $fields->merge($this->getSingularRelationFields($key, $field));
+        }
+
+        if ($relationship instanceof Relations\BelongsToMany) {
+            $fields = $fields->merge(
+                $this->getBelongsToManyRelationFields($key, $field, $relationship)
             );
         }
 
-        // Check if there is a policy with this name
-        if (is_string($policy) && ! $gate->check($policy, $source)) {
-            throw new AuthorizationException('Cannot read property '.$key.' of '.$this->name);
-        }
+        return $fields;
     }
 
-    public function fields(): array
+    /**
+     * Get the fields for a plural relation.
+     *
+     * @param string $key
+     * @param EloquentType $field
+     * @return Collection
+     */
+    protected function getPluralRelationFields(string $key, EloquentType $field): Collection
     {
-        $fields = $this->schema->getFields();
-        $relations = $this->schema->getRelations();
+        $fields = collect();
+        $singularKey = str_singular($key);
 
-        foreach ($relations as $key => $field) {
-            $fieldType = Utils::nullifyField($field)['type'];
+        $fields->put($singularKey.'Ids', Bakery::ID()
+            ->list()
+            ->nullable($field->isNullable())
+            ->resolve(function ($model) use ($key) {
+                $relation = $model->{$key};
+                $relationship = $model->{$key}();
 
-            if ($fieldType instanceof ListOfType) {
-                $singularKey = str_singular($key);
-                $fields[$singularKey.'Ids'] = [
-                    'type' => Type::listOf(Type::ID()),
-                    'resolve' => function ($model) use ($key) {
-                        $keyName = $model->{$key}()->getRelated()->getKeyName();
+                return $relation
+                    ->pluck($relationship->getRelated()->getKeyName())
+                    ->toArray();
+            })
+        );
 
-                        return $model->{$key}->pluck($keyName)->toArray();
-                    },
-                ];
-                $fields[$key.'_count'] = [
-                    'type' => Type::nonNull(Type::int()),
-                    'resolve' => function ($model) use ($key) {
-                        return $model->{$key}->count();
-                    },
-                ];
-            } else {
-                $fields[$key.'Id'] = [
-                    'type' => $field instanceof NonNull ? Type::nonNull(Type::ID()) : Type::ID(),
-                    'resolve' => function ($model) use ($key) {
-                        $instance = $model->{$key};
+        $fields->put($key.'_count', Bakery::int()
+            ->nullable($field->isNullable())
+            ->resolve(function ($model) use ($key) {
+                $relation = $model->{$key};
 
-                        return $instance ? $instance->getKey() : null;
-                    },
-                ];
-            }
-            $fields[$key] = $field;
+                return $relation->count();
+            })
+        );
+
+        return $fields;
+    }
+
+    /**
+     * Get the fields for a singular relation.
+     *
+     * @param string $key
+     * @param EloquentType $field
+     * @return Collection
+     */
+    protected function getSingularRelationFields(string $key, EloquentType $field): Collection
+    {
+        $fields = collect();
+
+        return $fields->put($key.'Id', Bakery::ID()
+            ->nullable($field->isNullable())
+            ->resolve(function ($model) use ($key) {
+                $relation = $model->{$key};
+
+                return $relation ? $relation->getKey() : null;
+            })
+        );
+    }
+
+    /**
+     * Get the fields for a belongs to many relation.
+     *
+     * @param string $key
+     * @param EloquentType $field
+     * @param Relations\BelongsToMany $relation
+     * @return Collection
+     */
+    protected function getBelongsToManyRelationFields(string $key, EloquentType $field, Relations\BelongsToMany $relation): Collection
+    {
+        $fields = collect();
+        $pivot = $relation->getPivotClass();
+
+        if (! Bakery::hasModelSchema($pivot)) {
+            return $fields;
         }
 
-        return collect($fields)->map(function ($field, $key) {
-            $field = Utils::toFieldArray($field);
-            $field['resolve'] = $this->createFieldResolver($field, $key);
+        $accessor = $relation->getPivotAccessor();
+        $definition = resolve(Bakery::getModelSchema($pivot));
+        $type = $field->getNamedType();
+        $closure = $type->config['fields'];
+        $pivotField = [
+            $accessor => [
+                'type' => Bakery::type($definition->typename())->toType(),
+                'resolve' => function ($model) use ($key, $accessor) {
+                    return $model->{$accessor};
+                },
+            ],
+        ];
+        $type->config['fields'] = function () use ($closure, $pivotField) {
+            return array_merge($pivotField, $closure());
+        };
 
-            return $field;
-        })->toArray();
+        return $fields;
+    }
+
+    /**
+     * Get the fields for a polymorphic relation.
+     *
+     * @param string $key
+     * @param \Bakery\Types\Definitions\PolymorphicType $field
+     * @return Collection
+     */
+    public function getFieldsForPolymorphicField(string $key, PolymorphicType $field): Collection
+    {
+        $typename = Utils::typename($key).'On'.$this->schema->typename();
+
+        return collect([$key => $field->setName($typename)]);
     }
 }

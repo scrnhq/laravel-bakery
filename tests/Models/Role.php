@@ -4,8 +4,9 @@ namespace Bakery\Tests\Models;
 
 use Bakery\Eloquent\Mutable;
 use Illuminate\Database\Eloquent\Model;
+use Bakery\Contracts\Mutable as MutableContract;
 
-class Role extends Model
+class Role extends Model implements MutableContract
 {
     use Mutable;
 
@@ -15,5 +16,14 @@ class Role extends Model
 
     protected $fillable = [
         'name',
+        'users',
     ];
+
+    public function users()
+    {
+        return $this->belongsToMany(User::class)
+            ->using(UserRole::class)
+            ->withPivot('comment')
+            ->withTimestamps();
+    }
 }

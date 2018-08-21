@@ -6,11 +6,13 @@ use GraphQL\GraphQL;
 use Bakery\Utils\Utils;
 use GraphQL\Type\Schema;
 use Bakery\Traits\BakeryTypes;
+use Bakery\Types\Definitions\Type;
 use Bakery\Exceptions\TypeNotFound;
 use GraphQL\Executor\ExecutionResult;
-use GraphQL\Type\Definition\ObjectType;
+use Bakery\Types\Definitions\NamedType;
 use Illuminate\Database\Eloquent\Model;
 use Bakery\Support\Schema as BakerySchema;
+use GraphQL\Type\Definition\NamedType as GraphQLNamedType;
 
 class Bakery
 {
@@ -60,22 +62,21 @@ class Bakery
     /**
      * Add a type to the registry.
      *
-     * @param $class
+     * @param \Bakery\Types\Definitions\NamedType $type
      * @param string|null $name
      */
-    public function addType($class, string $name = null)
+    public function addType(NamedType $type, string $name = null)
     {
-        $name = $name ?: $class->name;
-        $this->types[$name] = $class;
+        $name = $name ?: $type->name();
+        $this->types[$name] = $type;
     }
 
     /**
      * Add the models as model schemas to the registry.
      *
-     * @param array $models
-     * @return void
+     * @param \ArrayAccess|array $models
      */
-    public function addModelSchemas(array $models)
+    public function addModelSchemas($models)
     {
         foreach ($models as $model) {
             $this->addModelSchema($model);
@@ -86,7 +87,6 @@ class Bakery
      * Add a single model schema to the registry.
      *
      * @param mixed $model
-     * @return void
      */
     public function addModelSchema($model)
     {
@@ -117,6 +117,43 @@ class Bakery
     }
 
     /**
+     * Return the definition of a model.
+     *
+     * @param $model
+     * @return mixed
+     */
+    public function definition($model)
+    {
+        return resolve($this->getModelSchema($model));
+    }
+
+    /**
+     * Resolve the type of a definition of a model.
+     *
+     * @param $model
+     * @return \GraphQL\Type\Definition\NamedType
+     * @throws \Bakery\Exceptions\TypeNotFound
+     */
+    public function resolveDefinitionType($model): GraphQLNamedType
+    {
+        return $this->resolve($this->definition($model)->typename());
+    }
+
+    /**
+     * Return if the model has a model schema in Bakery.
+     * This can either be an instance or a class name.
+     *
+     * @param mixed $model
+     * @return bool
+     */
+    public function hasModelSchema($model)
+    {
+        $model = is_string($model) ? $model : get_class($model);
+
+        return array_key_exists($model, $this->modelSchemas);
+    }
+
+    /**
      * Return if the name is registered as a type.
      *
      * @param string $name
@@ -128,24 +165,40 @@ class Bakery
     }
 
     /**
-     * Return the types that should be included in all schemas.
+     * Get a type by name.
+     * This can be a string or a class path of a Type that has that name.
      *
-     * @return array
+     * @param string $name
+     * @return Type|null
      */
-    public function getStandardTypes()
+    public function getType(string $name): ?NamedType
     {
-        return [
-            new Types\PaginationType(),
-            new Types\OrderType(),
-        ];
+        // If the string is the name of the type we return it straight away.
+        if ($this->hasType($name)) {
+            return $this->types[$name];
+        }
+
+        // If the string is a class, we resolve it, check if it is an instance of type and grab it's name.
+        // and then call this method again to check.
+        if (class_exists($name)) {
+            $instance = resolve($name);
+
+            if ($instance instanceof Type) {
+                $name = $instance->name();
+
+                return $this->getType($name);
+            }
+        }
+
+        return null;
     }
 
     /**
      * Get the default GraphQL schema.
      *
-     * @return Schema
+     * @return \GraphQL\Type\Schema
      */
-    public function schema()
+    public function schema(): Schema
     {
         $schema = new Support\DefaultSchema();
 
@@ -153,48 +206,40 @@ class Bakery
     }
 
     /**
-     * Get the GraphQL type.
+     * Resolve a type from the registry.
      *
-     * @param $name
-     * @return ObjectType
-     * @throws TypeNotFound
+     * @param string $name
+     * @return \GraphQL\Type\Definition\NamedType
+     * @throws \Bakery\Exceptions\TypeNotFound
      */
-    public function getType($name)
+    public function resolve(string $name): GraphQLNamedType
     {
-        if (! isset($this->types[$name])) {
+        $type = $this->getType($name);
+
+        if (! $type) {
             throw new TypeNotFound('Type '.$name.' not found.');
         }
 
+        $name = $type->name();
+
+        // If we already have an instance of this type, return it.
         if (isset($this->typeInstances[$name])) {
             return $this->typeInstances[$name];
         }
 
-        $class = $this->types[$name];
-        $type = $this->makeObjectType($class, ['name' => $name]);
+        // Otherwise we create it and store it for future references.
+        $type = $type->toType();
         $this->typeInstances[$name] = $type;
 
         return $type;
     }
 
     /**
-     * Get the GraphQL type, alias for getType().
-     *
-     * @api
-     * @param $name
-     * @return ObjectType
-     * @throws TypeNotFound
-     */
-    public function type($name)
-    {
-        return $this->getType($name);
-    }
-
-    /**
      * Execute the GraphQL query.
      *
      * @param array $input
-     * @param Schema|BakerySchema $schema
-     * @return ExecutionResult
+     * @param \GraphQL\Type\Schema|\Bakery\Support\Schema $schema
+     * @return \GraphQL\Executor\ExecutionResult
      */
     public function executeQuery($input, $schema = null): ExecutionResult
     {
@@ -216,32 +261,18 @@ class Bakery
         return GraphQL::executeQuery($schema, $query, $root, $context, $variables, $operationName);
     }
 
+    /**
+     * Serve the GraphiQL tool.
+     *
+     * @param $route
+     * @param array $headers
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     */
     public function graphiql($route, $headers = [])
     {
         return view(
             'bakery::graphiql',
             ['endpoint' => route($route), 'headers' => $headers]
         );
-    }
-
-    protected function makeObjectType($type, $options = [])
-    {
-        $objectType = null;
-        if ($type instanceof \GraphQL\Type\Definition\Type) {
-            $objectType = $type;
-        } elseif (is_array($type)) {
-            $objectType = $this->makeObjectTypeFromFields($type, $options);
-        } else {
-            $objectType = $type->toGraphQLType($options);
-        }
-
-        return $objectType;
-    }
-
-    protected function makeObjectTypeFromFields($fields, $options = [])
-    {
-        return new ObjectType(array_merge([
-            'fields' => $fields,
-        ], $options));
     }
 }
