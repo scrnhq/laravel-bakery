@@ -269,6 +269,10 @@ class Type
      */
     public function isLeafType(): bool
     {
+        if ($this->isList()) {
+            return false;
+        }
+
         return GraphQLType::isLeafType($this->getNamedType());
     }
 
