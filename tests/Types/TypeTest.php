@@ -59,4 +59,18 @@ class TypeTest extends FeatureTestCase
 
         $this->assertTrue($type->checkStorePolicy($user, 'email'));
     }
+
+    /** @test */
+    public function it_throws_exception_if_policy_does_not_exist()
+    {
+        $this->expectException(AuthorizationException::class);
+
+        $user = new User();
+        $this->actingAs($user);
+
+        $type = new Type();
+        $type->canStoreWhen('nonExistingPolicy');
+
+        $this->assertTrue($type->checkStorePolicy($user, 'email'));
+    }
 }
