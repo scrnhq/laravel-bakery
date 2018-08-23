@@ -56,8 +56,8 @@ abstract class EntityMutation extends Mutation
      *
      * @param mixed $root
      * @param mixed $args
-     * @param mixed $viewer
+     * @param mixed $context
      * @return Model
      */
-    abstract public function resolve($root, array $args, $viewer): Model;
+    abstract public function resolve($root, array $args, $context): Model;
 }

@@ -2,8 +2,6 @@
 
 namespace Bakery\Eloquent\Concerns;
 
-use GraphQL\Error\UserError;
-
 trait InteractsWithAttributes
 {
     /**
@@ -14,13 +12,7 @@ trait InteractsWithAttributes
     protected function fillScalars(array $scalars)
     {
         foreach ($scalars as $key => $value) {
-            try {
-                $this->fillScalar($key, $value);
-            } catch (\Exception $previous) {
-                throw new UserError('Could not set '.$key, [
-                    $key => $previous->getMessage(),
-                ]);
-            }
+            $this->fillScalar($key, $value);
         }
     }
 
@@ -33,11 +25,8 @@ trait InteractsWithAttributes
      */
     protected function fillScalar(string $key, $value)
     {
-        $policyMethod = 'set'.studly_case($key).'Attribute';
-
-        if (method_exists($this->policy(), $policyMethod)) {
-            $this->gate->authorize($policyMethod, [$this, $value]);
-        }
+        $field = $this->getSchema()->getFields()->get($key);
+        $field->checkStorePolicy($this->getModel(), $key);
 
         return $this->setAttribute($key, $value);
     }

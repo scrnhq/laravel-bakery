@@ -83,13 +83,13 @@ class AttachPivotMutation extends EntityMutation
      *
      * @param  mixed $root
      * @param  array $args
-     * @param  mixed $viewer
+     * @param  mixed $context
      * @return Model
      * @throws \Illuminate\Auth\Access\AuthorizationException
      */
-    public function resolve($root, array $args, $viewer): Model
+    public function resolve($root, array $args, $context): Model
     {
-        $model = $this->findOrFail($root, $args, $viewer);
+        $model = $this->findOrFail($root, $args, $context);
         $relation = $model->{$this->pivotRelation->getRelationName()}();
 
         $permission = 'set'.studly_case($relation->getRelationName());

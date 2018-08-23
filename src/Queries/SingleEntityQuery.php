@@ -50,18 +50,14 @@ class SingleEntityQuery extends EntityQuery
      *
      * @param mixed $root
      * @param array $args
-     * @param mixed $viewer
+     * @param mixed $context
      * @return Model
      */
-    public function resolve($root, array $args, $viewer)
+    public function resolve($root, array $args, $context)
     {
         $primaryKey = $this->model->getKeyName();
 
-        $query = $this->scopeQuery(
-            $this->schema->getBakeryQuery($viewer),
-            $args,
-            $viewer
-        );
+        $query = $this->scopeQuery($this->schema->getBakeryQuery());
 
         if (array_key_exists($primaryKey, $args)) {
             return $query->find($args[$primaryKey]);

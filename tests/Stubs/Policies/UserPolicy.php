@@ -47,6 +47,11 @@ class UserPolicy
         return true;
     }
 
+    public function setType()
+    {
+        return false;
+    }
+
     public function readPassword(Authenticatable $viewer, User $user): bool
     {
         return $viewer && $user->is($viewer);

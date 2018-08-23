@@ -29,7 +29,7 @@ interface Introspectable
 
     public function getConnections(): Collection;
 
-    public function getBakeryQuery(?Authenticatable $viewer): Builder;
+    public function getBakeryQuery(): Builder;
 
     public function scopeQuery(Builder $builder): Builder;
 }
