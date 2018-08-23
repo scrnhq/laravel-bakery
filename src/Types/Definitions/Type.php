@@ -284,13 +284,15 @@ class Type
      *
      * @param $source
      * @param $fieldName
-     * @return void
+     * @return bool
      * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     public function checkStorePolicy($source, $fieldName)
     {
         $user = auth()->user();
         $policy = $this->storePolicy;
+
+        /** @var Gate $gate */
         $gate = app(Gate::class)->forUser($user);
 
         // Check if the policy method is a closure.
@@ -299,9 +301,11 @@ class Type
         }
 
         // Check if there is a policy with this name
-        if (is_string($policy) && ! $gate->check($policy, $source)) {
+        if (is_string($policy) && ! $gate->check($policy, [$source])) {
             throw new AuthorizationException('Cannot set property "'.$fieldName.'" of '.get_class($source));
         }
+
+        return true;
     }
 
     /**

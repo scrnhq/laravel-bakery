@@ -47,6 +47,11 @@ class UserPolicy
         return true;
     }
 
+    public function setEmail()
+    {
+        return true;
+    }
+
     public function setType()
     {
         return false;
