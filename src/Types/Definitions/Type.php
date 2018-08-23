@@ -258,11 +258,11 @@ class Type
     /**
      * Set the store policy with a callable.
      *
-     * @param callable $callable
+     * @param \Closure $closure
      * @return \Bakery\Types\Definitions\Type
      */
-    public function canStore(callable $callable) {
-        $this->storePolicy($callable);
+    public function canStore(\Closure $closure) {
+        $this->storePolicy($closure);
 
         return $this;
     }
