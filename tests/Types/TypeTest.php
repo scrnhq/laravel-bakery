@@ -16,7 +16,9 @@ class TypeTest extends FeatureTestCase
         $this->actingAs($user);
 
         $type = new Type();
-        $type->canStore(function () { return true; });
+        $type->canStore(function () {
+            return true;
+        });
 
         $this->assertTrue($type->checkStorePolicy($user, 'email'));
     }
@@ -30,7 +32,9 @@ class TypeTest extends FeatureTestCase
         $this->actingAs($user);
 
         $type = new Type();
-        $type->canStore(function () { return false; });
+        $type->canStore(function () {
+            return false;
+        });
 
         $type->checkStorePolicy($user, 'email');
     }
