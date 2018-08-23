@@ -261,7 +261,8 @@ class Type
      * @param \Closure $closure
      * @return \Bakery\Types\Definitions\Type
      */
-    public function canStore(\Closure $closure) {
+    public function canStore(\Closure $closure)
+    {
         $this->storePolicy($closure);
 
         return $this;
@@ -273,7 +274,8 @@ class Type
      * @param string $policy
      * @return \Bakery\Types\Definitions\Type
      */
-    public function canStoreWhen(string $policy) {
+    public function canStoreWhen(string $policy)
+    {
         $this->storePolicy = $policy;
 
         return $this;
