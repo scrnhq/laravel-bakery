@@ -5,7 +5,6 @@ namespace Bakery\Contracts;
 use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Contracts\Auth\Authenticatable;
 
 interface Introspectable
 {

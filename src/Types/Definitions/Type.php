@@ -261,7 +261,8 @@ class Type
      * @param callable $callable
      * @return \Bakery\Types\Definitions\Type
      */
-    public function canStore(callable $callable) {
+    public function canStore(callable $callable)
+    {
         $this->storePolicy($callable);
 
         return $this;
@@ -273,7 +274,8 @@ class Type
      * @param string $policy
      * @return \Bakery\Types\Definitions\Type
      */
-    public function canStoreWhen(string $policy) {
+    public function canStoreWhen(string $policy)
+    {
         $this->storePolicy = $policy;
 
         return $this;
