@@ -263,9 +263,7 @@ class Type
      */
     public function canStore(\Closure $closure)
     {
-        $this->storePolicy($closure);
-
-        return $this;
+        return $this->storePolicy($closure);
     }
 
     /**
@@ -276,9 +274,7 @@ class Type
      */
     public function canStoreWhen(string $policy)
     {
-        $this->storePolicy = $policy;
-
-        return $this;
+        return $this->storePolicy($policy);
     }
 
     /**
