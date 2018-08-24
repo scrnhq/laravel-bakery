@@ -35,13 +35,13 @@ class EntityType extends ObjectType
      */
     protected function createFieldResolver(array $field, string $key): Closure
     {
-        return function ($source, $args, $viewer) use ($key, $field) {
+        return function ($source, $args, $context) use ($key, $field) {
             if (array_key_exists('policy', $field)) {
-                $this->checkPolicy($field, $key, $source, $args, $viewer);
+                $this->checkPolicy($field, $key, $source, $args, $context);
             }
 
             if (array_key_exists('resolve', $field)) {
-                return $field['resolve']($source, $args, $viewer);
+                return $field['resolve']($source, $args, $context);
             } else {
                 if (is_array($source) || $source instanceof \ArrayAccess) {
                     return $source[$key] ?? null;

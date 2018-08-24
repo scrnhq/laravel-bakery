@@ -3,23 +3,21 @@
 namespace Bakery\Eloquent\Concerns;
 
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Contracts\Auth\Authenticatable;
 
 trait InteractsWithQueries
 {
     /**
      * Boot the query builder on the underlying model.
      *
-     * @param \Illuminate\Contracts\Auth\Authenticatable|null $viewer
      * @return Builder
      */
-    public function getBakeryQuery(?Authenticatable $viewer): Builder
+    public function getBakeryQuery(): Builder
     {
         $model = $this->getModel();
         $query = $model->query();
 
         if (method_exists($model, 'scopeAuthorizedForReading')) {
-            $query = $query->authorizedForReading($viewer);
+            $query = $query->authorizedForReading(auth()->user());
         }
 
         return $this->scopeQuery($query);

@@ -13,14 +13,14 @@ trait QueriesModel
      *
      * @param mixed $root
      * @param array $args
-     * @param mixed $viewer
+     * @param mixed $context
      * @return mixed
      */
-    public function find($root, array $args, $viewer)
+    public function find($root, array $args, $context)
     {
         $primaryKey = $this->model->getKeyName();
 
-        $query = $this->schema->getBakeryQuery($viewer);
+        $query = $this->schema->getBakeryQuery();
 
         if (array_key_exists($primaryKey, $args)) {
             return $query->find($args[$primaryKey]);
@@ -47,12 +47,12 @@ trait QueriesModel
      *
      * @param mixed $root
      * @param array $args
-     * @param mixed $viewer
+     * @param mixed $context
      * @return Model
      */
-    public function findOrFail($root, array $args, $viewer): Model
+    public function findOrFail($root, array $args, $context): Model
     {
-        $result = $this->find($root, $args, $viewer);
+        $result = $this->find($root, $args, $context);
 
         if (! $result) {
             throw (new ModelNotFoundException)->setModel(class_basename($this->model));

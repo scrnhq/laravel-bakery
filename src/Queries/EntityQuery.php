@@ -16,11 +16,9 @@ abstract class EntityQuery extends Query
      * This can be overwritten to make your own collection queries.
      *
      * @param Builder $query
-     * @param array $args
-     * @param $viewer
      * @return Builder
      */
-    protected function scopeQuery(Builder $query, array $args, $viewer): Builder
+    protected function scopeQuery(Builder $query): Builder
     {
         return $query;
     }

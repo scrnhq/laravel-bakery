@@ -68,6 +68,13 @@ class Type
     protected $policy;
 
     /**
+     * The policy for storing the value of the type.
+     *
+     * @var callable|string
+     */
+    protected $storePolicy;
+
+    /**
      * Construct a new type.
      *
      * @param null $type
@@ -181,16 +188,16 @@ class Type
      */
     protected function getResolver()
     {
-        return function ($source, $args, $viewer, ResolveInfo $info) {
+        return function ($source, array $args, $context, ResolveInfo $info) {
             if (isset($this->policy)) {
-                $this->checkPolicy($source, $args, $viewer, $info);
+                $this->checkPolicy($source, $args, $context, $info);
             }
 
             if (isset($this->resolver)) {
-                return call_user_func_array($this->resolver, [$source, $args, $viewer]);
+                return call_user_func_array($this->resolver, [$source, $args, $context, $info]);
             }
 
-            return self::defaultResolver($source, $args, $viewer, $info);
+            return self::defaultResolver($source, $args, $context, $info);
         };
     }
 
@@ -212,19 +219,20 @@ class Type
      *
      * @param $source
      * @param $args
-     * @param $viewer
+     * @param $context
      * @param ResolveInfo $info
      * @return void
      * @throws AuthorizationException
      */
-    protected function checkPolicy($source, $args, $viewer, ResolveInfo $info)
+    protected function checkPolicy($source, $args, $context, ResolveInfo $info)
     {
+        $user = auth()->user();
         $policy = $this->policy;
-        $gate = app(Gate::class)->forUser($viewer);
+        $gate = app(Gate::class)->forUser($user);
         $fieldName = $info->fieldName;
 
         // Check if the policy method is callable
-        if (is_callable($policy) && ! $policy($source, $args, $viewer, $info)) {
+        if (is_callable($policy) && ! $policy($user, $source, $args, $context, $info)) {
             throw new AuthorizationException('Cannot read property "'.$fieldName.'" of '.get_class($source));
         }
 
@@ -232,6 +240,70 @@ class Type
         if (is_string($policy) && ! $gate->check($policy, $source)) {
             throw new AuthorizationException('Cannot read property "'.$fieldName.'" of '.get_class($source));
         }
+    }
+
+    /**
+     * Set the story policy.
+     *
+     * @param $policy
+     * @return \Bakery\Types\Definitions\Type
+     */
+    public function storePolicy($policy)
+    {
+        $this->storePolicy = $policy;
+
+        return $this;
+    }
+
+    /**
+     * Set the store policy with a callable.
+     *
+     * @param \Closure $closure
+     * @return \Bakery\Types\Definitions\Type
+     */
+    public function canStore(\Closure $closure)
+    {
+        return $this->storePolicy($closure);
+    }
+
+    /**
+     * Set the store policy with a reference to a policy method.
+     *
+     * @param string $policy
+     * @return \Bakery\Types\Definitions\Type
+     */
+    public function canStoreWhen(string $policy)
+    {
+        return $this->storePolicy($policy);
+    }
+
+    /**
+     * Check the store policy of the type.
+     *
+     * @param $source
+     * @param $fieldName
+     * @return bool
+     * @throws \Illuminate\Auth\Access\AuthorizationException
+     */
+    public function checkStorePolicy($source, $fieldName)
+    {
+        $user = auth()->user();
+        $policy = $this->storePolicy;
+
+        /** @var Gate $gate */
+        $gate = app(Gate::class)->forUser($user);
+
+        // Check if the policy method is a closure.
+        if ($policy instanceof \Closure && ! $policy($source)) {
+            throw new AuthorizationException('Cannot set property "'.$fieldName.'" of '.get_class($source));
+        }
+
+        // Check if there is a policy with this name
+        if (is_string($policy) && ! $gate->check($policy, [$source])) {
+            throw new AuthorizationException('Cannot set property "'.$fieldName.'" of '.get_class($source));
+        }
+
+        return true;
     }
 
     /**
@@ -358,12 +430,12 @@ class Type
      * This gets called when there is no custom resolver defined.
      *
      * @param $source
-     * @param $args
-     * @param $viewer
+     * @param array $args
+     * @param $context
      * @param \GraphQL\Type\Definition\ResolveInfo $info
      * @return mixed|null
      */
-    protected static function defaultResolver($source, $args, $viewer, ResolveInfo $info)
+    protected static function defaultResolver($source, array $args, $context, ResolveInfo $info)
     {
         $fieldName = $info->fieldName;
         $property = null;
@@ -378,6 +450,6 @@ class Type
             }
         }
 
-        return $property instanceof \Closure ? $property($source, $args, $viewer, $info) : $property;
+        return $property instanceof \Closure ? $property($source, $args, $context, $info) : $property;
     }
 }

@@ -5,7 +5,6 @@ namespace Bakery\Contracts;
 use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Contracts\Auth\Authenticatable;
 
 interface Introspectable
 {
@@ -29,7 +28,7 @@ interface Introspectable
 
     public function getConnections(): Collection;
 
-    public function getBakeryQuery(?Authenticatable $viewer): Builder;
+    public function getBakeryQuery(): Builder;
 
     public function scopeQuery(Builder $builder): Builder;
 }

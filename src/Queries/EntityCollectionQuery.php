@@ -71,11 +71,11 @@ class EntityCollectionQuery extends EntityQuery
      *
      * @param mixed $root
      * @param array $args
-     * @param mixed $viewer
+     * @param mixed $context
      * @return LengthAwarePaginator
      * @throws PaginationMaxCountExceededException
      */
-    public function resolve($root, array $args, $viewer)
+    public function resolve($root, array $args, $context)
     {
         $page = array_get($args, 'page', 1);
         $count = array_get($args, 'count', 15);
@@ -87,9 +87,9 @@ class EntityCollectionQuery extends EntityQuery
         }
 
         $query = $this->scopeQuery(
-            $this->schema->getBakeryQuery($viewer),
+            $this->schema->getBakeryQuery($context),
             $args,
-            $viewer
+            $context
         );
 
         if (array_key_exists('filter', $args) && ! empty($args['filter'])) {

@@ -20,11 +20,11 @@ class UserDefinition implements IntrospectableContract
         return [
             'name' => Bakery::string(),
             'email' => Bakery::string()->unique(),
-            'type' => Bakery::string(),
+            'type' => Bakery::string()->canStoreWhen('setType'),
             'password' => Bakery::string()->policy('readPassword'),
             'secret_information' => Bakery::string()
-                ->policy(function (User $user, $args, Authenticatable $viewer = null) {
-                    return $viewer && $user->is($viewer);
+                ->policy(function (Authenticatable $user, User $source) {
+                    return $user && $source->is($user);
                 })->nullable(),
         ];
     }
@@ -33,8 +33,8 @@ class UserDefinition implements IntrospectableContract
     {
         return [
             'articles' => Bakery::collection(ArticleDefinition::class)
-                ->policy(function (User $user, $args, Authenticatable $viewer = null) {
-                    return $viewer && $user->is($viewer);
+                ->policy(function (Authenticatable $user, User $source) {
+                    return $user && $source->is($user);
                 }),
             'customRoles' => Bakery::collection(RoleDefinition::class),
             'phone' => Bakery::model(PhoneDefinition::class),
