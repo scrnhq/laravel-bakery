@@ -2,6 +2,7 @@
 
 namespace Bakery\Mutations;
 
+use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
 
 class CreateMutation extends EntityMutation
@@ -27,15 +28,16 @@ class CreateMutation extends EntityMutation
      * @param  array $args
      * @param  mixed $context
      * @return Model
-     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     public function resolve($root, array $args, $context): Model
     {
-        $this->authorize('create', $this->model);
-
         $input = $args['input'];
-        $model = $this->model->createWithInput($input);
 
-        return $model;
+        return DB::transaction(function () use ($input) {
+            $model = $this->model->createWithInput($input);
+            $this->authorize('create', [$model]);
+
+            return $model;
+        });
     }
 }
