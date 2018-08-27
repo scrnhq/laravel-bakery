@@ -57,14 +57,17 @@ trait InteractsWithRelations
             $relation = $this->resolveRelation($key);
             $relationType = $this->getRelationTypeName($relation);
             $method = "fill{$relationType}Relation";
-            $policyMethod = 'create'.studly_case($key);
 
             if (! method_exists($this, $method)) {
                 throw new RuntimeException("Unknown or unfillable relation type: {$key} of type ${relationType}");
             }
 
-            $this->authorize($policyMethod, $attributes);
             $this->{$method}($relation, $attributes);
+        }
+
+        foreach ($relations as $key => $attributes) {
+            $policyMethod = 'create'.studly_case($key);
+            $this->authorize($policyMethod, $attributes);
         }
     }
 
@@ -81,14 +84,17 @@ trait InteractsWithRelations
             $relation = $this->resolveRelationOfConnection($key);
             $relationType = $this->getRelationTypeName($relation);
             $method = "connect{$relationType}Relation";
-            $policyMethod = 'set'.studly_case($this->getRelationOfConnection($key));
 
             if (! method_exists($this, $method)) {
                 throw new RuntimeException("Unknown or unfillable connection type: {$key} of type ${relationType}");
             }
 
-            $this->authorize($policyMethod, $attributes);
             $this->{$method}($relation, $attributes);
+        }
+
+        foreach ($connections as $key => $attributes) {
+            $policyMethod = 'set'.studly_case($this->getRelationOfConnection($key));
+            $this->authorize($policyMethod, $attributes);
         }
     }
 
