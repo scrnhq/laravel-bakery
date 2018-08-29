@@ -5,6 +5,7 @@ namespace Bakery\Support;
 use Bakery\Types;
 use Bakery\Utils\Utils;
 use Bakery\Eloquent\Mutable;
+use GraphQL\Type\Definition\Directive;
 use GraphQL\Type\SchemaConfig;
 use Bakery\Support\Facades\Bakery;
 use Bakery\Types\Definitions\Type;
@@ -471,7 +472,7 @@ class Schema
         }
 
         // Set directives
-        $config->setDirectives($this->directives());
+        $config->setDirectives(array_merge(Directive::getInternalDirectives(), $this->directives()));
 
         // Set the type loader
         $config->setTypeLoader(function ($name) use ($query, $mutation) {
