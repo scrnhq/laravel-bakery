@@ -435,7 +435,7 @@ class Type
      * @param \GraphQL\Type\Definition\ResolveInfo $info
      * @return mixed|null
      */
-    protected static function defaultResolver($source, array $args, $context, ResolveInfo $info)
+    public static function defaultResolver($source, array $args, $context, ResolveInfo $info)
     {
         $fieldName = $info->fieldName;
         $property = null;
