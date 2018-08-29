@@ -24,22 +24,104 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Schema
 {
+    /**
+     * The models of the schema.
+     *
+     * @var array
+     */
     protected $models = [];
 
-    protected $queries = [];
-
-    protected $mutations = [];
-
+    /**
+     * The types of the schema.
+     *
+     * @var array
+     */
     protected $types = [];
 
+    /**
+     * The queries of the schema.
+     *
+     * @var array
+     */
+    protected $queries = [];
+
+    /**
+     * The mutations of the schema.
+     *
+     * @var array
+     */
+    protected $mutations = [];
+
+    /**
+     * The directives of the schema.
+     *
+     * @var array
+     */
+    protected $directives = [];
+
+    /**
+     * Define the models of the schema.
+     * This method can be overridden for complex implementations.
+     *
+     * @return array
+     */
     protected function models(): array
     {
-        return [];
+        return $this->models;
     }
 
+    /**
+     * Define the types of the schema.
+     * This method can be overridden for complex implementations.
+     *
+     * @return array
+     */
+    protected function types(): array
+    {
+        return $this->types;
+    }
+
+    /**
+     * Define the queries of the schema.
+     * This method can be overridden for complex implementations.
+     *
+     * @return array
+     */
+    protected function queries(): array
+    {
+        return $this->queries;
+    }
+
+    /**
+     * Define the mutations of the schema.
+     * This method can be overridden for complex implementations.
+     *
+     * @return array
+     */
+    protected function mutations(): array
+    {
+        return $this->mutations;
+    }
+
+    /**
+     * Define the directives of the schema.
+     * This method can be overridden for complex implementations.
+     *
+     * @return array
+     */
+    protected function directives(): array
+    {
+        return $this->directives;
+    }
+
+    /**
+     * Get the models of the schema.
+     *
+     * @return \Illuminate\Support\Collection
+     */
     protected function getModels(): Collection
     {
-        return collect($this->models)->merge($this->models());
+        return collect($this->models());
     }
 
     /**
@@ -77,18 +159,6 @@ class Schema
             ->merge($this->types)
             ->merge($this->types())
             ->toArray();
-    }
-
-    /**
-     * Returns the types of the schema.
-     * This method can be overridden if you implement a custom schema and the
-     * types here will be added.
-     *
-     * @return array
-     */
-    protected function types(): array
-    {
-        return [];
     }
 
     /**
@@ -399,6 +469,9 @@ class Schema
         if (count($mutation->getFields()) > 0) {
             $config->setMutation($mutation);
         }
+
+        // Set directives
+        $config->setDirectives($this->directives());
 
         // Set the type loader
         $config->setTypeLoader(function ($name) use ($query, $mutation) {
