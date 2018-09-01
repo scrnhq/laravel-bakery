@@ -87,8 +87,8 @@ class SingleEntityQuery extends EntityQuery
     {
         foreach ($args as $key => $value) {
             if (is_array($value)) {
-                $query->whereHas($key, function ($subQuery) use ($value) {
-                    $this->queryByArgs($subQuery, $value);
+                $query->whereHas($key, function (Builder $query) use ($value) {
+                    $this->queryByArgs($query, $value);
                 });
             } else {
                 $query->where($key, $value);
