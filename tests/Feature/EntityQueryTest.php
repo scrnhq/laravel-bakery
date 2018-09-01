@@ -99,6 +99,25 @@ class EntityQueryTest extends FeatureTestCase
     }
 
     /** @test */
+    public function it_can_lookup_entities_by_nested_relational_fields()
+    {
+        $user = factory(Models\User::class)->create();
+        $article = factory(Models\Article::class)->create(['user_id' => $user->id]);
+        $phone = factory(Models\Phone::class)->create(['user_id' => $user->id]);
+
+        $query = '
+            query {
+                article(user: { phone: { id: "'.$phone->id.'"} }) {
+                    id
+                }
+            }
+        ';
+
+        $response = $this->json('GET', '/graphql', ['query' => $query]);
+        $response->assertJsonFragment(['id' => $article->id]);
+    }
+
+    /** @test */
     public function it_checks_if_the_viewer_is_not_allowed_to_read_a_field()
     {
         $this->withExceptionHandling();
