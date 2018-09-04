@@ -55,4 +55,14 @@ return [
     ],
 
     'postgresDictionary' => 'simple',
+
+    /*
+     |--------------------------------------------------------------------------
+     | Query eager loading depth
+     |--------------------------------------------------------------------------
+     |
+     | Here you can define the maximum depth of eager loading
+     | in queries.
+     */
+    'query_max_eager_load' => 5,
 ];

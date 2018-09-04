@@ -94,7 +94,7 @@ class EntityCollectionQuery extends EntityQuery
             $context
         );
 
-        $fields = $info->getFieldSelection($depth = 5);
+        $fields = $info->getFieldSelection(config('bakery.query_max_eager_load'));
         $this->eagerLoadRelations($query, $fields['items'], $this->schema);
 
         if (array_key_exists('filter', $args) && ! empty($args['filter'])) {
