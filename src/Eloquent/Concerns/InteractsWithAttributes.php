@@ -26,7 +26,7 @@ trait InteractsWithAttributes
     protected function fillScalar(string $key, $value)
     {
         $field = $this->getSchema()->getFields()->get($key);
-        $field->checkStorePolicy($this->getModel(), $key);
+        $field->checkStorePolicy($this->getModel(), $key, $value);
 
         return $this->setAttribute($key, $value);
     }
