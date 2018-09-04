@@ -293,7 +293,7 @@ class Type
         $policy = $this->storePolicy;
 
         // Check if there is a policy.
-        if (!$policy) {
+        if (! $policy) {
             return true;
         }
 
