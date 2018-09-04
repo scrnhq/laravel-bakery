@@ -232,14 +232,16 @@ class Type
         $fieldName = $info->fieldName;
 
         // Check if the policy method is callable
-        if (is_callable($policy) && ! $policy($user, $source, $args, $context, $info)) {
-            throw new AuthorizationException('Cannot read property "'.$fieldName.'" of '.get_class($source));
+        if (($policy instanceof \Closure || is_callable_tuple($policy)) && $policy($user, $source, $args, $context, $info)) {
+            return;
         }
 
         // Check if there is a policy with this name
-        if (is_string($policy) && ! $gate->check($policy, $source)) {
-            throw new AuthorizationException('Cannot read property "'.$fieldName.'" of '.get_class($source));
+        if (is_string($policy) && $gate->check($policy, $source)) {
+            return;
         }
+
+        throw new AuthorizationException('Cannot read property "'.$fieldName.'" of '.get_class($source));
     }
 
     /**
@@ -282,28 +284,35 @@ class Type
      *
      * @param $source
      * @param $fieldName
+     * @param $value
      * @return bool
      * @throws \Illuminate\Auth\Access\AuthorizationException
      */
-    public function checkStorePolicy($source, $fieldName)
+    public function checkStorePolicy($source, $fieldName, $value): bool
     {
-        $user = auth()->user();
         $policy = $this->storePolicy;
+
+        // Check if there is a policy.
+        if (! $policy) {
+            return true;
+        }
+
+        $user = auth()->user();
 
         /** @var Gate $gate */
         $gate = app(Gate::class)->forUser($user);
 
         // Check if the policy method is a closure.
-        if ($policy instanceof \Closure && ! $policy($source)) {
-            throw new AuthorizationException('Cannot set property "'.$fieldName.'" of '.get_class($source));
+        if (($policy instanceof \Closure || is_callable_tuple($policy)) && $policy($user, $source, $value)) {
+            return true;
         }
 
         // Check if there is a policy with this name
-        if (is_string($policy) && ! $gate->check($policy, [$source])) {
-            throw new AuthorizationException('Cannot set property "'.$fieldName.'" of '.get_class($source));
+        if (is_string($policy) && $gate->check($policy, [$source, $value])) {
+            return true;
         }
 
-        return true;
+        throw new AuthorizationException('Cannot set property "'.$fieldName.'" of '.get_class($source));
     }
 
     /**

@@ -20,7 +20,7 @@ class TypeTest extends FeatureTestCase
             return true;
         });
 
-        $this->assertTrue($type->checkStorePolicy($user, 'email'));
+        $this->assertTrue($type->checkStorePolicy($user, 'email', 'value'));
     }
 
     /** @test */
@@ -36,7 +36,7 @@ class TypeTest extends FeatureTestCase
             return false;
         });
 
-        $type->checkStorePolicy($user, 'email');
+        $type->checkStorePolicy($user, 'email', 'value');
     }
 
     /** @test */
@@ -47,7 +47,7 @@ class TypeTest extends FeatureTestCase
         $type = new Type();
         $type->canStoreWhen('setEmail');
 
-        $this->assertTrue($type->checkStorePolicy($user, 'email'));
+        $this->assertTrue($type->checkStorePolicy($user, 'email', 'value'));
     }
 
     /** @test */
@@ -61,7 +61,7 @@ class TypeTest extends FeatureTestCase
         $type = new Type();
         $type->canStoreWhen('setType');
 
-        $this->assertTrue($type->checkStorePolicy($user, 'email'));
+        $this->assertTrue($type->checkStorePolicy($user, 'email', 'value'));
     }
 
     /** @test */
@@ -75,6 +75,6 @@ class TypeTest extends FeatureTestCase
         $type = new Type();
         $type->canStoreWhen('nonExistingPolicy');
 
-        $this->assertTrue($type->checkStorePolicy($user, 'email'));
+        $this->assertTrue($type->checkStorePolicy($user, 'email', 'value'));
     }
 }
