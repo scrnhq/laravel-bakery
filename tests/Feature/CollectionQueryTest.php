@@ -462,4 +462,42 @@ class CollectionQueryTest extends FeatureTestCase
         $response->assertJsonStructure(['data' => ['articles' => ['items' => [['comments' => [['user' => ['id']]]]]]]]);
         $this->assertCount(4, DB::getQueryLog());
     }
+
+    /** @test */
+    public function it_eager_loads_sibling_relationships()
+    {
+        $user = factory(Models\User::class)->create();
+        $articles = factory(Models\Article::class, 25)->create();
+
+        foreach ($articles as $article) {
+            factory(Models\Comment::class, 3)->create(['article_id' => $article->id]);
+        }
+
+        $this->actingAs($user);
+
+        $query = '
+            query {
+                articles {
+                    items {
+                        comments {
+                            id
+                            user {
+                                id
+                            }
+                            article {
+                                title
+                            }
+                        }
+                    }
+                }
+            }
+        ';
+
+        DB::enableQueryLog();
+        $response = $this->json('GET', '/graphql', ['query' => $query]);
+        DB::disableQueryLog();
+
+        $response->assertJsonStructure(['data' => ['articles' => ['items' => [['comments' => [['user' => ['id'], 'article' => ['title']]]]]]]]);
+        $this->assertCount(5, DB::getQueryLog());
+    }
 }
