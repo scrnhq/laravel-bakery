@@ -49,7 +49,6 @@ trait InteractsWithRelations
      *
      * @param array $relations
      * @return void
-     * @throws AuthorizationException
      */
     protected function fillRelations(array $relations)
     {
@@ -64,7 +63,16 @@ trait InteractsWithRelations
 
             $this->{$method}($relation, $attributes);
         }
+    }
 
+    /**
+     * Check the policies for the relations in the model.
+     *
+     * @param array $relations
+     * @throws \Illuminate\Auth\Access\AuthorizationException
+     */
+    protected function checkRelations(array $relations)
+    {
         foreach ($relations as $key => $attributes) {
             $policyMethod = 'create'.studly_case($key);
             $this->authorize($policyMethod, $attributes);
@@ -76,7 +84,6 @@ trait InteractsWithRelations
      *
      * @param array $connections
      * @return void
-     * @throws AuthorizationException
      */
     protected function fillConnections(array $connections)
     {
@@ -91,7 +98,16 @@ trait InteractsWithRelations
 
             $this->{$method}($relation, $attributes);
         }
+    }
 
+    /**
+     * Check the policies for the connections in the model.
+     *
+     * @param array $connections
+     * @throws \Illuminate\Auth\Access\AuthorizationException
+     */
+    protected function checkConnections(array $connections)
+    {
         foreach ($connections as $key => $attributes) {
             $policyMethod = 'set'.studly_case($this->getRelationOfConnection($key));
             $this->authorize($policyMethod, $attributes);

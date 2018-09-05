@@ -12,22 +12,20 @@ trait InteractsWithAttributes
     protected function fillScalars(array $scalars)
     {
         foreach ($scalars as $key => $value) {
-            $this->fillScalar($key, $value);
+            $this->setAttribute($key, $value);
         }
     }
 
     /**
-     * Fill a scalar.
+     * Check the policies for the scalars in the model.
      *
-     * @param string $key
-     * @param mixed $value
-     * @return $this;
+     * @param array $scalars
      */
-    protected function fillScalar(string $key, $value)
+    protected function checkScalars(array $scalars)
     {
-        $field = $this->getSchema()->getFields()->get($key);
-        $field->checkStorePolicy($this->getModel(), $key, $value);
-
-        return $this->setAttribute($key, $value);
+        foreach ($scalars as $key => $value) {
+            $field = $this->getSchema()->getFields()->get($key);
+            $field->checkStorePolicy($this->getModel(), $key, $value);
+        }
     }
 }
