@@ -21,11 +21,11 @@ trait EagerLoadRelationships
 
         foreach ($fields as $key => $field) {
             if (in_array($key, $relations)) {
-                $path = $path ? $path.'.'.$key : $key;
-                $query->with($path);
+                $relation = $path ? $path.'.'.$key : $key;
+                $query->with($relation);
                 $related = $schema->getModel()->{$key}()->getRelated();
                 $relatedSchema = resolve(Bakery::getModelSchema($related));
-                $this->eagerLoadRelations($query, $field, $relatedSchema, $path);
+                $this->eagerLoadRelations($query, $field, $relatedSchema, $relation);
             }
         }
     }
