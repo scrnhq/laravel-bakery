@@ -4,6 +4,7 @@ namespace Bakery\Tests\Feature;
 
 use Bakery\Tests\Models;
 use Bakery\Tests\FeatureTestCase;
+use Illuminate\Support\Facades\DB;
 
 class CollectionQueryTest extends FeatureTestCase
 {
@@ -425,5 +426,40 @@ class CollectionQueryTest extends FeatureTestCase
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
         $response->assertJsonFragment(['total' => 3]);
+    }
+
+    /** @test */
+    public function it_eager_loads_the_relationships()
+    {
+        $user = factory(Models\User::class)->create();
+        $articles = factory(Models\Article::class, 25)->create();
+
+        foreach ($articles as $article) {
+            factory(Models\Comment::class, 3)->create(['article_id' => $article->id]);
+        }
+
+        $this->actingAs($user);
+
+        $query = '
+            query {
+                articles {
+                    items {
+                        comments {
+                            id
+                            user {
+                                id
+                            }
+                        }
+                    }
+                }
+            }
+        ';
+
+        DB::enableQueryLog();
+        $response = $this->json('GET', '/graphql', ['query' => $query]);
+        DB::disableQueryLog();
+
+        $response->assertJsonStructure(['data' => ['articles' => ['items' => [['comments' => [['user' => ['id']]]]]]]]);
+        $this->assertCount(4, DB::getQueryLog());
     }
 }

@@ -6,6 +6,7 @@ use Bakery\Utils\Utils;
 use Bakery\Support\Facades\Bakery;
 use Bakery\Types\Definitions\Type;
 use Illuminate\Database\Eloquent\Model;
+use GraphQL\Type\Definition\ResolveInfo;
 use Illuminate\Database\Eloquent\Builder;
 use Bakery\Exceptions\TooManyResultsException;
 
@@ -51,13 +52,17 @@ class SingleEntityQuery extends EntityQuery
      * @param mixed $root
      * @param array $args
      * @param mixed $context
-     * @return Model
+     * @param \GraphQL\Type\Definition\ResolveInfo $info
+     * @return \Illuminate\Database\Eloquent\Model|null ?Model
      */
-    public function resolve($root, array $args, $context)
+    public function resolve($root, array $args, $context, ResolveInfo $info): ?Model
     {
         $primaryKey = $this->model->getKeyName();
 
         $query = $this->scopeQuery($this->schema->getBakeryQuery());
+
+        $fields = $info->getFieldSelection(config('bakery.query_max_eager_load'));
+        $this->eagerLoadRelations($query, $fields, $this->schema);
 
         if (array_key_exists($primaryKey, $args)) {
             return $query->find($args[$primaryKey]);
