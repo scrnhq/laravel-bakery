@@ -31,9 +31,9 @@ class MutableTest extends FeatureTestCase
     /** @test */
     public function it_adds_the_persist_events_to_the_observables()
     {
-        /** @var \Illuminate\Database\Eloquent\Model $article */
         $article = factory(Article::class)->create();
 
-        $this->assertArraySubset(['persisting', 'persisted'], $article->getObservableEvents());
+        $this->assertContains('persisting', $article->getObservableEvents());
+        $this->assertContains('persisted', $article->getObservableEvents());
     }
 }

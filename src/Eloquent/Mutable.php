@@ -26,7 +26,7 @@ trait Mutable
      */
     public static function bootMutable()
     {
-        Event::listen('eloquent.booting: '.static::class, function (Model $model) {
+        Event::listen('eloquent.booted: '.static::class, function (Model $model) {
             $model->addObservableEvents(['persisting', 'persisted']);
         });
     }
