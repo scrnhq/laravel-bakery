@@ -5,6 +5,8 @@ namespace Bakery\Eloquent;
 use Bakery\Support\Facades\Bakery;
 use Illuminate\Support\Facades\DB;
 use Bakery\Events\BakeryModelSaved;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Contracts\Auth\Access\Gate;
 
 trait Mutable
@@ -16,6 +18,18 @@ trait Mutable
     protected $schema;
 
     protected $gate;
+
+    /**
+     * The "booting" method of the Mutable trait.
+     *
+     * @return void
+     */
+    public static function bootMutable()
+    {
+        Event::listen('eloquent.booted: '.static::class, function (Model $model) {
+            $model->addObservableEvents(['persisting', 'persisted']);
+        });
+    }
 
     /**
      * Return an instance of the Gate class.
@@ -122,7 +136,12 @@ trait Mutable
     public function save(array $options = [])
     {
         parent::save($options);
+
+        $this->fireModelEvent('persisting');
+
         event(new BakeryModelSaved($this));
+
+        $this->fireModelEvent('persisted');
 
         return $this;
     }
