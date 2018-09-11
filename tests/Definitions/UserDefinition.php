@@ -23,7 +23,7 @@ class UserDefinition implements IntrospectableContract
             'type' => Bakery::string()->canStoreWhen('setType'),
             'password' => Bakery::string()->policy('readPassword'),
             'secret_information' => Bakery::string()
-                ->policy(function (Authenticatable $user, User $source) {
+                ->policy(function (?Authenticatable $user, User $source) {
                     return $user && $source->is($user);
                 })->nullable(),
         ];
@@ -33,7 +33,7 @@ class UserDefinition implements IntrospectableContract
     {
         return [
             'articles' => Bakery::collection(ArticleDefinition::class)
-                ->policy(function (Authenticatable $user, User $source) {
+                ->policy(function (?Authenticatable $user, User $source) {
                     return $user && $source->is($user);
                 }),
             'customRoles' => Bakery::collection(RoleDefinition::class),

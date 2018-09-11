@@ -122,6 +122,24 @@ class EntityQueryTest extends FeatureTestCase
     public function it_checks_if_the_viewer_is_not_allowed_to_read_a_field()
     {
         $this->withExceptionHandling();
+        $user = factory(Models\User::class)->create();
+
+        $query = '
+            query {
+                user(id: "'.$user->id.'") {
+                    id
+                    password
+                }
+            }
+        ';
+
+        $response = $this->json('GET', '/graphql', ['query' => $query]);
+        $response->assertJsonFragment(['user' => null]);
+    }
+
+    /** @test */
+    public function it_checks_if_the_viewer_is_not_allowed_to_read_a_nullable_field_and_returns_null()
+    {
         $secret = 'secr3t';
         $user = factory(Models\User::class)->create([
             'secret_information' => $secret,
