@@ -190,7 +190,7 @@ class Type
     {
         return function ($source, array $args, $context, ResolveInfo $info) {
             if (isset($this->policy)) {
-                if (!$this->checkPolicy($source, $args, $context, $info)) {
+                if (! $this->checkPolicy($source, $args, $context, $info)) {
                     return null;
                 }
             }
