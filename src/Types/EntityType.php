@@ -151,6 +151,7 @@ class EntityType extends ObjectType
         $fields->put($singularKey.'Ids', Bakery::ID()
             ->list()
             ->nullable($field->isNullable())
+            ->policy($field->getPolicy())
             ->resolve(function ($model) use ($key) {
                 $relation = $model->{$key};
                 $relationship = $model->{$key}();
@@ -163,6 +164,7 @@ class EntityType extends ObjectType
 
         $fields->put($key.'_count', Bakery::int()
             ->nullable($field->isNullable())
+            ->policy($field->getPolicy())
             ->resolve(function ($model) use ($key) {
                 $relation = $model->{$key};
 
@@ -186,6 +188,7 @@ class EntityType extends ObjectType
 
         return $fields->put($key.'Id', Bakery::ID()
             ->nullable($field->isNullable())
+            ->policy($field->getPolicy())
             ->resolve(function ($model) use ($key) {
                 $relation = $model->{$key};
 
