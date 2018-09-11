@@ -190,7 +190,9 @@ class Type
     {
         return function ($source, array $args, $context, ResolveInfo $info) {
             if (isset($this->policy)) {
-                $this->checkPolicy($source, $args, $context, $info);
+                if (! $this->checkPolicy($source, $args, $context, $info)) {
+                    return null;
+                }
             }
 
             if (isset($this->resolver)) {
@@ -215,14 +217,24 @@ class Type
     }
 
     /**
+     * Get the policy for the type.
+     *
+     * @return callable|string
+     */
+    public function getPolicy()
+    {
+        return $this->policy;
+    }
+
+    /**
      * Check the policy of the type.
      *
      * @param $source
      * @param $args
      * @param $context
      * @param ResolveInfo $info
-     * @return void
-     * @throws AuthorizationException
+     * @return bool
+     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     protected function checkPolicy($source, $args, $context, ResolveInfo $info)
     {
@@ -233,12 +245,16 @@ class Type
 
         // Check if the policy method is callable
         if (($policy instanceof \Closure || is_callable_tuple($policy)) && $policy($user, $source, $args, $context, $info)) {
-            return;
+            return true;
         }
 
         // Check if there is a policy with this name
         if (is_string($policy) && $gate->check($policy, $source)) {
-            return;
+            return true;
+        }
+
+        if ($this->nullable) {
+            return false;
         }
 
         throw new AuthorizationException('Cannot read property "'.$fieldName.'" of '.get_class($source));

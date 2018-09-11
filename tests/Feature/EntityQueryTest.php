@@ -122,6 +122,24 @@ class EntityQueryTest extends FeatureTestCase
     public function it_checks_if_the_viewer_is_not_allowed_to_read_a_field()
     {
         $this->withExceptionHandling();
+        $user = factory(Models\User::class)->create();
+
+        $query = '
+            query {
+                user(id: "'.$user->id.'") {
+                    id
+                    password
+                }
+            }
+        ';
+
+        $response = $this->json('GET', '/graphql', ['query' => $query]);
+        $response->assertJsonFragment(['user' => null]);
+    }
+
+    /** @test */
+    public function it_checks_if_the_viewer_is_not_allowed_to_read_a_nullable_field_and_returns_null()
+    {
         $secret = 'secr3t';
         $user = factory(Models\User::class)->create([
             'secret_information' => $secret,
@@ -189,6 +207,28 @@ class EntityQueryTest extends FeatureTestCase
     }
 
     /** @test */
+    public function it_checks_if_the_viewer_is_not_allowed_to_read_relation_ids()
+    {
+        $this->withExceptionHandling();
+        $user = factory(Models\User::class)->create();
+        factory(Models\Article::class)->create([
+            'user_id' => $user->id,
+        ]);
+
+        $query = '
+            query {
+                user(id: "'.$user->id.'") {
+                    id
+                    articleIds
+                }
+            }
+        ';
+
+        $response = $this->json('GET', '/graphql', ['query' => $query]);
+        $response->assertJsonFragment(['user' => null]);
+    }
+
+    /** @test */
     public function it_checks_if_the_viewer_is_allowed_to_read_a_relation()
     {
         $user = factory(Models\User::class)->create();
@@ -214,6 +254,31 @@ class EntityQueryTest extends FeatureTestCase
         $response->assertJsonKey('user');
         $response->assertJsonStructure(['data' => ['user' => ['articles' => 'id']]]);
         $response->assertJsonFragment(['title' => $article->title]);
+    }
+
+    /** @test */
+    public function it_checks_if_the_viewer_is_allowed_to_read_relation_ids()
+    {
+        $user = factory(Models\User::class)->create();
+        $article = factory(Models\Article::class)->create([
+            'user_id' => $user->id,
+        ]);
+
+        $this->actingAs($user);
+
+        $query = '
+            query {
+                user(id: "'.$user->id.'") {
+                    id
+                    articleIds
+                }
+            }
+        ';
+
+        $response = $this->json('GET', '/graphql', ['query' => $query]);
+        $response->assertJsonKey('user');
+        $response->assertJsonStructure(['data' => ['user' => ['articleIds']]]);
+        $response->assertJsonFragment(['articleIds' => [$article->id]]);
     }
 
     /** @test */
