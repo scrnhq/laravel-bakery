@@ -189,6 +189,28 @@ class EntityQueryTest extends FeatureTestCase
     }
 
     /** @test */
+    public function it_check_if_the_viewer_is_not_allowed_to_read_relation_ids()
+    {
+        $this->withExceptionHandling();
+        $user = factory(Models\User::class)->create();
+        factory(Models\Article::class)->create([
+            'user_id' => $user->id,
+        ]);
+
+        $query = '
+            query {
+                user(id: "'.$user->id.'") {
+                    id
+                    articleIds
+                }
+            }
+        ';
+
+        $response = $this->json('GET', '/graphql', ['query' => $query]);
+        $response->assertJsonFragment(['user' => null]);
+    }
+
+    /** @test */
     public function it_checks_if_the_viewer_is_allowed_to_read_a_relation()
     {
         $user = factory(Models\User::class)->create();
