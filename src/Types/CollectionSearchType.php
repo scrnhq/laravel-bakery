@@ -36,17 +36,17 @@ class CollectionSearchType extends InputType
             $fields->put($name, Bakery::boolean()->nullable());
         });
 
-         foreach ($this->schema->getFields() as $name => $field) {
-             if ($field instanceof BaseType) {
-                 $fields[$name] = Bakery::boolean()->nullable();
-             }
-         }
+        foreach ($this->schema->getFields() as $name => $field) {
+            if ($field instanceof BaseType) {
+                $fields[$name] = Bakery::boolean()->nullable();
+            }
+        }
 
-         foreach ($this->schema->getRelationFields() as $relation => $field) {
-             if ($field instanceof EloquentType) {
-                 $fields[$relation] = Bakery::type($field->name().'Search')->nullable();
-             }
-         }
+        foreach ($this->schema->getRelationFields() as $relation => $field) {
+            if ($field instanceof EloquentType) {
+                $fields[$relation] = Bakery::type($field->name().'Search')->nullable();
+            }
+        }
 
         return $fields->toArray();
     }
