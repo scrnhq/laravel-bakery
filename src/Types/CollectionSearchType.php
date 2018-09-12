@@ -5,7 +5,9 @@ namespace Bakery\Types;
 use Bakery\Concerns\ModelAware;
 use Bakery\Support\Facades\Bakery;
 use Bakery\Types\Definitions\Type;
+use Bakery\Types\Definitions\BaseType;
 use Bakery\Types\Definitions\InputType;
+use Bakery\Types\Definitions\EloquentType;
 
 class CollectionSearchType extends InputType
 {
@@ -34,18 +36,17 @@ class CollectionSearchType extends InputType
             $fields->put($name, Bakery::boolean()->nullable());
         });
 
-        // foreach ($this->schema->getFields() as $name => $field) {
-        //     $field = Utils::toFieldArray($field);
-        //     $type = Type::getNamedType($field['type']);
+        foreach ($this->schema->getFields() as $name => $field) {
+            if ($field instanceof BaseType) {
+                $fields[$name] = Bakery::boolean()->nullable();
+            }
+        }
 
-        //     if ($type instanceof StringType || $type instanceof IDType) {
-        //         $fields[$name] = Bakery::boolean();
-        //     }
-        // }
-
-        // foreach ($this->schema->getRelationFields() as $relation => $field) {
-        //     $fields[$relation] = Bakery::type($field->typename().'Search');
-        // }
+        foreach ($this->schema->getRelationFields() as $relation => $field) {
+            if ($field instanceof EloquentType) {
+                $fields[$relation] = Bakery::type($field->name().'Search')->nullable();
+            }
+        }
 
         return $fields->toArray();
     }
