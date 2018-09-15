@@ -144,7 +144,7 @@ trait InteractsWithRelations
     protected function fillBelongsToRelation(Relations\BelongsTo $relation, $attributes = [])
     {
         $related = $relation->getRelated();
-        $modelSchema = Bakery::resolveModelSchema($related);
+        $modelSchema = Bakery::getSchemaForModel($related);
         $model = $modelSchema->create($attributes);
 
         $relation->associate($model);
@@ -186,7 +186,7 @@ trait InteractsWithRelations
     protected function fillHasOneRelation(Relations\HasOne $relation, $attributes)
     {
         $related = $relation->getRelated();
-        $modelSchema = Bakery::resolveModelSchema($related);
+        $modelSchema = Bakery::getSchemaForModel($related);
         $modelSchema->fill($attributes);
 
         $this->queue(function () use ($modelSchema, $relation) {
@@ -223,7 +223,7 @@ trait InteractsWithRelations
             $relation->delete();
 
             foreach ($values as $attributes) {
-                $modelSchema = Bakery::resolveModelSchema($related);
+                $modelSchema = Bakery::getSchemaForModel($related);
                 $modelSchema->fill($attributes);
                 $modelSchema->getModel()->setAttribute($relation->getForeignKeyName(), $relation->getParentKey());
                 $modelSchema->save();
@@ -269,7 +269,7 @@ trait InteractsWithRelations
         $instances = collect();
         $related = $relation->getRelated();
         $accessor = $relation->getPivotAccessor();
-        $relatedSchema = Bakery::resolveModelSchema($related);
+        $relatedSchema = Bakery::getSchemaForModel($related);
 
         foreach ($value as $attributes) {
             $instances[] = $relatedSchema->create($attributes);
@@ -414,7 +414,7 @@ trait InteractsWithRelations
         $this->queue(function () use ($relation, $values) {
             $relation->delete();
             $related = $relation->getRelated();
-            $relatedSchema = Bakery::resolveModelSchema($related);
+            $relatedSchema = Bakery::getSchemaForModel($related);
 
             foreach ($values as $attributes) {
                 $relatedSchema->make($attributes);

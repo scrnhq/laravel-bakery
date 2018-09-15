@@ -19,7 +19,6 @@ use Illuminate\Support\Facades\Facade;
  * @method static \Bakery\Eloquent\ModelSchema getModelSchema(string $class)
  * @method static bool hasSchemaForModel(\Illuminate\Database\Eloquent\Model|string $model)
  * @method static \Bakery\Eloquent\ModelSchema getSchemaForModel(\Illuminate\Database\Eloquent\Model|string $model)
- * @method static \Bakery\Eloquent\ModelSchema resolveModelSchema(\Illuminate\Database\Eloquent\Model $model)
  */
 class Bakery extends Facade
 {
