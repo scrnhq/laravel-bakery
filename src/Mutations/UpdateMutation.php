@@ -2,6 +2,8 @@
 
 namespace Bakery\Mutations;
 
+use Bakery\Support\Facades\Bakery;
+use GraphQL\Type\Definition\ResolveInfo;
 use Illuminate\Database\Eloquent\Model;
 
 class UpdateMutation extends EntityMutation
@@ -39,16 +41,18 @@ class UpdateMutation extends EntityMutation
      * @param  mixed $root
      * @param  array $args
      * @param  mixed $context
+     * @param \GraphQL\Type\Definition\ResolveInfo $info
      * @return Model
      * @throws \Illuminate\Auth\Access\AuthorizationException
+     * @throws \Throwable
      */
-    public function resolve($root, array $args, $context): Model
+    public function resolve($root, array $args, $context, ResolveInfo $info): Model
     {
-        $model = $this->findOrFail($root, $args, $context);
-        $this->authorize('update', $model);
+        $model = $this->findOrFail($root, $args, $context, $info);
+        $modelSchema = Bakery::getSchemaForModel($model);
 
-        $input = $args['input'];
-        $model->updateWithInput($input);
+        $modelSchema->authorize('update');
+        $modelSchema->update($args['input']);
 
         return $model;
     }

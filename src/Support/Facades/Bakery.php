@@ -16,6 +16,10 @@ use Illuminate\Support\Facades\Facade;
  * @method static \Bakery\Types\Definitions\ReferenceType type(string $definition)
  * @method static \Bakery\Types\Definitions\PolymorphicType polymorphic(array $definitions)
  * @method static \GraphQL\Type\Definition\NamedType resolve(string $definition)
+ * @method static \Bakery\Eloquent\ModelSchema getModelSchema(string $class)
+ * @method static bool hasSchemaForModel(\Illuminate\Database\Eloquent\Model|string $model)
+ * @method static \Bakery\Eloquent\ModelSchema getSchemaForModel(\Illuminate\Database\Eloquent\Model|string $model)
+ * @method static \Bakery\Eloquent\ModelSchema resolveModelSchema(\Illuminate\Database\Eloquent\Model $model)
  */
 class Bakery extends Facade
 {

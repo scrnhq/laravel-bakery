@@ -2,8 +2,9 @@
 
 namespace Bakery\Concerns;
 
-use Bakery\Utils\Utils;
-use Bakery\Eloquent\Introspectable;
+use Bakery\Eloquent\ModelSchema;
+use Bakery\Support\Facades\Bakery;
+use Bakery\Exceptions\InvariantViolation;
 
 trait ModelAware
 {
@@ -24,7 +25,7 @@ trait ModelAware
     /**
      * A reference to the schema.
      *
-     * @var \Bakery\Contracts\Introspectable
+     * @var \Bakery\Eloquent\ModelSchema
      */
     protected $schema;
 
@@ -33,23 +34,19 @@ trait ModelAware
      *
      * @param string $class
      */
-    public function __construct(string $class = null)
+    public function __construct($class = null)
     {
         if (isset($class)) {
             $this->class = $class;
         }
 
-        Utils::invariant(
-            $this->class,
-            'No class defined.'
-        );
-
-        $this->schema = resolve($this->class);
-
-        Utils::invariant(
-            Utils::usesTrait($this->schema, Introspectable::class),
-            class_basename($this->schema).' does not use the '.Introspectable::class.' trait.'
-        );
+        if ($class instanceof ModelSchema) {
+            $this->schema = $class;
+        } else if (is_string($class)) {
+            $this->schema = Bakery::getModelSchema($this->class);
+        } else {
+            throw new InvariantViolation('Invalid schema for '.get_class($this));
+        }
 
         $this->model = $this->schema->getModel();
     }

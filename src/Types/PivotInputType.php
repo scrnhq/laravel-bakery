@@ -29,14 +29,14 @@ class PivotInputType extends MutationInputType
      */
     public function fields(): array
     {
-        $pivot = $this->getPivotDefinition();
+        $modelSchema = $this->getPivotModelSchema();
         $accessor = $this->getPivotRelation()->getPivotAccessor();
         $relatedKey = $this->pivotRelation->getRelated()->getKeyName();
 
         $fields = collect()->put($relatedKey, Bakery::ID());
 
-        if ($pivot) {
-            $fields->put($accessor, Bakery::type('Create'.$pivot->typename().'Input'));
+        if ($modelSchema) {
+            $fields->put($accessor, Bakery::type('Create'.$modelSchema->typename().'Input'));
         }
 
         return $fields->toArray();

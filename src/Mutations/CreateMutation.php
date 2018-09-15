@@ -2,6 +2,7 @@
 
 namespace Bakery\Mutations;
 
+use GraphQL\Type\Definition\ResolveInfo;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
 
@@ -27,15 +28,16 @@ class CreateMutation extends EntityMutation
      * @param  mixed $root
      * @param  array $args
      * @param  mixed $context
+     * @param \GraphQL\Type\Definition\ResolveInfo $info
      * @return Model
      */
-    public function resolve($root, array $args, $context): Model
+    public function resolve($root, array $args, $context, ResolveInfo $info): Model
     {
         $input = $args['input'];
 
         return DB::transaction(function () use ($input) {
-            $model = $this->model->createWithInput($input);
-            $this->authorize('create', [$model]);
+            $this->schema->authorize('create');
+            $model = $this->schema->create($input);
 
             return $model;
         });

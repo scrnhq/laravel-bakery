@@ -1,15 +1,11 @@
 <?php
 
-namespace Bakery\Tests\Models;
+namespace Bakery\Tests\Stubs\Models;
 
-use Bakery\Eloquent\Mutable;
-use Bakery\Contracts\Mutable as MutableContract;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
-class User extends Authenticatable implements MutableContract
+class User extends Authenticatable
 {
-    use Mutable;
-
     protected $attributes = [
         'type' => 'regular',
     ];

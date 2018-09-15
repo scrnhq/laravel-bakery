@@ -2,6 +2,7 @@
 
 namespace Bakery\Types;
 
+use Bakery\Eloquent\ModelSchema;
 use Bakery\Utils\Utils;
 use Bakery\Support\Facades\Bakery;
 use Bakery\Types\Concerns\InteractsWithPolymorphism;
@@ -17,11 +18,10 @@ class CreateUnionEntityInputType extends MutationInputType
      */
     public function fields(): array
     {
-        return collect($this->definitions)->reduce(function (array $fields, string $definition) {
-            $definition = resolve($definition);
-            $inputType = 'Create'.$definition->typename().'Input';
+        return $this->getModelSchemas()->reduce(function (array $fields, ModelSchema $modelSchema) {
+            $inputType = 'Create'.$modelSchema->typename().'Input';
 
-            $fields[Utils::single($definition->typename())] = Bakery::type($inputType)->nullable();
+            $fields[Utils::single($modelSchema->typename())] = Bakery::type($inputType)->nullable();
 
             return $fields;
         }, []);

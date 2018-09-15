@@ -1,6 +1,6 @@
 <?php
 
-use Bakery\Tests\Models\Tag;
+use Bakery\Tests\Stubs\Models\Tag;
 
 /*
 |--------------------------------------------------------------------------

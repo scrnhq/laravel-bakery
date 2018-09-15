@@ -42,10 +42,10 @@ trait InteractsWithPivot
      *
      * @return mixed
      */
-    protected function getPivotDefinition()
+    protected function getPivotModelSchema()
     {
         $class = $this->pivotRelation->getPivotClass();
 
-        return Bakery::definition($class);
+        return Bakery::getSchemaForModel($class);
     }
 }

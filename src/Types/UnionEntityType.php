@@ -19,8 +19,10 @@ class UnionEntityType extends UnionType
      */
     public function types(): array
     {
-        return collect($this->definitions)->map(function ($definition) {
-            return $definition instanceof Type ? $definition : Bakery::type(resolve($definition)->typename());
+        return collect($this->modelSchemas)->map(function ($modelSchema) {
+            return $modelSchema instanceof Type
+                ? $modelSchema
+                : Bakery::type(Bakery::getModelSchema($modelSchema)->typename());
         })->toArray();
     }
 
@@ -34,6 +36,6 @@ class UnionEntityType extends UnionType
      */
     public function resolveType($value, $context, ResolveInfo $info)
     {
-        return Bakery::resolveDefinitionType($value);
+        return Bakery::resolve(Bakery::getSchemaForModel($value)->typename());
     }
 }

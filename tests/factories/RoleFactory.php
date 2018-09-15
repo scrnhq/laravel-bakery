@@ -1,6 +1,6 @@
 <?php
 
-use Bakery\Tests\Models\Role;
+use Bakery\Tests\Stubs\Models\Role;
 
 /*
 |--------------------------------------------------------------------------

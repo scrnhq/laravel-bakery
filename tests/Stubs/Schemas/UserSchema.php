@@ -1,19 +1,15 @@
 <?php
 
-namespace Bakery\Tests\Definitions;
+namespace Bakery\Tests\Stubs\Schemas;
 
-use Bakery\Tests\Models\User;
-use GraphQL\Type\Definition\Type;
+use Bakery\Eloquent\ModelSchema;
 use Bakery\Support\Facades\Bakery;
-use Bakery\Eloquent\Introspectable;
+use Bakery\Tests\Stubs\Models\User;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Bakery\Contracts\Introspectable as IntrospectableContract;
 
-class UserDefinition implements IntrospectableContract
+class UserSchema extends ModelSchema
 {
-    use Introspectable;
-
-    public static $model = User::class;
+    protected $model = User::class;
 
     public function fields(): array
     {
@@ -32,12 +28,12 @@ class UserDefinition implements IntrospectableContract
     public function relations(): array
     {
         return [
-            'articles' => Bakery::collection(ArticleDefinition::class)
+            'articles' => Bakery::collection(ArticleSchema::class)
                 ->policy(function (?Authenticatable $user, User $source) {
                     return $user && $source->is($user);
                 }),
-            'customRoles' => Bakery::collection(RoleDefinition::class),
-            'phone' => Bakery::model(PhoneDefinition::class),
+            'customRoles' => Bakery::collection(RoleSchema::class),
+            'phone' => Bakery::model(PhoneSchema::class),
         ];
     }
 }

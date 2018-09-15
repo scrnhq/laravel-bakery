@@ -4,39 +4,33 @@ namespace Bakery\Types\Definitions;
 
 use Bakery\Utils\Utils;
 use Bakery\Support\Facades\Bakery;
-use Bakery\Eloquent\Introspectable;
 use GraphQL\Type\Definition\NamedType as GraphQLNamedType;
 
 class EloquentType extends Type
 {
     /**
-     * The underlying definition.
+     * The underlying model schema.
      *
      * @var mixed
      */
-    protected $definition;
+    protected $modelSchema;
 
     /**
      * Construct a new Eloquent type.
      *
-     * @param string $definition
+     * @param string|null $modelSchema
      */
-    public function __construct(string $definition = null)
+    public function __construct(string $modelSchema = null)
     {
         parent::__construct();
 
-        if (isset($definition)) {
-            $this->definition = $definition;
+        if (isset($modelSchema)) {
+            $this->modelSchema = $modelSchema;
         }
 
-        Utils::invariant($this->definition, 'No definition defined on "'.get_class($this).'"');
+        Utils::invariant($this->modelSchema, 'No model schema defined on "'.get_class($this).'"');
 
-        $this->definition = resolve($this->definition);
-
-        Utils::invariant(
-            Utils::usesTrait($this->definition, Introspectable::class),
-            get_class($this->definition).' does not have the '.Introspectable::class.' trait'
-        );
+        $this->modelSchema = Bakery::getModelSchema($this->modelSchema);
     }
 
     /**
@@ -50,7 +44,7 @@ class EloquentType extends Type
             return $this->name;
         }
 
-        return $this->definition->typename();
+        return $this->modelSchema->typename();
     }
 
     /**
@@ -60,6 +54,6 @@ class EloquentType extends Type
      */
     public function getNamedType(): GraphQLNamedType
     {
-        return Bakery::type($this->definition->typename())->getNamedType();
+        return Bakery::type($this->modelSchema->typename())->getNamedType();
     }
 }

@@ -27,9 +27,9 @@ class ReferenceType extends Type
     /**
      * Resolve the type that is being referenced.
      *
-     * @return \GraphQL\Type\Definition\Type
+     * @return \GraphQL\Type\Definition\NamedType
      */
-    public function type(): \GraphQL\Type\Definition\Type
+    public function type(): \GraphQL\Type\Definition\NamedType
     {
         return Bakery::resolve($this->reference);
     }

@@ -12,7 +12,7 @@ trait EagerLoadRelationships
      *
      * @param \Illuminate\Database\Eloquent\Builder $query
      * @param array $fields
-     * @param \Bakery\Eloquent\Introspectable $schema
+     * @param \Bakery\Eloquent\ModelSchema $schema
      * @param string $path
      */
     protected function eagerLoadRelations(Builder $query, array $fields, $schema, $path = '')
@@ -24,7 +24,7 @@ trait EagerLoadRelationships
                 $relation = $path ? $path.'.'.$key : $key;
                 $query->with($relation);
                 $related = $schema->getModel()->{$key}()->getRelated();
-                $relatedSchema = resolve(Bakery::getModelSchema($related));
+                $relatedSchema = Bakery::getSchemaForModel($related);
                 $this->eagerLoadRelations($query, $field, $relatedSchema, $relation);
             }
         }

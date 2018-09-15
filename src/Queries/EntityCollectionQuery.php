@@ -89,7 +89,7 @@ class EntityCollectionQuery extends EntityQuery
         }
 
         $query = $this->scopeQuery(
-            $this->schema->getBakeryQuery($context),
+            $this->schema->getQuery($context),
             $args,
             $context
         );
@@ -148,7 +148,8 @@ class EntityCollectionQuery extends EntityQuery
                     }
                 });
             } else {
-                $schema = resolve(Bakery::getModelSchema($query->getModel()));
+                $schema = Bakery::getSchemaForModel(get_class($query->getModel()));
+
                 if ($schema->getRelationFields()->has($key)) {
                     $this->applyRelationFilter($query, $key, $value, $type);
                 } else {
@@ -301,7 +302,8 @@ class EntityCollectionQuery extends EntityQuery
         $this->joinRelation($query, $relation, 'left');
 
         foreach ($fields as $key => $value) {
-            $schema = resolve(Bakery::getModelSchema($related));
+            $schema = Bakery::getSchemaForModel(get_class($related));
+
             $relations = $schema->getRelationFields();
             if ($relations->keys()->contains($key)) {
                 $this->applyRelationalSearch($query, $related, $key, $needle, $value);
@@ -348,7 +350,8 @@ class EntityCollectionQuery extends EntityQuery
         $this->joinRelation($query, $relation, 'left');
 
         foreach ($args as $key => $value) {
-            $schema = resolve(Bakery::getModelSchema($related));
+            $schema = Bakery::getSchemaForModel(get_class($related));
+
             $relations = $schema->getRelationFields();
             if ($relations->keys()->contains($key)) {
                 $this->applyRelationalOrderBy($query, $related, $key, $value);

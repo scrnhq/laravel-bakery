@@ -32,7 +32,8 @@ class CreateInputType extends MutationInputType
 
         Utils::invariant(
             count($fields) > 0,
-            'There are no fields defined for '.class_basename($this->model)
+            'There are no fillable fields defined for '.class_basename($this->model).'. '.
+            'Make sure that a mutable model has at least one fillable field.'
         );
 
         return $fields;

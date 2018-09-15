@@ -3,6 +3,7 @@
 namespace Bakery\Mutations;
 
 use Bakery\Support\Facades\Bakery;
+use GraphQL\Type\Definition\ResolveInfo;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations;
 
@@ -59,6 +60,17 @@ class DetachPivotMutation extends EntityMutation
     }
 
     /**
+     * Get the pivot relation for a model.
+     *
+     * @param \Illuminate\Database\Eloquent\Model $model
+     * @return mixed
+     */
+    protected function getRelation(Model $model): Relations\BelongsToMany
+    {
+        return $model->{$this->pivotRelation->getRelationName()}();
+    }
+
+    /**
      * Get the arguments of the mutation.
      *
      * @return array
@@ -76,19 +88,20 @@ class DetachPivotMutation extends EntityMutation
      * @param  mixed $root
      * @param  array $args
      * @param  mixed $context
+     * @param \GraphQL\Type\Definition\ResolveInfo $info
      * @return Model
      * @throws \Illuminate\Auth\Access\AuthorizationException
      */
-    public function resolve($root, array $args, $context): Model
+    public function resolve($root, array $args, $context, ResolveInfo $info): Model
     {
-        $model = $this->findOrFail($root, $args, $context);
-        $relation = $model->{$this->pivotRelation->getRelationName()}();
+        $model = $this->findOrFail($root, $args, $context, $info);
+        $modelSchema = Bakery::getSchemaForModel($model);
+        $relation = $this->getRelation($model);
 
         $permission = 'set'.studly_case($relation->getRelationName());
-        $this->authorize($permission, $model);
+        $modelSchema->authorize($permission);
 
-        $input = $args['input'];
-        $relation->detach($input);
+        $relation->detach($args['input']);
 
         return $model;
     }

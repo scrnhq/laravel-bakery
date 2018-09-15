@@ -1,15 +1,11 @@
 <?php
 
-namespace Bakery\Tests\Models;
+namespace Bakery\Tests\Stubs\Models;
 
-use Bakery\Eloquent\Mutable;
 use Illuminate\Database\Eloquent\Model;
-use Bakery\Contracts\Mutable as MutableContract;
 
-class Role extends Model implements MutableContract
+class Role extends Model
 {
-    use Mutable;
-
     protected $casts = [
         'id' => 'string',
     ];

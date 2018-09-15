@@ -11,29 +11,11 @@ trait InteractsWithQueries
      *
      * @return Builder
      */
-    public function getBakeryQuery(): Builder
+    public function getQuery(): Builder
     {
+        /** @var \Illuminate\Database\Eloquent\Model $model */
         $model = $this->getModel();
-        $query = $model->query();
 
-        if (method_exists($model, 'scopeAuthorizedForReading')) {
-            $query = $query->authorizedForReading(auth()->user());
-        }
-
-        return $this->scopeQuery($query);
-    }
-
-    /**
-     * Scope the query.
-     *
-     * When extending the BakeryModel you can override this method to have
-     * some default scoping when querying with Bakery.
-     *
-     * @param Builder $query
-     * @return Builder
-     */
-    public function scopeQuery(Builder $query): Builder
-    {
-        return $query;
+        return $model->newQuery();
     }
 }

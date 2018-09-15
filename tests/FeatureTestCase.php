@@ -2,6 +2,8 @@
 
 namespace Bakery\Tests;
 
+use Bakery\Tests\Stubs\Models;
+use Bakery\Tests\Stubs\Schemas;
 use Bakery\Tests\Stubs\Policies;
 use Bakery\BakeryServiceProvider;
 use Bakery\Support\Facades\Bakery;
@@ -46,15 +48,15 @@ class FeatureTestCase extends TestCase
 
         // Set up default schema.
         app()['config']->set('bakery.models', [
-            Definitions\UserDefinition::class,
-            Definitions\ArticleDefinition::class,
-            Definitions\PhoneDefinition::class,
-            Definitions\CommentDefinition::class,
-            Definitions\RoleDefinition::class,
-            Definitions\CategoryDefinition::class,
-            Definitions\TagDefinition::class,
-            Definitions\UserRoleDefinition::class,
-            Definitions\UpvoteDefinition::class,
+            Schemas\UserSchema::class,
+            Schemas\ArticleSchema::class,
+            Schemas\PhoneSchema::class,
+            Schemas\CommentSchema::class,
+            Schemas\RoleSchema::class,
+            Schemas\CategorySchema::class,
+            Schemas\TagSchema::class,
+            Schemas\UserRoleSchema::class,
+            Schemas\UpvoteSchema::class,
         ]);
 
         app()['config']->set('bakery.types', [

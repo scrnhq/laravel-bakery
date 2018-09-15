@@ -18,7 +18,7 @@ class CreateWithPivotInputType extends CreateInputType
     public function name(): string
     {
         $relation = $this->getPivotRelation()->getRelationName();
-        $parentSchema = Bakery::definition($this->getPivotRelation()->getParent());
+        $parentSchema = Bakery::getSchemaForModel($this->getPivotRelation()->getParent());
 
         return 'Create'.Utils::typename($relation).'On'.$parentSchema->typename().'WithPivotInput';
     }
@@ -32,9 +32,9 @@ class CreateWithPivotInputType extends CreateInputType
     {
         $fields = parent::fields();
 
-        $pivotDefinition = $this->getPivotDefinition();
+        $modelSchema = $this->getPivotModelSchema();
         $accessor = $this->getPivotRelation()->getPivotAccessor();
-        $typename = 'Create'.$pivotDefinition->typename().'Input';
+        $typename = 'Create'.$modelSchema->typename().'Input';
 
         $fields = array_merge($fields, [
             $accessor => Bakery::type($typename)->nullable(),

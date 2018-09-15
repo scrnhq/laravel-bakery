@@ -1,49 +1,27 @@
 <?php
 
-namespace Bakery\Eloquent;
+namespace Bakery\Eloquent\Concerns;
 
 use Bakery\Support\Facades\Bakery;
 use Illuminate\Support\Facades\DB;
 use Bakery\Events\BakeryModelSaved;
-use Illuminate\Support\Facades\Event;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Contracts\Auth\Access\Gate;
 
-trait Mutable
+trait MutatesModel
 {
-    use Concerns\QueuesTransactions;
-    use Concerns\InteractsWithRelations;
-    use Concerns\InteractsWithAttributes;
+    use QueuesTransactions;
+    use InteractsWithRelations;
+    use InteractsWithAttributes;
 
-    protected $schema;
-
+    /**
+     * @var \Illuminate\Contracts\Auth\Access\Gate
+     */
     protected $gate;
 
     /**
-     * The "booting" method of the Mutable trait.
-     *
-     * @return void
+     * @var \Illuminate\Database\Eloquent\Model
      */
-    public static function bootMutable()
-    {
-        Event::listen('eloquent.booted: '.static::class, function (Model $model) {
-            $model->addObservableEvents(['persisting', 'persisted']);
-        });
-    }
-
-    /**
-     * Return an instance of the Gate class.
-     *
-     * @return \Illuminate\Contracts\Auth\Access\Gate
-     */
-    protected function gate(): Gate
-    {
-        if (! isset($this->gate)) {
-            $this->gate = app(Gate::class);
-        }
-
-        return $this->gate;
-    }
+    protected $instance;
 
     /**
      * Return the policy of the class.
@@ -52,38 +30,36 @@ trait Mutable
      */
     protected function policy()
     {
-        return $this->gate()->getPolicyFor($this);
-    }
-
-    /**
-     * Get the Bakery model schema that belongs to this model.
-     *
-     * @return \Bakery\Contracts\Introspectable
-     */
-    public function getSchema()
-    {
-        if ($this->schema) {
-            return $this->schema;
-        }
-
-        return $this->schema = resolve(Bakery::getModelSchema($this));
+        return $this->gate->getPolicyFor($this->instance);
     }
 
     /**
      * Create a new instance with GraphQL input.
      *
      * @param array $input
-     * @return $this
+     * @return \Illuminate\Database\Eloquent\Model
      */
-    public function createWithInput(array $input = [])
+    public function create(array $input = []): Model
     {
         return DB::transaction(function () use ($input) {
-            $model = new static();
-            $model->fillWithInput($input);
-            $model->save();
+            $this->make($input);
+            $this->save();
 
-            return $model;
+            return $this->instance;
         });
+    }
+
+    /**
+     * @param array $input
+     * @return \Illuminate\Database\Eloquent\Model
+     * @throws \Illuminate\Auth\Access\AuthorizationException
+     */
+    public function make(array $input = []): Model
+    {
+        $this->instance = $this->instance->newInstance();
+        $this->fill($input);
+
+        return $this->instance;
     }
 
     /**
@@ -93,14 +69,12 @@ trait Mutable
      * @return $this
      * @throws \Throwable
      */
-    public function updateWithInput(array $input = [])
+    public function update(array $input = [])
     {
-        return DB::transaction(function () use ($input) {
-            $this->fillWithInput($input);
-            $this->save();
+        $this->fill($input);
+        $this->save();
 
-            return $this;
-        });
+        return $this;
     }
 
     /**
@@ -110,7 +84,7 @@ trait Mutable
      * @return $this
      * @throws \Illuminate\Auth\Access\AuthorizationException
      */
-    public function fillWithInput(array $input = [])
+    public function fill(array $input = [])
     {
         $scalars = $this->getFillableScalars($input);
         $relations = $this->getFillableRelations($input);
@@ -130,18 +104,13 @@ trait Mutable
     /**
      * Save the underlying model.
      *
-     * @param array $options
      * @return $this
      */
-    public function save(array $options = [])
+    public function save()
     {
-        parent::save($options);
+        $this->instance->save();
 
-        $this->fireModelEvent('persisting');
-
-        event(new BakeryModelSaved($this));
-
-        $this->fireModelEvent('persisted');
+        $this->persistQueuedDatabaseTransactions();
 
         return $this;
     }
@@ -155,7 +124,7 @@ trait Mutable
      */
     protected function getFillableScalars(array $attributes): array
     {
-        $fields = $this->getSchema()->getFillableFields();
+        $fields = $this->getFillableFields();
 
         return collect($attributes)->intersectByKeys($fields)->toArray();
     }
@@ -169,7 +138,7 @@ trait Mutable
      */
     protected function getFillableRelations(array $attributes): array
     {
-        $relations = $this->getSchema()->getRelationFields();
+        $relations = $this->getRelationFields();
 
         return collect($attributes)->intersectByKeys($relations)->toArray();
     }
@@ -183,7 +152,7 @@ trait Mutable
      */
     protected function getFillableConnections(array $attributes): array
     {
-        $connections = $this->getSchema()->getConnections();
+        $connections = $this->getConnections();
 
         return collect($attributes)->intersectByKeys($connections->flip())->toArray();
     }

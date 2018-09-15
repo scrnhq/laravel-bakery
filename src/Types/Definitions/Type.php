@@ -40,6 +40,13 @@ class Type
     protected $nullable = false;
 
     /**
+     * Whether the type is fillable.
+     *
+     * @var bool
+     */
+    protected $fillable = true;
+
+    /**
      * Whether the type is a list.
      *
      * @var bool
@@ -120,6 +127,29 @@ class Type
     public function isNullable(): bool
     {
         return $this->nullable;
+    }
+
+    /**
+     * Define if the type is fillable.
+     *
+     * @param bool value
+     * @return $this
+     */
+    public function fillable(bool $value = true)
+    {
+        $this->fillable = $value;
+
+        return $this;
+    }
+
+    /**
+     * Return if the type is nullable.
+     *
+     * @return bool
+     */
+    public function isFillable(): bool
+    {
+        return $this->fillable;
     }
 
     /**

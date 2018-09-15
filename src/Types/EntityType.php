@@ -210,17 +210,17 @@ class EntityType extends ObjectType
         $fields = collect();
         $pivot = $relation->getPivotClass();
 
-        if (! Bakery::hasModelSchema($pivot)) {
+        if (! Bakery::hasSchemaForModel($pivot)) {
             return $fields;
         }
 
         $accessor = $relation->getPivotAccessor();
-        $definition = resolve(Bakery::getModelSchema($pivot));
+        $modelSchema = Bakery::getSchemaForModel($pivot);
         $type = $field->getNamedType();
         $closure = $type->config['fields'];
         $pivotField = [
             $accessor => [
-                'type' => Bakery::type($definition->typename())->toType(),
+                'type' => Bakery::type($modelSchema->typename())->toType(),
                 'resolve' => function ($model) use ($key, $accessor) {
                     return $model->{$accessor};
                 },

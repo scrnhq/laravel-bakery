@@ -4,6 +4,7 @@ namespace Bakery\Mutations;
 
 use Bakery\Support\Facades\Bakery;
 use Bakery\Types\Definitions\Type;
+use GraphQL\Type\Definition\ResolveInfo;
 use Illuminate\Database\Eloquent\Model;
 
 class DeleteMutation extends EntityMutation
@@ -48,14 +49,15 @@ class DeleteMutation extends EntityMutation
      * @param  mixed $root
      * @param  array $args
      * @param  mixed $context
+     * @param \GraphQL\Type\Definition\ResolveInfo $info
      * @return Model
      * @throws \Illuminate\Auth\Access\AuthorizationException
-     * @throws \Exception
      */
-    public function resolve($root, array $args, $context): Model
+    public function resolve($root, array $args, $context, ResolveInfo $info): Model
     {
-        $model = $this->findOrFail($root, $args, $context);
-        $this->authorize('delete', $model);
+        $model = $this->findOrFail($root, $args, $context, $info);
+        $modelSchema = Bakery::getSchemaForModel($model);
+        $modelSchema->authorize('delete');
 
         $model->delete();
 

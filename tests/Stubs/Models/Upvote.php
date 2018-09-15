@@ -1,16 +1,12 @@
 <?php
 
-namespace Bakery\Tests\Models;
+namespace Bakery\Tests\Stubs\Models;
 
-use Bakery\Eloquent\Mutable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations;
-use Bakery\Contracts\Mutable as MutableContract;
 
-class Upvote extends Model implements MutableContract
+class Upvote extends Model
 {
-    use Mutable;
-
     protected $fillable = [
         'upvoteable',
     ];

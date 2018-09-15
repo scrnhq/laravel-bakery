@@ -3,25 +3,101 @@
 namespace Bakery\Eloquent;
 
 use Bakery\Utils\Utils;
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Contracts\Auth\Access\Gate;
+use Illuminate\Support\Collection;
 use Bakery\Support\Facades\Bakery;
 use Bakery\Types\Definitions\Type;
-use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Bakery\Types\Definitions\EloquentType;
+use Bakery\Eloquent\Concerns\MutatesModel;
+use Bakery\Eloquent\Concerns\InteractsWithQueries;
 
-trait Introspectable
+abstract class ModelSchema
 {
-    use Concerns\InteractsWithQueries;
+    use MutatesModel;
+    use InteractsWithQueries;
 
     /**
-     * A reference to the underlying Eloquent instance.
-     *
-     * @var \Illuminate\Database\Eloquent\Model
+     * @var string
      */
-    protected $instance = null;
+    protected $model;
 
     /**
-     * Return the typename of the model.
+     * @var Model
+     */
+    protected $instance;
+
+    /**
+     * ModelSchema constructor.
+     *
+     * @param Model $instance
+     */
+    public function __construct(Model $instance = null)
+    {
+        $this->gate = app(Gate::class);
+
+        if (isset($instance)) {
+            $this->instance = $instance;
+        } else {
+            $model = $this->model();
+
+            Utils::invariant(isset($model), 'No model defined on '.class_basename($this));
+
+            Utils::invariant(
+                is_subclass_of($model, Model::class),
+                'Defined model on '.class_basename($this).' is not an instance of '.Model::class
+            );
+
+            $this->instance = resolve($model);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Define the eloquent model of the model schema.
+     *
+     * @return string
+     */
+    protected function model()
+    {
+        return $this->model;
+    }
+
+    /**
+     * Get the class of the model.
+     *
+     * @return string
+     */
+    public function getModelClass(): string
+    {
+       return $this->model;
+    }
+
+    /**
+     * Get the eloquent model of the model schema.
+     *
+     * @return Model
+     */
+    public function getModel(): Model
+    {
+        return $this->instance;
+    }
+
+    /**
+     * Returns if the schema is mutable.
+     *
+     * @return bool
+     */
+    public function isMutable()
+    {
+        // TODO: Make this overridable
+        return true;
+    }
+
+    /**
+     * Return the typename of the model schema.
      *
      * @return string
      */
@@ -31,34 +107,21 @@ trait Introspectable
     }
 
     /**
-     * Get the underlying model.
+     * Check if the user is authorised to perform an action on the model.
      *
-     * If $this is already an Eloquent model, we just return this.
-     * Otherwise we boot up an instance of that model and return it.
-     *
-     * @return \Illuminate\Database\Eloquent\Model
+     * @param string $policy
+     * @param array $attributes
+     * @throws AuthorizationException
      */
-    public function getModel(): Model
+    public function authorize(string $policy, $attributes = null)
     {
-        if ($this instanceof Model) {
-            return $this;
+        $allowed = $this->gate->allows($policy, [$this->instance, $attributes]);
+
+        if (! $allowed) {
+            throw new AuthorizationException(
+                'Not allowed to perform '.$policy.' on '.$this->getModelClass()
+            );
         }
-
-        if (isset($this->instance)) {
-            return $this->instance;
-        }
-
-        Utils::invariant(
-            isset(static::$model),
-            'No model defined on '.class_basename($this)
-        );
-
-        Utils::invariant(
-            is_subclass_of(static::$model, Model::class),
-            'Defined model on '.class_basename($this).' is not an instance of '.Model::class
-        );
-
-        return $this->instance = resolve(static::$model);
     }
 
     /**
@@ -66,9 +129,9 @@ trait Introspectable
      *
      * @return array
      */
-    private function getKeyField(): array
+    protected function getKeyField(): array
     {
-        return [$this->getKeyName() => Bakery::ID()];
+        return [$this->instance->getKeyName() => Bakery::ID()->fillable(false)];
     }
 
     /**
@@ -103,7 +166,7 @@ trait Introspectable
     public function getFillableFields(): Collection
     {
         return $this->getFields()->filter(function (Type $field, $key) {
-            return collect($this->getFillable())->contains($key);
+            return $field->isFillable();
         });
     }
 
@@ -165,8 +228,8 @@ trait Introspectable
      */
     public function getFillableRelationFields(): Collection
     {
-        return $this->getRelationFields()->filter(function (Type $field, $key) {
-            return collect($this->getFillable())->contains($key);
+        return $this->getRelationFields()->filter(function (Type $field) {
+            return $field->isFillable();
         });
     }
 
@@ -200,22 +263,5 @@ trait Introspectable
         return collect($this->getRelationFields())->map(function (Type $field, $key) {
             return $field->isList() ? str_singular($key).'Ids' : $key.'Id';
         });
-    }
-
-    /**
-     * Pass through any calls to the underlying model if $this
-     * is not an instance of Eloquent.
-     *
-     * @param string $method
-     * @param array $parameters
-     * @return mixed
-     */
-    public function __call($method, $parameters)
-    {
-        if ($this instanceof Model) {
-            return parent::__call($method, $parameters);
-        }
-
-        return $this->getModel()->{$method}($parameters);
     }
 }

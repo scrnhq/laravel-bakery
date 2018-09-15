@@ -5,6 +5,7 @@ namespace Bakery\Mutations;
 use Bakery\Concerns\ModelAware;
 use Bakery\Support\Facades\Bakery;
 use Bakery\Types\Definitions\Type;
+use GraphQL\Type\Definition\ResolveInfo;
 use Illuminate\Database\Eloquent\Model;
 
 abstract class EntityMutation extends Mutation
@@ -57,7 +58,8 @@ abstract class EntityMutation extends Mutation
      * @param mixed $root
      * @param mixed $args
      * @param mixed $context
+     * @param \GraphQL\Type\Definition\ResolveInfo $info
      * @return Model
      */
-    abstract public function resolve($root, array $args, $context): Model;
+    abstract public function resolve($root, array $args, $context, ResolveInfo $info): Model;
 }

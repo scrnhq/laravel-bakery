@@ -132,7 +132,7 @@ abstract class MutationInputType extends InputType
         $pivot = $relation->getPivotClass();
         $relationName = $relation->getRelationName();
 
-        if (! Bakery::hasModelSchema($pivot)) {
+        if (! Bakery::hasSchemaForModel($pivot)) {
             return collect();
         }
 

@@ -59,7 +59,7 @@ class SingleEntityQuery extends EntityQuery
     {
         $primaryKey = $this->model->getKeyName();
 
-        $query = $this->scopeQuery($this->schema->getBakeryQuery());
+        $query = $this->scopeQuery($this->schema->getQuery());
 
         $fields = $info->getFieldSelection(config('bakery.query_max_eager_load'));
         $this->eagerLoadRelations($query, $fields, $this->schema);

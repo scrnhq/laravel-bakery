@@ -2,6 +2,7 @@
 
 namespace Bakery;
 
+use Bakery\Eloquent\ModelSchema;
 use GraphQL\GraphQL;
 use Bakery\Utils\Utils;
 use GraphQL\Type\Schema;
@@ -40,11 +41,33 @@ class Bakery
     protected $typeInstances = [];
 
     /**
-     * The registered model schemas.
+     * The model schema instances.
      *
-     * @var array
+     * @var \Illuminate\Support\Collection
      */
-    protected $modelSchemas = [];
+    protected $modelSchemas;
+
+    /**
+     * The model schemas keyed by model class name.
+     *
+     * @var \Illuminate\Support\Collection
+     */
+    protected $schemasByModel;
+
+    /**
+     * @var \Illuminate\Support\Collection
+     */
+    protected  $schemasByInstance;
+
+    /**
+     * Bakery constructor.
+     */
+    public function __construct()
+    {
+        $this->modelSchemas = collect();
+        $this->schemasByModel = collect();
+        $this->schemasByInstance = collect();
+    }
 
     /**
      * Add types to the registry.
@@ -86,15 +109,29 @@ class Bakery
     /**
      * Add a single model schema to the registry.
      *
-     * @param mixed $model
+     * @param string $class
      */
-    public function addModelSchema($model)
+    public function addModelSchema(string $class)
     {
-        if (! is_subclass_of($model, Model::class)) {
-            $this->modelSchemas[$model::$model] = $model;
-        } else {
-            $this->modelSchemas[$model] = $model;
-        }
+        $schema = resolve($class);
+        $this->modelSchemas->put($class, $schema);
+        $this->schemasByModel->put($schema->getModelClass(), $class);
+    }
+
+    /**
+     * Get a model schema instance based on it's class name.
+     *
+     * @param string $class
+     * @return mixed
+     */
+    public function getModelSchema(string $class): ModelSchema
+    {
+        Utils::invariant(
+            $this->modelSchemas->has($class),
+            $class.' is not registered as model schema in Bakery.'
+        );
+
+        return $this->modelSchemas->get($class);
     }
 
     /**
@@ -102,55 +139,51 @@ class Bakery
      * This can either be an instance or a class name.
      *
      * @param mixed $model
-     * @return mixed
+     * @return \Bakery\Eloquent\ModelSchema
      */
-    public function getModelSchema($model)
+    public function getSchemaForModel($model): ModelSchema
     {
-        $model = is_string($model) ? $model : get_class($model);
+        $class = is_string($model) ? $model : get_class($model);
 
         Utils::invariant(
-            array_key_exists($model, $this->modelSchemas),
-            $model.' has no registered model schema in Bakery.'
+            $this->hasSchemaForModel($class),
+            $class.' has no registered model schema in Bakery.'
         );
 
-        return $this->modelSchemas[$model];
+        $modelSchema = $this->schemasByModel->get($class);
+
+        // If we get a string passed in we just grab the 'general' model schema.
+        if (is_string($model)) {
+            return $this->getModelSchema($modelSchema);
+        }
+
+        // Otherwise we create a model schema for a specific model instance.
+        $hash = spl_object_hash($model);
+
+        if ($this->schemasByInstance->has($hash)) {
+            return $this->schemasByInstance->get($hash);
+        }
+
+        $class = $this->schemasByModel->get(get_class($model));
+
+        $modelSchema = new $class($model);
+
+        $this->schemasByInstance->put($hash, $modelSchema);
+
+        return $modelSchema;
     }
 
     /**
-     * Return the definition of a model.
+     * Returns if there is a model schema for a model registered.
      *
      * @param $model
-     * @return mixed
-     */
-    public function definition($model)
-    {
-        return resolve($this->getModelSchema($model));
-    }
-
-    /**
-     * Resolve the type of a definition of a model.
-     *
-     * @param $model
-     * @return \GraphQL\Type\Definition\NamedType
-     * @throws \Bakery\Exceptions\TypeNotFound
-     */
-    public function resolveDefinitionType($model): GraphQLNamedType
-    {
-        return $this->resolve($this->definition($model)->typename());
-    }
-
-    /**
-     * Return if the model has a model schema in Bakery.
-     * This can either be an instance or a class name.
-     *
-     * @param mixed $model
      * @return bool
      */
-    public function hasModelSchema($model)
+    public function hasSchemaForModel($model): bool
     {
         $model = is_string($model) ? $model : get_class($model);
 
-        return array_key_exists($model, $this->modelSchemas);
+        return $this->schemasByModel->has($model);
     }
 
     /**

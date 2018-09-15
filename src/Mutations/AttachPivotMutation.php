@@ -3,6 +3,7 @@
 namespace Bakery\Mutations;
 
 use Bakery\Support\Facades\Bakery;
+use GraphQL\Type\Definition\ResolveInfo;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations;
 
@@ -53,9 +54,20 @@ class AttachPivotMutation extends EntityMutation
     {
         $pivot = $this->pivotRelation->getPivotClass();
 
-        return Bakery::hasModelSchema($pivot)
-            ? resolve(Bakery::getModelSchema($pivot))
+        return Bakery::hasSchemaForModel($pivot)
+            ? Bakery::getSchemaForModel($pivot)
             : null;
+    }
+
+    /**
+     * Get the pivot relation for a model.
+     *
+     * @param \Illuminate\Database\Eloquent\Model $model
+     * @return mixed
+     */
+    protected function getRelation(Model $model): Relations\BelongsToMany
+    {
+        return $model->{$this->pivotRelation->getRelationName()}();
     }
 
     /**
@@ -84,22 +96,23 @@ class AttachPivotMutation extends EntityMutation
      * @param  mixed $root
      * @param  array $args
      * @param  mixed $context
+     * @param \GraphQL\Type\Definition\ResolveInfo $info
      * @return Model
      * @throws \Illuminate\Auth\Access\AuthorizationException
      */
-    public function resolve($root, array $args, $context): Model
+    public function resolve($root, array $args, $context, ResolveInfo $info): Model
     {
-        $model = $this->findOrFail($root, $args, $context);
-        $relation = $model->{$this->pivotRelation->getRelationName()}();
+        $model = $this->findOrFail($root, $args, $context, $info);
+        $relation = $this->getRelation($model);
+        $modelSchema = Bakery::getSchemaForModel($model);
 
         $permission = 'set'.studly_case($relation->getRelationName());
-        $this->authorize($permission, $model);
+        $modelSchema->authorize($permission, $model);
 
-        $input = $args['input'];
         $relatedKey = $relation->getRelated()->getKeyName();
         $accessor = $relation->getPivotAccessor();
 
-        $data = collect($input)->mapWithKeys(function ($data, $key) use ($accessor, $relatedKey) {
+        $data = collect($args['input'])->mapWithKeys(function ($data, $key) use ($accessor, $relatedKey) {
             if (! is_array($data)) {
                 return [$key => $data];
             }

@@ -2,6 +2,7 @@
 
 namespace Bakery\Mutations\Concerns;
 
+use GraphQL\Type\Definition\ResolveInfo;
 use Illuminate\Database\Eloquent\Model;
 use Bakery\Exceptions\TooManyResultsException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -9,18 +10,29 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 trait QueriesModel
 {
     /**
+     * @var \Illuminate\Database\Eloquent\Model
+     */
+    protected $model;
+
+    /**
+     * @var \Bakery\Eloquent\ModelSchema
+     */
+    protected $schema;
+
+    /**
      * Get the model based on the arguments provided.
      *
      * @param mixed $root
      * @param array $args
      * @param mixed $context
+     * @param \GraphQL\Type\Definition\ResolveInfo $info
      * @return mixed
      */
-    public function find($root, array $args, $context)
+    public function find($root, array $args, $context, ResolveInfo $info)
     {
         $primaryKey = $this->model->getKeyName();
 
-        $query = $this->schema->getBakeryQuery();
+        $query = $this->schema->getQuery();
 
         if (array_key_exists($primaryKey, $args)) {
             return $query->find($args[$primaryKey]);
@@ -48,11 +60,12 @@ trait QueriesModel
      * @param mixed $root
      * @param array $args
      * @param mixed $context
+     * @param \GraphQL\Type\Definition\ResolveInfo $info
      * @return Model
      */
-    public function findOrFail($root, array $args, $context): Model
+    public function findOrFail($root, array $args, $context, ResolveInfo $info): Model
     {
-        $result = $this->find($root, $args, $context);
+        $result = $this->find($root, $args, $context, $info);
 
         if (! $result) {
             throw (new ModelNotFoundException)->setModel(class_basename($this->model));
