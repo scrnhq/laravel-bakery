@@ -17,7 +17,8 @@ trait QueuesTransactions
      *
      * @param \Closure $closure
      */
-    protected function queue(\Closure $closure) {
+    protected function queue(\Closure $closure)
+    {
         $this->queue[] = $closure;
     }
 

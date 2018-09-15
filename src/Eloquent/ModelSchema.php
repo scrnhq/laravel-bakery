@@ -3,15 +3,15 @@
 namespace Bakery\Eloquent;
 
 use Bakery\Utils\Utils;
-use Illuminate\Auth\Access\AuthorizationException;
-use Illuminate\Contracts\Auth\Access\Gate;
-use Illuminate\Support\Collection;
 use Bakery\Support\Facades\Bakery;
 use Bakery\Types\Definitions\Type;
+use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Model;
-use Bakery\Types\Definitions\EloquentType;
 use Bakery\Eloquent\Concerns\MutatesModel;
+use Bakery\Types\Definitions\EloquentType;
+use Illuminate\Contracts\Auth\Access\Gate;
 use Bakery\Eloquent\Concerns\InteractsWithQueries;
+use Illuminate\Auth\Access\AuthorizationException;
 
 abstract class ModelSchema
 {
@@ -72,7 +72,7 @@ abstract class ModelSchema
      */
     public function getModelClass(): string
     {
-       return $this->model;
+        return $this->model;
     }
 
     /**

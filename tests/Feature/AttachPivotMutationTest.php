@@ -3,8 +3,8 @@
 namespace Bakery\Tests\Feature;
 
 use Bakery\Tests\FeatureTestCase;
-use Bakery\Tests\Stubs\Models\Role;
 use Bakery\Tests\Stubs\Models\Tag;
+use Bakery\Tests\Stubs\Models\Role;
 use Bakery\Tests\Stubs\Models\User;
 use Bakery\Tests\Stubs\Models\Article;
 

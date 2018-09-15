@@ -2,14 +2,13 @@
 
 namespace Bakery\Eloquent\Concerns;
 
-use Bakery\Support\Facades\Bakery;
 use RuntimeException;
 use Bakery\Utils\Utils;
 use GraphQL\Error\UserError;
+use Bakery\Support\Facades\Bakery;
 use Illuminate\Database\Eloquent\Model;
 use Bakery\Exceptions\InvariantViolation;
 use Illuminate\Database\Eloquent\Relations;
-use Illuminate\Auth\Access\AuthorizationException;
 
 trait InteractsWithRelations
 {
@@ -42,8 +41,6 @@ trait InteractsWithRelations
      * @return void
      */
     abstract protected function queue(\Closure $closure);
-
-
 
     /**
      * Fill the relations in the model.

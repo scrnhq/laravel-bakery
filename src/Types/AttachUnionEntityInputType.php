@@ -2,8 +2,8 @@
 
 namespace Bakery\Types;
 
-use Bakery\Eloquent\ModelSchema;
 use Bakery\Utils\Utils;
+use Bakery\Eloquent\ModelSchema;
 use Bakery\Support\Facades\Bakery;
 use Bakery\Types\Concerns\InteractsWithPolymorphism;
 
