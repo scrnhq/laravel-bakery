@@ -3,8 +3,8 @@
 namespace Bakery\Mutations;
 
 use Bakery\Support\Facades\Bakery;
-use GraphQL\Type\Definition\ResolveInfo;
 use Illuminate\Database\Eloquent\Model;
+use GraphQL\Type\Definition\ResolveInfo;
 
 class UpdateMutation extends EntityMutation
 {

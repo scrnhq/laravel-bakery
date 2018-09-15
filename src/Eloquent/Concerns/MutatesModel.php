@@ -2,9 +2,7 @@
 
 namespace Bakery\Eloquent\Concerns;
 
-use Bakery\Support\Facades\Bakery;
 use Illuminate\Support\Facades\DB;
-use Bakery\Events\BakeryModelSaved;
 use Illuminate\Database\Eloquent\Model;
 
 trait MutatesModel

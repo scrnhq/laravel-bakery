@@ -2,11 +2,11 @@
 
 namespace Bakery;
 
-use Bakery\Eloquent\ModelSchema;
 use GraphQL\GraphQL;
 use Bakery\Utils\Utils;
 use GraphQL\Type\Schema;
 use Bakery\Traits\BakeryTypes;
+use Bakery\Eloquent\ModelSchema;
 use Bakery\Types\Definitions\Type;
 use Bakery\Exceptions\TypeNotFound;
 use GraphQL\Executor\ExecutionResult;
@@ -57,7 +57,7 @@ class Bakery
     /**
      * @var \Illuminate\Support\Collection
      */
-    protected  $schemasByInstance;
+    protected $schemasByInstance;
 
     /**
      * Bakery constructor.

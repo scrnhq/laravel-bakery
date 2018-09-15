@@ -2,9 +2,9 @@
 
 namespace Bakery\Mutations;
 
-use GraphQL\Type\Definition\ResolveInfo;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
+use GraphQL\Type\Definition\ResolveInfo;
 
 class CreateMutation extends EntityMutation
 {

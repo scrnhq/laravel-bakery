@@ -42,7 +42,7 @@ trait ModelAware
 
         if ($class instanceof ModelSchema) {
             $this->schema = $class;
-        } else if (is_string($class)) {
+        } elseif (is_string($class)) {
             $this->schema = Bakery::getModelSchema($this->class);
         } else {
             throw new InvariantViolation('Invalid schema for '.get_class($this));
