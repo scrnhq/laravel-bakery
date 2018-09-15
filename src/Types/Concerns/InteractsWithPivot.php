@@ -8,6 +8,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 trait InteractsWithPivot
 {
     /**
+     * @var \Bakery\Bakery
+     */
+    protected $bakery;
+
+    /**
      * The pivot relationship.
      *
      * @var BelongsToMany
@@ -46,6 +51,6 @@ trait InteractsWithPivot
     {
         $class = $this->pivotRelation->getPivotClass();
 
-        return Bakery::getSchemaForModel($class);
+        return $this->bakery->resolveSchemaForModel($class);
     }
 }

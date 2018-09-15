@@ -13,6 +13,11 @@ use Illuminate\Database\Eloquent\Relations;
 trait InteractsWithRelations
 {
     /**
+     * @var \Bakery\Bakery
+     */
+    protected $bakery;
+
+    /**
      * @var \Illuminate\Database\Eloquent\Model
      */
     protected $instance;
@@ -67,7 +72,6 @@ trait InteractsWithRelations
      * Check the policies for the relations in the model.
      *
      * @param array $relations
-     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     protected function checkRelations(array $relations)
     {
@@ -102,7 +106,6 @@ trait InteractsWithRelations
      * Check the policies for the connections in the model.
      *
      * @param array $connections
-     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     protected function checkConnections(array $connections)
     {
@@ -220,8 +223,8 @@ trait InteractsWithRelations
             $relation->delete();
 
             foreach ($values as $attributes) {
-                $modelSchema = Bakery::getSchemaForModel($related);
-                $modelSchema->fill($attributes);
+                $modelSchema = $this->bakery->resolveSchemaForModel(get_class($related));
+                $modelSchema->make($attributes);
                 $modelSchema->getModel()->setAttribute($relation->getForeignKeyName(), $relation->getParentKey());
                 $modelSchema->save();
             }
@@ -266,7 +269,7 @@ trait InteractsWithRelations
         $instances = collect();
         $related = $relation->getRelated();
         $accessor = $relation->getPivotAccessor();
-        $relatedSchema = Bakery::getSchemaForModel($related);
+        $relatedSchema = $this->bakery->getSchemaForModel($related);
 
         foreach ($value as $attributes) {
             $instances[] = $relatedSchema->create($attributes);

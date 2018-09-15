@@ -24,6 +24,6 @@ class Bakery extends Facade
 {
     protected static function getFacadeAccessor()
     {
-        return 'bakery';
+        return \Bakery\Bakery::class;
     }
 }

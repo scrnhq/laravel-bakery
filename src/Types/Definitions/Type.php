@@ -2,6 +2,7 @@
 
 namespace Bakery\Types\Definitions;
 
+use Bakery\Bakery;
 use Bakery\Utils\Utils;
 use GraphQL\Type\Definition\ResolveInfo;
 use Illuminate\Contracts\Auth\Access\Gate;
@@ -13,6 +14,11 @@ use GraphQL\Type\Definition\OutputType as GraphQLOutputType;
 
 class Type
 {
+    /**
+     * @var \Bakery\Bakery
+     */
+    protected $bakery;
+
     /**
      * The name of the type.
      *
@@ -81,6 +87,7 @@ class Type
      */
     protected $storePolicy;
 
+
     /**
      * Construct a new type.
      *
@@ -91,6 +98,8 @@ class Type
         if ($type) {
             $this->type = $type;
         }
+
+        $this->bakery = resolve(Bakery::class);
     }
 
     /**

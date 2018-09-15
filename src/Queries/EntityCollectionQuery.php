@@ -88,11 +88,7 @@ class EntityCollectionQuery extends EntityQuery
             throw new PaginationMaxCountExceededException($maxCount);
         }
 
-        $query = $this->scopeQuery(
-            $this->schema->getQuery($context),
-            $args,
-            $context
-        );
+        $query = $this->scopeQuery($this->schema->getQuery());
 
         $fields = $info->getFieldSelection(config('bakery.query_max_eager_load'));
         $this->eagerLoadRelations($query, $fields['items'], $this->schema);
@@ -148,7 +144,7 @@ class EntityCollectionQuery extends EntityQuery
                     }
                 });
             } else {
-                $schema = Bakery::getSchemaForModel(get_class($query->getModel()));
+                $schema = $this->bakery->resolveSchemaForModel(get_class($query->getModel()));
 
                 if ($schema->getRelationFields()->has($key)) {
                     $this->applyRelationFilter($query, $key, $value, $type);
@@ -255,6 +251,9 @@ class EntityCollectionQuery extends EntityQuery
      */
     protected function applySearch(Builder $query, array $search)
     {
+        /** @var \Illuminate\Database\Connection $connection */
+        $connection = DB::connection();
+
         $this->tsFields = [];
 
         $needle = $search['query'];
@@ -275,7 +274,8 @@ class EntityCollectionQuery extends EntityQuery
             return $query;
         }
 
-        $grammar = DB::connection()->getQueryGrammar();
+        $grammar = $connection->getQueryGrammar();
+
         if ($grammar instanceof Grammars\PostgresGrammar) {
             $dictionary = config('bakery.postgresDictionary');
             $fields = implode(', ', $this->tsFields);
@@ -297,6 +297,7 @@ class EntityCollectionQuery extends EntityQuery
      */
     protected function applyRelationalSearch(Builder $query, Model $model, string $relation, string $needle, array $fields)
     {
+        /** @var \Illuminate\Database\Eloquent\Relations\Relation $relation */
         $relation = $model->$relation();
         $related = $relation->getRelated();
         $this->joinRelation($query, $relation, 'left');
@@ -345,12 +346,13 @@ class EntityCollectionQuery extends EntityQuery
      */
     protected function applyRelationalOrderBy(Builder $query, Model $model, string $relation, array $args)
     {
+        /** @var \Illuminate\Database\Eloquent\Relations\Relation $relation */
         $relation = $model->$relation();
         $related = $relation->getRelated();
         $this->joinRelation($query, $relation, 'left');
 
         foreach ($args as $key => $value) {
-            $schema = Bakery::getSchemaForModel(get_class($related));
+            $schema = $this->bakery->resolveSchemaForModel(get_class($related));
 
             $relations = $schema->getRelationFields();
             if ($relations->keys()->contains($key)) {
@@ -381,7 +383,10 @@ class EntityCollectionQuery extends EntityQuery
      */
     protected function getCaseInsensitiveLikeOperator()
     {
-        return DB::connection()->getQueryGrammar() instanceof Grammars\PostgresGrammar
+        /** @var \Illuminate\Database\Connection $connection */
+        $connection = DB::connection();
+
+        return $connection->getQueryGrammar() instanceof Grammars\PostgresGrammar
             ? 'ILIKE'
             : 'LIKE';
     }

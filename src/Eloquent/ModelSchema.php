@@ -2,8 +2,8 @@
 
 namespace Bakery\Eloquent;
 
+use Bakery\Bakery;
 use Bakery\Utils\Utils;
-use Bakery\Support\Facades\Bakery;
 use Bakery\Types\Definitions\Type;
 use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Model;
@@ -17,6 +17,11 @@ abstract class ModelSchema
 {
     use MutatesModel;
     use InteractsWithQueries;
+
+    /**
+     * @var \Bakery\Bakery
+     */
+    protected $bakery;
 
     /**
      * @var string
@@ -35,7 +40,8 @@ abstract class ModelSchema
      */
     public function __construct(Model $instance = null)
     {
-        $this->gate = app(Gate::class);
+        $this->gate = resolve(Gate::class);
+        $this->bakery = resolve(Bakery::class);
 
         if (isset($instance)) {
             $this->instance = $instance;
@@ -131,7 +137,7 @@ abstract class ModelSchema
      */
     protected function getKeyField(): array
     {
-        return [$this->instance->getKeyName() => Bakery::ID()->fillable(false)];
+        return [$this->instance->getKeyName() => $this->bakery->ID()->fillable(false)];
     }
 
     /**
@@ -189,7 +195,7 @@ abstract class ModelSchema
             ->map(function (EloquentType $field) {
                 $lookupTypeName = $field->name().'LookupType';
 
-                return Bakery::type($lookupTypeName)->nullable();
+                return $this->bakery->type($lookupTypeName)->nullable();
             });
 
         return collect($this->getKeyField())

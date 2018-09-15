@@ -54,9 +54,7 @@ class AttachPivotMutation extends EntityMutation
     {
         $pivot = $this->pivotRelation->getPivotClass();
 
-        return Bakery::hasSchemaForModel($pivot)
-            ? Bakery::getSchemaForModel($pivot)
-            : null;
+        return $this->bakery->hasSchemaForModel($pivot) ? $this->bakery->resolveSchemaForModel($pivot) : null;
     }
 
     /**

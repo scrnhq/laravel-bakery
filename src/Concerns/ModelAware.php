@@ -9,6 +9,11 @@ use Bakery\Exceptions\InvariantViolation;
 trait ModelAware
 {
     /**
+     * @var \Bakery\Bakery
+     */
+    protected $bakery;
+
+    /**
      * A reference to the class.
      *
      * @var string
@@ -36,6 +41,8 @@ trait ModelAware
      */
     public function __construct($class = null)
     {
+        parent::__construct();
+
         if (isset($class)) {
             $this->class = $class;
         }
@@ -43,7 +50,7 @@ trait ModelAware
         if ($class instanceof ModelSchema) {
             $this->schema = $class;
         } elseif (is_string($class)) {
-            $this->schema = Bakery::getModelSchema($this->class);
+            $this->schema = $this->bakery->getModelSchema($this->class);
         } else {
             throw new InvariantViolation('Invalid schema for '.get_class($this));
         }

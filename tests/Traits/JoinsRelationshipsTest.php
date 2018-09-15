@@ -3,9 +3,9 @@
 namespace Bakery\Tests\Traits;
 
 use Bakery\Tests\TestCase;
-use Bakery\Tests\Models\Role;
-use Bakery\Tests\Models\User;
-use Bakery\Tests\Models\Article;
+use Bakery\Tests\Stubs\Models\Role;
+use Bakery\Tests\Stubs\Models\User;
+use Bakery\Tests\Stubs\Models\Article;
 use Bakery\Traits\JoinsRelationships;
 
 class JoinsRelationshipsTest extends TestCase

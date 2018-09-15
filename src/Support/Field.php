@@ -2,12 +2,26 @@
 
 namespace Bakery\Support;
 
+use Bakery\Bakery;
 use Bakery\Types\Definitions\Type;
 use Bakery\Exceptions\InvalidFieldException;
 use GraphQL\Type\Definition\OutputType as GraphQLOutputType;
 
 abstract class Field
 {
+    /**
+     * @var \Bakery\Bakery
+     */
+    protected $bakery;
+
+    /**
+     * Field constructor.
+     */
+    public function __construct()
+    {
+        $this->bakery = resolve(Bakery::class);
+    }
+
     /**
      * The attributes of the Field.
      *

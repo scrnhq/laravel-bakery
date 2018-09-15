@@ -2,11 +2,11 @@
 
 namespace Bakery\Support;
 
+use Bakery\Bakery;
 use Bakery\Types;
 use Bakery\Utils\Utils;
 use GraphQL\Type\SchemaConfig;
 use Bakery\Eloquent\ModelSchema;
-use Bakery\Support\Facades\Bakery;
 use Bakery\Types\Definitions\Type;
 use Illuminate\Support\Collection;
 use Bakery\Mutations\CreateMutation;
@@ -24,6 +24,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Schema
 {
+    /**
+     * @var \Bakery\Bakery
+     */
+    protected $bakery;
+
     /**
      * The models of the schema.
      *
@@ -58,6 +63,16 @@ class Schema
      * @var array
      */
     protected $directives = [];
+
+    /**
+     * Schema constructor.
+     *
+     * @param \Bakery\Bakery
+     */
+    public function __construct(Bakery $bakery)
+    {
+        $this->bakery = $bakery;
+    }
 
     /**
      * Define the models of the schema.
@@ -148,7 +163,7 @@ class Schema
     protected function getModelTypes(): Collection
     {
         return $this->getModels()->reduce(function (Collection $types, string $class) {
-            $schema = Bakery::getModelSchema($class);
+            $schema = $this->bakery->getModelSchema($class);
 
             if ($schema->getModel() instanceof Pivot) {
                 $types = $types->merge($this->getPivotModelTypes($schema));
@@ -220,7 +235,7 @@ class Schema
         // We actually want to create pivot input types for the reverse side here, but we approach
         // it from this side because we have the relevant information here (relation name, pivot accessor)
         // so we grab the model schema from the related one and pass it through.
-        $related = Bakery::getSchemaForModel($relation->getRelated());
+        $related = $this->bakery->getSchemaForModel($relation->getRelated());
 
         return [
             (new Types\CreateWithPivotInputType($related))->setPivotRelation($relation),
@@ -308,7 +323,7 @@ class Schema
         $queries = collect();
 
         foreach ($this->getModels() as $modelSchema) {
-            $modelSchema = Bakery::getModelSchema($modelSchema);
+            $modelSchema = $this->bakery->getModelSchema($modelSchema);
 
             if (! $modelSchema->getModel() instanceof Pivot) {
                 $entityQuery = new SingleEntityQuery($modelSchema);
@@ -351,7 +366,7 @@ class Schema
         $mutations = collect();
 
         foreach ($this->getModels() as $class) {
-            $modelSchema = Bakery::getModelSchema($class);
+            $modelSchema = $this->bakery->getModelSchema($class);
 
             $pivotRelations = $modelSchema->getRelations()->filter(function ($relation) {
                 return $relation instanceof BelongsToMany;
@@ -418,8 +433,8 @@ class Schema
      */
     public function toGraphQLSchema(): GraphQLSchema
     {
-        Bakery::addModelSchemas($this->getModels());
-        Bakery::addTypes($this->getTypes());
+        $this->bakery->addModelSchemas($this->getModels());
+        $this->bakery->addTypes($this->getTypes());
 
         $config = SchemaConfig::create();
 
@@ -457,7 +472,7 @@ class Schema
                 return $mutation;
             }
 
-            return Bakery::resolve($name);
+            return $this->bakery->resolve($name);
         });
 
         return new GraphQLSchema($config);

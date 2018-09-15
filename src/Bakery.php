@@ -135,30 +135,21 @@ class Bakery
     }
 
     /**
-     * Return a model schema based on the model provided.
-     * This can either be an instance or a class name.
+     * Return a model schema for a Eloquent model instance.
+     * This 'wraps' a model schema around it.
      *
      * @param mixed $model
      * @return \Bakery\Eloquent\ModelSchema
      */
-    public function getSchemaForModel($model): ModelSchema
+    public function getSchemaForModel(Model $model): ModelSchema
     {
-        $class = is_string($model) ? $model : get_class($model);
+        $class = get_class($model);
+        $hash = spl_object_hash($model);
 
         Utils::invariant(
             $this->hasSchemaForModel($class),
             $class.' has no registered model schema in Bakery.'
         );
-
-        $modelSchema = $this->schemasByModel->get($class);
-
-        // If we get a string passed in we just grab the 'general' model schema.
-        if (is_string($model)) {
-            return $this->getModelSchema($modelSchema);
-        }
-
-        // Otherwise we create a model schema for a specific model instance.
-        $hash = spl_object_hash($model);
 
         if ($this->schemasByInstance->has($hash)) {
             return $this->schemasByInstance->get($hash);
@@ -171,6 +162,24 @@ class Bakery
         $this->schemasByInstance->put($hash, $modelSchema);
 
         return $modelSchema;
+    }
+
+    /**
+     * Resolve the schema for a model based on the class name.
+     *
+     * @param string $model
+     * @return \Bakery\Eloquent\ModelSchema
+     */
+    public function resolveSchemaForModel(string $model): ModelSchema
+    {
+        Utils::invariant(
+            $this->hasSchemaForModel($model),
+            $model.' has no registered model schema in Bakery.'
+        );
+
+        $schema = $this->schemasByModel->get($model);
+
+        return $this->getModelSchema($schema);
     }
 
     /**
@@ -227,18 +236,6 @@ class Bakery
     }
 
     /**
-     * Get the default GraphQL schema.
-     *
-     * @return \GraphQL\Type\Schema
-     */
-    public function schema(): Schema
-    {
-        $schema = new Support\DefaultSchema();
-
-        return $schema->toGraphQLSchema();
-    }
-
-    /**
      * Resolve a type from the registry.
      *
      * @param string $name
@@ -265,6 +262,18 @@ class Bakery
         $this->typeInstances[$name] = $type;
 
         return $type;
+    }
+
+    /**
+     * Get the default GraphQL schema.
+     *
+     * @return \GraphQL\Type\Schema
+     */
+    public function schema(): Schema
+    {
+        $schema = resolve(Support\DefaultSchema::class);
+
+        return $schema->toGraphQLSchema();
     }
 
     /**
