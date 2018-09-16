@@ -4,8 +4,8 @@ namespace Bakery\Tests;
 
 use Bakery\Support\Schema;
 use Bakery\Support\DefaultSchema;
-use Bakery\Tests\Stubs\DummyModel;
 use Bakery\Tests\Stubs\DummyType;
+use Bakery\Tests\Stubs\DummyModel;
 use Bakery\Tests\Stubs\DummyQuery;
 use Bakery\Tests\Stubs\DummyMutation;
 use Bakery\Tests\Stubs\DummyModelSchema;
@@ -16,7 +16,7 @@ use Bakery\Tests\Stubs\DummyReadOnlySchema;
 class NotResourceSchema extends Schema
 {
     protected $models = [
-        DummyModel::class
+        DummyModel::class,
     ];
 }
 
