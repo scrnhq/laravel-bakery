@@ -2,8 +2,8 @@
 
 namespace Bakery\Support;
 
-use Bakery\Bakery;
 use Bakery\Types;
+use Bakery\Bakery;
 use Bakery\Utils\Utils;
 use GraphQL\Type\SchemaConfig;
 use Bakery\Eloquent\ModelSchema;
