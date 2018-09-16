@@ -20,6 +20,11 @@ class Type
     protected $bakery;
 
     /**
+     * @var Gate
+     */
+    protected $gate;
+
+    /**
      * The name of the type.
      *
      * @var string
@@ -99,6 +104,7 @@ class Type
             $this->type = $type;
         }
 
+        $this->gate = resolve(Gate::class);
         $this->bakery = resolve(Bakery::class);
     }
 
@@ -279,7 +285,7 @@ class Type
     {
         $user = auth()->user();
         $policy = $this->policy;
-        $gate = app(Gate::class)->forUser($user);
+        $gate = $this->gate->forUser($user);
         $fieldName = $info->fieldName;
 
         // Check if the policy method is callable
@@ -353,9 +359,7 @@ class Type
         }
 
         $user = auth()->user();
-
-        /** @var Gate $gate */
-        $gate = app(Gate::class)->forUser($user);
+        $gate = $this->gate->forUser($user);
 
         // Check if the policy method is a closure.
         if (($policy instanceof \Closure || is_callable_tuple($policy)) && $policy($user, $source, $value)) {

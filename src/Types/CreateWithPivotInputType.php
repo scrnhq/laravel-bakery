@@ -3,7 +3,6 @@
 namespace Bakery\Types;
 
 use Bakery\Utils\Utils;
-use GraphQL\Type\Definition\Type;
 use Bakery\Support\Facades\Bakery;
 
 class CreateWithPivotInputType extends CreateInputType

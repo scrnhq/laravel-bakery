@@ -3,7 +3,6 @@
 namespace Bakery\Concerns;
 
 use Bakery\Eloquent\ModelSchema;
-use Bakery\Support\Facades\Bakery;
 use Bakery\Exceptions\InvariantViolation;
 
 trait ModelAware

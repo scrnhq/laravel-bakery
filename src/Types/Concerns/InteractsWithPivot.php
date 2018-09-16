@@ -2,7 +2,6 @@
 
 namespace Bakery\Types\Concerns;
 
-use Bakery\Support\Facades\Bakery;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 trait InteractsWithPivot

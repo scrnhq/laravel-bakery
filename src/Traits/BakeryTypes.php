@@ -2,7 +2,6 @@
 
 namespace Bakery\Traits;
 
-use Bakery\Types\Definitions\Type;
 use Bakery\Types\Definitions\BaseType;
 use Bakery\Types\Definitions\ObjectType;
 use Bakery\Types\Definitions\EloquentType;

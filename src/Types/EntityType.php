@@ -37,7 +37,7 @@ class EntityType extends ObjectType
     {
         return function ($source, $args, $context) use ($key, $field) {
             if (array_key_exists('policy', $field)) {
-                $this->checkPolicy($field, $key, $source, $args, $context);
+                $this->checkPolicy($field, $key, $source, $args);
             }
 
             if (array_key_exists('resolve', $field)) {
