@@ -91,7 +91,8 @@ class BakeryServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    public function registerViews() {
+    public function registerViews()
+    {
         $this->loadViewsFrom(__DIR__.'/views', static::$abstract);
     }
 

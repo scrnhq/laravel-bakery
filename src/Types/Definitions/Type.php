@@ -92,7 +92,6 @@ class Type
      */
     protected $storePolicy;
 
-
     /**
      * Construct a new type.
      *
