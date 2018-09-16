@@ -4,9 +4,9 @@ namespace Bakery\Types;
 
 use Closure;
 use Bakery\Utils\Utils;
-use Bakery\Concerns\ModelAware;
 use Bakery\Support\Facades\Bakery;
 use Illuminate\Support\Collection;
+use Bakery\Concerns\ModelSchemaAware;
 use Bakery\Types\Definitions\ObjectType;
 use Bakery\Types\Definitions\EloquentType;
 use Illuminate\Database\Eloquent\Relations;
@@ -14,7 +14,7 @@ use Bakery\Types\Definitions\PolymorphicType;
 
 class EntityType extends ObjectType
 {
-    use ModelAware;
+    use ModelSchemaAware;
 
     /**
      * Get the name of the Entity type.

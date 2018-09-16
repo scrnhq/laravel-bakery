@@ -3,10 +3,10 @@
 namespace Bakery\Types;
 
 use Bakery\Utils\Utils;
-use Bakery\Concerns\ModelAware;
 use Bakery\Support\Facades\Bakery;
 use Bakery\Types\Definitions\Type;
 use Illuminate\Support\Collection;
+use Bakery\Concerns\ModelSchemaAware;
 use Bakery\Types\Definitions\InputType;
 use Bakery\Types\Definitions\EloquentType;
 use Bakery\Types\Definitions\PolymorphicType;
@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 abstract class MutationInputType extends InputType
 {
-    use ModelAware;
+    use ModelSchemaAware;
 
     /**
      * Get the fillable fields for the input type.

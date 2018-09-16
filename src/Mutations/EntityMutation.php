@@ -2,15 +2,15 @@
 
 namespace Bakery\Mutations;
 
-use Bakery\Concerns\ModelAware;
 use Bakery\Support\Facades\Bakery;
 use Bakery\Types\Definitions\Type;
+use Bakery\Concerns\ModelSchemaAware;
 use Illuminate\Database\Eloquent\Model;
 use GraphQL\Type\Definition\ResolveInfo;
 
 abstract class EntityMutation extends Mutation
 {
-    use ModelAware;
+    use ModelSchemaAware;
     use Concerns\QueriesModel;
 
     /**

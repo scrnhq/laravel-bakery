@@ -34,6 +34,14 @@ abstract class ModelSchema
     protected $instance;
 
     /**
+     * Indicates if the model can be mutated.
+     * Setting this to false will make sure no mutations are generated for that model.
+     *
+     * @var bool
+     */
+    protected $mutable = true;
+
+    /**
      * ModelSchema constructor.
      *
      * @param Model $instance
@@ -98,8 +106,7 @@ abstract class ModelSchema
      */
     public function isMutable()
     {
-        // TODO: Make this overridable
-        return true;
+        return $this->mutable;
     }
 
     /**

@@ -114,6 +114,9 @@ class Bakery
     public function addModelSchema(string $class)
     {
         $schema = resolve($class);
+
+        Utils::invariant($schema instanceof ModelSchema, 'Model schema '.$class.' does not extend '.ModelSchema::class);
+
         $this->modelSchemas->put($class, $schema);
         $this->schemasByModel->put($schema->getModelClass(), $class);
     }

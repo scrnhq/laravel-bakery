@@ -2,13 +2,13 @@
 
 namespace Bakery\Types;
 
-use Bakery\Concerns\ModelAware;
 use Bakery\Support\Facades\Bakery;
+use Bakery\Concerns\ModelSchemaAware;
 use Bakery\Types\Definitions\InputType;
 
 class CollectionRootSearchType extends InputType
 {
-    use ModelAware;
+    use ModelSchemaAware;
 
     /**
      * Get the name of the Collection Root Search Type.

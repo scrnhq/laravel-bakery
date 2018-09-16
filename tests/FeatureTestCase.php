@@ -17,6 +17,19 @@ class FeatureTestCase extends TestCase
     use InteractsWithDatabase;
     use InteractsWithExceptionHandling;
 
+    /**
+     * @var \Bakery\Bakery
+     */
+    protected $bakery;
+
+    /**
+     * @var \Illuminate\Contracts\Auth\Access\Gate
+     */
+    private $gate;
+
+    /**
+     * @param \Illuminate\Foundation\Application $app
+     */
     protected function getEnvironmentSetUp($app)
     {
         $app['config']->set('database.default', 'testbench');
@@ -26,16 +39,21 @@ class FeatureTestCase extends TestCase
             'prefix' => '',
         ]);
 
-        $gate = app(Gate::class);
-        $gate->policy(Models\User::class, Policies\UserPolicy::class);
-        $gate->policy(Models\Role::class, Policies\RolePolicy::class);
-        $gate->policy(Models\Article::class, Policies\ArticlePolicy::class);
-        $gate->policy(Models\Phone::class, Policies\PhonePolicy::class);
-        $gate->policy(Models\Comment::class, Policies\CommentPolicy::class);
-        $gate->policy(Models\Upvote::class, Policies\UpvotePolicy::class);
-        $gate->policy(Models\Tag::class, Policies\TagPolicy::class);
+        $this->bakery = resolve(\Bakery\Bakery::class);
+        $this->gate = resolve(Gate::class);
+
+        $this->gate->policy(Models\User::class, Policies\UserPolicy::class);
+        $this->gate->policy(Models\Role::class, Policies\RolePolicy::class);
+        $this->gate->policy(Models\Article::class, Policies\ArticlePolicy::class);
+        $this->gate->policy(Models\Phone::class, Policies\PhonePolicy::class);
+        $this->gate->policy(Models\Comment::class, Policies\CommentPolicy::class);
+        $this->gate->policy(Models\Upvote::class, Policies\UpvotePolicy::class);
+        $this->gate->policy(Models\Tag::class, Policies\TagPolicy::class);
     }
 
+    /**
+     * @return void
+     */
     protected function setUp()
     {
         parent::setUp();
@@ -64,6 +82,10 @@ class FeatureTestCase extends TestCase
         ]);
     }
 
+    /**
+     * @param \Illuminate\Foundation\Application $app
+     * @return array
+     */
     protected function getPackageProviders($app)
     {
         return [
@@ -72,6 +94,10 @@ class FeatureTestCase extends TestCase
         ];
     }
 
+    /**
+     * @param \Illuminate\Foundation\Application $app
+     * @return array
+     */
     protected function getPackageAliases($app)
     {
         return [

@@ -2,14 +2,14 @@
 
 namespace Bakery\Types;
 
-use Bakery\Concerns\ModelAware;
 use Bakery\Support\Facades\Bakery;
+use Bakery\Concerns\ModelSchemaAware;
 use Bakery\Types\Definitions\ObjectType;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class EntityCollectionType extends ObjectType
 {
-    use ModelAware;
+    use ModelSchemaAware;
 
     /**
      * Get the name of the Entity type.

@@ -2,16 +2,16 @@
 
 namespace Bakery\Types;
 
-use Bakery\Concerns\ModelAware;
 use Bakery\Support\Facades\Bakery;
 use Bakery\Types\Definitions\Type;
+use Bakery\Concerns\ModelSchemaAware;
 use Bakery\Types\Definitions\BaseType;
 use Bakery\Types\Definitions\InputType;
 use Bakery\Types\Definitions\EloquentType;
 
 class CollectionSearchType extends InputType
 {
-    use ModelAware;
+    use ModelSchemaAware;
 
     /**
      * Get the name of the Collection Search Type.

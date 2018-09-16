@@ -2,12 +2,12 @@
 
 namespace Bakery\Types;
 
-use Bakery\Concerns\ModelAware;
+use Bakery\Concerns\ModelSchemaAware;
 use Bakery\Types\Definitions\InputType;
 
 class EntityLookupType extends InputType
 {
-    use ModelAware;
+    use ModelSchemaAware;
 
     /**
      * Get the name of the Entity Lookup Type.

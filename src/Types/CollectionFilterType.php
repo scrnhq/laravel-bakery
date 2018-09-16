@@ -2,16 +2,16 @@
 
 namespace Bakery\Types;
 
-use Bakery\Concerns\ModelAware;
 use Bakery\Support\Facades\Bakery;
 use Bakery\Types\Definitions\Type;
 use Illuminate\Support\Collection;
+use Bakery\Concerns\ModelSchemaAware;
 use Bakery\Types\Definitions\InputType;
 use Bakery\Types\Definitions\EloquentType;
 
 class CollectionFilterType extends InputType
 {
-    use ModelAware;
+    use ModelSchemaAware;
 
     /**
      * Get the name of the Collection Filter Type.

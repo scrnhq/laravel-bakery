@@ -6,5 +6,5 @@ use Bakery\Queries\SingleEntityQuery;
 
 class DummyQuery extends SingleEntityQuery
 {
-    protected $class = DummyModel::class;
+    protected $schema = DummyModelSchema::class;
 }

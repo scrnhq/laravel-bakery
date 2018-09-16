@@ -2,9 +2,9 @@
 
 namespace Bakery\Tests\Types;
 
-use Bakery\Tests\Models\User;
 use Bakery\Tests\FeatureTestCase;
 use Bakery\Types\Definitions\Type;
+use Bakery\Tests\Stubs\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
 
 class TypeTest extends FeatureTestCase
