@@ -26,6 +26,11 @@ class Field
     protected $name;
 
     /**
+     * @var string
+     */
+    protected $description;
+
+    /**
      * @var bool
      */
     protected $list = false;
@@ -148,6 +153,29 @@ class Field
     public function setName(string $name): self
     {
         $this->name = $name;
+
+        return $this;
+    }
+
+    /**
+     * Get the description of the field.
+     *
+     * @return string
+     */
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    /**
+     * Set the description of the field.
+     *
+     * @param string $description
+     * @return \Bakery\Fields\Field
+     */
+    public function description(string $description): self
+    {
+        $this->description = $description;
 
         return $this;
     }
@@ -433,6 +461,7 @@ class Field
         return [
             'type' => $this->getType()->toType(),
             'resolve' => [$this, 'resolveField'],
+            'description' => $this->getDescription(),
         ];
     }
 
@@ -467,4 +496,5 @@ class Field
     {
         return ['registry'];
     }
+
 }
