@@ -2,11 +2,11 @@
 
 namespace Bakery\Tests;
 
-use Bakery\Exceptions\TypeNotFound;
+use Bakery\TypeRegistry;
 use Bakery\Support\DefaultSchema;
+use Bakery\Exceptions\TypeNotFound;
 use Bakery\Tests\Stubs\Models\User;
 use Bakery\Tests\Stubs\Schemas\UserSchema;
-use Bakery\TypeRegistry;
 
 class TypeRegistryTest extends FeatureTestCase
 {

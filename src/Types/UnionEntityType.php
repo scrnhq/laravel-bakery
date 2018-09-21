@@ -2,7 +2,6 @@
 
 namespace Bakery\Types;
 
-use Bakery\Support\Facades\Bakery;
 use Bakery\Types\Definitions\Type;
 use Bakery\Types\Definitions\UnionType;
 use GraphQL\Type\Definition\ResolveInfo;

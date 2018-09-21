@@ -2,8 +2,8 @@
 
 namespace Bakery\Types\Definitions;
 
-use Bakery\TypeRegistry;
 use Bakery\Utils\Utils;
+use Bakery\TypeRegistry;
 use Illuminate\Contracts\Auth\Access\Gate;
 use GraphQL\Type\Definition\Type as GraphQLType;
 use GraphQL\Type\Definition\NamedType as GraphQLNamedType;

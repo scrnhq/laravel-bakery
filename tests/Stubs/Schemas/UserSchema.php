@@ -4,7 +4,6 @@ namespace Bakery\Tests\Stubs\Schemas;
 
 use Bakery\Field;
 use Bakery\Eloquent\ModelSchema;
-use Bakery\Support\Facades\Bakery;
 use Bakery\Tests\Stubs\Models\User;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 

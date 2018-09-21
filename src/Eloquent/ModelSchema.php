@@ -2,10 +2,9 @@
 
 namespace Bakery\Eloquent;
 
-use Bakery\Bakery;
 use Bakery\Utils\Utils;
-use Bakery\TypeRegistry;
 use Bakery\Fields\Field;
+use Bakery\TypeRegistry;
 use Bakery\Fields\EloquentField;
 use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Model;

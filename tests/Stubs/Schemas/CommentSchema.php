@@ -2,10 +2,9 @@
 
 namespace Bakery\Tests\Stubs\Schemas;
 
-use Bakery\Eloquent\ModelSchema;
-use Bakery\Support\Facades\Bakery;
-use Bakery\Tests\Stubs\Models\Comment;
 use Bakery\Field;
+use Bakery\Eloquent\ModelSchema;
+use Bakery\Tests\Stubs\Models\Comment;
 
 class CommentSchema extends ModelSchema
 {

@@ -2,11 +2,10 @@
 
 namespace Bakery\Mutations;
 
-use Bakery\BakeType;
-use Bakery\Eloquent\ModelSchema;
-use Bakery\TypeRegistry;
-use Bakery\Types\Definitions\Type;
 use Bakery\Utils\Utils;
+use Bakery\TypeRegistry;
+use Bakery\Eloquent\ModelSchema;
+use Bakery\Types\Definitions\Type;
 use Illuminate\Database\Eloquent\Model;
 use GraphQL\Type\Definition\ResolveInfo;
 
@@ -36,7 +35,7 @@ abstract class EloquentMutation extends Mutation
 
         if ($modelSchema) {
             $this->modelSchema = $modelSchema;
-        } else if (is_string($this->modelSchema)) {
+        } elseif (is_string($this->modelSchema)) {
             $this->modelSchema = $this->registry->getModelSchema($this->modelSchema);
         }
 

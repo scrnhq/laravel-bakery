@@ -31,7 +31,6 @@ class FieldTest extends FeatureTestCase
         $this->registry = $this->schema->getRegistry();
     }
 
-
     /** @test */
     public function it_can_set_a_store_policy_with_a_closure()
     {
@@ -69,7 +68,6 @@ class FieldTest extends FeatureTestCase
         $this->actingAs($user);
         $field = new Field($this->registry);
         $field->canStoreWhen('setEmail');
-
 
         $this->assertTrue($field->checkStorePolicy($user, 'email', 'value'));
     }

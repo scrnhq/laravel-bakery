@@ -2,9 +2,8 @@
 
 namespace Bakery\Support;
 
-use Bakery\Bakery;
-use Bakery\TypeRegistry;
 use Bakery\Utils\Utils;
+use Bakery\TypeRegistry;
 use Bakery\Types\Definitions\Type;
 use GraphQL\Type\Definition\Type as GraphQLType;
 
@@ -16,7 +15,7 @@ abstract class RootField
     protected $registry;
 
     /**
-     * Name of the field
+     * Name of the field.
      *
      * @var string
      */

@@ -2,7 +2,6 @@
 
 namespace Bakery\Types\Concerns;
 
-use http\Exception\RuntimeException;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 trait InteractsWithPivot
@@ -72,6 +71,7 @@ trait InteractsWithPivot
 
         if ($this->registry->hasSchemaForModel($this->relation->getPivotClass())) {
             $this->pivotModelSchema = $this->registry->resolveSchemaForModel($this->relation->getPivotClass());
+
             return $this->pivotModelSchema;
         }
 

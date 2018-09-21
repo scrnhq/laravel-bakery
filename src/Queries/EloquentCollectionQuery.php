@@ -2,7 +2,6 @@
 
 namespace Bakery\Queries;
 
-use Bakery\BakeType;
 use Bakery\Utils\Utils;
 use Bakery\Support\Facades\Bakery;
 use Bakery\Types\Definitions\Type;

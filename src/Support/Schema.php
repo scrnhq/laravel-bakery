@@ -16,9 +16,9 @@ use Bakery\Mutations\UpdateMutation;
 use Bakery\Queries\SingleEntityQuery;
 use GraphQL\Type\Definition\Directive;
 use GraphQL\Type\Definition\ObjectType;
-use GraphQL\Type\Schema as GraphQLSchema;
 use Bakery\Mutations\AttachPivotMutation;
 use Bakery\Mutations\DetachPivotMutation;
+use GraphQL\Type\Schema as GraphQLSchema;
 use Bakery\Queries\EloquentCollectionQuery;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -290,7 +290,7 @@ class Schema
             (new Types\UnionEntityType($this->registry))
                 ->setName($typename)
                 ->typeResolver($typeResolver)
-                ->setModelSchemas($modelSchemas)
+                ->setModelSchemas($modelSchemas),
         ];
     }
 
@@ -311,7 +311,7 @@ class Schema
         return [
             (new Types\UnionEntityType($this->registry))->setName($typename)->typeResolver($typeResolver)->setModelSchemas($modelSchemas),
             (new Types\CreateUnionEntityInputType($this->registry))->setName($typename)->setModelSchemas($modelSchemas),
-            (new Types\AttachUnionEntityInputType($this->registry))->setName($typename)->setModelSchemas($modelSchemas)
+            (new Types\AttachUnionEntityInputType($this->registry))->setName($typename)->setModelSchemas($modelSchemas),
         ];
     }
 

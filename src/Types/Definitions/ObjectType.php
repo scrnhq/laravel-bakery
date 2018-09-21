@@ -30,6 +30,7 @@ class ObjectType extends Type implements NamedType
 
         return $fields->map(function (Field $field) {
             $field->setRegistry($this->registry);
+
             return $field->toArray();
         });
     }

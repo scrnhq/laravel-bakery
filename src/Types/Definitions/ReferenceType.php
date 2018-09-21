@@ -12,7 +12,7 @@ class ReferenceType extends Type
      *
      * @var string
      */
-    protected  $reference;
+    protected $reference;
 
     /**
      * BaseType constructor.

@@ -2,12 +2,10 @@
 
 namespace Bakery\Types;
 
-use Bakery\Fields\EloquentField;
 use Bakery\Fields\Field;
-use Bakery\Support\Facades\Bakery;
+use Bakery\Fields\EloquentField;
 use Bakery\Types\Definitions\Type;
 use Illuminate\Support\Collection;
-use Bakery\Types\Definitions\EloquentType;
 use Bakery\Types\Definitions\EloquentInputType;
 
 class CollectionFilterType extends EloquentInputType

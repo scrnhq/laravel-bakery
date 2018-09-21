@@ -2,16 +2,16 @@
 
 namespace Bakery;
 
-use Bakery\Fields\EloquentField;
-use Bakery\Fields\Field;
-use Bakery\Fields\PolymorphicField;
-use Bakery\Types\Definitions\ReferenceType;
 use Bakery\Utils\Utils;
+use Bakery\Fields\Field;
 use Bakery\Eloquent\ModelSchema;
+use Bakery\Fields\EloquentField;
 use Bakery\Types\Definitions\Type;
 use Bakery\Exceptions\TypeNotFound;
-use Bakery\Types\Definitions\InternalType;
+use Bakery\Fields\PolymorphicField;
 use Illuminate\Database\Eloquent\Model;
+use Bakery\Types\Definitions\InternalType;
+use Bakery\Types\Definitions\ReferenceType;
 use GraphQL\Type\Definition\Type as GraphQLType;
 
 class TypeRegistry

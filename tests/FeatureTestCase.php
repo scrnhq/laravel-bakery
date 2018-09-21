@@ -65,8 +65,6 @@ class FeatureTestCase extends TestCase
         $this->loadMigrationsFrom(__DIR__.'/migrations');
         $this->withFactories(__DIR__.'/factories');
 
-
-
         // Set up default schema.
         app()['config']->set('bakery.models', [
             Schemas\UserSchema::class,

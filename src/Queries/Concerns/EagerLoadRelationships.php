@@ -2,7 +2,6 @@
 
 namespace Bakery\Queries\Concerns;
 
-use Bakery\Support\Facades\Bakery;
 use Illuminate\Database\Eloquent\Builder;
 
 trait EagerLoadRelationships

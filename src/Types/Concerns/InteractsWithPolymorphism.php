@@ -3,7 +3,6 @@
 namespace Bakery\Types\Concerns;
 
 use Bakery\Utils\Utils;
-use Bakery\Support\Facades\Bakery;
 use Illuminate\Support\Collection;
 
 trait InteractsWithPolymorphism

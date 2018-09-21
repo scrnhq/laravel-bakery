@@ -217,7 +217,7 @@ class EntityType extends EloquentType
         $modelSchema = $this->registry->resolveSchemaForModel($pivot);
         $type = $field->getType()->toType()->getWrappedType(true);
         $closure = $type->config['fields'];
-       $pivotField = [
+        $pivotField = [
             $accessor => [
                 'type' => $this->registry->type($modelSchema->typename())->toType(),
                 'resolve' => function ($model) use ($key, $accessor) {

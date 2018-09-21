@@ -3,7 +3,6 @@
 namespace Bakery\Mutations;
 
 use Bakery\Fields\Field;
-use Bakery\Tests\Stubs\Models\Article;
 use Illuminate\Database\Eloquent\Model;
 use GraphQL\Type\Definition\ResolveInfo;
 use Bakery\Types\Concerns\InteractsWithPivot;

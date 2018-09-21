@@ -2,8 +2,8 @@
 
 namespace Bakery\Types\Definitions;
 
-use Bakery\Eloquent\ModelSchema;
 use Bakery\TypeRegistry;
+use Bakery\Eloquent\ModelSchema;
 
 class EloquentType extends ObjectType
 {
@@ -42,7 +42,7 @@ class EloquentType extends ObjectType
     {
         $fields = [
             'modelSchema',
-            'model'
+            'model',
         ];
 
         return array_merge($fields, parent::__sleep());

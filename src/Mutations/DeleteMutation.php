@@ -2,9 +2,7 @@
 
 namespace Bakery\Mutations;
 
-use Bakery\BakeType;
 use Bakery\Fields\Field;
-use Bakery\Support\Facades\Bakery;
 use Bakery\Types\Definitions\Type;
 use Illuminate\Database\Eloquent\Model;
 use GraphQL\Type\Definition\ResolveInfo;

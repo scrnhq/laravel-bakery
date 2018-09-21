@@ -42,7 +42,7 @@ class EloquentInputType extends InputType
     {
         $fields = [
             'modelSchema',
-            'model'
+            'model',
         ];
 
         return array_merge($fields, parent::__sleep());

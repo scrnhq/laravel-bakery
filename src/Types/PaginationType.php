@@ -2,7 +2,6 @@
 
 namespace Bakery\Types;
 
-use Bakery\Support\Facades\Bakery;
 use Bakery\Types\Definitions\ObjectType;
 
 class PaginationType extends ObjectType

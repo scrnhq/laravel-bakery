@@ -436,7 +436,6 @@ class Field
         ];
     }
 
-
     /**
      * The default resolver for resolving the value of the type.
      * This gets called when there is no custom resolver defined.
@@ -460,6 +459,7 @@ class Field
                 $property = $source->{$fieldName};
             }
         }
+
         return $property instanceof \Closure ? $property($source, $args, $context, $info) : $property;
     }
 

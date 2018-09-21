@@ -2,10 +2,10 @@
 
 namespace Bakery\Queries;
 
+use Bakery\Utils\Utils;
+use Bakery\TypeRegistry;
 use Bakery\Eloquent\ModelSchema;
 use Bakery\Traits\JoinsRelationships;
-use Bakery\TypeRegistry;
-use Bakery\Utils\Utils;
 use Illuminate\Database\Eloquent\Builder;
 use Bakery\Queries\Concerns\EagerLoadRelationships;
 
@@ -36,7 +36,7 @@ abstract class EloquentQuery extends Query
 
         if ($modelSchema) {
             $this->modelSchema = $modelSchema;
-        } else if (is_string($this->modelSchema)) {
+        } elseif (is_string($this->modelSchema)) {
             $this->modelSchema = $this->registry->getModelSchema($this->modelSchema);
         }
 

@@ -2,9 +2,8 @@
 
 namespace Bakery\Types;
 
-use Bakery\Fields\Field;
 use Bakery\Utils\Utils;
-use Bakery\Types\Definitions\Type;
+use Bakery\Fields\Field;
 use Illuminate\Support\Collection;
 
 class UpdateInputType extends EloquentMutationInputType

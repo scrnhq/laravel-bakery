@@ -3,17 +3,10 @@
 namespace Bakery;
 
 use GraphQL\GraphQL;
-use Bakery\Utils\Utils;
 use GraphQL\Type\Schema;
-use Bakery\Traits\BakeryTypes;
-use Bakery\Eloquent\ModelSchema;
 use Bakery\Types\Definitions\Type;
-use Bakery\Exceptions\TypeNotFound;
 use GraphQL\Executor\ExecutionResult;
-use Bakery\Types\Definitions\NamedType;
-use Illuminate\Database\Eloquent\Model;
 use Bakery\Support\Schema as BakerySchema;
-use GraphQL\Type\Definition\NamedType as GraphQLNamedType;
 
 class Bakery
 {

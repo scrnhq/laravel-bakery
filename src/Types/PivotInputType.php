@@ -3,7 +3,6 @@
 namespace Bakery\Types;
 
 use Bakery\Utils\Utils;
-use Bakery\Support\Facades\Bakery;
 
 class PivotInputType extends EloquentMutationInputType
 {
