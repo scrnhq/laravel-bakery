@@ -249,6 +249,18 @@ abstract class ModelSchema
     }
 
     /**
+     * Get the lookup types.
+     *
+     * @return \Illuminate\Support\Collection
+     */
+    public function getLookupTypes(): Collection
+    {
+        return $this->getLookupFields()->map(function (Field $field) {
+            return $field->getType();
+        });
+    }
+
+    /**
      * Define the relation fields of the schema.
      * This method can be overridden.
      *
