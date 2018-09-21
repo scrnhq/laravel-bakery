@@ -39,7 +39,10 @@ abstract class EloquentMutation extends Mutation
             $this->modelSchema = $this->registry->getModelSchema($this->modelSchema);
         }
 
-        Utils::invariant($this->modelSchema instanceof ModelSchema);
+        Utils::invariant(
+            $this->modelSchema instanceof ModelSchema,
+            'Model schema on '.get_class($this).' should be an instance of '.ModelSchema::class
+        );
 
         $this->model = $this->modelSchema->getModel();
     }
