@@ -120,7 +120,7 @@ abstract class RootField
      */
     public function getArgs(): array
     {
-        return collect($this->args())->map(function ($type) {
+        return collect($this->args())->map(function (Type $type) {
             return $type->toType();
         })->toArray();
     }

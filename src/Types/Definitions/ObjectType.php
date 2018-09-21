@@ -10,13 +10,20 @@ use GraphQL\Type\Definition\ObjectType as GraphQLObjectType;
 class ObjectType extends Type implements NamedType
 {
     /**
+     * The fields of the object type.
+     *
+     * @var array
+     */
+    protected $fields = [];
+
+    /**
      * Define the fields for the type.
      *
      * @return array
      */
     public function fields(): array
     {
-        return [];
+        return $this->fields;
     }
 
     /**
@@ -29,8 +36,6 @@ class ObjectType extends Type implements NamedType
         $fields = collect($this->fields());
 
         return $fields->map(function (Field $field) {
-            $field->setRegistry($this->registry);
-
             return $field->toArray();
         });
     }
@@ -61,7 +66,7 @@ class ObjectType extends Type implements NamedType
     }
 
     /**
-     * Convert the type to a GraphQL BakeField.
+     * Convert the type to a GraphQL type.
      *
      * @return GraphQLType
      */

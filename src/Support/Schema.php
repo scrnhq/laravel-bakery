@@ -2,7 +2,9 @@
 
 namespace Bakery\Support;
 
+use Bakery\RootMutation;
 use Bakery\Types;
+use Bakery\RootQuery;
 use Bakery\Utils\Utils;
 use Bakery\TypeRegistry;
 use GraphQL\Type\SchemaConfig;
@@ -448,19 +450,6 @@ class Schema
     }
 
     /**
-     * Convert fields to array.
-     *
-     * @param $fields
-     * @return array
-     */
-    public function fieldsToArray($fields): array
-    {
-        return array_map(function (RootField $field) {
-            return $field->toArray();
-        }, $fields);
-    }
-
-    /**
      * Prepare the schema.
      *
      * @return array
@@ -473,8 +462,8 @@ class Schema
         $types = $this->getTypes();
         $this->registry->addTypes($types);
 
-        $queries = $this->fieldsToArray($this->getQueries());
-        $mutations = $this->fieldsToArray($this->getMutations());
+        $queries = $this->getQueries();
+        $mutations = $this->getMutations();
 
         $this->data = [
             'queries' => $queries,
@@ -502,19 +491,15 @@ class Schema
 
         $config = SchemaConfig::create();
 
+        Utils::invariant(count($data['queries']) > 0, 'There must be query fields defined in the schema.');
+
         // Build the query
-        $query = $this->makeObjectType($data['queries'], ['name' => 'Query']);
-
-        Utils::invariant(count($query->getFields()) > 0, 'There must be query fields defined in the schema.');
-
-        if (count($query->getFields()) > 0) {
-            $config->setQuery($query);
-        }
+        $query = (new RootQuery($this->registry, $data['queries']))->toType();
+        $config->setQuery($query);
 
         // Build the mutation
-        $mutation = $this->makeObjectType($data['mutations'], ['name' => 'Mutation']);
-
-        if (count($mutation->getFields()) > 0) {
+        if (count($data['mutations']) > 0) {
+            $mutation = (new RootMutation($this->registry, $data['mutations']))->toType();
             $config->setMutation($mutation);
         }
 
