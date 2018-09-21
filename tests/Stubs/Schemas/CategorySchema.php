@@ -2,8 +2,8 @@
 
 namespace Bakery\Tests\Stubs\Schemas;
 
+use Bakery\Field;
 use Bakery\Eloquent\ModelSchema;
-use Bakery\Support\Facades\Bakery;
 use Bakery\Tests\Stubs\Models\Category;
 
 class CategorySchema extends ModelSchema
@@ -13,7 +13,7 @@ class CategorySchema extends ModelSchema
     public function fields(): array
     {
         return [
-            'name' => Bakery::string(),
+            'name' => Field::string(),
         ];
     }
 

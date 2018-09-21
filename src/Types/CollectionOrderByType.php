@@ -2,31 +2,20 @@
 
 namespace Bakery\Types;
 
-use Bakery\Support\Facades\Bakery;
-use Bakery\Types\Definitions\Type;
-use Bakery\Concerns\ModelSchemaAware;
-use Bakery\Types\Definitions\InputType;
-use Bakery\Types\Definitions\EloquentType;
+use Bakery\Fields\Field;
+use Bakery\Fields\EloquentField;
+use Bakery\Types\Definitions\EloquentInputType;
 
-class CollectionOrderByType extends InputType
+class CollectionOrderByType extends EloquentInputType
 {
-    use ModelSchemaAware;
-
     /**
-     * Define the collection order type as an input type.
-     *
-     * @var bool
-     */
-    protected $input = true;
-
-    /**
-     * Get the name of the Collection Order By Type.
+     * Get the name of the Collection Order By BakeField.
      *
      * @return string
      */
     public function name(): string
     {
-        return $this->schema->typename().'OrderBy';
+        return $this->modelSchema->typename().'OrderBy';
     }
 
     /**
@@ -38,14 +27,14 @@ class CollectionOrderByType extends InputType
     {
         $fields = collect();
 
-        foreach ($this->schema->getFields() as $name => $field) {
-            $fields->put($name, Bakery::type('Order')->nullable());
+        foreach ($this->modelSchema->getFields() as $name => $field) {
+            $fields->put($name, $this->registry->field('Order')->nullable());
         }
 
-        $this->schema->getRelationFields()->filter(function (Type $field) {
-            return $field instanceof EloquentType;
-        })->each(function (EloquentType $field, $relation) use ($fields) {
-            $fields->put($relation, Bakery::type($field->name().'OrderBy')->nullable());
+        $this->modelSchema->getRelationFields()->filter(function (Field $field) {
+            return $field instanceof EloquentField;
+        })->each(function (EloquentField $field, $relation) use ($fields) {
+            $fields->put($relation, $this->registry->field($field->name().'OrderBy')->nullable());
         });
 
         return $fields->toArray();

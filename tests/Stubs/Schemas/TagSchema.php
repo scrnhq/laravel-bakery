@@ -2,6 +2,7 @@
 
 namespace Bakery\Tests\Stubs\Schemas;
 
+use Bakery\Field;
 use Bakery\Eloquent\ModelSchema;
 use Bakery\Support\Facades\Bakery;
 use Bakery\Tests\Stubs\Models\Tag;
@@ -13,14 +14,14 @@ class TagSchema extends ModelSchema
     public function fields(): array
     {
         return [
-            'name' => Bakery::string(),
+            'name' => Field::string(),
         ];
     }
 
     public function relations(): array
     {
         return [
-            'articles' => Bakery::collection(ArticleSchema::class),
+            'articles' => Field::collection(ArticleSchema::class),
         ];
     }
 }

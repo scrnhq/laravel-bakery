@@ -108,7 +108,11 @@ trait MutatesModel
     {
         $this->instance->save();
 
+        //$this->instance->fireModelEvent('persisting');
+
         $this->persistQueuedDatabaseTransactions();
+
+        //$this->instance->fireModelEvent('persisted');
 
         return $this;
     }

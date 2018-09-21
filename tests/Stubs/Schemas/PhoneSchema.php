@@ -2,8 +2,8 @@
 
 namespace Bakery\Tests\Stubs\Schemas;
 
+use Bakery\Field;
 use Bakery\Eloquent\ModelSchema;
-use Bakery\Support\Facades\Bakery;
 use Bakery\Tests\Stubs\Models\Phone;
 
 class PhoneSchema extends ModelSchema
@@ -13,14 +13,14 @@ class PhoneSchema extends ModelSchema
     public function fields(): array
     {
         return [
-            'number' => Bakery::string(),
+            'number' => Field::string(),
         ];
     }
 
     public function relations(): array
     {
         return [
-            'user' => Bakery::model(UserSchema::class),
+            'user' => Field::model(UserSchema::class),
         ];
     }
 }

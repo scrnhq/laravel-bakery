@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
 use GraphQL\Type\Definition\ResolveInfo;
 
-class CreateMutation extends EntityMutation
+class CreateMutation extends EloquentMutation
 {
     /**
      * Get the name of the mutation.
@@ -15,11 +15,11 @@ class CreateMutation extends EntityMutation
      */
     public function name(): string
     {
-        if (property_exists($this, 'name')) {
+        if (isset($this->name)) {
             return $this->name;
         }
 
-        return 'create'.$this->schema->typename();
+        return 'create'.$this->modelSchema->typename();
     }
 
     /**
@@ -36,8 +36,8 @@ class CreateMutation extends EntityMutation
         $input = $args['input'];
 
         return DB::transaction(function () use ($input) {
-            $this->schema->authorize('create');
-            $model = $this->schema->create($input);
+            $this->modelSchema->authorize('create');
+            $model = $this->modelSchema->create($input);
 
             return $model;
         });

@@ -37,7 +37,7 @@ trait InteractsWithAttributes
     protected function checkScalars(array $scalars)
     {
         foreach ($scalars as $key => $value) {
-            /** @var \Bakery\Types\Definitions\Type $field */
+            /** @var \Bakery\Fields\Field $field */
             $field = $this->getFields()->get($key);
 
             $field->checkStorePolicy($this->instance, $key, $value);

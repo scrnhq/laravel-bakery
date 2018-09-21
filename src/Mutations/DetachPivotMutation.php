@@ -2,19 +2,17 @@
 
 namespace Bakery\Mutations;
 
+use Bakery\BakeType;
+use Bakery\Fields\Field;
 use Bakery\Support\Facades\Bakery;
 use Illuminate\Database\Eloquent\Model;
 use GraphQL\Type\Definition\ResolveInfo;
 use Illuminate\Database\Eloquent\Relations;
+use Bakery\Types\Concerns\InteractsWithPivot;
 
-class DetachPivotMutation extends EntityMutation
+class DetachPivotMutation extends EloquentMutation
 {
-    /**
-     * The pivot relationship.
-     *
-     * @var Relations\BelongsToMany
-     */
-    protected $pivotRelation;
+    use InteractsWithPivot;
 
     /**
      * Get the name of the mutation.
@@ -23,40 +21,13 @@ class DetachPivotMutation extends EntityMutation
      */
     public function name(): string
     {
-        if (property_exists($this, 'name')) {
+        if (isset($this->name)) {
             return $this->name;
         }
 
-        $relation = studly_case($this->pivotRelation->getRelationName());
+        $relation = studly_case($this->pivotRelationName);
 
-        return 'detach'.$relation.'On'.$this->schema->typename();
-    }
-
-    /**
-     * Set the pivot relation.
-     *
-     * @param Relations\BelongsToMany $relation
-     * @return \Bakery\Mutations\DetachPivotMutation
-     */
-    public function setPivotRelation(Relations\BelongsToMany $relation)
-    {
-        $this->pivotRelation = $relation;
-
-        return $this;
-    }
-
-    /**
-     * Get the schema of the pivot model.
-     *
-     * @return mixed
-     */
-    protected function getPivotSchema()
-    {
-        $pivot = $this->pivotRelation->getPivotClass();
-
-        return Bakery::hasModelSchema($pivot)
-            ? resolve(Bakery::getModelSchema($pivot))
-            : null;
+        return 'detach'.$relation.'On'.$this->modelSchema->typename();
     }
 
     /**
@@ -67,7 +38,7 @@ class DetachPivotMutation extends EntityMutation
      */
     protected function getRelation(Model $model): Relations\BelongsToMany
     {
-        return $model->{$this->pivotRelation->getRelationName()}();
+        return $model->{$this->pivotRelationName}();
     }
 
     /**
@@ -77,8 +48,11 @@ class DetachPivotMutation extends EntityMutation
      */
     public function args(): array
     {
-        return collect(['input' => Bakery::ID()->list()])
-            ->merge($this->schema->getLookupFields())
+        return $this->modelSchema->getLookupFields()
+            ->map(function (Field $field) {
+                return $field->getType();
+            })
+            ->merge(['input' => $this->registry->ID()->list()])
             ->toArray();
     }
 
@@ -95,7 +69,7 @@ class DetachPivotMutation extends EntityMutation
     public function resolve($root, array $args, $context, ResolveInfo $info): Model
     {
         $model = $this->findOrFail($root, $args, $context, $info);
-        $modelSchema = Bakery::getSchemaForModel($model);
+        $modelSchema = $this->registry->getSchemaForModel($model);
         $relation = $this->getRelation($model);
 
         $permission = 'set'.studly_case($relation->getRelationName());

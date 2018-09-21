@@ -2,8 +2,8 @@
 
 namespace Bakery\Tests\Stubs\Schemas;
 
+use Bakery\Field;
 use Bakery\Eloquent\ModelSchema;
-use Bakery\Support\Facades\Bakery;
 use Bakery\Tests\Stubs\Models\Article;
 
 class ArticleSchema extends ModelSchema
@@ -13,21 +13,21 @@ class ArticleSchema extends ModelSchema
     public function fields(): array
     {
         return [
-            'slug' => Bakery::string()->unique(),
-            'title' => Bakery::string(),
-            'content' => Bakery::string(),
-            'created_at' => Bakery::type('Timestamp')->fillable(false),
+            'slug' => Field::string()->unique(),
+            'title' => Field::string(),
+            'content' => Field::string(),
+            'created_at' => Field::type('Timestamp')->fillable(false),
         ];
     }
 
     public function relations(): array
     {
         return [
-            'user' => Bakery::model(UserSchema::class)->nullable(),
-            'tags' => Bakery::collection(TagSchema::class)->nullable(),
-            'category' => Bakery::model(CategorySchema::class)->nullable(),
-            'comments' => Bakery::collection(CommentSchema::class),
-            'upvotes' => Bakery::collection(UpvoteSchema::class),
+            'user' => Field::model(UserSchema::class)->nullable(),
+            'tags' => Field::collection(TagSchema::class)->nullable(),
+            'category' => Field::model(CategorySchema::class)->nullable(),
+            'comments' => Field::collection(CommentSchema::class),
+            'upvotes' => Field::collection(UpvoteSchema::class),
         ];
     }
 }

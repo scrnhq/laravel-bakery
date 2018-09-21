@@ -2,19 +2,16 @@
 
 namespace Bakery\Mutations;
 
-use Bakery\Support\Facades\Bakery;
+use Bakery\Fields\Field;
+use Bakery\Tests\Stubs\Models\Article;
 use Illuminate\Database\Eloquent\Model;
 use GraphQL\Type\Definition\ResolveInfo;
-use Illuminate\Database\Eloquent\Relations;
+use Bakery\Types\Concerns\InteractsWithPivot;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
-class AttachPivotMutation extends EntityMutation
+class AttachPivotMutation extends EloquentMutation
 {
-    /**
-     * The pivot relationship.
-     *
-     * @var Relations\BelongsToMany
-     */
-    protected $pivotRelation;
+    use InteractsWithPivot;
 
     /**
      * Get the name of the mutation.
@@ -23,49 +20,13 @@ class AttachPivotMutation extends EntityMutation
      */
     public function name(): string
     {
-        if (property_exists($this, 'name')) {
+        if (isset($this->name)) {
             return $this->name;
         }
 
-        $relation = studly_case($this->pivotRelation->getRelationName());
+        $relation = studly_case($this->pivotRelationName);
 
-        return 'attach'.$relation.'On'.$this->schema->typename();
-    }
-
-    /**
-     * Set the pivot relation.
-     *
-     * @param Relations\BelongsToMany $relation
-     * @return \Bakery\Mutations\AttachPivotMutation
-     */
-    public function setPivotRelation(Relations\BelongsToMany $relation)
-    {
-        $this->pivotRelation = $relation;
-
-        return $this;
-    }
-
-    /**
-     * Get the schema of the pivot model.
-     *
-     * @return mixed
-     */
-    protected function getPivotSchema()
-    {
-        $pivot = $this->pivotRelation->getPivotClass();
-
-        return $this->bakery->hasSchemaForModel($pivot) ? $this->bakery->resolveSchemaForModel($pivot) : null;
-    }
-
-    /**
-     * Get the pivot relation for a model.
-     *
-     * @param \Illuminate\Database\Eloquent\Model $model
-     * @return mixed
-     */
-    protected function getRelation(Model $model): Relations\BelongsToMany
-    {
-        return $model->{$this->pivotRelation->getRelationName()}();
+        return 'attach'.$relation.'On'.$this->modelSchema->typename();
     }
 
     /**
@@ -75,17 +36,31 @@ class AttachPivotMutation extends EntityMutation
      */
     public function args(): array
     {
-        $args = collect($this->schema->getLookupFields());
-        $relation = $this->pivotRelation->getRelationName();
+        $args = $this->modelSchema->getLookupFields()->map(function (Field $field) {
+            return $field->getType();
+        });
 
-        if ($this->getPivotSchema()) {
+        $relation = $this->relation->getRelationName();
+
+        if ($this->getPivotModelSchema()) {
             $typename = studly_case($relation).'PivotInput';
-            $args->put('input', Bakery::type($typename)->list());
+            $args->put('input', $this->registry->type($typename)->list());
         } else {
-            $args->put('input', Bakery::ID()->list());
+            $args->put('input', $this->registry->ID()->list());
         }
 
         return $args->toArray();
+    }
+
+    /**
+     * Get the pivot relation.
+     *
+     * @param \Illuminate\Database\Eloquent\Model $model
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
+    protected function getRelation(Model $model): BelongsToMany
+    {
+        return $model->{$this->pivotRelationName}();
     }
 
     /**
@@ -102,7 +77,7 @@ class AttachPivotMutation extends EntityMutation
     {
         $model = $this->findOrFail($root, $args, $context, $info);
         $relation = $this->getRelation($model);
-        $modelSchema = Bakery::getSchemaForModel($model);
+        $modelSchema = $this->registry->getSchemaForModel($model);
 
         $permission = 'set'.studly_case($relation->getRelationName());
         $modelSchema->authorize($permission, $model);

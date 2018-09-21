@@ -2,21 +2,18 @@
 
 namespace Bakery\Types;
 
-use Bakery\Concerns\ModelSchemaAware;
-use Bakery\Types\Definitions\InputType;
+use Bakery\Types\Definitions\EloquentInputType;
 
-class EntityLookupType extends InputType
+class EntityLookupType extends EloquentInputType
 {
-    use ModelSchemaAware;
-
     /**
-     * Get the name of the Entity Lookup Type.
+     * Get the name of the Entity Lookup BakeField.
      *
      * @return string
      */
     public function name(): string
     {
-        return $this->schema->typename().'LookupType';
+        return $this->modelSchema->typename().'LookupType';
     }
 
     /**
@@ -26,6 +23,6 @@ class EntityLookupType extends InputType
      */
     public function fields(): array
     {
-        return $this->schema->getLookupFields()->toArray();
+        return $this->modelSchema->getLookupFields()->toArray();
     }
 }

@@ -3,14 +3,14 @@
 namespace Bakery\Tests;
 
 use Bakery\Queries\Query;
-use Bakery\Support\Facades\Bakery;
-use Bakery\Types\Definitions\Type;
+use Bakery\Support\DefaultSchema;
+use Bakery\Type;
 
 class CustomQuery extends Query
 {
-    public function type(): Type
+    public function type(): \Bakery\Types\Definitions\Type
     {
-        return Bakery::boolean();
+        return Type::boolean();
     }
 }
 
@@ -19,7 +19,8 @@ class QueryTest extends FeatureTestCase
     /** @test */
     public function it_allows_to_extend_query_to_make_custom_query()
     {
-        $query = (new CustomQuery())->toArray();
+        $schema = new DefaultSchema();
+        $query = (new CustomQuery($schema->getRegistry()))->toArray();
 
         $this->assertTrue(is_array($query));
     }
@@ -27,7 +28,8 @@ class QueryTest extends FeatureTestCase
     /** @test */
     public function it_falls_back_to_class_name_if_name_is_missing()
     {
-        $query = (new CustomQuery())->toArray();
+        $schema = new DefaultSchema();
+        $query = (new CustomQuery($schema->getRegistry()))->toArray();
 
         $this->assertEquals($query['name'], 'custom');
     }

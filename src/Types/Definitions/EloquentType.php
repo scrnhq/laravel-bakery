@@ -2,11 +2,10 @@
 
 namespace Bakery\Types\Definitions;
 
-use Bakery\Utils\Utils;
-use Bakery\Support\Facades\Bakery;
-use GraphQL\Type\Definition\NamedType as GraphQLNamedType;
+use Bakery\Eloquent\ModelSchema;
+use Bakery\TypeRegistry;
 
-class EloquentType extends Type
+class EloquentType extends ObjectType
 {
     /**
      * The underlying model schema.
@@ -16,44 +15,36 @@ class EloquentType extends Type
     protected $modelSchema;
 
     /**
+     * @var \Illuminate\Database\Eloquent\Model
+     */
+    protected $model;
+
+    /**
      * Construct a new Eloquent type.
      *
-     * @param string|null $modelSchema
+     * @param \Bakery\TypeRegistry $registry
+     * @param \Bakery\Eloquent\ModelSchema $modelSchema
      */
-    public function __construct(string $modelSchema = null)
+    public function __construct(TypeRegistry $registry, ModelSchema $modelSchema)
     {
-        parent::__construct();
+        parent::__construct($registry);
 
-        if (isset($modelSchema)) {
-            $this->modelSchema = $modelSchema;
-        }
-
-        Utils::invariant($this->modelSchema, 'No model schema defined on "'.get_class($this).'"');
-
-        $this->modelSchema = Bakery::getModelSchema($this->modelSchema);
+        $this->modelSchema = $modelSchema;
+        $this->model = $this->modelSchema->getModel();
     }
 
     /**
-     * The name of the type.
+     * Define the fields that should be serialized.
      *
-     * @return string
+     * @return array
      */
-    public function name(): string
+    public function __sleep()
     {
-        if (isset($this->name)) {
-            return $this->name;
-        }
+        $fields = [
+            'modelSchema',
+            'model'
+        ];
 
-        return $this->modelSchema->typename();
-    }
-
-    /**
-     * Return the underlying, named type.
-     *
-     * @return \GraphQL\Type\Definition\NamedType
-     */
-    public function getNamedType(): GraphQLNamedType
-    {
-        return Bakery::type($this->modelSchema->typename())->getNamedType();
+        return array_merge($fields, parent::__sleep());
     }
 }

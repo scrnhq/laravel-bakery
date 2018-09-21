@@ -17,263 +17,15 @@ use GraphQL\Type\Definition\NamedType as GraphQLNamedType;
 
 class Bakery
 {
-    use BakeryTypes;
-
-    /**
-     * The schemas.
-     *
-     * @var array
-     */
-    protected $schemas = [];
-
-    /**
-     * The registered types.
-     *
-     * @var array
-     */
-    protected $types = [];
-
-    /**
-     * The GraphQL type instances.
-     *
-     * @var array
-     */
-    protected $typeInstances = [];
-
-    /**
-     * The model schema instances.
-     *
-     * @var \Illuminate\Support\Collection
-     */
-    protected $modelSchemas;
-
-    /**
-     * The model schemas keyed by model class name.
-     *
-     * @var \Illuminate\Support\Collection
-     */
-    protected $schemasByModel;
-
-    /**
-     * @var \Illuminate\Support\Collection
-     */
-    protected $schemasByInstance;
-
-    /**
-     * Bakery constructor.
-     */
-    public function __construct()
-    {
-        $this->modelSchemas = collect();
-        $this->schemasByModel = collect();
-        $this->schemasByInstance = collect();
-    }
-
-    /**
-     * Add types to the registry.
-     *
-     * @param array $classes
-     */
-    public function addTypes(array $classes)
-    {
-        foreach ($classes as $class) {
-            $class = is_object($class) ? $class : resolve($class);
-            $this->addType($class);
-        }
-    }
-
-    /**
-     * Add a type to the registry.
-     *
-     * @param \Bakery\Types\Definitions\NamedType $type
-     * @param string|null $name
-     */
-    public function addType(NamedType $type, string $name = null)
-    {
-        $name = $name ?: $type->name();
-        $this->types[$name] = $type;
-    }
-
-    /**
-     * Add the models as model schemas to the registry.
-     *
-     * @param \ArrayAccess|array $models
-     */
-    public function addModelSchemas($models)
-    {
-        foreach ($models as $model) {
-            $this->addModelSchema($model);
-        }
-    }
-
-    /**
-     * Add a single model schema to the registry.
-     *
-     * @param string $class
-     */
-    public function addModelSchema(string $class)
-    {
-        $schema = resolve($class);
-
-        Utils::invariant($schema instanceof ModelSchema, 'Model schema '.$class.' does not extend '.ModelSchema::class);
-
-        $this->modelSchemas->put($class, $schema);
-        $this->schemasByModel->put($schema->getModelClass(), $class);
-    }
-
-    /**
-     * Get a model schema instance based on it's class name.
-     *
-     * @param string $class
-     * @return mixed
-     */
-    public function getModelSchema(string $class): ModelSchema
-    {
-        Utils::invariant(
-            $this->modelSchemas->has($class),
-            $class.' is not registered as model schema in Bakery.'
-        );
-
-        return $this->modelSchemas->get($class);
-    }
-
-    /**
-     * Return a model schema for a Eloquent model instance.
-     * This 'wraps' a model schema around it.
-     *
-     * @param mixed $model
-     * @return \Bakery\Eloquent\ModelSchema
-     */
-    public function getSchemaForModel(Model $model): ModelSchema
-    {
-        $class = get_class($model);
-        $hash = spl_object_hash($model);
-
-        Utils::invariant(
-            $this->hasSchemaForModel($class),
-            $class.' has no registered model schema in Bakery.'
-        );
-
-        if ($this->schemasByInstance->has($hash)) {
-            return $this->schemasByInstance->get($hash);
-        }
-
-        $class = $this->schemasByModel->get(get_class($model));
-
-        $modelSchema = new $class($model);
-
-        $this->schemasByInstance->put($hash, $modelSchema);
-
-        return $modelSchema;
-    }
-
-    /**
-     * Resolve the schema for a model based on the class name.
-     *
-     * @param string $model
-     * @return \Bakery\Eloquent\ModelSchema
-     */
-    public function resolveSchemaForModel(string $model): ModelSchema
-    {
-        Utils::invariant(
-            $this->hasSchemaForModel($model),
-            $model.' has no registered model schema in Bakery.'
-        );
-
-        $schema = $this->schemasByModel->get($model);
-
-        return $this->getModelSchema($schema);
-    }
-
-    /**
-     * Returns if there is a model schema for a model registered.
-     *
-     * @param $model
-     * @return bool
-     */
-    public function hasSchemaForModel($model): bool
-    {
-        $model = is_string($model) ? $model : get_class($model);
-
-        return $this->schemasByModel->has($model);
-    }
-
-    /**
-     * Return if the name is registered as a type.
-     *
-     * @param string $name
-     * @return bool
-     */
-    public function hasType(string $name): bool
-    {
-        return array_key_exists($name, $this->types);
-    }
-
-    /**
-     * Get a type by name.
-     * This can be a string or a class path of a Type that has that name.
-     *
-     * @param string $name
-     * @return Type|null
-     */
-    public function getType(string $name): ?NamedType
-    {
-        // If the string is the name of the type we return it straight away.
-        if ($this->hasType($name)) {
-            return $this->types[$name];
-        }
-
-        // If the string is a class, we resolve it, check if it is an instance of type and grab it's name.
-        // and then call this method again to check.
-        if (class_exists($name)) {
-            $instance = resolve($name);
-
-            if ($instance instanceof Type) {
-                $name = $instance->name();
-
-                return $this->getType($name);
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * Resolve a type from the registry.
-     *
-     * @param string $name
-     * @return \GraphQL\Type\Definition\NamedType
-     * @throws \Bakery\Exceptions\TypeNotFound
-     */
-    public function resolve(string $name): GraphQLNamedType
-    {
-        $type = $this->getType($name);
-
-        if (! $type) {
-            throw new TypeNotFound('Type '.$name.' not found.');
-        }
-
-        $name = $type->name();
-
-        // If we already have an instance of this type, return it.
-        if (isset($this->typeInstances[$name])) {
-            return $this->typeInstances[$name];
-        }
-
-        // Otherwise we create it and store it for future references.
-        $type = $type->toType();
-        $this->typeInstances[$name] = $type;
-
-        return $type;
-    }
-
     /**
      * Get the default GraphQL schema.
      *
      * @return \GraphQL\Type\Schema
+     * @throws \Exception
      */
     public function schema(): Schema
     {
+        /** @var \Bakery\Support\Schema $schema */
         $schema = resolve(Support\DefaultSchema::class);
 
         return $schema->toGraphQLSchema();
@@ -285,6 +37,7 @@ class Bakery
      * @param array $input
      * @param \GraphQL\Type\Schema|\Bakery\Support\Schema $schema
      * @return \GraphQL\Executor\ExecutionResult
+     * @throws \Exception
      */
     public function executeQuery($input, $schema = null): ExecutionResult
     {
@@ -295,7 +48,7 @@ class Bakery
         }
 
         $root = null;
-        $context = auth()->user();
+        $context = [];
         $query = array_get($input, 'query');
         $variables = array_get($input, 'variables');
         if (is_string($variables)) {
@@ -319,5 +72,25 @@ class Bakery
             'bakery::graphiql',
             ['endpoint' => route($route), 'headers' => $headers]
         );
+    }
+
+    /**
+     * Get the type instances of Bakery.
+     *
+     * @return array
+     */
+    public function getTypeInstances()
+    {
+        return $this->typeInstances;
+    }
+
+    /**
+     * Set the type instances.
+     *
+     * @param array $typeInstances
+     */
+    public function setTypeInstances(array $typeInstances)
+    {
+        $this->typeInstances = $typeInstances;
     }
 }

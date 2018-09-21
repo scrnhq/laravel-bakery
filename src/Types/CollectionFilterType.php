@@ -2,25 +2,24 @@
 
 namespace Bakery\Types;
 
+use Bakery\Fields\EloquentField;
+use Bakery\Fields\Field;
 use Bakery\Support\Facades\Bakery;
 use Bakery\Types\Definitions\Type;
 use Illuminate\Support\Collection;
-use Bakery\Concerns\ModelSchemaAware;
-use Bakery\Types\Definitions\InputType;
 use Bakery\Types\Definitions\EloquentType;
+use Bakery\Types\Definitions\EloquentInputType;
 
-class CollectionFilterType extends InputType
+class CollectionFilterType extends EloquentInputType
 {
-    use ModelSchemaAware;
-
     /**
-     * Get the name of the Collection Filter Type.
+     * Get the name of the Collection Filter BakeField.
      *
      * @return string
      */
     public function name(): string
     {
-        return $this->schema->typename().'Filter';
+        return $this->modelSchema->typename().'Filter';
     }
 
     /**
@@ -33,11 +32,11 @@ class CollectionFilterType extends InputType
         $fields = collect()
             ->merge($this->getScalarFilters())
             ->merge($this->getRelationFilters())
-            ->put('AND', Bakery::type($this->name())->list())
-            ->put('OR', Bakery::type($this->name())->list());
+            ->put('AND', $this->registry->field($this->registry->type($this->name()))->list())
+            ->put('OR', $this->registry->field($this->registry->type($this->name()))->list());
 
-        return $fields->map(function (Type $field) {
-            return $field->nullable();
+        return $fields->map(function (Field $type) {
+            return $type->nullable();
         })->toArray();
     }
 
@@ -48,12 +47,12 @@ class CollectionFilterType extends InputType
      */
     protected function getScalarFilters(): Collection
     {
-        $fields = $this->schema->getFields();
+        $fields = $this->modelSchema->getFields();
 
         return $fields->keys()->reduce(function (Collection $result, string $name) use ($fields) {
-            $type = $fields->get($name);
+            $field = $fields->get($name);
 
-            return $type->isLeafType() ? $result->merge($this->getFilters($name, $type)) : $result;
+            return $field->getType()->isLeafType() ? $result->merge($this->getFilters($name, $field)) : $result;
         }, collect());
     }
 
@@ -64,14 +63,14 @@ class CollectionFilterType extends InputType
      */
     protected function getRelationFilters(): Collection
     {
-        $fields = $this->schema->getRelationFields();
+        $fields = $this->modelSchema->getRelationFields();
 
-        return $fields->filter(function (Type $field) {
-            return $field instanceof EloquentType;
+        return $fields->filter(function (Field $field) {
+            return $field instanceof EloquentField;
         })->keys()->reduce(function (Collection $result, string $name) use ($fields) {
-            $type = $fields->get($name);
+            $field = $fields->get($name);
 
-            return $result->put($name, Bakery::type($type->name().'Filter'));
+            return $result->put($name, $this->registry->field($this->registry->type($field->name().'Filter')));
         }, collect());
     }
 
@@ -79,29 +78,29 @@ class CollectionFilterType extends InputType
      * Return the filters for a field.
      *
      * @param string $name
-     * @param \Bakery\Types\Definitions\Type $field
+     * @param \Bakery\Fields\Field $field
      * @return \Illuminate\Support\Collection
      */
-    protected function getFilters(string $name, Type $field): Collection
+    protected function getFilters(string $name, Field $field): Collection
     {
         $fields = collect();
 
-        $type = $field->toType();
+        $type = $field->getType();
 
-        $fields->put($name, new Type($type));
-        $fields->put($name.'_contains', new Type($type));
-        $fields->put($name.'_not_contains', new Type($type));
-        $fields->put($name.'_starts_with', new Type($type));
-        $fields->put($name.'_not_starts_with', new Type($type));
-        $fields->put($name.'_ends_with', new Type($type));
-        $fields->put($name.'_not_ends_with', new Type($type));
-        $fields->put($name.'_not', new Type($type));
-        $fields->put($name.'_not_in', (new Type($type))->list());
-        $fields->put($name.'_in', (new Type($type))->list());
-        $fields->put($name.'_lt', new Type($type));
-        $fields->put($name.'_lte', new Type($type));
-        $fields->put($name.'_gt', new Type($type));
-        $fields->put($name.'_gte', new Type($type));
+        $fields->put($name, $this->registry->field($type));
+        $fields->put($name.'_contains', $this->registry->field($type));
+        $fields->put($name.'_not_contains', $this->registry->field($type));
+        $fields->put($name.'_starts_with', $this->registry->field($type));
+        $fields->put($name.'_not_starts_with', $this->registry->field($type));
+        $fields->put($name.'_ends_with', $this->registry->field($type));
+        $fields->put($name.'_not_ends_with', $this->registry->field($type));
+        $fields->put($name.'_not', $this->registry->field($type));
+        $fields->put($name.'_not_in', $this->registry->field($type)->list());
+        $fields->put($name.'_in', $this->registry->field($type)->list());
+        $fields->put($name.'_lt', $this->registry->field($type));
+        $fields->put($name.'_lte', $this->registry->field($type));
+        $fields->put($name.'_gt', $this->registry->field($type));
+        $fields->put($name.'_gte', $this->registry->field($type));
 
         return $fields;
     }

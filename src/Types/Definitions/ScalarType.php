@@ -39,7 +39,7 @@ abstract class ScalarType extends Type implements NamedType
     abstract public function parseLiteral($valueNode);
 
     /**
-     * Convert the type to a GraphQL Type.
+     * Convert the type to a GraphQL BakeField.
      *
      * @return GraphQLType
      */
@@ -47,15 +47,9 @@ abstract class ScalarType extends Type implements NamedType
     {
         return new CustomScalarType([
             'name' => $this->name(),
-            'serialize' => function (...$args) {
-                return $this->serialize(...$args);
-            },
-            'parseValue' => function (...$args) {
-                return $this->parseValue(...$args);
-            },
-            'parseLiteral' => function (...$args) {
-                return $this->parseLiteral(...$args);
-            },
+            'serialize' => [$this, 'serialize'],
+            'parseValue' => [$this, 'parseValue'],
+            'parseLiteral' => [$this, 'parseLiteral'],
         ]);
     }
 }

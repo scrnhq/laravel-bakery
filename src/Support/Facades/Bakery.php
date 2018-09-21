@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static \Bakery\Types\Definitions\EloquentType collection(string $definition)
  * @method static \Bakery\Types\Definitions\ReferenceType list(string $definition)
  * @method static \Bakery\Types\Definitions\ReferenceType type(string $definition)
- * @method static \Bakery\Types\Definitions\PolymorphicType polymorphic(array $definitions)
+ * @method static \Bakery\Types\Definitions\PolymorphicField polymorphic(array $definitions)
  * @method static \GraphQL\Type\Definition\NamedType resolve(string $definition)
  * @method static \Bakery\Eloquent\ModelSchema getModelSchema(string $class)
  * @method static bool hasSchemaForModel(\Illuminate\Database\Eloquent\Model|string $model)

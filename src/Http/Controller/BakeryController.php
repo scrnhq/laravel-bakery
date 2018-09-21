@@ -49,6 +49,7 @@ class BakeryController extends Controller
      * @param Request $request
      * @param \Bakery\Bakery $bakery
      * @return JsonResponse
+     * @throws \Exception
      */
     public function graphql(Request $request, Bakery $bakery): JsonResponse
     {
@@ -59,12 +60,19 @@ class BakeryController extends Controller
         return response()->json($data, 200, []);
     }
 
-    public function graphiql()
+    /**
+     * Serve the GraphiQL tool.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @param \Bakery\Bakery $bakery
+     * @return \Illuminate\Contracts\View\View
+     */
+    public function graphiql(Request $request, Bakery $bakery)
     {
         if (! app()->isLocal()) {
             abort(404);
         }
 
-        return app('bakery')->graphiql('graphql');
+        return $bakery->graphiql('graphql');
     }
 }

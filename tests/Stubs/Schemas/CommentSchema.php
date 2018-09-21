@@ -5,6 +5,7 @@ namespace Bakery\Tests\Stubs\Schemas;
 use Bakery\Eloquent\ModelSchema;
 use Bakery\Support\Facades\Bakery;
 use Bakery\Tests\Stubs\Models\Comment;
+use Bakery\Field;
 
 class CommentSchema extends ModelSchema
 {
@@ -13,16 +14,16 @@ class CommentSchema extends ModelSchema
     public function fields(): array
     {
         return [
-            'body' => Bakery::string(),
+            'body' => Field::string(),
         ];
     }
 
     public function relations(): array
     {
         return [
-            'user' => Bakery::model(UserSchema::class),
-            'article' => Bakery::model(ArticleSchema::class),
-            'upvotes' => Bakery::collection(UpvoteSchema::class),
+            'user' => Field::model(UserSchema::class),
+            'article' => Field::model(ArticleSchema::class),
+            'upvotes' => Field::collection(UpvoteSchema::class),
         ];
     }
 }

@@ -2,8 +2,8 @@
 
 namespace Bakery\Tests\Stubs\Schemas;
 
+use Bakery\Field;
 use Bakery\Eloquent\ModelSchema;
-use Bakery\Support\Facades\Bakery;
 use Bakery\Tests\Stubs\Models\Role;
 
 class RoleSchema extends ModelSchema
@@ -13,14 +13,14 @@ class RoleSchema extends ModelSchema
     public function fields(): array
     {
         return [
-            'name' => Bakery::string(),
+            'name' => Field::string(),
         ];
     }
 
     public function relations(): array
     {
         return [
-            'users' => Bakery::collection(UserSchema::class),
+            'users' => Field::collection(UserSchema::class),
         ];
     }
 }

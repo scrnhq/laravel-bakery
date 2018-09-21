@@ -17,7 +17,7 @@ trait QueriesModel
     /**
      * @var \Bakery\Eloquent\ModelSchema
      */
-    protected $schema;
+    protected $modelSchema;
 
     /**
      * Get the model based on the arguments provided.
@@ -32,7 +32,7 @@ trait QueriesModel
     {
         $primaryKey = $this->model->getKeyName();
 
-        $query = $this->schema->getQuery();
+        $query = $this->modelSchema->getQuery();
 
         if (array_key_exists($primaryKey, $args)) {
             return $query->find($args[$primaryKey]);

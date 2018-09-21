@@ -8,6 +8,11 @@ use Illuminate\Database\Eloquent\Builder;
 trait EagerLoadRelationships
 {
     /**
+     * @var \Bakery\TypeRegistry
+     */
+    protected $registry;
+
+    /**
      * Eager load the relations.
      *
      * @param \Illuminate\Database\Eloquent\Builder $query
@@ -24,7 +29,7 @@ trait EagerLoadRelationships
                 $relation = $path ? $path.'.'.$key : $key;
                 $query->with($relation);
                 $related = $schema->getModel()->{$key}()->getRelated();
-                $relatedSchema = Bakery::getSchemaForModel($related);
+                $relatedSchema = $this->registry->getSchemaForModel($related);
                 $this->eagerLoadRelations($query, $field, $relatedSchema, $relation);
             }
         }

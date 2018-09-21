@@ -5,7 +5,7 @@ namespace Bakery\Types;
 use Bakery\Utils\Utils;
 use Bakery\Support\Facades\Bakery;
 
-class PivotInputType extends MutationInputType
+class PivotInputType extends EloquentMutationInputType
 {
     use Concerns\InteractsWithPivot;
 
@@ -16,7 +16,7 @@ class PivotInputType extends MutationInputType
      */
     public function name(): string
     {
-        $relation = $this->getPivotRelation()->getRelationName();
+        $relation = $this->pivotRelationName;
         $typename = Utils::pluralTypename($relation);
 
         return $typename.'PivotInput';
@@ -30,13 +30,13 @@ class PivotInputType extends MutationInputType
     public function fields(): array
     {
         $modelSchema = $this->getPivotModelSchema();
-        $accessor = $this->getPivotRelation()->getPivotAccessor();
-        $relatedKey = $this->pivotRelation->getRelated()->getKeyName();
+        $accessor = $this->relation->getPivotAccessor();
+        $relatedKey = $this->relation->getRelated()->getKeyName();
 
-        $fields = collect()->put($relatedKey, Bakery::ID());
+        $fields = collect()->put($relatedKey, $this->registry->field($this->registry->ID()));
 
         if ($modelSchema) {
-            $fields->put($accessor, Bakery::type('Create'.$modelSchema->typename().'Input'));
+            $fields->put($accessor, $this->registry->field('Create'.$modelSchema->typename().'Input'));
         }
 
         return $fields->toArray();

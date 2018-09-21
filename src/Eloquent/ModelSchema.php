@@ -4,11 +4,12 @@ namespace Bakery\Eloquent;
 
 use Bakery\Bakery;
 use Bakery\Utils\Utils;
-use Bakery\Types\Definitions\Type;
+use Bakery\TypeRegistry;
+use Bakery\Fields\Field;
+use Bakery\Fields\EloquentField;
 use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Bakery\Eloquent\Concerns\MutatesModel;
-use Bakery\Types\Definitions\EloquentType;
 use Illuminate\Contracts\Auth\Access\Gate;
 use Bakery\Eloquent\Concerns\InteractsWithQueries;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -19,9 +20,19 @@ abstract class ModelSchema
     use InteractsWithQueries;
 
     /**
-     * @var \Bakery\Bakery
+     * @var \Bakery\Support\Schema
      */
-    protected $bakery;
+    protected $schema;
+
+    /**
+     * @var \Bakery\TypeRegistry
+     */
+    protected $registry;
+
+    /**
+     * @var \Illuminate\Contracts\Auth\Access\Gate
+     */
+    protected $gate;
 
     /**
      * @var string
@@ -42,21 +53,33 @@ abstract class ModelSchema
     protected $mutable = true;
 
     /**
+     * The bound fields.
+     *
+     * @var Collection
+     */
+    private $fields;
+
+    /**
+     * The bound relations.
+     *
+     * @var Collection
+     */
+    private $relations;
+
+    /**
      * ModelSchema constructor.
      *
-     * @param Model $instance
+     * @param \Bakery\TypeRegistry $registry
+     * @param \Illuminate\Database\Eloquent\Model|null $instance
      */
-    public function __construct(Model $instance = null)
+    public function __construct(TypeRegistry $registry, Model $instance = null)
     {
-        $this->gate = resolve(Gate::class);
-        $this->bakery = resolve(Bakery::class);
+        $this->registry = $registry;
 
-        if (isset($instance)) {
+        if ($instance) {
             $this->instance = $instance;
         } else {
             $model = $this->model();
-
-            Utils::invariant(isset($model), 'No model defined on '.class_basename($this));
 
             Utils::invariant(
                 is_subclass_of($model, Model::class),
@@ -65,8 +88,6 @@ abstract class ModelSchema
 
             $this->instance = resolve($model);
         }
-
-        return $this;
     }
 
     /**
@@ -114,9 +135,18 @@ abstract class ModelSchema
      *
      * @return string
      */
-    public function typename(): string
+    public function getTypename(): string
     {
         return Utils::typename($this->getModel());
+    }
+
+    /**
+     * @alias getTypename()
+     * @return string
+     */
+    public function typename(): string
+    {
+        return $this->getTypename();
     }
 
     /**
@@ -128,7 +158,7 @@ abstract class ModelSchema
      */
     public function authorize(string $policy, $attributes = null)
     {
-        $allowed = $this->gate->allows($policy, [$this->instance, $attributes]);
+        $allowed = $this->getGate()->allows($policy, [$this->instance, $attributes]);
 
         if (! $allowed) {
             throw new AuthorizationException(
@@ -144,7 +174,9 @@ abstract class ModelSchema
      */
     protected function getKeyField(): array
     {
-        return [$this->instance->getKeyName() => $this->bakery->ID()->fillable(false)];
+        $key = $this->instance->getKeyName();
+
+        return [$key => $this->registry->field($this->registry->ID())->fillable(false)->unique()];
     }
 
     /**
@@ -165,6 +197,10 @@ abstract class ModelSchema
      */
     public function getFields(): Collection
     {
+        if (isset($this->fields)) {
+            return $this->fields;
+        }
+
         return collect($this->getKeyField())->merge($this->fields());
     }
 
@@ -178,7 +214,7 @@ abstract class ModelSchema
      */
     public function getFillableFields(): Collection
     {
-        return $this->getFields()->filter(function (Type $field, $key) {
+        return $this->getFields()->filter(function (Field $field) {
             return $field->isFillable();
         });
     }
@@ -191,24 +227,24 @@ abstract class ModelSchema
     public function getLookupFields(): Collection
     {
         $fields = collect($this->getFields())
-            ->filter(function (Type $field) {
+            ->filter(function (Field $field) {
                 return $field->isUnique();
             });
 
         $relations = collect($this->getRelationFields())
-            ->filter(function (Type $field) {
-                return $field instanceof EloquentType;
+            ->filter(function ($field) {
+                return $field instanceof EloquentField;
             })
-            ->map(function (EloquentType $field) {
-                $lookupTypeName = $field->name().'LookupType';
+            ->map(function (EloquentField $field) {
+                $lookupTypeName = $field->getName().'LookupType';
 
-                return $this->bakery->type($lookupTypeName)->nullable();
+                return $this->registry->field($lookupTypeName);
             });
 
-        return collect($this->getKeyField())
+        return collect()
             ->merge($fields)
             ->merge($relations)
-            ->map(function (Type $field) {
+            ->map(function (Field $field, $key) {
                 return $field->nullable();
             });
     }
@@ -231,6 +267,10 @@ abstract class ModelSchema
      */
     public function getRelationFields(): Collection
     {
+        if (isset($this->relations)) {
+            return $this->relations;
+        }
+
         return collect($this->relations());
     }
 
@@ -241,7 +281,7 @@ abstract class ModelSchema
      */
     public function getFillableRelationFields(): Collection
     {
-        return $this->getRelationFields()->filter(function (Type $field) {
+        return $this->getRelationFields()->filter(function (Field $field) {
             return $field->isFillable();
         });
     }
@@ -273,8 +313,48 @@ abstract class ModelSchema
      */
     public function getConnections(): Collection
     {
-        return collect($this->getRelationFields())->map(function (Type $field, $key) {
+        return collect($this->getRelationFields())->map(function (Field $field, $key) {
             return $field->isList() ? str_singular($key).'Ids' : $key.'Id';
         });
+    }
+
+    public function __sleep()
+    {
+        return ['registry'];
+    }
+
+    public function __wakeup()
+    {
+        //
+    }
+
+    /**
+     * @return \Bakery\TypeRegistry
+     */
+    public function getRegistry(): TypeRegistry
+    {
+        return $this->registry;
+    }
+
+    /**
+     * @param \Bakery\TypeRegistry $registry
+     */
+    public function setRegistry(TypeRegistry $registry): void
+    {
+        $this->registry = $registry;
+    }
+
+    /**
+     * Get an instance to the Laravel gate.
+     *
+     * @return \Illuminate\Contracts\Auth\Access\Gate
+     */
+    public function getGate(): Gate
+    {
+        if (! $this->gate) {
+            $this->gate = resolve(Gate::class);
+        }
+
+        return $this->gate;
     }
 }

@@ -2,9 +2,9 @@
 
 namespace Bakery\Mutations;
 
-use Bakery\Support\Field;
+use Bakery\Support\RootField;
 
-abstract class Mutation extends Field
+abstract class Mutation extends RootField
 {
     /**
      * Get the name of the Mutation, if no name is specified fall back
@@ -14,7 +14,7 @@ abstract class Mutation extends Field
      */
     public function name(): string
     {
-        if (property_exists($this, 'name')) {
+        if (isset($this->name)) {
             return $this->name;
         }
 

@@ -3,31 +3,37 @@
 namespace Bakery\Support;
 
 use Bakery\Types;
-use Bakery\Bakery;
 use Bakery\Utils\Utils;
+use Bakery\TypeRegistry;
 use GraphQL\Type\SchemaConfig;
 use Bakery\Eloquent\ModelSchema;
 use Bakery\Types\Definitions\Type;
 use Illuminate\Support\Collection;
+use Bakery\Fields\PolymorphicField;
 use Bakery\Mutations\CreateMutation;
 use Bakery\Mutations\DeleteMutation;
 use Bakery\Mutations\UpdateMutation;
 use Bakery\Queries\SingleEntityQuery;
 use GraphQL\Type\Definition\Directive;
 use GraphQL\Type\Definition\ObjectType;
+use GraphQL\Type\Schema as GraphQLSchema;
 use Bakery\Mutations\AttachPivotMutation;
 use Bakery\Mutations\DetachPivotMutation;
-use Bakery\Queries\EntityCollectionQuery;
-use GraphQL\Type\Schema as GraphQLSchema;
+use Bakery\Queries\EloquentCollectionQuery;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Schema
 {
     /**
-     * @var \Bakery\Bakery
+     * @var TypeRegistry
      */
-    protected $bakery;
+    protected $registry;
+
+    /**
+     * @var array
+     */
+    protected $data;
 
     /**
      * The models of the schema.
@@ -65,13 +71,20 @@ class Schema
     protected $directives = [];
 
     /**
+     * The generated GraphQLSchema.
+     *
+     * @var GraphQLSchema
+     */
+    protected $graphQLSchema;
+
+    /**
      * Schema constructor.
      *
      * @param \Bakery\Bakery
      */
-    public function __construct(Bakery $bakery)
+    public function __construct()
     {
-        $this->bakery = $bakery;
+        $this->registry = new TypeRegistry();
     }
 
     /**
@@ -94,6 +107,22 @@ class Schema
     protected function types(): array
     {
         return $this->types;
+    }
+
+    /**
+     * @return \Bakery\TypeRegistry
+     */
+    public function getRegistry(): TypeRegistry
+    {
+        return $this->registry;
+    }
+
+    /**
+     * @param \Bakery\TypeRegistry $registry
+     */
+    public function setRegistry(TypeRegistry $registry)
+    {
+        $this->registry = $registry;
     }
 
     /**
@@ -163,28 +192,28 @@ class Schema
     protected function getModelTypes(): Collection
     {
         return $this->getModels()->reduce(function (Collection $types, string $class) {
-            $schema = $this->bakery->getModelSchema($class);
+            $schema = $this->registry->getModelSchema($class);
 
             if ($schema->getModel() instanceof Pivot) {
                 $types = $types->merge($this->getPivotModelTypes($schema));
             } else {
-                $types->push(new Types\EntityType($class))
-                      ->push(new Types\EntityCollectionType($class))
-                      ->push(new Types\EntityLookupType($class))
-                      ->push(new Types\CollectionFilterType($class))
-                      ->push(new Types\CollectionRootSearchType($class))
-                      ->push(new Types\CollectionSearchType($class))
-                      ->push(new Types\CollectionOrderByType($class));
+                $types->push(new Types\EntityType($this->registry, $schema))
+                      ->push(new Types\EntityCollectionType($this->registry, $schema))
+                      ->push(new Types\EntityLookupType($this->registry, $schema))
+                      ->push(new Types\CollectionFilterType($this->registry, $schema))
+                      ->push(new Types\CollectionRootSearchType($this->registry, $schema))
+                      ->push(new Types\CollectionSearchType($this->registry, $schema))
+                      ->push(new Types\CollectionOrderByType($this->registry, $schema));
 
                 if ($schema->isMutable()) {
-                    $types->push(new Types\CreateInputType($class))
-                          ->push(new Types\UpdateInputType($class));
+                    $types->push(new Types\CreateInputType($this->registry, $schema))
+                          ->push(new Types\UpdateInputType($this->registry, $schema));
                 }
             }
 
             // Filter through the regular fields and get the polymorphic types.
             $schema->getFields()->filter(function ($field) {
-                return $field instanceof Types\Definitions\PolymorphicType;
+                return $field instanceof PolymorphicField;
             })->each(function ($field, $key) use ($schema, &$types) {
                 $types = $types->merge($this->getPolymorphicFieldTypes($schema, $key, $field));
             });
@@ -201,7 +230,7 @@ class Schema
             // Filter through the relation fields and get the the
             // polymorphic types for the relations.
             $schema->getRelationFields()->filter(function ($field) {
-                return $field instanceof Types\Definitions\PolymorphicType;
+                return $field instanceof PolymorphicField;
             })->each(function ($field, $key) use ($schema, &$types) {
                 $types = $types->merge($this->getPolymorphicRelationshipTypes($schema, $key, $field));
             });
@@ -213,14 +242,14 @@ class Schema
     /**
      * Get the types for a pivot model.
      *
-     * @param $model
+     * @param \Bakery\Eloquent\ModelSchema $modelSchema
      * @return array
      */
-    protected function getPivotModelTypes($model): array
+    protected function getPivotModelTypes(ModelSchema $modelSchema): array
     {
         return [
-            new Types\EntityType($model),
-            new Types\CreatePivotInputType($model),
+            new Types\EntityType($this->registry, $modelSchema),
+            new Types\CreatePivotInputType($this->registry, $modelSchema),
         ];
     }
 
@@ -235,11 +264,11 @@ class Schema
         // We actually want to create pivot input types for the reverse side here, but we approach
         // it from this side because we have the relevant information here (relation name, pivot accessor)
         // so we grab the model schema from the related one and pass it through.
-        $related = $this->bakery->getSchemaForModel($relation->getRelated());
+        $related = $this->registry->getSchemaForModel($relation->getRelated());
 
         return [
-            (new Types\CreateWithPivotInputType($related))->setPivotRelation($relation),
-            (new Types\PivotInputType($related))->setPivotRelation($relation),
+            (new Types\CreateWithPivotInputType($this->registry, $related))->setPivotRelation($relation),
+            (new Types\PivotInputType($this->registry, $related))->setPivotRelation($relation),
         ];
     }
 
@@ -248,16 +277,21 @@ class Schema
      *
      * @param \Bakery\Eloquent\ModelSchema $modelSchema
      * @param string $key
-     * @param \Bakery\Types\Definitions\PolymorphicType $type
+     * @param \Bakery\Fields\PolymorphicField $field
      * @return array
      */
-    protected function getPolymorphicFieldTypes(ModelSchema $modelSchema, string $key, Types\Definitions\PolymorphicType $type): array
+    protected function getPolymorphicFieldTypes(ModelSchema $modelSchema, string $key, PolymorphicField $field): array
     {
         $typename = Utils::typename($key).'On'.$modelSchema->typename();
-        $definitions = $type->getDefinitions();
-        $typeResolver = $type->getTypeResolver();
+        $modelSchemas = $field->getModelSchemas();
+        $typeResolver = $field->getTypeResolver();
 
-        return [(new Types\UnionEntityType($definitions))->setName($typename)->typeResolver($typeResolver)];
+        return [
+            (new Types\UnionEntityType($this->registry))
+                ->setName($typename)
+                ->typeResolver($typeResolver)
+                ->setModelSchemas($modelSchemas)
+        ];
     }
 
     /**
@@ -265,19 +299,19 @@ class Schema
      *
      * @param \Bakery\Eloquent\ModelSchema $modelSchema
      * @param string $key
-     * @param \Bakery\Types\Definitions\PolymorphicType $type
+     * @param \Bakery\Fields\PolymorphicField $type
      * @return array
      */
-    protected function getPolymorphicRelationshipTypes(ModelSchema $modelSchema, string $key, Types\Definitions\PolymorphicType $type): array
+    protected function getPolymorphicRelationshipTypes(ModelSchema $modelSchema, string $key, PolymorphicField $type): array
     {
         $typename = Utils::typename($key).'On'.$modelSchema->typename();
-        $definitions = $type->getDefinitions();
+        $modelSchemas = $type->getModelSchemas();
         $typeResolver = $type->getTypeResolver();
 
         return [
-            (new Types\UnionEntityType($definitions))->setName($typename)->typeResolver($typeResolver),
-            (new Types\CreateUnionEntityInputType($definitions))->setName($typename),
-            (new Types\AttachUnionEntityInputType($definitions))->setName($typename),
+            (new Types\UnionEntityType($this->registry))->setName($typename)->typeResolver($typeResolver)->setModelSchemas($modelSchemas),
+            (new Types\CreateUnionEntityInputType($this->registry))->setName($typename)->setModelSchemas($modelSchemas),
+            (new Types\AttachUnionEntityInputType($this->registry))->setName($typename)->setModelSchemas($modelSchemas)
         ];
     }
 
@@ -305,8 +339,8 @@ class Schema
             ->merge($this->getModelQueries());
 
         foreach ($this->queries as $name => $query) {
-            $query = is_object($query) ?: resolve($query);
-            $name = is_string($name) ? $name : $query->name;
+            $query = is_object($query) ?: new $query($this->registry);
+            $name = is_string($name) ? $name : $query->getName();
             $queries->put($name, $query);
         }
 
@@ -323,14 +357,14 @@ class Schema
         $queries = collect();
 
         foreach ($this->getModels() as $modelSchema) {
-            $modelSchema = $this->bakery->getModelSchema($modelSchema);
+            $modelSchema = $this->registry->getModelSchema($modelSchema);
 
             if (! $modelSchema->getModel() instanceof Pivot) {
-                $entityQuery = new SingleEntityQuery($modelSchema);
-                $queries->put($entityQuery->name, $entityQuery);
+                $entityQuery = new SingleEntityQuery($this->registry, $modelSchema);
+                $queries->put($entityQuery->getName(), $entityQuery);
 
-                $collectionQuery = new EntityCollectionQuery($modelSchema);
-                $queries->put($collectionQuery->name, $collectionQuery);
+                $collectionQuery = new EloquentCollectionQuery($this->registry, $modelSchema);
+                $queries->put($collectionQuery->getName(), $collectionQuery);
             }
         }
 
@@ -348,8 +382,8 @@ class Schema
             ->merge($this->getModelMutations());
 
         foreach ($this->mutations as $name => $mutation) {
-            $mutation = is_object($mutation) ?: resolve($mutation);
-            $name = is_string($name) ? $name : $mutation->name;
+            $mutation = is_object($mutation) ?: new $mutation($this->registry);
+            $name = is_string($name) ? $name : $mutation->getName();
             $mutations->put($name, $mutation);
         }
 
@@ -366,21 +400,21 @@ class Schema
         $mutations = collect();
 
         foreach ($this->getModels() as $class) {
-            $modelSchema = $this->bakery->getModelSchema($class);
+            $modelSchema = $this->registry->getModelSchema($class);
 
             $pivotRelations = $modelSchema->getRelations()->filter(function ($relation) {
                 return $relation instanceof BelongsToMany;
             });
 
             if ($modelSchema->isMutable() && ! $modelSchema->getModel() instanceof Pivot) {
-                $createMutation = new CreateMutation($modelSchema);
-                $mutations->put($createMutation->name, $createMutation);
+                $createMutation = new CreateMutation($this->registry, $modelSchema);
+                $mutations->put($createMutation->getName(), $createMutation);
 
-                $updateMutation = new UpdateMutation($modelSchema);
-                $mutations->put($updateMutation->name, $updateMutation);
+                $updateMutation = new UpdateMutation($this->registry, $modelSchema);
+                $mutations->put($updateMutation->getName(), $updateMutation);
 
-                $deleteMutation = new DeleteMutation($modelSchema);
-                $mutations->put($deleteMutation->name, $deleteMutation);
+                $deleteMutation = new DeleteMutation($this->registry, $modelSchema);
+                $mutations->put($deleteMutation->getName(), $deleteMutation);
             }
 
             foreach ($pivotRelations as $relation) {
@@ -404,45 +438,72 @@ class Schema
     {
         $mutations = collect();
 
-        $mutation = (new AttachPivotMutation($modelSchema))->setPivotRelation($relation);
-        $mutations->put($mutation->name, $mutation);
+        $mutation = (new AttachPivotMutation($this->registry, $modelSchema))->setPivotRelation($relation);
+        $mutations->put($mutation->getName(), $mutation);
 
-        $mutation = (new DetachPivotMutation($modelSchema))->setPivotRelation($relation);
-        $mutations->put($mutation->name, $mutation);
+        $mutation = (new DetachPivotMutation($this->registry, $modelSchema))->setPivotRelation($relation);
+        $mutations->put($mutation->getName(), $mutation);
 
         return $mutations;
     }
 
     /**
-     * Convert field sto array.
+     * Convert fields to array.
      *
      * @param $fields
      * @return array
      */
     public function fieldsToArray($fields): array
     {
-        return array_map(function ($field) {
+        return array_map(function (RootField $field) {
             return $field->toArray();
         }, $fields);
+    }
+
+    /**
+     * Prepare the schema.
+     *
+     * @return array
+     */
+    protected function prepareSchema(): array
+    {
+        $models = $this->getModels();
+        $this->registry->addModelSchemas($models);
+
+        $types = $this->getTypes();
+        $this->registry->addTypes($types);
+
+        $queries = $this->fieldsToArray($this->getQueries());
+        $mutations = $this->fieldsToArray($this->getMutations());
+
+        $this->data = [
+            'queries' => $queries,
+            'mutations' => $mutations,
+        ];
+
+        return $this->data;
     }
 
     /**
      * Convert the bakery schema to a GraphQL schema.
      *
      * @return GraphQLSchema
+     * @throws \Exception
      */
     public function toGraphQLSchema(): GraphQLSchema
     {
-        $this->bakery->addModelSchemas($this->getModels());
-        $this->bakery->addTypes($this->getTypes());
+        $this->bindTypeRegistry();
+
+        if (isset($this->data)) {
+            $data = $this->data;
+        } else {
+            $data = $this->prepareSchema();
+        }
 
         $config = SchemaConfig::create();
 
         // Build the query
-        $query = $this->makeObjectType(
-            $this->fieldsToArray($this->getQueries()),
-            ['name' => 'Query']
-        );
+        $query = $this->makeObjectType($data['queries'], ['name' => 'Query']);
 
         Utils::invariant(count($query->getFields()) > 0, 'There must be query fields defined in the schema.');
 
@@ -451,10 +512,7 @@ class Schema
         }
 
         // Build the mutation
-        $mutation = $this->makeObjectType(
-            $this->fieldsToArray($this->getMutations()),
-            ['name' => 'Mutation']
-        );
+        $mutation = $this->makeObjectType($data['mutations'], ['name' => 'Mutation']);
 
         if (count($mutation->getFields()) > 0) {
             $config->setMutation($mutation);
@@ -472,10 +530,20 @@ class Schema
                 return $mutation;
             }
 
-            return $this->bakery->resolve($name);
+            return $this->registry->resolve($name);
         });
 
         return new GraphQLSchema($config);
+    }
+
+    /**
+     * Bind the type registry of the schema to the IoC container of Laravel.
+     * This lets us resolve the type registry from static calls via the `Type` and `Field` helpers.
+     * From now on every call to `resolve(TypeRegistry::class)` will resolve in this instance.
+     */
+    protected function bindTypeRegistry()
+    {
+        app()->instance(TypeRegistry::class, $this->registry);
     }
 
     /**
@@ -517,5 +585,17 @@ class Schema
     protected function makeObjectTypeFromClass(Type $class): \GraphQL\Type\Definition\Type
     {
         return $class->toType();
+    }
+
+    /**
+     * @return array
+     * @throws \Exception
+     */
+    public function __sleep()
+    {
+        $schema = $this->toGraphQLSchema();
+        $schema->assertValid();
+
+        return ['registry', 'data'];
     }
 }

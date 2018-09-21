@@ -2,27 +2,28 @@
 
 namespace Bakery\Types\Definitions;
 
-use Bakery\Bakery;
+use Bakery\TypeRegistry;
 use Bakery\Utils\Utils;
-use GraphQL\Type\Definition\ResolveInfo;
 use Illuminate\Contracts\Auth\Access\Gate;
 use GraphQL\Type\Definition\Type as GraphQLType;
-use Illuminate\Auth\Access\AuthorizationException;
-use GraphQL\Type\Definition\InputType as GraphQLInputType;
 use GraphQL\Type\Definition\NamedType as GraphQLNamedType;
-use GraphQL\Type\Definition\OutputType as GraphQLOutputType;
 
 class Type
 {
     /**
-     * @var \Bakery\Bakery
+     * @var \Bakery\TypeRegistry
      */
-    protected $bakery;
+    protected $registry;
 
     /**
      * @var Gate
      */
     protected $gate;
+
+    /**
+     * @var \Illuminate\Database\Eloquent\Model
+     */
+    protected $model;
 
     /**
      * The name of the type.
@@ -40,6 +41,8 @@ class Type
 
     /**
      * The underlying type.
+     *
+     * @var GraphQLNamedType
      */
     protected $type;
 
@@ -51,13 +54,6 @@ class Type
     protected $nullable = false;
 
     /**
-     * Whether the type is fillable.
-     *
-     * @var bool
-     */
-    protected $fillable = true;
-
-    /**
      * Whether the type is a list.
      *
      * @var bool
@@ -65,46 +61,63 @@ class Type
     protected $list = false;
 
     /**
-     * Define if the type is unique and can be used to lookup a model.
-     *
-     * @var bool
-     */
-    protected $unique = false;
-
-    /**
-     * The resolver for resolving the value of the type.
-     *
-     * @var callable
-     */
-    protected $resolver;
-
-    /**
-     * The policy for accessing the value of the type.
-     *
-     * @var callable|string
-     */
-    protected $policy;
-
-    /**
-     * The policy for storing the value of the type.
-     *
-     * @var callable|string
-     */
-    protected $storePolicy;
-
-    /**
      * Construct a new type.
      *
-     * @param null $type
+     * @param \Bakery\TypeRegistry $registry
+     * @param \GraphQL\Type\Definition\Type $type
      */
-    public function __construct($type = null)
+    public function __construct(TypeRegistry $registry, GraphQLType $type = null)
     {
+        $this->registry = $registry;
+
         if ($type) {
             $this->type = $type;
         }
+    }
 
-        $this->gate = resolve(Gate::class);
-        $this->bakery = resolve(Bakery::class);
+    /**
+     * Get the type registry.
+     *
+     * @return \Bakery\TypeRegistry
+     */
+    public function getRegistry(): TypeRegistry
+    {
+        return $this->registry;
+    }
+
+    /**
+     * Set the type registry.
+     *
+     * @param \Bakery\TypeRegistry $registry
+     * @return \Bakery\Types\Definitions\Type
+     */
+    public function setRegistry(TypeRegistry $registry): self
+    {
+        $this->registry = $registry;
+
+        return $this;
+    }
+
+    /**
+     * Define the underlying type.
+     *
+     * This can be overridden when extending the type.
+     *
+     * @return \GraphQL\Type\Definition\NamedType
+     */
+    protected function type(): GraphQLNamedType
+    {
+        return $this->type;
+    }
+
+    /**
+     * Get the underlying type.
+     *
+     * @return \GraphQL\Type\Definition\NamedType
+     */
+    public function getType(): GraphQLNamedType
+    {
+        return $this->type();
     }
 
     /**
@@ -144,52 +157,6 @@ class Type
     }
 
     /**
-     * Define if the type is fillable.
-     *
-     * @param bool value
-     * @return $this
-     */
-    public function fillable(bool $value = true)
-    {
-        $this->fillable = $value;
-
-        return $this;
-    }
-
-    /**
-     * Return if the type is nullable.
-     *
-     * @return bool
-     */
-    public function isFillable(): bool
-    {
-        return $this->fillable;
-    }
-
-    /**
-     * Define if the value of the type is unique.
-     *
-     * @param bool|null value
-     * @return $this
-     */
-    public function unique(bool $value = true)
-    {
-        $this->unique = $value;
-
-        return $this;
-    }
-
-    /**
-     * Return if the value of the type is unique.
-     *
-     * @return bool
-     */
-    public function isUnique(): bool
-    {
-        return $this->unique;
-    }
-
-    /**
      * Define if the type is a list.
      *
      * @param bool|null $value
@@ -213,182 +180,6 @@ class Type
     }
 
     /**
-     * Define the resolver.
-     *
-     * @param callable resolver
-     * @return $this
-     */
-    public function resolve($resolver)
-    {
-        $this->resolver = $resolver;
-
-        return $this;
-    }
-
-    /**
-     * Get the resolver for the type.
-     *
-     * @return callable
-     */
-    protected function getResolver()
-    {
-        return function ($source, array $args, $context, ResolveInfo $info) {
-            if (isset($this->policy)) {
-                if (! $this->checkPolicy($source, $args, $context, $info)) {
-                    return null;
-                }
-            }
-
-            if (isset($this->resolver)) {
-                return call_user_func_array($this->resolver, [$source, $args, $context, $info]);
-            }
-
-            return self::defaultResolver($source, $args, $context, $info);
-        };
-    }
-
-    /**
-     * Define the policy on the type.
-     *
-     * @param callable|string $policy
-     * @return $this
-     */
-    public function policy($policy)
-    {
-        $this->policy = $policy;
-
-        return $this;
-    }
-
-    /**
-     * Get the policy for the type.
-     *
-     * @return callable|string
-     */
-    public function getPolicy()
-    {
-        return $this->policy;
-    }
-
-    /**
-     * Check the policy of the type.
-     *
-     * @param $source
-     * @param $args
-     * @param $context
-     * @param ResolveInfo $info
-     * @return bool
-     * @throws \Illuminate\Auth\Access\AuthorizationException
-     */
-    protected function checkPolicy($source, $args, $context, ResolveInfo $info)
-    {
-        $user = auth()->user();
-        $policy = $this->policy;
-        $gate = $this->gate->forUser($user);
-        $fieldName = $info->fieldName;
-
-        // Check if the policy method is callable
-        if (($policy instanceof \Closure || is_callable_tuple($policy)) && $policy($user, $source, $args, $context, $info)) {
-            return true;
-        }
-
-        // Check if there is a policy with this name
-        if (is_string($policy) && $gate->check($policy, $source)) {
-            return true;
-        }
-
-        if ($this->nullable) {
-            return false;
-        }
-
-        throw new AuthorizationException('Cannot read property "'.$fieldName.'" of '.get_class($source));
-    }
-
-    /**
-     * Set the story policy.
-     *
-     * @param $policy
-     * @return \Bakery\Types\Definitions\Type
-     */
-    public function storePolicy($policy)
-    {
-        $this->storePolicy = $policy;
-
-        return $this;
-    }
-
-    /**
-     * Set the store policy with a callable.
-     *
-     * @param \Closure $closure
-     * @return \Bakery\Types\Definitions\Type
-     */
-    public function canStore(\Closure $closure)
-    {
-        return $this->storePolicy($closure);
-    }
-
-    /**
-     * Set the store policy with a reference to a policy method.
-     *
-     * @param string $policy
-     * @return \Bakery\Types\Definitions\Type
-     */
-    public function canStoreWhen(string $policy)
-    {
-        return $this->storePolicy($policy);
-    }
-
-    /**
-     * Check the store policy of the type.
-     *
-     * @param $source
-     * @param $fieldName
-     * @param $value
-     * @return bool
-     * @throws \Illuminate\Auth\Access\AuthorizationException
-     */
-    public function checkStorePolicy($source, $fieldName, $value): bool
-    {
-        $policy = $this->storePolicy;
-
-        // Check if there is a policy.
-        if (! $policy) {
-            return true;
-        }
-
-        $user = auth()->user();
-        $gate = $this->gate->forUser($user);
-
-        // Check if the policy method is a closure.
-        if (($policy instanceof \Closure || is_callable_tuple($policy)) && $policy($user, $source, $value)) {
-            return true;
-        }
-
-        // Check if there is a policy with this name
-        if (is_string($policy) && $gate->check($policy, [$source, $value])) {
-            return true;
-        }
-
-        throw new AuthorizationException('Cannot set property "'.$fieldName.'" of '.get_class($source));
-    }
-
-    /**
-     * If no name is specified fall back on an
-     * automatically generated name based on the class name.
-     *
-     * @return string
-     */
-    public function name(): string
-    {
-        if (isset($this->name)) {
-            return $this->name;
-        }
-
-        return studly_case(str_before(class_basename($this), 'Type'));
-    }
-
-    /**
      * Set a name on the type.
      *
      * @param $name
@@ -402,6 +193,32 @@ class Type
     }
 
     /**
+     * Define the name of the type.
+     *
+     * This method can be overridden when extending the type.
+     *
+     * @return string
+     */
+    protected function name(): string
+    {
+        if (isset($this->name)) {
+            return $this->name;
+        }
+
+        return Utils::typename(str_before(class_basename($this), 'Type'));
+    }
+
+    /**
+     * Get the name of the type.
+     *
+     * @return string
+     */
+    public function getName(): string
+    {
+        return $this->name();
+    }
+
+    /**
      * Returns if the underlying type is a leaf type.
      *
      * @return bool
@@ -412,111 +229,53 @@ class Type
             return false;
         }
 
-        return GraphQLType::isLeafType($this->getNamedType());
+        return GraphQLType::isLeafType($this->getType());
     }
 
     /**
-     * Get the underlying (wrapped) type.
-     *
-     * @return GraphQLNamedType
-     */
-    public function getNamedType(): GraphQLNamedType
-    {
-        $type = method_exists($this, 'type') ? $this->type() : $this->type;
-        Utils::invariant($type, 'No type defined on '.get_class($this));
-
-        return $type;
-    }
-
-    /**
-     * Get the type.
+     * Convert the Bakery type to a GraphQL type.
      *
      * @return GraphQLType
      */
     public function toType(): GraphQLType
     {
-        $type = $this->getNamedType();
+        $type = $this->getType();
+        $type = $this->isList() ? GraphQLType::listOf($type) : $type;
+        $type = $this->isNullable() ? $type : GraphQLType::nonNull($type);
 
-        return $this->isList() ? GraphQLType::listOf($type) : $type;
+        return $type;
     }
 
     /**
-     * Get the output type.
-     * This checks if the type is nullable and if so, wrap it in a nullable type.
+     * Convert the Bakery type to a GraphQL (named) type.
      *
-     * @return \GraphQL\Type\Definition\OutputType
+     * @return \GraphQL\Type\Definition\NamedType
      */
-    public function toOutputType(): GraphQLOutputType
+    public function toNamedType(): GraphQLNamedType
     {
-        $type = $this->toType();
-
-        return $this->isNullable() ? $type : GraphQLType::nonNull($type);
+        return $this->getType();
     }
 
     /**
-     * Get the input type.
-     * This checks if the type is nullable and if so, wrap it in a nullable type.
-     *
-     * @return \GraphQL\Type\Definition\InputType
-     */
-    public function toInputType(): GraphQLInputType
-    {
-        $type = $this->toType();
-
-        return $this->isNullable() ? $type : GraphQLType::nonNull($type);
-    }
-
-    /**
-     * Convert the type to a field.
+     * Invoked when the object is being serialized.
      *
      * @return array
      */
-    public function toField(): array
+    public function __sleep()
     {
         return [
-            'policy' => $this->policy,
-            'type' => $this->toOutputType(),
-            'resolve' => $this->getResolver(),
+            'type',
+            'list',
+            'nullable',
+            'registry',
         ];
     }
 
     /**
-     * Convert the type to an input field.
-     *
-     * @return array
+     * Invoked when the object is unserialized.
      */
-    public function toInputField(): array
+    public function __wakeup()
     {
-        return [
-            'type' => $this->toInputType(),
-        ];
-    }
-
-    /**
-     * The default resolver for resolving the value of the type.
-     * This gets called when there is no custom resolver defined.
-     *
-     * @param $source
-     * @param array $args
-     * @param $context
-     * @param \GraphQL\Type\Definition\ResolveInfo $info
-     * @return mixed|null
-     */
-    public static function defaultResolver($source, array $args, $context, ResolveInfo $info)
-    {
-        $fieldName = $info->fieldName;
-        $property = null;
-
-        if (is_array($source) || $source instanceof \ArrayAccess) {
-            if (isset($source[$fieldName])) {
-                $property = $source[$fieldName];
-            }
-        } elseif (is_object($source)) {
-            if (isset($source->{$fieldName})) {
-                $property = $source->{$fieldName};
-            }
-        }
-
-        return $property instanceof \Closure ? $property($source, $args, $context, $info) : $property;
+        //
     }
 }

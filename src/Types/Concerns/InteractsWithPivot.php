@@ -2,21 +2,35 @@
 
 namespace Bakery\Types\Concerns;
 
+use http\Exception\RuntimeException;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 trait InteractsWithPivot
 {
     /**
-     * @var \Bakery\Bakery
+     * @var \Bakery\TypeRegistry
      */
-    protected $bakery;
+    protected $registry;
 
     /**
-     * The pivot relationship.
-     *
-     * @var BelongsToMany
+     * @var \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
-    protected $pivotRelation;
+    protected $relation;
+
+    /**
+     * @var \Bakery\Eloquent\ModelSchema
+     */
+    protected $pivotModelSchema;
+
+    /**
+     * @var string
+     */
+    private $pivotRelationName;
+
+    /**
+     * @var \Illuminate\Database\Eloquent\Model
+     */
+    private $pivotParent;
 
     /**
      * Set the pivot relationship.
@@ -26,30 +40,53 @@ trait InteractsWithPivot
      */
     public function setPivotRelation(BelongsToMany $relation)
     {
-        $this->pivotRelation = $relation;
+        $this->relation = $relation;
+        $this->pivotParent = $relation->getParent();
+        $this->pivotRelationName = $relation->getRelationName();
 
         return $this;
     }
 
     /**
-     * Get the pivot relationship.
+     * Get the pivot relation for a model.
      *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     * @return BelongsToMany
      */
-    public function getPivotRelation(): BelongsToMany
+    protected function getRelation(): BelongsToMany
     {
-        return $this->pivotRelation;
+        if (isset($this->relation)) {
+            return $this->relation;
+        }
+
+        return $this->relation = $this->model->{$this->pivotRelationName}();
     }
 
     /**
-     * Get the pivot definition class.
-     *
-     * @return mixed
+     * @return \Bakery\Eloquent\ModelSchema
      */
-    protected function getPivotModelSchema()
+    public function getPivotModelSchema()
     {
-        $class = $this->pivotRelation->getPivotClass();
+        if (isset($this->pivotModelSchema)) {
+            return $this->pivotModelSchema;
+        }
 
-        return $this->bakery->resolveSchemaForModel($class);
+        if ($this->registry->hasSchemaForModel($this->relation->getPivotClass())) {
+            $this->pivotModelSchema = $this->registry->resolveSchemaForModel($this->relation->getPivotClass());
+            return $this->pivotModelSchema;
+        }
+
+        return null;
+    }
+
+    /**
+     * Invoked when the object is serialized.
+     *
+     * @return array
+     */
+    public function __sleep()
+    {
+        $fields = ['pivotParent', 'pivotRelationName'];
+
+        return array_merge($fields, parent::__sleep());
     }
 }

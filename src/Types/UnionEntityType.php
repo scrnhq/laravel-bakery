@@ -22,20 +22,21 @@ class UnionEntityType extends UnionType
         return collect($this->modelSchemas)->map(function ($modelSchema) {
             return $modelSchema instanceof Type
                 ? $modelSchema
-                : Bakery::type(Bakery::getModelSchema($modelSchema)->typename());
+                : $this->registry->type($this->registry->getModelSchema($modelSchema)->typename());
         })->toArray();
     }
 
     /**
-     * Receives $value from resolver of the parent field and returns concrete Object Type for this $value.
+     * Receives $value from resolver of the parent field and returns concrete Object BakeField for this $value.
      *
      * @param $value
      * @param $context
      * @param ResolveInfo $info
      * @return mixed
+     * @throws \Bakery\Exceptions\TypeNotFound
      */
     public function resolveType($value, $context, ResolveInfo $info)
     {
-        return Bakery::resolve(Bakery::getSchemaForModel($value)->typename());
+        return $this->registry->resolve($this->registry->getSchemaForModel($value)->typename());
     }
 }

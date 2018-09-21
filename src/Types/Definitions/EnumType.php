@@ -21,7 +21,7 @@ class EnumType extends Type implements NamedType
      * Convert the Bakery type to a GraphQL type.
      *
      * @param array $options
-     * @return BaseType
+     * @return InternalType
      */
     public function toType(array $options = []): BaseType
     {

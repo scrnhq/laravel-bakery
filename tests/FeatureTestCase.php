@@ -32,6 +32,7 @@ class FeatureTestCase extends TestCase
      */
     protected function getEnvironmentSetUp($app)
     {
+        $app['config']->set('cache.default', 'database');
         $app['config']->set('database.default', 'testbench');
         $app['config']->set('database.connections.testbench', [
             'driver' => 'sqlite',
@@ -63,6 +64,8 @@ class FeatureTestCase extends TestCase
 
         $this->loadMigrationsFrom(__DIR__.'/migrations');
         $this->withFactories(__DIR__.'/factories');
+
+
 
         // Set up default schema.
         app()['config']->set('bakery.models', [

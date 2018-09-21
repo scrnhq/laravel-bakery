@@ -2,8 +2,8 @@
 
 namespace Bakery\Tests\Stubs\Schemas;
 
+use Bakery\Field;
 use Bakery\Eloquent\ModelSchema;
-use Bakery\Support\Facades\Bakery;
 use Bakery\Tests\Stubs\Models\Upvote;
 
 class UpvoteSchema extends ModelSchema
@@ -18,7 +18,7 @@ class UpvoteSchema extends ModelSchema
     public function relations(): array
     {
         return [
-            'upvoteable' => Bakery::polymorphic([ArticleSchema::class, CommentSchema::class]),
+            'upvoteable' => Field::polymorphic([ArticleSchema::class, CommentSchema::class]),
         ];
     }
 }

@@ -2,6 +2,7 @@
 
 namespace Bakery\Queries;
 
+use Bakery\BakeType;
 use Bakery\Utils\Utils;
 use Bakery\Support\Facades\Bakery;
 use Bakery\Types\Definitions\Type;
@@ -13,7 +14,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Bakery\Exceptions\PaginationMaxCountExceededException;
 
-class EntityCollectionQuery extends EntityQuery
+class EloquentCollectionQuery extends EloquentQuery
 {
     /**
      * The fields to be fulltext searched on.
@@ -29,11 +30,11 @@ class EntityCollectionQuery extends EntityQuery
      */
     public function name(): string
     {
-        if (property_exists($this, 'name')) {
+        if (isset($this->name)) {
             return $this->name;
         }
 
-        return Utils::plural($this->schema->getModel());
+        return Utils::plural($this->modelSchema->getModel());
     }
 
     /**
@@ -43,7 +44,7 @@ class EntityCollectionQuery extends EntityQuery
      */
     public function type(): Type
     {
-        return Bakery::type($this->schema->typename().'Collection');
+        return $this->registry->type($this->modelSchema->typename().'Collection');
     }
 
     /**
@@ -54,14 +55,14 @@ class EntityCollectionQuery extends EntityQuery
     public function args(): array
     {
         $args = collect([
-            'page' => Bakery::int()->nullable(),
-            'count' => Bakery::int()->nullable(),
-            'filter' => Bakery::type($this->schema->typename().'Filter')->nullable(),
-            'search' => Bakery::type($this->schema->typename().'RootSearch')->nullable(),
+            'page' => $this->registry->int()->nullable(),
+            'count' => $this->registry->int()->nullable(),
+            'filter' => $this->registry->type($this->modelSchema->typename().'Filter')->nullable(),
+            'search' => $this->registry->type($this->modelSchema->typename().'RootSearch')->nullable(),
         ]);
 
-        if (! empty($this->schema->getFields())) {
-            $args->put('orderBy', Bakery::type($this->schema->typename().'OrderBy')->nullable());
+        if (! empty($this->modelSchema->getFields())) {
+            $args->put('orderBy', $this->registry->type($this->modelSchema->typename().'OrderBy')->nullable());
         }
 
         return $args->toArray();
@@ -88,10 +89,10 @@ class EntityCollectionQuery extends EntityQuery
             throw new PaginationMaxCountExceededException($maxCount);
         }
 
-        $query = $this->scopeQuery($this->schema->getQuery());
+        $query = $this->scopeQuery($this->modelSchema->getQuery());
 
         $fields = $info->getFieldSelection(config('bakery.query_max_eager_load'));
-        $this->eagerLoadRelations($query, $fields['items'], $this->schema);
+        $this->eagerLoadRelations($query, $fields['items'], $this->modelSchema);
 
         if (array_key_exists('filter', $args) && ! empty($args['filter'])) {
             $query = $this->applyFilters($query, $args['filter']);
@@ -144,7 +145,7 @@ class EntityCollectionQuery extends EntityQuery
                     }
                 });
             } else {
-                $schema = $this->bakery->resolveSchemaForModel(get_class($query->getModel()));
+                $schema = $this->registry->resolveSchemaForModel(get_class($query->getModel()));
 
                 if ($schema->getRelationFields()->has($key)) {
                     $this->applyRelationFilter($query, $key, $value, $type);
@@ -259,7 +260,7 @@ class EntityCollectionQuery extends EntityQuery
         $needle = $search['query'];
         $fields = $search['fields'];
 
-        $relations = $this->schema->getRelationFields();
+        $relations = $this->modelSchema->getRelationFields();
         $qualifiedNeedle = preg_replace('/[*&|:\']+/', ' ', $needle);
 
         foreach ($fields as $key => $value) {
@@ -323,7 +324,7 @@ class EntityCollectionQuery extends EntityQuery
      */
     protected function applyOrderBy(Builder $query, array $args)
     {
-        $relations = $this->schema->getRelationFields();
+        $relations = $this->modelSchema->getRelationFields();
         foreach ($args as $key => $value) {
             if ($relations->keys()->contains($key)) {
                 $this->applyRelationalOrderBy($query, $this->model, $key, $value);
@@ -352,7 +353,7 @@ class EntityCollectionQuery extends EntityQuery
         $this->joinRelation($query, $relation, 'left');
 
         foreach ($args as $key => $value) {
-            $schema = $this->bakery->resolveSchemaForModel(get_class($related));
+            $schema = $this->registry->resolveSchemaForModel(get_class($related));
 
             $relations = $schema->getRelationFields();
             if ($relations->keys()->contains($key)) {

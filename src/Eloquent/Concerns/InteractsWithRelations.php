@@ -13,9 +13,9 @@ use Illuminate\Database\Eloquent\Relations;
 trait InteractsWithRelations
 {
     /**
-     * @var \Bakery\Bakery
+     * @var \Bakery\TypeRegistry
      */
-    protected $bakery;
+    protected $registry;
 
     /**
      * @var \Illuminate\Database\Eloquent\Model
@@ -144,7 +144,7 @@ trait InteractsWithRelations
     protected function fillBelongsToRelation(Relations\BelongsTo $relation, $attributes = [])
     {
         $related = $relation->getRelated();
-        $modelSchema = Bakery::getSchemaForModel($related);
+        $modelSchema = $this->registry->getSchemaForModel($related);
         $model = $modelSchema->create($attributes);
 
         $relation->associate($model);
@@ -186,7 +186,7 @@ trait InteractsWithRelations
     protected function fillHasOneRelation(Relations\HasOne $relation, $attributes)
     {
         $related = $relation->getRelated();
-        $modelSchema = Bakery::getSchemaForModel($related);
+        $modelSchema = $this->registry->getSchemaForModel($related);
         $modelSchema->fill($attributes);
 
         $this->queue(function () use ($modelSchema, $relation) {
@@ -223,7 +223,7 @@ trait InteractsWithRelations
             $relation->delete();
 
             foreach ($values as $attributes) {
-                $modelSchema = $this->bakery->resolveSchemaForModel(get_class($related));
+                $modelSchema = $this->registry->resolveSchemaForModel(get_class($related));
                 $modelSchema->make($attributes);
                 $modelSchema->getModel()->setAttribute($relation->getForeignKeyName(), $relation->getParentKey());
                 $modelSchema->save();
@@ -269,7 +269,7 @@ trait InteractsWithRelations
         $instances = collect();
         $related = $relation->getRelated();
         $accessor = $relation->getPivotAccessor();
-        $relatedSchema = $this->bakery->getSchemaForModel($related);
+        $relatedSchema = $this->registry->getSchemaForModel($related);
 
         foreach ($value as $attributes) {
             $instances[] = $relatedSchema->create($attributes);
@@ -359,7 +359,7 @@ trait InteractsWithRelations
             });
 
             $model = $this->getPolymorphicModel($relation, $key);
-            $modelSchema = Bakery::getSchemaForModel($model);
+            $modelSchema = $this->registry->getSchemaForModel($model);
             $instance = $modelSchema->create($attributes);
             $relation->associate($instance);
         }
@@ -375,9 +375,10 @@ trait InteractsWithRelations
      */
     protected function getPolymorphicModel(Relations\MorphTo $relation, string $key): Model
     {
+        /** @var \Bakery\Fields\PolymorphicField $type */
         $type = array_get($this->getRelationFields(), $relation->getRelation());
 
-        return resolve($type->getDefinitionByKey($key))->getModel();
+        return resolve($type->getModelSchemaByKey($key))->getModel();
     }
 
     /**
@@ -414,7 +415,7 @@ trait InteractsWithRelations
         $this->queue(function () use ($relation, $values) {
             $relation->delete();
             $related = $relation->getRelated();
-            $relatedSchema = Bakery::getSchemaForModel($related);
+            $relatedSchema = $this->registry->getSchemaForModel($related);
 
             foreach ($values as $attributes) {
                 $relatedSchema->make($attributes);

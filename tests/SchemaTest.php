@@ -151,9 +151,10 @@ class SchemaTest extends FeatureTestCase
     }
 
     /** @test */
-    public function it_returns_the_graphql_schema()
+    public function it_validates_the_graphql_schema()
     {
-        $schema = resolve(TestSchema::class);
+        /** @var Schema $schema */
+        $schema = resolve(DefaultSchema::class);
         $schema = $schema->toGraphQLSchema();
 
         $this->assertInstanceOf(GraphQLSchema::class, $schema);

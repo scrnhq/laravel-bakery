@@ -3,14 +3,14 @@
 namespace Bakery\Tests;
 
 use Bakery\Mutations\Mutation;
-use Bakery\Support\Facades\Bakery;
-use Bakery\Types\Definitions\Type;
+use Bakery\Support\Schema;
+use Bakery\Type;
 
 class CreateCustomMutation extends Mutation
 {
-    public function type(): Type
+    public function type(): \Bakery\Types\Definitions\Type
     {
-        return Bakery::boolean();
+        return Type::boolean();
     }
 }
 
@@ -19,7 +19,8 @@ class MutationTest extends FeatureTestCase
     /** @test */
     public function it_allows_to_extend_mutation_to_make_custom_mutation()
     {
-        $mutation = (new CreateCustomMutation())->toArray();
+        $schema = new Schema();
+        $mutation = (new CreateCustomMutation($schema->getRegistry()))->toArray();
 
         $this->assertTrue(is_array($mutation));
     }
@@ -27,7 +28,8 @@ class MutationTest extends FeatureTestCase
     /** @test */
     public function it_falls_back_to_generated_name_if_name_is_missing()
     {
-        $mutation = (new CreateCustomMutation())->toArray();
+        $schema = new Schema();
+        $mutation = (new CreateCustomMutation($schema->getRegistry()))->toArray();
 
         $this->assertEquals($mutation['name'], 'createCustom');
     }

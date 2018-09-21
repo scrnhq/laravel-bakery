@@ -6,5 +6,5 @@ use Bakery\Mutations\CreateMutation;
 
 class DummyMutation extends CreateMutation
 {
-    protected $schema = DummyModelSchema::class;
+    protected $modelSchema = DummyModelSchema::class;
 }

@@ -15,17 +15,21 @@ trait InteractsWithPolymorphism
     protected $modelSchemas;
 
     /**
-     * InteractsWithPolymorphism constructor.
+     * @var \Bakery\TypeRegistry
+     */
+    protected $registry;
+
+    /**
+     * Set the model schemas.
      *
      * @param array $modelSchemas
+     * @return \Bakery\Types\Concerns\InteractsWithPolymorphism
      */
-    public function __construct(array $modelSchemas = [])
+    public function setModelSchemas(array $modelSchemas)
     {
-        if (isset($modelSchemas)) {
-            $this->modelSchemas = $modelSchemas;
-        }
+        $this->modelSchemas = $modelSchemas;
 
-        Utils::invariant(! empty($this->modelSchemas), 'No model schemas defined on "'.get_class($this).'"');
+        return $this;
     }
 
     /**
@@ -35,8 +39,13 @@ trait InteractsWithPolymorphism
      */
     public function getModelSchemas(): Collection
     {
+        Utils::invariant(
+            ! empty($this->modelSchemas),
+            'No model schemas defined on "'.get_class($this).'"'
+        );
+
         return collect($this->modelSchemas)->map(function (string $class) {
-            return Bakery::getModelSchema($class);
+            return $this->registry->getModelSchema($class);
         });
     }
 }

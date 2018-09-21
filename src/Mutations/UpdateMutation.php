@@ -2,11 +2,12 @@
 
 namespace Bakery\Mutations;
 
+use Bakery\Fields\Field;
 use Bakery\Support\Facades\Bakery;
 use Illuminate\Database\Eloquent\Model;
 use GraphQL\Type\Definition\ResolveInfo;
 
-class UpdateMutation extends EntityMutation
+class UpdateMutation extends EloquentMutation
 {
     /**
      * Get the name of the mutation.
@@ -15,11 +16,11 @@ class UpdateMutation extends EntityMutation
      */
     public function name(): string
     {
-        if (property_exists($this, 'name')) {
+        if (isset($this->name)) {
             return $this->name;
         }
 
-        return 'update'.$this->schema->typename();
+        return 'update'.$this->modelSchema->typename();
     }
 
     /**
@@ -31,7 +32,9 @@ class UpdateMutation extends EntityMutation
     {
         return array_merge(
             parent::args(),
-            $this->schema->getLookupFields()->toArray()
+            $this->modelSchema->getLookupFields()->map(function (Field $field) {
+                return $field->getType();
+            })->toArray()
         );
     }
 
@@ -49,7 +52,7 @@ class UpdateMutation extends EntityMutation
     public function resolve($root, array $args, $context, ResolveInfo $info): Model
     {
         $model = $this->findOrFail($root, $args, $context, $info);
-        $modelSchema = Bakery::getSchemaForModel($model);
+        $modelSchema = $this->registry->getSchemaForModel($model);
 
         $modelSchema->authorize('update');
         $modelSchema->update($args['input']);

@@ -2,6 +2,7 @@
 
 namespace Bakery\Types\Definitions;
 
+use Bakery\Fields\Field;
 use Illuminate\Support\Collection;
 use GraphQL\Type\Definition\Type as GraphQLType;
 use GraphQL\Type\Definition\ObjectType as GraphQLObjectType;
@@ -27,8 +28,9 @@ class ObjectType extends Type implements NamedType
     {
         $fields = collect($this->fields());
 
-        return $fields->map(function (Type $field, $name) {
-            return $field->toField();
+        return $fields->map(function (Field $field) {
+            $field->setRegistry($this->registry);
+            return $field->toArray();
         });
     }
 
@@ -40,18 +42,25 @@ class ObjectType extends Type implements NamedType
     public function getAttributes(): array
     {
         $attributes = [
-           'name' => $this->name(),
-           'resolver' => $this->getResolver(),
-           'fields' => function () {
-               return $this->getFields()->toArray();
-           },
-       ];
+            'name' => $this->name(),
+            'fields' => [$this, 'resolveFields'],
+        ];
 
         return $attributes;
     }
 
     /**
-     * Convert the type to a GraphQL Type.
+     * Resolve the fields.
+     *
+     * @return array
+     */
+    public function resolveFields(): array
+    {
+        return $this->getFields()->toArray();
+    }
+
+    /**
+     * Convert the type to a GraphQL BakeField.
      *
      * @return GraphQLType
      */

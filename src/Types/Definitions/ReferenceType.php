@@ -2,35 +2,43 @@
 
 namespace Bakery\Types\Definitions;
 
-use Bakery\Support\Facades\Bakery;
+use Bakery\TypeRegistry;
+use GraphQL\Type\Definition\NamedType as GraphQLNamedType;
 
 class ReferenceType extends Type
 {
     /**
-     * The reference of the type.
+     * Reference to the type.
      *
-     * @var
+     * @var string
      */
-    protected $reference;
+    protected  $reference;
 
     /**
-     * ReferenceType constructor.
-     * @param $reference
+     * BaseType constructor.
+     *
+     * @param \Bakery\TypeRegistry $registry
+     * @param string $reference
      */
-    public function __construct(string $reference)
+    public function __construct(TypeRegistry $registry, string $reference)
     {
-        parent::__construct(null);
+        parent::__construct($registry);
 
         $this->reference = $reference;
     }
 
     /**
-     * Resolve the type that is being referenced.
-     *
      * @return \GraphQL\Type\Definition\NamedType
+     * @throws \Bakery\Exceptions\TypeNotFound
      */
-    public function type(): \GraphQL\Type\Definition\NamedType
+    public function getType(): GraphQLNamedType
     {
-        return Bakery::resolve($this->reference);
+        if (isset($this->type)) {
+            return $this->type;
+        }
+
+        $this->type = $this->getRegistry()->resolve($this->reference);
+
+        return $this->type;
     }
 }

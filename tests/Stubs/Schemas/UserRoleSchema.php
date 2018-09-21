@@ -2,8 +2,8 @@
 
 namespace Bakery\Tests\Stubs\Schemas;
 
+use Bakery\Field;
 use Bakery\Eloquent\ModelSchema;
-use Bakery\Support\Facades\Bakery;
 use Bakery\Tests\Stubs\Models\UserRole;
 
 class UserRoleSchema extends ModelSchema
@@ -13,7 +13,7 @@ class UserRoleSchema extends ModelSchema
     public function fields(): array
     {
         return [
-            'comment' => Bakery::string(),
+            'comment' => Field::string(),
         ];
     }
 }
