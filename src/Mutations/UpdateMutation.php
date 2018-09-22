@@ -5,6 +5,7 @@ namespace Bakery\Mutations;
 use Bakery\Fields\Field;
 use Illuminate\Database\Eloquent\Model;
 use GraphQL\Type\Definition\ResolveInfo;
+use Illuminate\Support\Facades\DB;
 
 class UpdateMutation extends EloquentMutation
 {
@@ -49,12 +50,12 @@ class UpdateMutation extends EloquentMutation
      */
     public function resolve($root, array $args, $context, ResolveInfo $info): Model
     {
+        $input = $args['input'];
         $model = $this->findOrFail($root, $args, $context, $info);
-        $modelSchema = $this->registry->getSchemaForModel($model);
 
-        $modelSchema->authorize('update');
-        $modelSchema->update($args['input']);
-
-        return $model;
+        return DB::transaction(function () use ($input, $model) {
+            $modelSchema = $this->registry->getSchemaForModel($model);
+            return $modelSchema->updateIfAuthorized($input);
+        });
     }
 }

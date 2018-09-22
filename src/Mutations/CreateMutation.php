@@ -36,10 +36,7 @@ class CreateMutation extends EloquentMutation
         $input = $args['input'];
 
         return DB::transaction(function () use ($input) {
-            $this->modelSchema->authorize('create');
-            $model = $this->modelSchema->create($input);
-
-            return $model;
+            return $this->getModelSchema()->createIfAuthorized($input);
         });
     }
 }

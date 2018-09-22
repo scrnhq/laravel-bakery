@@ -333,6 +333,32 @@ abstract class ModelSchema
     }
 
     /**
+     * Get the instance of the model schema.
+     *
+     * @return \Illuminate\Database\Eloquent\Model
+     */
+    public function getInstance(): Model
+    {
+        return $this->instance;
+    }
+
+    /**
+     * Set the instance on the model schema.
+     *
+     * @param \Illuminate\Database\Eloquent\Model $instance
+     */
+    public function setInstance(Model $instance): void
+    {
+        $model = $this->getModel();
+        Utils::invariant(
+            $instance instanceof $model,
+            'Can not set instance of '.get_class($instance).' on '.get_class($this).' as it differs from defined model which is: '.$this->getModelClass()
+        );
+
+        $this->instance = $instance;
+    }
+
+    /**
      * Get the registry of the model schema.
      *
      * @return \Bakery\Support\TypeRegistry
@@ -369,11 +395,10 @@ abstract class ModelSchema
     /**
      * Boot the query builder on the underlying model.
      *
-     * @return Builder
+     * @return \Illuminate\Database\Eloquent\Builder
      */
     public function getQuery(): Builder
     {
-        /** @var \Illuminate\Database\Eloquent\Model $model */
         $model = $this->getModel();
 
         return $this->scopeQuery($model->newQuery());
@@ -393,4 +418,5 @@ abstract class ModelSchema
     {
         return $query;
     }
+
 }

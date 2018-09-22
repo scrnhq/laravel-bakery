@@ -96,4 +96,12 @@ abstract class EloquentMutation extends Mutation
      * @return Model
      */
     abstract public function resolve($root, array $args, $context, ResolveInfo $info): Model;
+
+    /**
+     * @return \Bakery\Eloquent\ModelSchema
+     */
+    public function getModelSchema(): ModelSchema
+    {
+        return $this->modelSchema;
+    }
 }

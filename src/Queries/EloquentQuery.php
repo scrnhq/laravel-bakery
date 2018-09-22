@@ -49,6 +49,16 @@ abstract class EloquentQuery extends Query
     }
 
     /**
+     * Get the model schema.
+     *
+     * @return \Bakery\Eloquent\ModelSchema
+     */
+    public function getModelSchema(): ModelSchema
+    {
+        return $this->modelSchema;
+    }
+
+    /**
      * Scope the query.
      * This can be overwritten to make your own collection queries.
      *

@@ -58,7 +58,6 @@ trait MutatesModel
         return DB::transaction(function () use ($input) {
             $this->create($input);
             $this->authorize('create');
-
             return $this->instance;
         });
     }
@@ -101,9 +100,8 @@ trait MutatesModel
     public function updateIfAuthorized(array $input = []): Model
     {
         return DB::transaction(function () use ($input) {
-            $this->update($input);
             $this->authorize('update');
-
+            $this->update($input);
             return $this->instance;
         });
     }
