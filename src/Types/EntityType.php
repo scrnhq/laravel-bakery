@@ -147,8 +147,7 @@ class EntityType extends EloquentType
         $fields->put($singularKey.'Ids', $this->registry->field($this->registry->ID())
             ->list()
             ->nullable($field->isNullable())
-            ->canSee($field->getViewPolicy())
-            //->resolve([$this, 'resolveIds'])
+            ->viewPolicy($field->getViewPolicy())
             ->resolve(function ($model) use ($key) {
                 $relation = $model->{$key};
                 $relationship = $model->{$key}();
@@ -161,8 +160,7 @@ class EntityType extends EloquentType
 
         $fields->put($key.'_count', $this->registry->field($this->registry->int())
             ->nullable($field->isNullable())
-            ->canSee($field->getViewPolicy())
-            //->resolve([$this, 'resolveCount'])
+            ->viewPolicy($field->getViewPolicy())
             ->resolve(function ($model) use ($key) {
                 $relation = $model->{$key};
 
@@ -186,8 +184,7 @@ class EntityType extends EloquentType
 
         return $fields->put($key.'Id', $this->registry->field($this->registry->ID())
             ->nullable($field->isNullable())
-            ->canSee($field->getViewPolicy())
-            //->resolve([$this, 'resolveId'])
+            ->viewPolicy($field->getViewPolicy())
             ->resolve(function ($model) use ($key) {
                 $relation = $model->{$key};
 
