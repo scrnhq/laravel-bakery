@@ -418,5 +418,4 @@ abstract class ModelSchema
     {
         return $query;
     }
-
 }

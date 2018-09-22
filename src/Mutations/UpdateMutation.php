@@ -3,9 +3,9 @@
 namespace Bakery\Mutations;
 
 use Bakery\Fields\Field;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
 use GraphQL\Type\Definition\ResolveInfo;
-use Illuminate\Support\Facades\DB;
 
 class UpdateMutation extends EloquentMutation
 {
@@ -55,6 +55,7 @@ class UpdateMutation extends EloquentMutation
 
         return DB::transaction(function () use ($input, $model) {
             $modelSchema = $this->registry->getSchemaForModel($model);
+
             return $modelSchema->updateIfAuthorized($input);
         });
     }
