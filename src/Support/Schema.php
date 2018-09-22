@@ -498,6 +498,8 @@ class Schema
         $config->setQuery($query);
 
         // Build the mutation
+        $mutation = null;
+
         if (count($data['mutations']) > 0) {
             $mutation = (new RootMutation($this->registry, $data['mutations']))->toType();
             $config->setMutation($mutation);
@@ -511,6 +513,7 @@ class Schema
             if ($name === $query->name) {
                 return $query;
             }
+
             if ($name === $mutation->name) {
                 return $mutation;
             }
