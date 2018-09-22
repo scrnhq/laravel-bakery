@@ -169,8 +169,6 @@ abstract class ModelSchema
         return $this->getTypename();
     }
 
-
-
     /**
      * Get the key (ID) field.
      *
@@ -182,8 +180,6 @@ abstract class ModelSchema
 
         return [$key => $this->registry->field($this->registry->ID())->fillable(false)->unique()];
     }
-
-
 
     /**
      * Get all the readable fields.
@@ -255,7 +251,6 @@ abstract class ModelSchema
             return $field->getType();
         });
     }
-
 
     /**
      * Get the relational fields.
