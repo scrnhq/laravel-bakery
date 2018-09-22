@@ -2,7 +2,7 @@
 
 namespace Bakery\Types\Definitions;
 
-use Bakery\TypeRegistry;
+use Bakery\Support\TypeRegistry;
 use Bakery\Eloquent\ModelSchema;
 
 class EloquentInputType extends InputType
@@ -22,7 +22,7 @@ class EloquentInputType extends InputType
     /**
      * Construct a new Eloquent type.
      *
-     * @param \Bakery\TypeRegistry $registry
+     * @param \Bakery\Support\TypeRegistry $registry
      * @param \Bakery\Eloquent\ModelSchema $modelSchema
      */
     public function __construct(TypeRegistry $registry, ModelSchema $modelSchema)

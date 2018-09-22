@@ -45,7 +45,6 @@ class UpdateMutation extends EloquentMutation
      * @param  mixed $context
      * @param \GraphQL\Type\Definition\ResolveInfo $info
      * @return Model
-     * @throws \Illuminate\Auth\Access\AuthorizationException
      * @throws \Throwable
      */
     public function resolve($root, array $args, $context, ResolveInfo $info): Model

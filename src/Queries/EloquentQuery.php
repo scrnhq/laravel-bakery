@@ -3,7 +3,7 @@
 namespace Bakery\Queries;
 
 use Bakery\Utils\Utils;
-use Bakery\TypeRegistry;
+use Bakery\Support\TypeRegistry;
 use Bakery\Eloquent\ModelSchema;
 use Bakery\Traits\JoinsRelationships;
 use Illuminate\Database\Eloquent\Builder;
@@ -27,7 +27,7 @@ abstract class EloquentQuery extends Query
     /**
      * EloquentQuery constructor.
      *
-     * @param \Bakery\TypeRegistry $registry
+     * @param \Bakery\Support\TypeRegistry $registry
      * @param \Bakery\Eloquent\ModelSchema $modelSchema
      */
     public function __construct(TypeRegistry $registry, ModelSchema $modelSchema = null)

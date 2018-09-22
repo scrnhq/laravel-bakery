@@ -2,11 +2,8 @@
 
 namespace Bakery\Support;
 
-use Bakery\RootMutation;
 use Bakery\Types;
-use Bakery\RootQuery;
 use Bakery\Utils\Utils;
-use Bakery\TypeRegistry;
 use GraphQL\Type\SchemaConfig;
 use Bakery\Eloquent\ModelSchema;
 use Bakery\Types\Definitions\Type;
@@ -112,7 +109,7 @@ class Schema
     }
 
     /**
-     * @return \Bakery\TypeRegistry
+     * @return \Bakery\Support\TypeRegistry
      */
     public function getRegistry(): TypeRegistry
     {
@@ -120,7 +117,7 @@ class Schema
     }
 
     /**
-     * @param \Bakery\TypeRegistry $registry
+     * @param \Bakery\Support\TypeRegistry $registry
      */
     public function setRegistry(TypeRegistry $registry)
     {

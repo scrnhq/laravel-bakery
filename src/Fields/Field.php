@@ -2,7 +2,7 @@
 
 namespace Bakery\Fields;
 
-use Bakery\TypeRegistry;
+use Bakery\Support\TypeRegistry;
 use Bakery\Types\Definitions\Type;
 use GraphQL\Type\Definition\ResolveInfo;
 use Illuminate\Contracts\Auth\Access\Gate;
@@ -11,7 +11,7 @@ use Illuminate\Auth\Access\AuthorizationException;
 class Field
 {
     /**
-     * @var \Bakery\TypeRegistry
+     * @var \Bakery\Support\TypeRegistry
      */
     protected $registry;
 
@@ -68,7 +68,7 @@ class Field
     /**
      * Construct a new field.
      *
-     * @param \Bakery\TypeRegistry $registry
+     * @param \Bakery\Support\TypeRegistry $registry
      * @param \Bakery\Types\Definitions\Type|null $type
      */
     public function __construct(TypeRegistry $registry, Type $type = null)
@@ -81,7 +81,7 @@ class Field
     }
 
     /**
-     * @return \Bakery\TypeRegistry
+     * @return \Bakery\Support\TypeRegistry
      */
     public function getRegistry(): TypeRegistry
     {
@@ -89,8 +89,8 @@ class Field
     }
 
     /**
-     * @param \Bakery\TypeRegistry $registry
-     * @return \Bakery\Fields\Field
+     * @param \Bakery\Support\TypeRegistry $registry
+     * @return $this
      */
     public function setRegistry(TypeRegistry $registry): self
     {
@@ -100,6 +100,9 @@ class Field
     }
 
     /**
+     * Define the type of the field.
+     * This method can be overridden.
+     *
      * @return \Bakery\Types\Definitions\Type
      */
     protected function type(): Type
@@ -148,7 +151,7 @@ class Field
      * Set the name of the type.
      *
      * @param string $name
-     * @return \Bakery\Fields\Field
+     * @return $this
      */
     public function setName(string $name): self
     {
@@ -171,7 +174,7 @@ class Field
      * Set the description of the field.
      *
      * @param string $description
-     * @return \Bakery\Fields\Field
+     * @return $this
      */
     public function description(string $description): self
     {
@@ -182,7 +185,7 @@ class Field
 
     /**
      * @param bool $list
-     * @return \Bakery\Fields\Field
+     * @return $this
      */
     public function list(bool $list = true): self
     {
@@ -203,7 +206,7 @@ class Field
      * Set if the field is nullable.
      *
      * @param bool $nullable
-     * @return \Bakery\Fields\Field
+     * @return $this
      */
     public function nullable(bool $nullable = true): self
     {
@@ -226,11 +229,23 @@ class Field
      * Set if the field is fillable.
      *
      * @param bool $fillable
-     * @return \Bakery\Fields\Field
+     * @return $this
      */
     public function fillable(bool $fillable = true): self
     {
         $this->fillable = $fillable;
+
+        return $this;
+    }
+
+    /**
+     * Set the field to read only.
+     *
+     * @return $this
+     */
+    public function readOnly(): self
+    {
+        $this->fillable(false);
 
         return $this;
     }
@@ -285,7 +300,7 @@ class Field
      * Set the store policy with a callable.
      *
      * @param callable $closure
-     * @return \Bakery\Fields\Field
+     * @return $this
      */
     public function canStore(callable $closure): self
     {
@@ -296,7 +311,7 @@ class Field
      * Set the store policy with a reference to a policy method.
      *
      * @param string $policy
-     * @return \Bakery\Fields\Field
+     * @return $this
      */
     public function canStoreWhen(string $policy): self
     {
@@ -307,7 +322,7 @@ class Field
      * Set the view policy.
      *
      * @param $policy
-     * @return \Bakery\Fields\Field
+     * @return $this
      */
     public function viewPolicy($policy): self
     {
@@ -320,7 +335,7 @@ class Field
      * Set the store policy with a callable.
      *
      * @param callable $closure
-     * @return \Bakery\Fields\Field
+     * @return $this
      */
     public function canSee(callable $closure = null): self
     {
@@ -331,7 +346,7 @@ class Field
      * Set the store policy with a reference to a policy method.
      *
      * @param string $policy
-     * @return \Bakery\Fields\Field
+     * @return $this
      */
     public function canSeeWhen(string $policy): self
     {
@@ -350,7 +365,7 @@ class Field
      * Set the resolver.
      *
      * @param $resolver
-     * @return \Bakery\Fields\Field
+     * @return $this
      */
     public function resolve(callable $resolver): self
     {
@@ -492,9 +507,14 @@ class Field
         return $property instanceof \Closure ? $property($source, $args, $context, $info) : $property;
     }
 
+    /**
+     * Invoked when the object is being serialized.
+     * Returns the field that should be serialized.
+     *
+     * @return array
+     */
     public function __sleep()
     {
         return ['registry'];
     }
-
 }

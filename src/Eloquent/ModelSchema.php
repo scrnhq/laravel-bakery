@@ -4,7 +4,7 @@ namespace Bakery\Eloquent;
 
 use Bakery\Utils\Utils;
 use Bakery\Fields\Field;
-use Bakery\TypeRegistry;
+use Bakery\Support\TypeRegistry;
 use Bakery\Fields\EloquentField;
 use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Model;
@@ -24,7 +24,7 @@ abstract class ModelSchema
     protected $schema;
 
     /**
-     * @var \Bakery\TypeRegistry
+     * @var \Bakery\Support\TypeRegistry
      */
     protected $registry;
 
@@ -68,7 +68,7 @@ abstract class ModelSchema
     /**
      * ModelSchema constructor.
      *
-     * @param \Bakery\TypeRegistry $registry
+     * @param \Bakery\Support\TypeRegistry $registry
      * @param \Illuminate\Database\Eloquent\Model|null $instance
      */
     public function __construct(TypeRegistry $registry, Model $instance = null)
@@ -157,7 +157,11 @@ abstract class ModelSchema
      */
     public function authorize(string $policy, $attributes = null)
     {
-        $allowed = $this->getGate()->allows($policy, [$this->instance, $attributes]);
+        // If the instance on the model schema does not exist or has not been modified we don't want to use it for
+        // authorization checks. This usually happens if we have to check if an instance can be created at all.
+        $model = $this->instance->exists || $this->instance->isDirty() ? $this->instance : get_class($this->instance);
+
+        $allowed = $this->getGate()->allows($policy, [$model, $attributes]);
 
         if (! $allowed) {
             throw new AuthorizationException(
@@ -340,7 +344,7 @@ abstract class ModelSchema
     }
 
     /**
-     * @return \Bakery\TypeRegistry
+     * @return \Bakery\Support\TypeRegistry
      */
     public function getRegistry(): TypeRegistry
     {
@@ -348,7 +352,7 @@ abstract class ModelSchema
     }
 
     /**
-     * @param \Bakery\TypeRegistry $registry
+     * @param \Bakery\Support\TypeRegistry $registry
      */
     public function setRegistry(TypeRegistry $registry): void
     {

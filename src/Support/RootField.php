@@ -3,14 +3,14 @@
 namespace Bakery\Support;
 
 use Bakery\Utils\Utils;
-use Bakery\TypeRegistry;
+use Bakery\Support\TypeRegistry;
 use Bakery\Types\Definitions\Type;
 use GraphQL\Type\Definition\Type as GraphQLType;
 
 abstract class RootField
 {
     /**
-     * @var \Bakery\TypeRegistry
+     * @var \Bakery\Support\TypeRegistry
      */
     protected $registry;
 
@@ -45,7 +45,7 @@ abstract class RootField
     /**
      * RootField constructor.
      *
-     * @param \Bakery\TypeRegistry $registry
+     * @param \Bakery\Support\TypeRegistry $registry
      */
     public function __construct(TypeRegistry $registry)
     {

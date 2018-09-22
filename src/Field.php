@@ -2,6 +2,7 @@
 
 namespace Bakery;
 
+use Bakery\Support\TypeRegistry;
 use Bakery\Fields\PolymorphicField;
 
 class Field

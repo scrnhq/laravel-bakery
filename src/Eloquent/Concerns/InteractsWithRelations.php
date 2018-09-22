@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Relations;
 trait InteractsWithRelations
 {
     /**
-     * @var \Bakery\TypeRegistry
+     * @var \Bakery\Support\TypeRegistry
      */
     protected $registry;
 

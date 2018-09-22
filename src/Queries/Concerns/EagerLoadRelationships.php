@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Builder;
 trait EagerLoadRelationships
 {
     /**
-     * @var \Bakery\TypeRegistry
+     * @var \Bakery\Support\TypeRegistry
      */
     protected $registry;
 

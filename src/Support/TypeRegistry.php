@@ -1,6 +1,6 @@
 <?php
 
-namespace Bakery;
+namespace Bakery\Support;
 
 use Bakery\Utils\Utils;
 use Bakery\Fields\Field;

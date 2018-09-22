@@ -3,7 +3,7 @@
 namespace Bakery\Fields;
 
 use Bakery\Utils\Utils;
-use Bakery\TypeRegistry;
+use Bakery\Support\TypeRegistry;
 use Bakery\Types\Definitions\Type;
 
 class PolymorphicField extends Field
@@ -25,7 +25,7 @@ class PolymorphicField extends Field
     /**
      * PolymorphicType constructor.
      *
-     * @param \Bakery\TypeRegistry $registry
+     * @param \Bakery\Support\TypeRegistry $registry
      * @param array $modelSchemas
      */
     public function __construct(TypeRegistry $registry, array $modelSchemas = [])

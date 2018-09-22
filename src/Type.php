@@ -2,6 +2,7 @@
 
 namespace Bakery;
 
+use Bakery\Support\TypeRegistry;
 use Bakery\Types\Definitions\InternalType;
 
 class Type
@@ -55,11 +56,25 @@ class Type
     }
 
     /**
+     * Create a new type by reference.
+     *
      * @param string $name
      * @return \Bakery\Types\Definitions\Type
      */
-    public static function type(string $name): Types\Definitions\Type
+    public static function of(string $name): Types\Definitions\Type
     {
         return self::getRegistry()->type($name);
+    }
+
+    /**
+     * Create a new type for a model schema.
+     *
+     * @param string $class
+     * @return \Bakery\Types\Definitions\Type
+     */
+    public static function modelSchema(string $class): Types\Definitions\Type
+    {
+        $modelSchema = self::getRegistry()->getModelSchema($class);
+        return self::getRegistry()->type($modelSchema->getTypename());
     }
 }

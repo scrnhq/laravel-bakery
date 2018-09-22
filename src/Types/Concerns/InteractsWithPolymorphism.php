@@ -14,7 +14,7 @@ trait InteractsWithPolymorphism
     protected $modelSchemas;
 
     /**
-     * @var \Bakery\TypeRegistry
+     * @var \Bakery\Support\TypeRegistry
      */
     protected $registry;
 

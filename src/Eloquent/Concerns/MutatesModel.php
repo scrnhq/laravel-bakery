@@ -64,15 +64,16 @@ trait MutatesModel
      * Update the model with GraphQL input.
      *
      * @param array $input
-     * @return $this
-     * @throws \Throwable
+     * @return \Illuminate\Database\Eloquent\Model
      */
-    public function update(array $input = [])
+    public function update(array $input = []): Model
     {
-        $this->fill($input);
-        $this->save();
+        return DB::transaction(function () use ($input) {
+            $this->fill($input);
+            $this->save();
 
-        return $this;
+            return $this->instance;
+        });
     }
 
     /**
@@ -104,15 +105,19 @@ trait MutatesModel
      *
      * @return $this
      */
-    public function save()
+    public function save(): self
     {
         $this->instance->save();
 
-        //$this->instance->fireModelEvent('persisting');
+        if (method_exists($this->instance, 'firePersistingEvent')) {
+            $this->instance->firePersistingEvent();
+        }
 
         $this->persistQueuedDatabaseTransactions();
 
-        //$this->instance->fireModelEvent('persisted');
+        if (method_exists($this->instance, 'firePersistedEvent')) {
+            $this->instance->firePersistedEvent();
+        }
 
         return $this;
     }

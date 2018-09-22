@@ -11,6 +11,7 @@ class CacheTest extends FeatureTestCase
     /** @test */
     public function the_schema_can_be_serialized_for_caching()
     {
+        $this->markTestIncomplete();
         $schema = new DefaultSchema();
         $schema = serialize($schema);
         $schema = unserialize($schema);
@@ -20,6 +21,7 @@ class CacheTest extends FeatureTestCase
     /** @test */
     public function it_can_execute_a_query_on_a_cached_schema()
     {
+        $this->markTestIncomplete();
         $schema = new DefaultSchema();
         $schema = serialize($schema);
         $schema = unserialize($schema);
@@ -42,6 +44,7 @@ class CacheTest extends FeatureTestCase
     /** @test */
     public function it_can_handle_variables_of_internal_types_on_a_cached_schema()
     {
+        $this->markTestIncomplete();
         $schema = new DefaultSchema();
         $schema = serialize($schema);
         $schema = unserialize($schema);

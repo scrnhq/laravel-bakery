@@ -2,7 +2,7 @@
 
 namespace Bakery\Types\Definitions;
 
-use Bakery\TypeRegistry;
+use Bakery\Support\TypeRegistry;
 use GraphQL\Type\Definition\ScalarType;
 
 class InternalType extends Type
@@ -10,7 +10,7 @@ class InternalType extends Type
     /**
      * BaseType constructor.
      *
-     * @param \Bakery\TypeRegistry $registry
+     * @param \Bakery\Support\TypeRegistry $registry
      * @param \GraphQL\Type\Definition\ScalarType $type
      */
     public function __construct(TypeRegistry $registry, ScalarType $type)

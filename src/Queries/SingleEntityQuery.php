@@ -43,11 +43,7 @@ class SingleEntityQuery extends EloquentQuery
      */
     public function args(): array
     {
-        $args = $this->modelSchema->getLookupFields()->map(function (Field $field) {
-            return $field->getType();
-        })->toArray();
-
-        return $args;
+        return $this->modelSchema->getLookupTypes()->toArray();
     }
 
     /**

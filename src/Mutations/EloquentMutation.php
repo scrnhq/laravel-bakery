@@ -3,7 +3,7 @@
 namespace Bakery\Mutations;
 
 use Bakery\Utils\Utils;
-use Bakery\TypeRegistry;
+use Bakery\Support\TypeRegistry;
 use Bakery\Eloquent\ModelSchema;
 use Bakery\Types\Definitions\Type;
 use Illuminate\Database\Eloquent\Model;
@@ -26,7 +26,7 @@ abstract class EloquentMutation extends Mutation
     /**
      * EloquentMutation constructor.
      *
-     * @param \Bakery\TypeRegistry $registry
+     * @param \Bakery\Support\TypeRegistry $registry
      * @param \Bakery\Eloquent\ModelSchema $modelSchema
      */
     public function __construct(TypeRegistry $registry, ModelSchema $modelSchema = null)

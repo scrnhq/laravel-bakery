@@ -3,14 +3,11 @@
 namespace Bakery\Types;
 
 use Bakery\Fields\Field;
-use Bakery\Concerns\ModelSchemaAware;
 use Bakery\Types\Definitions\EloquentType;
 use Bakery\Types\Definitions\EloquentInputType;
 
 class CollectionSearchType extends EloquentInputType
 {
-    use ModelSchemaAware;
-
     /**
      * Get the name of the Collection Search BakeField.
      *

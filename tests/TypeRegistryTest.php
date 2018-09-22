@@ -2,7 +2,7 @@
 
 namespace Bakery\Tests;
 
-use Bakery\TypeRegistry;
+use Bakery\Support\TypeRegistry;
 use Bakery\Support\DefaultSchema;
 use Bakery\Exceptions\TypeNotFound;
 use Bakery\Tests\Stubs\Models\User;
@@ -16,7 +16,7 @@ class TypeRegistryTest extends FeatureTestCase
     private $schema;
 
     /**
-     * @var \Bakery\TypeRegistry
+     * @var \Bakery\Support\TypeRegistry
      */
     private $registry;
 

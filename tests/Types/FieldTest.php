@@ -16,7 +16,7 @@ class FieldTest extends FeatureTestCase
     private $schema;
 
     /**
-     * @var \Bakery\TypeRegistry
+     * @var \Bakery\Support\TypeRegistry
      */
     private $registry;
 

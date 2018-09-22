@@ -2,7 +2,7 @@
 
 namespace Bakery\Types\Definitions;
 
-use Bakery\TypeRegistry;
+use Bakery\Support\TypeRegistry;
 use GraphQL\Type\Definition\NamedType as GraphQLNamedType;
 
 class ReferenceType extends Type
@@ -17,7 +17,7 @@ class ReferenceType extends Type
     /**
      * BaseType constructor.
      *
-     * @param \Bakery\TypeRegistry $registry
+     * @param \Bakery\Support\TypeRegistry $registry
      * @param string $reference
      */
     public function __construct(TypeRegistry $registry, string $reference)

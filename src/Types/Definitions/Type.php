@@ -3,7 +3,7 @@
 namespace Bakery\Types\Definitions;
 
 use Bakery\Utils\Utils;
-use Bakery\TypeRegistry;
+use Bakery\Support\TypeRegistry;
 use Illuminate\Contracts\Auth\Access\Gate;
 use GraphQL\Type\Definition\Type as GraphQLType;
 use GraphQL\Type\Definition\NamedType as GraphQLNamedType;
@@ -11,7 +11,7 @@ use GraphQL\Type\Definition\NamedType as GraphQLNamedType;
 class Type
 {
     /**
-     * @var \Bakery\TypeRegistry
+     * @var \Bakery\Support\TypeRegistry
      */
     protected $registry;
 
@@ -63,7 +63,7 @@ class Type
     /**
      * Construct a new type.
      *
-     * @param \Bakery\TypeRegistry $registry
+     * @param \Bakery\Support\TypeRegistry $registry
      * @param \GraphQL\Type\Definition\Type $type
      */
     public function __construct(TypeRegistry $registry, GraphQLType $type = null)
@@ -78,7 +78,7 @@ class Type
     /**
      * Get the type registry.
      *
-     * @return \Bakery\TypeRegistry
+     * @return \Bakery\Support\TypeRegistry
      */
     public function getRegistry(): TypeRegistry
     {
@@ -88,7 +88,7 @@ class Type
     /**
      * Set the type registry.
      *
-     * @param \Bakery\TypeRegistry $registry
+     * @param \Bakery\Support\TypeRegistry $registry
      * @return \Bakery\Types\Definitions\Type
      */
     public function setRegistry(TypeRegistry $registry): self

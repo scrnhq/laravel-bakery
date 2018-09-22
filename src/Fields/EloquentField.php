@@ -2,7 +2,7 @@
 
 namespace Bakery\Fields;
 
-use Bakery\TypeRegistry;
+use Bakery\Support\TypeRegistry;
 use Bakery\Eloquent\ModelSchema;
 use Bakery\Types\Definitions\Type;
 
@@ -16,7 +16,7 @@ class EloquentField extends Field
     /**
      * EloquentField constructor.
      *
-     * @param \Bakery\TypeRegistry $registry
+     * @param \Bakery\Support\TypeRegistry $registry
      * @param string $class
      */
     public function __construct(TypeRegistry $registry, string $class)
