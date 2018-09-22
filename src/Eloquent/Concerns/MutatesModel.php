@@ -48,6 +48,21 @@ trait MutatesModel
     }
 
     /**
+     * Create a model after checking if the user is authorised to do so.
+     *
+     * @param array $input
+     * @return \Illuminate\Database\Eloquent\Model
+     */
+    public function createIfAuthorized(array $input = []): Model
+    {
+        return DB::transaction(function () use ($input) {
+            $this->create($input);
+            $this->authorize('create');
+            return $this->instance;
+        });
+    }
+
+    /**
      * @param array $input
      * @return \Illuminate\Database\Eloquent\Model
      * @throws \Illuminate\Auth\Access\AuthorizationException
@@ -72,6 +87,21 @@ trait MutatesModel
             $this->fill($input);
             $this->save();
 
+            return $this->instance;
+        });
+    }
+
+    /**
+     * Update a model after checking if the user is authorised to do so.
+     *
+     * @param array $input
+     * @return \Illuminate\Database\Eloquent\Model
+     */
+    public function updateIfAuthorized(array $input = []): Model
+    {
+        return DB::transaction(function () use ($input) {
+            $this->update($input);
+            $this->authorize('update');
             return $this->instance;
         });
     }

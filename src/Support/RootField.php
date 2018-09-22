@@ -205,29 +205,26 @@ abstract class RootField
         return $this->getAttributes();
     }
 
-    public function serialize()
-    {
-        $attributes = $this->getAttributes();
-        $attributes['args'] = $this->args();
-
-        return $attributes;
-    }
-
     /**
-     * Indicates which fields should be serialized.
+     * Get the registry.
      *
-     * @return array
+     * @return \Bakery\Support\TypeRegistry
      */
-    public function __sleep()
+    public function getRegistry(): \Bakery\Support\TypeRegistry
     {
-        return ['registry'];
+        return $this->registry;
     }
 
     /**
-     * Called when the object is unserialized.
+     * Set the registry on the root field.
+     *
+     * @param \Bakery\Support\TypeRegistry $registry
+     * @return $this
      */
-    public function __wakeup()
+    public function setRegistry(TypeRegistry $registry): self
     {
-        //
+        $this->registry = $registry;
+
+        return $this;
     }
 }

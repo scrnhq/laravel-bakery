@@ -8,15 +8,14 @@ use Bakery\Fields\EloquentField;
 use Bakery\Support\TypeRegistry;
 use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
 use Bakery\Eloquent\Concerns\MutatesModel;
 use Illuminate\Contracts\Auth\Access\Gate;
-use Bakery\Eloquent\Concerns\InteractsWithQueries;
 use Illuminate\Auth\Access\AuthorizationException;
 
 abstract class ModelSchema
 {
     use MutatesModel;
-    use InteractsWithQueries;
 
     /**
      * @var \Bakery\Support\Schema
@@ -100,6 +99,28 @@ abstract class ModelSchema
     }
 
     /**
+     * Define the fields of the model.
+     * This method can be overridden.
+     *
+     * @return array
+     */
+    public function fields(): array
+    {
+        return [];
+    }
+
+    /**
+     * Define the relation fields of the schema.
+     * This method can be overridden.
+     *
+     * @return array
+     */
+    public function relations(): array
+    {
+        return [];
+    }
+
+    /**
      * Get the class of the model.
      *
      * @return string
@@ -148,27 +169,7 @@ abstract class ModelSchema
         return $this->getTypename();
     }
 
-    /**
-     * Check if the user is authorised to perform an action on the model.
-     *
-     * @param string $policy
-     * @param array $attributes
-     * @throws AuthorizationException
-     */
-    public function authorize(string $policy, $attributes = null)
-    {
-        // If the instance on the model schema does not exist or has not been modified we don't want to use it for
-        // authorization checks. This usually happens if we have to check if an instance can be created at all.
-        $model = $this->instance->exists || $this->instance->isDirty() ? $this->instance : get_class($this->instance);
 
-        $allowed = $this->getGate()->allows($policy, [$model, $attributes]);
-
-        if (! $allowed) {
-            throw new AuthorizationException(
-                'Not allowed to perform '.$policy.' on '.$this->getModelClass()
-            );
-        }
-    }
 
     /**
      * Get the key (ID) field.
@@ -182,16 +183,7 @@ abstract class ModelSchema
         return [$key => $this->registry->field($this->registry->ID())->fillable(false)->unique()];
     }
 
-    /**
-     * Define the fields of the model.
-     * This method can be overridden.
-     *
-     * @return array
-     */
-    public function fields(): array
-    {
-        return [];
-    }
+
 
     /**
      * Get all the readable fields.
@@ -264,16 +256,6 @@ abstract class ModelSchema
         });
     }
 
-    /**
-     * Define the relation fields of the schema.
-     * This method can be overridden.
-     *
-     * @return array
-     */
-    public function relations(): array
-    {
-        return [];
-    }
 
     /**
      * Get the relational fields.
@@ -333,17 +315,31 @@ abstract class ModelSchema
         });
     }
 
-    public function __sleep()
+    /**
+     * Check if the user is authorised to perform an action on the model.
+     *
+     * @param string $policy
+     * @param array $attributes
+     * @throws AuthorizationException
+     */
+    public function authorize(string $policy, $attributes = null)
     {
-        return ['registry'];
-    }
+        // If the instance on the model schema does not exist or has not been modified we don't want to use it for
+        // authorization checks. This usually happens if we have to check if an instance can be created at all.
+        $model = $this->instance->exists || $this->instance->isDirty() ? $this->instance : get_class($this->instance);
 
-    public function __wakeup()
-    {
-        //
+        $allowed = $this->getGate()->allows($policy, [$model, $attributes]);
+
+        if (! $allowed) {
+            throw new AuthorizationException(
+                'Not allowed to perform '.$policy.' on '.$this->getModelClass()
+            );
+        }
     }
 
     /**
+     * Get the registry of the model schema.
+     *
      * @return \Bakery\Support\TypeRegistry
      */
     public function getRegistry(): TypeRegistry
@@ -352,6 +348,8 @@ abstract class ModelSchema
     }
 
     /**
+     * Set the registry of the model schema.
+     *
      * @param \Bakery\Support\TypeRegistry $registry
      */
     public function setRegistry(TypeRegistry $registry): void
@@ -371,5 +369,33 @@ abstract class ModelSchema
         }
 
         return $this->gate;
+    }
+
+    /**
+     * Boot the query builder on the underlying model.
+     *
+     * @return Builder
+     */
+    public function getQuery(): Builder
+    {
+        /** @var \Illuminate\Database\Eloquent\Model $model */
+        $model = $this->getModel();
+
+        return $this->scopeQuery($model->newQuery());
+    }
+
+    /**
+     * Scope the query on the model schema. This method can be overridden to always
+     * scope the query when executing queries/mutations on this schema.
+     *
+     * Note that this does not work for relations, in these cases you
+     * should consider using Laravel's global scopes.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    protected function scopeQuery(Builder $query): Builder
+    {
+        return $query;
     }
 }
