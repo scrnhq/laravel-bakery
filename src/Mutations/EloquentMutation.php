@@ -3,8 +3,8 @@
 namespace Bakery\Mutations;
 
 use Bakery\Utils\Utils;
-use Bakery\Support\TypeRegistry;
 use Bakery\Eloquent\ModelSchema;
+use Bakery\Support\TypeRegistry;
 use Bakery\Types\Definitions\Type;
 use Illuminate\Database\Eloquent\Model;
 use GraphQL\Type\Definition\ResolveInfo;

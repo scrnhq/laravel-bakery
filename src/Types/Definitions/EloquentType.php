@@ -2,8 +2,8 @@
 
 namespace Bakery\Types\Definitions;
 
-use Bakery\Support\TypeRegistry;
 use Bakery\Eloquent\ModelSchema;
+use Bakery\Support\TypeRegistry;
 
 class EloquentType extends ObjectType
 {

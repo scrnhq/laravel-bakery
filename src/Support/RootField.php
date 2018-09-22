@@ -3,7 +3,6 @@
 namespace Bakery\Support;
 
 use Bakery\Utils\Utils;
-use Bakery\Support\TypeRegistry;
 use Bakery\Types\Definitions\Type;
 use GraphQL\Type\Definition\Type as GraphQLType;
 

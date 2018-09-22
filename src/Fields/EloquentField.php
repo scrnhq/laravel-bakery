@@ -2,8 +2,8 @@
 
 namespace Bakery\Fields;
 
-use Bakery\Support\TypeRegistry;
 use Bakery\Eloquent\ModelSchema;
+use Bakery\Support\TypeRegistry;
 use Bakery\Types\Definitions\Type;
 
 class EloquentField extends Field

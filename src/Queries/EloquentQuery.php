@@ -3,8 +3,8 @@
 namespace Bakery\Queries;
 
 use Bakery\Utils\Utils;
-use Bakery\Support\TypeRegistry;
 use Bakery\Eloquent\ModelSchema;
+use Bakery\Support\TypeRegistry;
 use Bakery\Traits\JoinsRelationships;
 use Illuminate\Database\Eloquent\Builder;
 use Bakery\Queries\Concerns\EagerLoadRelationships;

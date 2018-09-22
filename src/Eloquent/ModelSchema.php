@@ -4,8 +4,8 @@ namespace Bakery\Eloquent;
 
 use Bakery\Utils\Utils;
 use Bakery\Fields\Field;
-use Bakery\Support\TypeRegistry;
 use Bakery\Fields\EloquentField;
+use Bakery\Support\TypeRegistry;
 use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Bakery\Eloquent\Concerns\MutatesModel;

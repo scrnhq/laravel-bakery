@@ -75,6 +75,7 @@ class Type
     public static function modelSchema(string $class): Types\Definitions\Type
     {
         $modelSchema = self::getRegistry()->getModelSchema($class);
+
         return self::getRegistry()->type($modelSchema->getTypename());
     }
 }

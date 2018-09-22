@@ -3,7 +3,6 @@
 namespace Bakery\Queries;
 
 use Bakery\Utils\Utils;
-use Bakery\Fields\Field;
 use Bakery\Types\Definitions\Type;
 use Illuminate\Database\Eloquent\Model;
 use GraphQL\Type\Definition\ResolveInfo;
