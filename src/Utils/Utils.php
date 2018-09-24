@@ -3,7 +3,6 @@
 namespace Bakery\Utils;
 
 use Bakery\Exceptions\InvariantViolation;
-use Illuminate\Database\Eloquent\Relations;
 
 class Utils
 {
