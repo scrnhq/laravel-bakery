@@ -20,9 +20,7 @@
     "php": "^7.1",
     "laravel/framework": "5.6.*",
     "webonyx/graphql-php": "^0.12.5",
-    "ext-json": "*",
-    "opis/closure": "^3.0",
-    "ext-http": "*"
+    "ext-json": "*"
   },
   "require-dev": {
     "orchestra/database": "^3.4",
