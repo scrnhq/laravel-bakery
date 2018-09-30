@@ -2,10 +2,13 @@
 
 namespace Bakery\Tests\Stubs\Models;
 
+use Bakery\Eloquent\Traits\BakeryTransactionalAware;
 use Illuminate\Database\Eloquent\Model;
 
 class Article extends Model
 {
+    use BakeryTransactionalAware;
+
     protected $casts = [
         'id' => 'string',
     ];

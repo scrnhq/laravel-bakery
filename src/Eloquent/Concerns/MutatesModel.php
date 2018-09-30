@@ -32,6 +32,26 @@ trait MutatesModel
     }
 
     /**
+     * Execute a callable in a database transaction and inform the model about that.
+     *
+     * @param callable $callback
+     * @return mixed
+     */
+    public function transaction(callable $callback) {
+        if (method_exists($this->getInstance(), 'startTransaction')) {
+            $this->getInstance()->startTransaction();
+        }
+
+        $result = DB::transaction($callback);
+
+        if (method_exists($this->getInstance(), 'endTransaction')) {
+            $this->getInstance()->endTransaction();
+        }
+
+        return $result;
+    }
+
+    /**
      * Create a new instance with GraphQL input.
      *
      * @param array $input
@@ -39,10 +59,9 @@ trait MutatesModel
      */
     public function create(array $input = []): Model
     {
-        return DB::transaction(function () use ($input) {
+        return $this->transaction(function () use ($input) {
             $this->make($input);
             $this->save();
-
             return $this->instance;
         });
     }
@@ -55,12 +74,9 @@ trait MutatesModel
      */
     public function createIfAuthorized(array $input = []): Model
     {
-        return DB::transaction(function () use ($input) {
-            $this->create($input);
-            $this->authorize('create');
-
-            return $this->instance;
-        });
+        $this->create($input);
+        $this->authorize('create');
+        return $this->instance;
     }
 
     /**
@@ -84,7 +100,7 @@ trait MutatesModel
      */
     public function update(array $input = []): Model
     {
-        return DB::transaction(function () use ($input) {
+        return $this->transaction(function () use ($input) {
             $this->fill($input);
             $this->save();
 
@@ -100,12 +116,9 @@ trait MutatesModel
      */
     public function updateIfAuthorized(array $input = []): Model
     {
-        return DB::transaction(function () use ($input) {
-            $this->authorize('update');
-            $this->update($input);
-
-            return $this->instance;
-        });
+        $this->authorize('update');
+        $this->update($input);
+        return $this->instance;
     }
 
     /**
@@ -141,15 +154,7 @@ trait MutatesModel
     {
         $this->instance->save();
 
-        if (method_exists($this->instance, 'firePersistingEvent')) {
-            $this->instance->firePersistingEvent();
-        }
-
         $this->persistQueuedDatabaseTransactions();
-
-        if (method_exists($this->instance, 'firePersistedEvent')) {
-            $this->instance->firePersistedEvent();
-        }
 
         return $this;
     }

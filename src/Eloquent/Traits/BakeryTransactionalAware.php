@@ -5,8 +5,10 @@ namespace Bakery\Eloquent\Traits;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Database\Eloquent\Model;
 
-trait BakeryEvents
+trait BakeryTransactionalAware
 {
+    protected $inTransaction = false;
+
     /**
      * Fire the given event for the model.
      *
@@ -21,7 +23,7 @@ trait BakeryEvents
      *
      * @return void
      */
-    public static function bootBakeryEvents()
+    public static function bootBakeryTransactionalAware()
     {
         Event::listen('eloquent.booted: '.static::class, function (Model $model) {
             $model->addObservableEvents(['persisting', 'persisted']);
@@ -29,22 +31,34 @@ trait BakeryEvents
     }
 
     /**
-     * Fire an event when the model is being persisted.
+     * Start the transaction for this model.
      *
      * @return void
      */
-    public function firePersistingEvent()
+    public function startTransaction()
     {
+        $this->inTransaction = true;
         $this->fireModelEvent('persisting');
     }
 
     /**
-     * Fire an event when the model is persisted.
+     * End the transaction for this model.
      *
      * @return void
      */
-    public function firePersistedEvent()
+    public function endTransaction()
     {
+        $this->inTransaction = false;
         $this->fireModelEvent('persisted');
+    }
+
+    /**
+     * Return if the model is currently in transaction.
+     *
+     * @return bool
+     */
+    public function inTransaction(): bool
+    {
+        return $this->inTransaction;
     }
 }
