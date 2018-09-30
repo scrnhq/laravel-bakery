@@ -2,8 +2,8 @@
 
 namespace Bakery\Tests\Stubs\Models;
 
-use Bakery\Eloquent\Traits\BakeryTransactionalAware;
 use Illuminate\Database\Eloquent\Model;
+use Bakery\Eloquent\Traits\BakeryTransactionalAware;
 
 class Article extends Model
 {

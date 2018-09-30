@@ -3,9 +3,9 @@
 namespace Bakery\Tests;
 
 use Bakery\Support\DefaultSchema;
-use Bakery\Tests\Stubs\Models\Article;
 use Bakery\Tests\Stubs\Models\User;
 use Illuminate\Support\Facades\Event;
+use Bakery\Tests\Stubs\Models\Article;
 
 class BakeryTransactionalAwareTest extends FeatureTestCase
 {
@@ -45,7 +45,7 @@ class BakeryTransactionalAwareTest extends FeatureTestCase
             'title' => $article->title,
             'slug' => $article->slug,
             'content' => $article->content,
-            'userId' => $user->id
+            'userId' => $user->id,
         ]);
 
         Event::assertDispatched('eloquent.persisting: '.Article::class, 1);
