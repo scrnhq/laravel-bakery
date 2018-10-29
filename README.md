@@ -31,10 +31,10 @@ composer require scrnhq/laravel-bakery
 
 or require in _composer.json_:
 
-```js
+```json
 {
     "require": {
-        "scrnhq/laravel-bakery": "^1.0"
+        "scrnhq/laravel-bakery": "^2.0"
     }
 }
 ```
@@ -179,7 +179,7 @@ class Article extends Model
     public function fields()
     {
         return [
-            'title' => Type::string();
+            'title' => Type::string(),
         ];
     }
 }
