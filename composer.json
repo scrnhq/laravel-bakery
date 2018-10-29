@@ -19,11 +19,11 @@
   "require": {
     "php": "^7.1",
     "laravel/framework": "5.7.*",
-    "webonyx/graphql-php": "^0.12.5"
+    "webonyx/graphql-php": "^0.12.5",
+    "mockery/mockery": "^1.2"
   },
   "require-dev": {
-    "orchestra/database": "^3.4",
-    "orchestra/testbench": "^3.4",
+    "orchestra/testbench": "~3.0",
     "phpunit/phpunit": "^7.1"
   },
   "autoload": {

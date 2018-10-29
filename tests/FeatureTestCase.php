@@ -7,7 +7,6 @@ use Bakery\BakeryServiceProvider;
 use Bakery\Support\Facades\Bakery;
 use Illuminate\Contracts\Auth\Access\Gate;
 use Bakery\Tests\Stubs\Types\TimestampType;
-use Orchestra\Database\ConsoleServiceProvider;
 use Illuminate\Foundation\Testing\Concerns\InteractsWithDatabase;
 
 class FeatureTestCase extends TestCase
@@ -66,7 +65,6 @@ class FeatureTestCase extends TestCase
     {
         return [
             BakeryServiceProvider::class,
-            ConsoleServiceProvider::class,
         ];
     }
 
