@@ -20,6 +20,7 @@ An on-the-fly GraphQL Schema generator from Eloquent models for Laravel.
 | 5.4.x   | 1.0.x  |
 | 5.5.x   | 1.0.x  |
 | 5.6.x   | 2.0.x  |
+| 5.7.x   | 2.0.x  |
 
 ## Installation
 
