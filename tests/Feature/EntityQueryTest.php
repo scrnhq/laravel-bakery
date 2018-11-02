@@ -119,6 +119,32 @@ class EntityQueryTest extends FeatureTestCase
     }
 
     /** @test */
+    public function it_can_filter_a_relation()
+    {
+        $user = factory(Models\User::class)->create();
+        $article = factory(Models\Article::class)->create(['user_id' => $user->id]);
+
+        factory(Models\Comment::class)->create(['article_id' => $article->id, 'body' => 'Cool story']);
+        factory(Models\Comment::class)->create(['article_id' => $article->id, 'body' => 'Boo!']);
+
+        $query = '
+            query {
+                article {
+                    id
+                    comments(filter: { body: "Cool story"}) {
+                        id
+                        body
+                    }
+                }
+            }
+        ';
+
+        $response = $this->json('GET', '/graphql', ['query' => $query]);
+        $response->assertJsonFragment(['body' => 'Cool story'])
+            ->assertJsonMissing(['body' => 'Boo!']);
+    }
+
+    /** @test */
     public function it_checks_if_the_viewer_is_not_allowed_to_read_a_field()
     {
         $this->withExceptionHandling();

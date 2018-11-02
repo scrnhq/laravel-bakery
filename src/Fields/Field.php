@@ -18,7 +18,12 @@ class Field
     /**
      * @var \GraphQL\Type\Definition\Type
      */
-    private $type;
+    protected $type;
+
+    /**
+     * @var array
+     */
+    protected $args;
 
     /**
      * @var string
@@ -181,6 +186,29 @@ class Field
         $this->description = $description;
 
         return $this;
+    }
+
+    /**
+     * Set the args of the field.
+     *
+     * @param array $args
+     * @return $this
+     */
+    public function args(array $args): self
+    {
+        $this->args = $args;
+
+        return $this;
+    }
+
+    /**
+     * Get the args of the field.
+     *
+     * @return array
+     */
+    public function getArgs(): array
+    {
+        return $this->args ?? [];
     }
 
     /**
@@ -475,6 +503,9 @@ class Field
     {
         return [
             'type' => $this->getType()->toType(),
+            'args' => collect($this->getArgs())->map(function (Type $type) {
+                return $type->toType();
+            })->toArray(),
             'resolve' => [$this, 'resolveField'],
             'description' => $this->getDescription(),
         ];
