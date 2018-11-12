@@ -29,7 +29,7 @@ Install via composer:
 composer require scrnhq/laravel-bakery
 ```
 
-or require in _composer.json_:
+or require in `composer.json`:
 
 ```json
 {
@@ -40,14 +40,6 @@ or require in _composer.json_:
 ```
 
 then run `composer update` in your terminal to install Bakery.
-
-Once this has finished, you will need to add the service provider to the providers array in your `app.php` config as follows:
-
-**This package supports Laravel's package auto-discovery; if you are using Laravel 5.5 or above you can skip this step.**
-
-```php
-Bakery\BakeryServiceProvider::class,
-```
 
 ## Quickstart
 
@@ -62,10 +54,10 @@ Here we can start defining the model schemas for our models. Model schemas are c
 relationships and behaviour for your models that Bakery uses to set up a GraphQL schema.
 
 Let's start by creating a model schema! You can put these wherever you want, for example you can put them in a
-`ModelSchemas` directory. 
+`Bakery` directory. 
 
 ```php
-namespace App\ModelSchemas\UserSchema;
+namespace App\Bakery;
 
 use App\User;
 use Bakery\Eloquent\ModelSchema;

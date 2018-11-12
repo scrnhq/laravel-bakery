@@ -1,6 +1,6 @@
 <?php
 
-namespace Bakery\Http\Controller;
+namespace Bakery\Http\Controllers;
 
 use Bakery\Bakery;
 use GraphQL\Error\Debug;
@@ -11,16 +11,6 @@ use Illuminate\Contracts\Debug\ExceptionHandler;
 
 class BakeryController extends Controller
 {
-    /**
-     * Construct the GraphQL controller.
-     *
-     * @param Request $request
-     */
-    public function __construct(Request $request)
-    {
-        //
-    }
-
     protected function isExceptionHandlingDisabled()
     {
         $handler = app(ExceptionHandler::class);
@@ -73,6 +63,6 @@ class BakeryController extends Controller
             abort(404);
         }
 
-        return $bakery->graphiql('graphql');
+        return $bakery->graphiql('bakery.graphql');
     }
 }
