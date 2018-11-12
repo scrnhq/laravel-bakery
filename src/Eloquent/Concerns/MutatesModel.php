@@ -76,10 +76,12 @@ trait MutatesModel
      */
     public function createIfAuthorized(array $input = []): Model
     {
-        $this->create($input);
-        $this->authorize('create');
+        return $this->transaction(function () use ($input) {
+            $this->create($input);
+            $this->authorize('create');
 
-        return $this->instance;
+            return $this->instance;
+        });
     }
 
     /**
