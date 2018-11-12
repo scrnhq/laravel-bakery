@@ -45,20 +45,12 @@ class TypeRegistry
     protected $schemasByModel;
 
     /**
-     * The model schemas keyed by model instance.
-     *
-     * @var \Illuminate\Support\Collection
-     */
-    protected $schemasByInstance;
-
-    /**
      * Bakery constructor.
      */
     public function __construct()
     {
         $this->modelSchemas = collect();
         $this->schemasByModel = collect();
-        $this->schemasByInstance = collect();
     }
 
     /**
@@ -162,22 +154,15 @@ class TypeRegistry
     public function getSchemaForModel(Model $model): ModelSchema
     {
         $class = get_class($model);
-        $hash = spl_object_hash($model);
 
         Utils::invariant(
             $this->hasSchemaForModel($class),
             $class.' has no registered model schema in the schema\'s type registry.'
         );
 
-        if ($this->schemasByInstance->has($hash)) {
-            return $this->schemasByInstance->get($hash);
-        }
+        $schemaClass = $this->schemasByModel->get($class);
 
-        $class = $this->schemasByModel->get(get_class($model));
-
-        $modelSchema = new $class($this, $model);
-
-        $this->schemasByInstance->put($hash, $modelSchema);
+        $modelSchema = new $schemaClass($this, $model);
 
         return $modelSchema;
     }
@@ -421,6 +406,5 @@ class TypeRegistry
     {
         $this->modelSchemas = collect();
         $this->schemasByModel = collect();
-        $this->schemasByInstance = collect();
     }
 }
