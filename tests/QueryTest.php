@@ -14,7 +14,7 @@ class CustomQuery extends Query
     }
 }
 
-class QueryTest extends FeatureTestCase
+class QueryTest extends IntegrationTest
 {
     /** @test */
     public function it_allows_to_extend_query_to_make_custom_query()

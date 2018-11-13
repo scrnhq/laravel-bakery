@@ -53,19 +53,8 @@ class TestSchema extends Schema
     ];
 }
 
-class SchemaTest extends FeatureTestCase
+class SchemaTest extends IntegrationTest
 {
-    /** @test */
-    public function it_throws_exception_when_there_are_no_models_defined_with_default_schema()
-    {
-        app()['config']->set('bakery.models', []);
-
-        $this->expectException(InvariantViolation::class);
-
-        $schema = resolve(DefaultSchema::class);
-        $schema->toGraphQLSchema();
-    }
-
     /** @test */
     public function it_throws_exception_when_there_are_no_query_fields_defined_in_a_schema()
     {
@@ -154,7 +143,7 @@ class SchemaTest extends FeatureTestCase
     public function it_validates_the_graphql_schema()
     {
         /** @var Schema $schema */
-        $schema = resolve(DefaultSchema::class);
+        $schema = resolve(TestSchema::class);
         $schema = $schema->toGraphQLSchema();
 
         $this->assertInstanceOf(GraphQLSchema::class, $schema);

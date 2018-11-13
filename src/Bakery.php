@@ -18,7 +18,7 @@ class Bakery
     public function schema(): Schema
     {
         /** @var \Bakery\Support\Schema $schema */
-        $schema = resolve(Support\DefaultSchema::class);
+        $schema = resolve(config('bakery.schema', Support\DefaultSchema::class));
 
         return $schema->toGraphQLSchema();
     }

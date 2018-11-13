@@ -3,9 +3,9 @@
 namespace Bakery\Tests\Feature;
 
 use Bakery\Tests\Stubs\Models;
-use Bakery\Tests\FeatureTestCase;
+use Bakery\Tests\IntegrationTest;
 
-class DeleteMutationTest extends FeatureTestCase
+class DeleteMutationTest extends IntegrationTest
 {
     /** @test */
     public function it_does_not_allow_deleting_entity_as_guest()

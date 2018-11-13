@@ -4,11 +4,11 @@ namespace Bakery\Tests\Types;
 
 use Bakery\Fields\Field;
 use Bakery\Support\DefaultSchema;
-use Bakery\Tests\FeatureTestCase;
+use Bakery\Tests\IntegrationTest;
 use Bakery\Tests\Stubs\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
 
-class FieldTest extends FeatureTestCase
+class FieldTest extends IntegrationTest
 {
     /**
      * @var \Bakery\Support\Schema
