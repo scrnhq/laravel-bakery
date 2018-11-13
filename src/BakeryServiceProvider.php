@@ -2,7 +2,6 @@
 
 namespace Bakery;
 
-use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use GraphQL\Validator\DocumentValidator;
 use GraphQL\Validator\Rules\DisableIntrospection;
@@ -62,6 +61,11 @@ class BakeryServiceProvider extends ServiceProvider
         );
 
         $this->registerBakery();
+
+        $this->commands([
+            Console\InstallCommand::class,
+            Console\ModelSchemaCommand::class,
+        ]);
     }
 
     /**

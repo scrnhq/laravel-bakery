@@ -1,0 +1,36 @@
+<?php
+
+namespace DummyNamespace;
+
+use Bakery\Field;
+use Bakery\Eloquent\ModelSchema;
+
+class DummyClass extends ModelSchema
+{
+	/**
+	 * The model the schema corresponds to.
+	 *
+	 * @var string
+	 */
+    protected $model = \DummyFullModel::class;
+
+    /**
+     * Get the fields for the schema.
+     *
+     * @return array
+     */
+    public function fields(): array
+    {
+        return [];
+    }
+
+    /**
+     * Get the relations for the schema.
+     *
+     * @return array
+     */
+    public function relations(): array
+    {
+        return [];
+    }
+}
