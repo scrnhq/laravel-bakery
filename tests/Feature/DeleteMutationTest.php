@@ -2,7 +2,7 @@
 
 namespace Bakery\Tests\Feature;
 
-use Bakery\Tests\Models;
+use Bakery\Tests\Stubs\Models;
 use Bakery\Tests\FeatureTestCase;
 
 class DeleteMutationTest extends FeatureTestCase

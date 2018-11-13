@@ -1,7 +1,7 @@
 <?php
 
-use Bakery\Tests\Models\User;
-use Bakery\Tests\Models\Article;
+use Bakery\Tests\Stubs\Models\User;
+use Bakery\Tests\Stubs\Models\Article;
 
 /*
 |--------------------------------------------------------------------------

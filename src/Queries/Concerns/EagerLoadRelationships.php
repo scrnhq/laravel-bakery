@@ -2,17 +2,21 @@
 
 namespace Bakery\Queries\Concerns;
 
-use Bakery\Support\Facades\Bakery;
 use Illuminate\Database\Eloquent\Builder;
 
 trait EagerLoadRelationships
 {
     /**
+     * @var \Bakery\Support\TypeRegistry
+     */
+    protected $registry;
+
+    /**
      * Eager load the relations.
      *
      * @param \Illuminate\Database\Eloquent\Builder $query
      * @param array $fields
-     * @param \Bakery\Eloquent\Introspectable $schema
+     * @param \Bakery\Eloquent\ModelSchema $schema
      * @param string $path
      */
     protected function eagerLoadRelations(Builder $query, array $fields, $schema, $path = '')
@@ -24,7 +28,7 @@ trait EagerLoadRelationships
                 $relation = $path ? $path.'.'.$key : $key;
                 $query->with($relation);
                 $related = $schema->getModel()->{$key}()->getRelated();
-                $relatedSchema = resolve(Bakery::getModelSchema($related));
+                $relatedSchema = $this->registry->getSchemaForModel($related);
                 $this->eagerLoadRelations($query, $field, $relatedSchema, $relation);
             }
         }

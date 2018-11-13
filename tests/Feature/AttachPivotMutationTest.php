@@ -2,19 +2,22 @@
 
 namespace Bakery\Tests\Feature;
 
-use Bakery\Tests\Models;
 use Bakery\Tests\FeatureTestCase;
+use Bakery\Tests\Stubs\Models\Tag;
+use Bakery\Tests\Stubs\Models\Role;
+use Bakery\Tests\Stubs\Models\User;
+use Bakery\Tests\Stubs\Models\Article;
 
 class AttachPivotMutationTest extends FeatureTestCase
 {
     /** @test */
     public function it_lets_you_attach_pivot_ids()
     {
-        $user = factory(Models\User::class)->create();
+        $user = factory(User::class)->create();
         $this->actingAs($user);
 
-        $article = factory(Models\Article::class)->create();
-        $tags = factory(Models\Tag::class, 2)->create();
+        $article = factory(Article::class)->create();
+        $tags = factory(Tag::class, 2)->create();
 
         $query = '
             mutation {
@@ -36,8 +39,8 @@ class AttachPivotMutationTest extends FeatureTestCase
     /** @test */
     public function it_lets_you_attach_pivot_ids_with_pivot_data()
     {
-        $user = factory(Models\User::class)->create();
-        $role = factory(Models\Role::class)->create();
+        $user = factory(User::class)->create();
+        $role = factory(Role::class)->create();
         $this->actingAs($user);
 
         $query = '
@@ -62,8 +65,8 @@ class AttachPivotMutationTest extends FeatureTestCase
     /** @test */
     public function it_lets_you_attach_pivot_ids_with_pivot_data_inversed()
     {
-        $user = factory(Models\User::class)->create();
-        $role = factory(Models\Role::class)->create();
+        $user = factory(User::class)->create();
+        $role = factory(Role::class)->create();
         $this->actingAs($user);
 
         $query = '

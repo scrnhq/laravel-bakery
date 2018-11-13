@@ -31,10 +31,10 @@ composer require scrnhq/laravel-bakery
 
 or require in _composer.json_:
 
-```js
+```json
 {
     "require": {
-        "scrnhq/laravel-bakery": "^1.0"
+        "scrnhq/laravel-bakery": "^2.0"
     }
 }
 ```
@@ -57,53 +57,31 @@ First publish the configuration file of Bakery by running the following command 
 php artisan vendor:publish --provider="Bakery\BakeryServiceProvider"
 ```
 
-Now open up `config/bakery.php` and you will see a `model` property that contains an empty array. Here you can start adding the models you want Bakery to handle.
+Now open up `config/bakery.php` and you will see a `models` property that contains an empty array.
+Here we can start defining the model schemas for our models. Model schemas are classes that lets you define fields,
+relationships and behaviour for your models that Bakery uses to set up a GraphQL schema.
+
+Let's start by creating a model schema! You can put these wherever you want, for example you can put them in a
+`ModelSchemas` directory. 
 
 ```php
-return [
-    'models' => [
-        App\User::class,
-    ],
-];
-```
+namespace App\ModelSchemas\UserSchema;
 
-Next, add the `Introspectable` trait to that model.
+use App\User;
+use Bakery\Eloquent\ModelSchema;
+use Bakery\Support\Facades\Bakery;
 
-```diff
-<?php
-
-namespace App;
-
-use Bakery\Eloquent\Introspectable;
-use Illuminate\Notifications\Notifiable;
-use Illuminate\Foundation\Auth\User as Authenticatable;
-
-class User extends Authenticatable
+class UserSchema extends ModelSchema
 {
-    use Notifiable;
-+   use Introspectable;
+	protected $model = User::class;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array
-     */
-    protected $fillable = [
-        'name', 'email', 'password',
-    ];
-
-    /**
-     * The attributes that should be hidden for arrays.
-     *
-     * @var array
-     */
-    protected $hidden = [
-        'password', 'remember_token',
-    ];
+	public function fields() {
+		return [
+			'email' => Bakery::string(),
+		];
+	}
 }
 ```
-
-The `Introspectable` trait gives Bakery the power to introspect your model and query it's collection or individual models.
 
 ### Queries
 
@@ -201,7 +179,7 @@ class Article extends Model
     public function fields()
     {
         return [
-            'title' => Type::string();
+            'title' => Type::string(),
         ];
     }
 }

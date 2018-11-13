@@ -3,23 +3,23 @@
 namespace Bakery\Types;
 
 use Bakery\Utils\Utils;
-use Bakery\Types\Definitions\Type;
+use Bakery\Fields\Field;
 use Illuminate\Support\Collection;
 
-class UpdateInputType extends MutationInputType
+class UpdateInputType extends EloquentMutationInputType
 {
     /**
-     * Get the name of the Update Input Type.
+     * Get the name of the Update Input BakeField.
      *
      * @return string
      */
     public function name(): string
     {
-        return 'Update'.$this->schema->typename().'Input';
+        return 'Update'.$this->modelSchema->typename().'Input';
     }
 
     /**
-     * Return the fields for theUpdate Input Type.
+     * Return the fields for theUpdate Input BakeField.
      *
      * @return array
      */
@@ -32,7 +32,8 @@ class UpdateInputType extends MutationInputType
 
         Utils::invariant(
             count($fields) > 0,
-            'There are no fields defined for '.class_basename($this->model)
+            'There are no fillable fields defined for '.class_basename($this->model).'. '.
+            'Make sure that a mutable model has at least one fillable field.'
         );
 
         return $fields;
@@ -49,7 +50,7 @@ class UpdateInputType extends MutationInputType
      */
     protected function getFillableFields(): Collection
     {
-        return parent::getFillableFields()->map(function (Type $field) {
+        return parent::getFillableFields()->map(function (Field $field) {
             return $field->nullable();
         });
     }

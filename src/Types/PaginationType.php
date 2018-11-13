@@ -2,7 +2,6 @@
 
 namespace Bakery\Types;
 
-use Bakery\Support\Facades\Bakery;
 use Bakery\Types\Definitions\ObjectType;
 
 class PaginationType extends ObjectType
@@ -12,12 +11,12 @@ class PaginationType extends ObjectType
     public function fields(): array
     {
         return [
-            'total' => Bakery::int(),
-            'per_page' => Bakery::int(),
-            'current_page' => Bakery::int(),
-            'last_page' => Bakery::int(),
-            'next_page' => Bakery::int()->nullable(),
-            'previous_page' => Bakery::int()->nullable(),
+            'total' => $this->registry->field($this->registry->int()),
+            'per_page' => $this->registry->field($this->registry->int()),
+            'current_page' => $this->registry->field($this->registry->int()),
+            'last_page' => $this->registry->field($this->registry->int()),
+            'next_page' => $this->registry->field($this->registry->int())->nullable(),
+            'previous_page' => $this->registry->field($this->registry->int())->nullable(),
         ];
     }
 }

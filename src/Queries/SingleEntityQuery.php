@@ -3,14 +3,13 @@
 namespace Bakery\Queries;
 
 use Bakery\Utils\Utils;
-use Bakery\Support\Facades\Bakery;
 use Bakery\Types\Definitions\Type;
 use Illuminate\Database\Eloquent\Model;
 use GraphQL\Type\Definition\ResolveInfo;
 use Illuminate\Database\Eloquent\Builder;
 use Bakery\Exceptions\TooManyResultsException;
 
-class SingleEntityQuery extends EntityQuery
+class SingleEntityQuery extends EloquentQuery
 {
     /**
      * Get the name of the query.
@@ -19,7 +18,7 @@ class SingleEntityQuery extends EntityQuery
      */
     public function name(): string
     {
-        if (property_exists($this, 'name')) {
+        if (isset($this->name)) {
             return $this->name;
         }
 
@@ -29,11 +28,11 @@ class SingleEntityQuery extends EntityQuery
     /**
      * The return type of the query.
      *
-     * @return Type
+     * @return \Bakery\Types\Definitions\Type
      */
     public function type(): Type
     {
-        return Bakery::type($this->schema->typename())->nullable();
+        return $this->registry->type($this->modelSchema->typename())->nullable();
     }
 
     /**
@@ -43,11 +42,11 @@ class SingleEntityQuery extends EntityQuery
      */
     public function args(): array
     {
-        return $this->schema->getLookupFields()->toArray();
+        return $this->modelSchema->getLookupTypes()->toArray();
     }
 
     /**
-     * Resolve the EntityQuery.
+     * Resolve the EloquentQuery.
      *
      * @param mixed $root
      * @param array $args
@@ -59,10 +58,10 @@ class SingleEntityQuery extends EntityQuery
     {
         $primaryKey = $this->model->getKeyName();
 
-        $query = $this->scopeQuery($this->schema->getBakeryQuery());
+        $query = $this->scopeQuery($this->modelSchema->getQuery());
 
         $fields = $info->getFieldSelection(config('bakery.query_max_eager_load'));
-        $this->eagerLoadRelations($query, $fields, $this->schema);
+        $this->eagerLoadRelations($query, $fields, $this->modelSchema);
 
         if (array_key_exists($primaryKey, $args)) {
             return $query->find($args[$primaryKey]);
@@ -75,7 +74,7 @@ class SingleEntityQuery extends EntityQuery
         }
 
         if ($results->count() > 1) {
-            throw (new TooManyResultsException)->setModel($this->class);
+            throw (new TooManyResultsException)->setModel($this->modelSchema->getModelClass());
         }
 
         return $results->first();

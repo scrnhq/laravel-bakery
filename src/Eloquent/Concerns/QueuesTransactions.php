@@ -10,7 +10,17 @@ trait QueuesTransactions
      *
      * @var array
      */
-    private $transactionQueue = [];
+    public $queue = [];
+
+    /**
+     * Add a closure to the queue.
+     *
+     * @param \Closure $closure
+     */
+    protected function queue(\Closure $closure)
+    {
+        $this->queue[] = $closure;
+    }
 
     /**
      * Persist the DB transactions that are queued.
@@ -19,9 +29,9 @@ trait QueuesTransactions
      */
     public function persistQueuedDatabaseTransactions()
     {
-        foreach ($this->transactionQueue as $key => $closure) {
+        foreach ($this->queue as $key => $closure) {
             $closure($this);
-            unset($this->transactionQueue[$key]);
+            unset($this->queue[$key]);
         }
     }
 }

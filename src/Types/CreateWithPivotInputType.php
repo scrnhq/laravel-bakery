@@ -3,8 +3,6 @@
 namespace Bakery\Types;
 
 use Bakery\Utils\Utils;
-use GraphQL\Type\Definition\Type;
-use Bakery\Support\Facades\Bakery;
 
 class CreateWithPivotInputType extends CreateInputType
 {
@@ -17,8 +15,8 @@ class CreateWithPivotInputType extends CreateInputType
      */
     public function name(): string
     {
-        $relation = $this->getPivotRelation()->getRelationName();
-        $parentSchema = Bakery::definition($this->getPivotRelation()->getParent());
+        $relation = $this->relation->getRelationName();
+        $parentSchema = $this->registry->getSchemaForModel($this->relation->getParent());
 
         return 'Create'.Utils::typename($relation).'On'.$parentSchema->typename().'WithPivotInput';
     }
@@ -32,12 +30,12 @@ class CreateWithPivotInputType extends CreateInputType
     {
         $fields = parent::fields();
 
-        $pivotDefinition = $this->getPivotDefinition();
-        $accessor = $this->getPivotRelation()->getPivotAccessor();
-        $typename = 'Create'.$pivotDefinition->typename().'Input';
+        $modelSchema = $this->getPivotModelSchema();
+        $accessor = $this->relation->getPivotAccessor();
+        $typename = 'Create'.$modelSchema->typename().'Input';
 
         $fields = array_merge($fields, [
-            $accessor => Bakery::type($typename)->nullable(),
+            $accessor => $this->registry->field($typename)->nullable(),
         ]);
 
         Utils::invariant(

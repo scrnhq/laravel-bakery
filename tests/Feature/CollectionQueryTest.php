@@ -2,7 +2,7 @@
 
 namespace Bakery\Tests\Feature;
 
-use Bakery\Tests\Models;
+use Bakery\Tests\Stubs\Models;
 use Bakery\Tests\FeatureTestCase;
 use Illuminate\Support\Facades\DB;
 
@@ -316,6 +316,7 @@ class CollectionQueryTest extends FeatureTestCase
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
         $response->assertStatus(200);
+        $response->assertJsonMissing(['errors']);
         $result = json_decode($response->getContent())->data->articles;
         $this->assertEquals($result->items[0]->id, $articleByJoe->id);
         $this->assertEquals($result->items[1]->id, $articleByJane->id);

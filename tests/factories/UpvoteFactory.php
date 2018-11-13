@@ -1,7 +1,7 @@
 <?php
 
-use Bakery\Tests\Models\Upvote;
-use Bakery\Tests\Models\Article;
+use Bakery\Tests\Stubs\Models\Upvote;
+use Bakery\Tests\Stubs\Models\Article;
 
 /*
 |--------------------------------------------------------------------------

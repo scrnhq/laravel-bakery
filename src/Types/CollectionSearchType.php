@@ -2,25 +2,20 @@
 
 namespace Bakery\Types;
 
-use Bakery\Concerns\ModelAware;
-use Bakery\Support\Facades\Bakery;
-use Bakery\Types\Definitions\Type;
-use Bakery\Types\Definitions\BaseType;
-use Bakery\Types\Definitions\InputType;
+use Bakery\Fields\Field;
 use Bakery\Types\Definitions\EloquentType;
+use Bakery\Types\Definitions\EloquentInputType;
 
-class CollectionSearchType extends InputType
+class CollectionSearchType extends EloquentInputType
 {
-    use ModelAware;
-
     /**
-     * Get the name of the Collection Search Type.
+     * Get the name of the Collection Search BakeField.
      *
      * @return string
      */
     public function name(): string
     {
-        return $this->schema->typename().'Search';
+        return $this->modelSchema->typename().'Search';
     }
 
     /**
@@ -30,21 +25,15 @@ class CollectionSearchType extends InputType
      */
     public function fields(): array
     {
-        $fields = collect($this->schema->getFields());
+        $fields = collect($this->modelSchema->getFields());
 
-        $fields->each(function (Type $field, $name) use (&$fields) {
-            $fields->put($name, Bakery::boolean()->nullable());
+        $fields->each(function (Field $field, $name) use (&$fields) {
+            $fields->put($name, $this->registry->field($this->registry->boolean())->nullable());
         });
 
-        foreach ($this->schema->getFields() as $name => $field) {
-            if ($field instanceof BaseType) {
-                $fields[$name] = Bakery::boolean()->nullable();
-            }
-        }
-
-        foreach ($this->schema->getRelationFields() as $relation => $field) {
+        foreach ($this->modelSchema->getRelationFields() as $relation => $field) {
             if ($field instanceof EloquentType) {
-                $fields[$relation] = Bakery::type($field->name().'Search')->nullable();
+                $fields[$relation] = $this->registry->field($field->getName().'Search')->nullable();
             }
         }
 

@@ -2,15 +2,11 @@
 
 namespace Bakery\Types;
 
-use Bakery\Concerns\ModelAware;
-use Bakery\Support\Facades\Bakery;
-use Bakery\Types\Definitions\ObjectType;
+use Bakery\Types\Definitions\EloquentType;
 use Illuminate\Pagination\LengthAwarePaginator;
 
-class EntityCollectionType extends ObjectType
+class EntityCollectionType extends EloquentType
 {
-    use ModelAware;
-
     /**
      * Get the name of the Entity type.
      *
@@ -18,7 +14,7 @@ class EntityCollectionType extends ObjectType
      */
     public function name(): string
     {
-        return $this->schema->typename().'Collection';
+        return $this->modelSchema->typename().'Collection';
     }
 
     /**
@@ -29,12 +25,8 @@ class EntityCollectionType extends ObjectType
     public function fields(): array
     {
         return [
-            'pagination' => Bakery::type('Pagination')->resolve(function (...$args) {
-                return $this->resolvePaginationField(...$args);
-            }),
-            'items' => Bakery::type($this->schema->typename())->list()->resolve(function (...$args) {
-                return $this->resolveItemsField(...$args);
-            }),
+            'pagination' => $this->registry->field('Pagination')->resolve([$this, 'resolvePaginationField']),
+            'items' => $this->registry->field($this->modelSchema->typename())->list()->resolve([$this, 'resolveItemsField']),
         ];
     }
 
@@ -44,7 +36,7 @@ class EntityCollectionType extends ObjectType
      * @param LengthAwarePaginator $paginator
      * @return array
      */
-    protected function resolveItemsField(LengthAwarePaginator $paginator): array
+    public function resolveItemsField(LengthAwarePaginator $paginator): array
     {
         return $paginator->items();
     }
@@ -55,7 +47,7 @@ class EntityCollectionType extends ObjectType
      * @param LengthAwarePaginator $paginator
      * @return array
      */
-    protected function resolvePaginationField(LengthAwarePaginator $paginator): array
+    public function resolvePaginationField(LengthAwarePaginator $paginator): array
     {
         $lastPage = $paginator->lastPage();
         $currentPage = $paginator->currentPage();

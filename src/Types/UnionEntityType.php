@@ -2,7 +2,6 @@
 
 namespace Bakery\Types;
 
-use Bakery\Support\Facades\Bakery;
 use Bakery\Types\Definitions\Type;
 use Bakery\Types\Definitions\UnionType;
 use GraphQL\Type\Definition\ResolveInfo;
@@ -19,21 +18,24 @@ class UnionEntityType extends UnionType
      */
     public function types(): array
     {
-        return collect($this->definitions)->map(function ($definition) {
-            return $definition instanceof Type ? $definition : Bakery::type(resolve($definition)->typename());
+        return collect($this->modelSchemas)->map(function ($modelSchema) {
+            return $modelSchema instanceof Type
+                ? $modelSchema
+                : $this->registry->type($this->registry->getModelSchema($modelSchema)->typename());
         })->toArray();
     }
 
     /**
-     * Receives $value from resolver of the parent field and returns concrete Object Type for this $value.
+     * Receives $value from resolver of the parent field and returns concrete Object BakeField for this $value.
      *
      * @param $value
      * @param $context
      * @param ResolveInfo $info
      * @return mixed
+     * @throws \Bakery\Exceptions\TypeNotFound
      */
     public function resolveType($value, $context, ResolveInfo $info)
     {
-        return Bakery::resolveDefinitionType($value);
+        return $this->registry->resolve($this->registry->getSchemaForModel($value)->typename());
     }
 }

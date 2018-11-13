@@ -2,9 +2,9 @@
 
 namespace Bakery\Queries;
 
-use Bakery\Support\Field;
+use Bakery\Support\RootField;
 
-abstract class Query extends Field
+abstract class Query extends RootField
 {
     /**
      * Get the name of the Query, if no name is specified fall back
@@ -14,7 +14,7 @@ abstract class Query extends Field
      */
     public function name(): string
     {
-        if (property_exists($this, 'name')) {
+        if (isset($this->name)) {
             return $this->name;
         }
 

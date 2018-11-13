@@ -13,5 +13,5 @@ namespace Bakery\Types\Definitions;
  */
 interface NamedType
 {
-    //
+    public function getName(): string;
 }

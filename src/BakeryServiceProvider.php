@@ -2,15 +2,12 @@
 
 namespace Bakery;
 
-use Bakery\Events\BakeryModelSaved;
-use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
-use Bakery\Listeners\PersistQueuedDatabaseTransactions;
 
 class BakeryServiceProvider extends ServiceProvider
 {
     /**
-     * Abstract type to bind Bakery as in the Service Container.
+     * Abstract name of the library.
      *
      * @var string
      */
@@ -47,7 +44,7 @@ class BakeryServiceProvider extends ServiceProvider
      */
     public function registerBakery()
     {
-        $this->app->singleton(static::$abstract, function () {
+        $this->app->singleton(Bakery::class, function () {
             return new Bakery();
         });
     }
@@ -61,15 +58,9 @@ class BakeryServiceProvider extends ServiceProvider
     {
         $router = $this->app['router'];
 
-        $router->any(
-            $this->app['config']->get('bakery.route'),
-            $this->app['config']->get('bakery.controller')
-        )->name('graphql');
+        $router->any($this->app['config']->get('bakery.route'), $this->app['config']->get('bakery.controller'))->name('graphql');
 
-        $router->get(
-            $this->app['config']->get('bakery.graphiqlRoute'),
-            $this->app['config']->get('bakery.graphiqlController')
-        )->name('graphiql');
+        $router->get($this->app['config']->get('bakery.graphiqlRoute'), $this->app['config']->get('bakery.graphiqlController'))->name('graphiql');
     }
 
     /**
@@ -79,10 +70,15 @@ class BakeryServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        $this->bootBakery();
         $this->bootPublishes();
+        $this->registerViews();
     }
 
+    /**
+     * Boot the publisher.
+     *
+     * @return void
+     */
     public function bootPublishes()
     {
         $this->publishes([
@@ -90,14 +86,8 @@ class BakeryServiceProvider extends ServiceProvider
         ], 'bakery');
     }
 
-    public function bootBakery()
-    {
-        $this->registerViews();
-        $this->registerListeners();
-    }
-
     /**
-     * Register the views.
+     * Register the Bakery views.
      *
      * @return void
      */
@@ -107,18 +97,10 @@ class BakeryServiceProvider extends ServiceProvider
     }
 
     /**
-     * Register the listeners.
+     * Load the helpers for Bakery.
      *
      * @return void
      */
-    protected function registerListeners()
-    {
-        Event::listen(
-            BakeryModelSaved::class,
-            PersistQueuedDatabaseTransactions::class
-        );
-    }
-
     protected function loadHelpers()
     {
         require __DIR__.'/helpers.php';

@@ -2,64 +2,49 @@
 
 namespace Bakery\Types\Definitions;
 
-use Bakery\Utils\Utils;
-use Bakery\Support\Facades\Bakery;
-use Bakery\Eloquent\Introspectable;
-use GraphQL\Type\Definition\NamedType as GraphQLNamedType;
+use Bakery\Eloquent\ModelSchema;
+use Bakery\Support\TypeRegistry;
 
-class EloquentType extends Type
+class EloquentType extends ObjectType
 {
     /**
-     * The underlying definition.
+     * The underlying model schema.
      *
      * @var mixed
      */
-    protected $definition;
+    protected $modelSchema;
+
+    /**
+     * @var \Illuminate\Database\Eloquent\Model
+     */
+    protected $model;
 
     /**
      * Construct a new Eloquent type.
      *
-     * @param string $definition
+     * @param \Bakery\Support\TypeRegistry $registry
+     * @param \Bakery\Eloquent\ModelSchema $modelSchema
      */
-    public function __construct(string $definition = null)
+    public function __construct(TypeRegistry $registry, ModelSchema $modelSchema)
     {
-        parent::__construct();
+        parent::__construct($registry);
 
-        if (isset($definition)) {
-            $this->definition = $definition;
-        }
-
-        Utils::invariant($this->definition, 'No definition defined on "'.get_class($this).'"');
-
-        $this->definition = resolve($this->definition);
-
-        Utils::invariant(
-            Utils::usesTrait($this->definition, Introspectable::class),
-            get_class($this->definition).' does not have the '.Introspectable::class.' trait'
-        );
+        $this->modelSchema = $modelSchema;
+        $this->model = $this->modelSchema->getModel();
     }
 
     /**
-     * The name of the type.
+     * Define the fields that should be serialized.
      *
-     * @return string
+     * @return array
      */
-    public function name(): string
+    public function __sleep()
     {
-        if (isset($this->name)) {
-            return $this->name;
-        }
+        $fields = [
+            'modelSchema',
+            'model',
+        ];
 
-        return $this->definition->typename();
-    }
-
-    /**
-     * Return the underlying, named type.
-     *
-     * @return \GraphQL\Type\Definition\NamedType
-     */
-    public function getNamedType(): GraphQLNamedType
-    {
-        return Bakery::type($this->definition->typename())->getNamedType();
+        return array_merge($fields, parent::__sleep());
     }
 }

@@ -1,6 +1,6 @@
 <?php
 
-use Bakery\Tests\Models\User;
+use Bakery\Tests\Stubs\Models\User;
 
 /*
 |--------------------------------------------------------------------------

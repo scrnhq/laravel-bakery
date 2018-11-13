@@ -2,6 +2,7 @@
 
 namespace Bakery\Http\Controller;
 
+use Bakery\Bakery;
 use GraphQL\Error\Debug;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
@@ -46,23 +47,32 @@ class BakeryController extends Controller
      * Handle an HTTP response containing the GraphQL query.
      *
      * @param Request $request
+     * @param \Bakery\Bakery $bakery
      * @return JsonResponse
+     * @throws \Exception
      */
-    public function graphql(Request $request): JsonResponse
+    public function graphql(Request $request, Bakery $bakery): JsonResponse
     {
         $input = $request->all();
 
-        $data = app('bakery')->executeQuery($input)->toArray($this->debug());
+        $data = $bakery->executeQuery($input)->toArray($this->debug());
 
         return response()->json($data, 200, []);
     }
 
-    public function graphiql()
+    /**
+     * Serve the GraphiQL tool.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @param \Bakery\Bakery $bakery
+     * @return \Illuminate\Contracts\View\View
+     */
+    public function graphiql(Request $request, Bakery $bakery)
     {
         if (! app()->isLocal()) {
             abort(404);
         }
 
-        return app('bakery')->graphiql('graphql');
+        return $bakery->graphiql('graphql');
     }
 }

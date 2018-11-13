@@ -2,9 +2,12 @@
 
 namespace Bakery\Mutations;
 
+use Bakery\Fields\Field;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
+use GraphQL\Type\Definition\ResolveInfo;
 
-class UpdateMutation extends EntityMutation
+class UpdateMutation extends EloquentMutation
 {
     /**
      * Get the name of the mutation.
@@ -13,11 +16,11 @@ class UpdateMutation extends EntityMutation
      */
     public function name(): string
     {
-        if (property_exists($this, 'name')) {
+        if (isset($this->name)) {
             return $this->name;
         }
 
-        return 'update'.$this->schema->typename();
+        return 'update'.$this->modelSchema->typename();
     }
 
     /**
@@ -29,7 +32,9 @@ class UpdateMutation extends EntityMutation
     {
         return array_merge(
             parent::args(),
-            $this->schema->getLookupFields()->toArray()
+            $this->modelSchema->getLookupFields()->map(function (Field $field) {
+                return $field->getType();
+            })->toArray()
         );
     }
 
@@ -39,17 +44,19 @@ class UpdateMutation extends EntityMutation
      * @param  mixed $root
      * @param  array $args
      * @param  mixed $context
+     * @param \GraphQL\Type\Definition\ResolveInfo $info
      * @return Model
-     * @throws \Illuminate\Auth\Access\AuthorizationException
+     * @throws \Throwable
      */
-    public function resolve($root, array $args, $context): Model
+    public function resolve($root, array $args, $context, ResolveInfo $info): Model
     {
-        $model = $this->findOrFail($root, $args, $context);
-        $this->authorize('update', $model);
-
         $input = $args['input'];
-        $model->updateWithInput($input);
+        $model = $this->findOrFail($root, $args, $context, $info);
 
-        return $model;
+        return DB::transaction(function () use ($input, $model) {
+            $modelSchema = $this->registry->getSchemaForModel($model);
+
+            return $modelSchema->updateIfAuthorized($input);
+        });
     }
 }
