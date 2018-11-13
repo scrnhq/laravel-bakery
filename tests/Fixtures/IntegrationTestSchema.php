@@ -3,16 +3,16 @@
 namespace Bakery\Tests\Fixtures;
 
 use Bakery\Support\Schema;
-use Bakery\Tests\Stubs\Schemas\CategorySchema;
-use Bakery\Tests\Stubs\Schemas\CommentSchema;
-use Bakery\Tests\Stubs\Schemas\PhoneSchema;
-use Bakery\Tests\Stubs\Schemas\RoleSchema;
 use Bakery\Tests\Stubs\Schemas\TagSchema;
-use Bakery\Tests\Stubs\Schemas\UpvoteSchema;
-use Bakery\Tests\Stubs\Schemas\UserRoleSchema;
+use Bakery\Tests\Stubs\Schemas\RoleSchema;
 use Bakery\Tests\Stubs\Schemas\UserSchema;
-use Bakery\Tests\Stubs\Schemas\ArticleSchema;
+use Bakery\Tests\Stubs\Schemas\PhoneSchema;
 use Bakery\Tests\Stubs\Types\TimestampType;
+use Bakery\Tests\Stubs\Schemas\UpvoteSchema;
+use Bakery\Tests\Stubs\Schemas\ArticleSchema;
+use Bakery\Tests\Stubs\Schemas\CommentSchema;
+use Bakery\Tests\Stubs\Schemas\CategorySchema;
+use Bakery\Tests\Stubs\Schemas\UserRoleSchema;
 
 class IntegrationTestSchema extends Schema
 {

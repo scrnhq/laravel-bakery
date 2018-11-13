@@ -3,7 +3,6 @@
 namespace Bakery\Tests;
 
 use Bakery\Support\Schema;
-use Bakery\Support\DefaultSchema;
 use Bakery\Tests\Stubs\DummyType;
 use Bakery\Tests\Stubs\DummyModel;
 use Bakery\Tests\Stubs\DummyQuery;
