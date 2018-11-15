@@ -148,4 +148,24 @@ class SchemaTest extends IntegrationTest
         $this->assertInstanceOf(GraphQLSchema::class, $schema);
         $schema->assertValid();
     }
+
+    /** @test */
+    public function it_can_load_the_model_schemas_from_a_given_directory()
+    {
+        $models = Schema::modelsIn(__DIR__.'/Stubs/Schemas', 'Bakery\\Tests\\Stubs\\Schemas\\');
+
+        $expected = [
+            'Bakery\Tests\Stubs\Schemas\ArticleSchema',
+            'Bakery\Tests\Stubs\Schemas\CategorySchema',
+            'Bakery\Tests\Stubs\Schemas\CommentSchema',
+            'Bakery\Tests\Stubs\Schemas\PhoneSchema',
+            'Bakery\Tests\Stubs\Schemas\RoleSchema',
+            'Bakery\Tests\Stubs\Schemas\TagSchema',
+            'Bakery\Tests\Stubs\Schemas\UserRoleSchema',
+            'Bakery\Tests\Stubs\Schemas\UpvoteSchema',
+            'Bakery\Tests\Stubs\Schemas\UserSchema',
+        ];
+
+        $this->assertEquals($expected, array_intersect($expected, $models));
+    }
 }
