@@ -60,7 +60,7 @@ class SingleEntityQuery extends EloquentQuery
 
         $query = $this->scopeQuery($this->modelSchema->getQuery());
 
-        $fields = $info->getFieldSelection(config('bakery.query_max_eager_load'));
+        $fields = $info->getFieldSelection(config('bakery.security.eagerLoadingMaxDepth'));
         $this->eagerLoadRelations($query, $fields, $this->modelSchema);
 
         if (array_key_exists($primaryKey, $args)) {

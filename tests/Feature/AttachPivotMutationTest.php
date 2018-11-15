@@ -2,13 +2,13 @@
 
 namespace Bakery\Tests\Feature;
 
-use Bakery\Tests\FeatureTestCase;
+use Bakery\Tests\IntegrationTest;
 use Bakery\Tests\Stubs\Models\Tag;
 use Bakery\Tests\Stubs\Models\Role;
 use Bakery\Tests\Stubs\Models\User;
 use Bakery\Tests\Stubs\Models\Article;
 
-class AttachPivotMutationTest extends FeatureTestCase
+class AttachPivotMutationTest extends IntegrationTest
 {
     /** @test */
     public function it_lets_you_attach_pivot_ids()

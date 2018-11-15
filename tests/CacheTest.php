@@ -6,7 +6,7 @@ use GraphQL\GraphQL;
 use Bakery\Support\DefaultSchema;
 use Bakery\Tests\Stubs\Models\Article;
 
-class CacheTest extends FeatureTestCase
+class CacheTest extends IntegrationTest
 {
     /** @test */
     public function the_schema_can_be_serialized_for_caching()

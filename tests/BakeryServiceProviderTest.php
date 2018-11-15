@@ -4,7 +4,7 @@ namespace Bakery\Tests;
 
 use Bakery\Bakery;
 
-class BakeryServiceProviderTest extends FeatureTestCase
+class BakeryServiceProviderTest extends IntegrationTest
 {
     /** @test */
     public function it_is_bound()

@@ -2,12 +2,12 @@
 
 namespace Bakery\Tests;
 
-use Bakery\Support\DefaultSchema;
 use Bakery\Tests\Stubs\Models\User;
 use Illuminate\Support\Facades\Event;
 use Bakery\Tests\Stubs\Models\Article;
+use Bakery\Tests\Fixtures\IntegrationTestSchema;
 
-class BakeryTransactionalAwareTest extends FeatureTestCase
+class BakeryTransactionalAwareTest extends IntegrationTest
 {
     /**
      * @var \Bakery\Support\Schema
@@ -26,7 +26,7 @@ class BakeryTransactionalAwareTest extends FeatureTestCase
     {
         parent::setUp();
 
-        $this->schema = new DefaultSchema();
+        $this->schema = new IntegrationTestSchema();
         $this->schema->toGraphQLSchema();
         $this->registry = $this->schema->getRegistry();
     }

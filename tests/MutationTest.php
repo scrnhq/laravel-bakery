@@ -14,7 +14,7 @@ class CreateCustomMutation extends Mutation
     }
 }
 
-class MutationTest extends FeatureTestCase
+class MutationTest extends IntegrationTest
 {
     /** @test */
     public function it_allows_to_extend_mutation_to_make_custom_mutation()

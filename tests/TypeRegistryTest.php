@@ -3,12 +3,12 @@
 namespace Bakery\Tests;
 
 use Bakery\Support\TypeRegistry;
-use Bakery\Support\DefaultSchema;
 use Bakery\Exceptions\TypeNotFound;
 use Bakery\Tests\Stubs\Models\User;
 use Bakery\Tests\Stubs\Schemas\UserSchema;
+use Bakery\Tests\Fixtures\IntegrationTestSchema;
 
-class TypeRegistryTest extends FeatureTestCase
+class TypeRegistryTest extends IntegrationTest
 {
     /**
      * @var \Bakery\Support\Schema
@@ -27,7 +27,7 @@ class TypeRegistryTest extends FeatureTestCase
     {
         parent::setUp();
 
-        $this->schema = new DefaultSchema();
+        $this->schema = new IntegrationTestSchema();
         $this->schema->toGraphQLSchema();
         $this->registry = $this->schema->getRegistry();
     }

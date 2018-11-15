@@ -13,9 +13,9 @@ class DefaultSchema extends Schema
      */
     public function models(): array
     {
-        $models = config('bakery.models');
+        $models = $this->modelsIn(app_path('Bakery'));
 
-        Utils::invariant(count($models) > 0, 'There must be models defined in the Bakery config.');
+        Utils::invariant(count($models) > 0, 'There must be model schema\'s defined in the Bakery directory.');
 
         return $models;
     }

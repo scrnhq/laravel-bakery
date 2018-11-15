@@ -4,7 +4,6 @@ namespace Bakery;
 
 use GraphQL\GraphQL;
 use GraphQL\Type\Schema;
-use Bakery\Types\Definitions\Type;
 use GraphQL\Executor\ExecutionResult;
 use Bakery\Support\Schema as BakerySchema;
 
@@ -19,7 +18,7 @@ class Bakery
     public function schema(): Schema
     {
         /** @var \Bakery\Support\Schema $schema */
-        $schema = resolve(Support\DefaultSchema::class);
+        $schema = resolve(config('bakery.schema', Support\DefaultSchema::class));
 
         return $schema->toGraphQLSchema();
     }

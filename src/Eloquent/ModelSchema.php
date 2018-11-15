@@ -147,6 +147,10 @@ abstract class ModelSchema
      */
     public function isMutable()
     {
+        if ($this->getFillableFields()->merge($this->getFillableRelationFields())->isEmpty()) {
+            return false;
+        }
+
         return $this->mutable;
     }
 

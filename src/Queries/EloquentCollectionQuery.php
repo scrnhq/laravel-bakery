@@ -84,7 +84,7 @@ class EloquentCollectionQuery extends EloquentQuery
         $page = array_get($args, 'page', 1);
         $count = array_get($args, 'count', 15);
 
-        $maxCount = config('bakery.pagination.maxCount');
+        $maxCount = config('bakery.security.paginationMaxCount');
 
         if ($count > $maxCount) {
             throw new PaginationMaxCountExceededException($maxCount);
@@ -92,7 +92,7 @@ class EloquentCollectionQuery extends EloquentQuery
 
         $query = $this->scopeQuery($this->modelSchema->getQuery());
 
-        $fields = $info->getFieldSelection(config('bakery.query_max_eager_load'));
+        $fields = $info->getFieldSelection(config('bakery.security.eagerLoadingMaxDepth'));
         $this->eagerLoadRelations($query, $fields['items'], $this->modelSchema);
 
         if (array_key_exists('filter', $args) && ! empty($args['filter'])) {

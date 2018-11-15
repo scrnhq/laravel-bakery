@@ -1,0 +1,39 @@
+<?php
+
+namespace App\Bakery;
+
+use Bakery\Field;
+use Bakery\Eloquent\ModelSchema;
+
+class User extends ModelSchema
+{
+	/**
+	 * The model the schema corresponds to.
+	 *
+	 * @var string
+	 */
+    protected $model = \App\User::class;
+
+    /**
+     * Get the fields for the schema.
+     *
+     * @return array
+     */
+    public function fields(): array
+    {
+        return [
+        	'name' => Field::string(),
+        	'email' => Field::string()->unique(),
+        ];
+    }
+
+    /**
+     * Get the relations for the schema.
+     *
+     * @return array
+     */
+    public function relations(): array
+    {
+        return [];
+    }
+}

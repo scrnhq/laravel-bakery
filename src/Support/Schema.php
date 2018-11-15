@@ -12,6 +12,7 @@ use Bakery\Fields\PolymorphicField;
 use Bakery\Mutations\CreateMutation;
 use Bakery\Mutations\DeleteMutation;
 use Bakery\Mutations\UpdateMutation;
+use Symfony\Component\Finder\Finder;
 use Bakery\Queries\SingleEntityQuery;
 use GraphQL\Type\Definition\Directive;
 use GraphQL\Type\Definition\ObjectType;
@@ -570,6 +571,32 @@ class Schema
     protected function makeObjectTypeFromClass(Type $class): \GraphQL\Type\Definition\Type
     {
         return $class->toType();
+    }
+
+    /**
+     * Get the models in the given directory.
+     *
+     * @param string $directory
+     * @param string|null $namespace
+     * @return array
+     */
+    public static function modelsIn($directory, $namespace = null)
+    {
+        if (is_null($namespace)) {
+            $namespace = app()->getNamespace();
+        }
+
+        $models = [];
+
+        foreach ((new Finder)->files()->in($directory) as $file) {
+            $class = $namespace.str_replace(['/', '.php'], ['\\', ''], $file->getRelativePathname());
+
+            if (is_subclass_of($class, ModelSchema::class)) {
+                $models[] = $class;
+            }
+        }
+
+        return $models;
     }
 
     /**

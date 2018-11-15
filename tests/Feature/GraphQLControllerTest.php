@@ -3,9 +3,9 @@
 namespace Bakery\Tests\Feature;
 
 use DB;
-use Bakery\Tests\FeatureTestCase;
+use Bakery\Tests\IntegrationTest;
 
-class GraphQLControllerTest extends FeatureTestCase
+class GraphQLControllerTest extends IntegrationTest
 {
     /** @test */
     public function it_returns_a_200()

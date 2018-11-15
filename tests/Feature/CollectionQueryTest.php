@@ -3,10 +3,10 @@
 namespace Bakery\Tests\Feature;
 
 use Bakery\Tests\Stubs\Models;
-use Bakery\Tests\FeatureTestCase;
+use Bakery\Tests\IntegrationTest;
 use Illuminate\Support\Facades\DB;
 
-class CollectionQueryTest extends FeatureTestCase
+class CollectionQueryTest extends IntegrationTest
 {
     /** @test */
     public function it_returns_collection_of_entities_with_pagination()

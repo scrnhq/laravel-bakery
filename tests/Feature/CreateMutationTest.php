@@ -3,11 +3,11 @@
 namespace Bakery\Tests\Feature;
 
 use Bakery\Tests\Stubs\Models;
-use Bakery\Tests\FeatureTestCase;
+use Bakery\Tests\IntegrationTest;
 use Bakery\Tests\Stubs\Models\Article;
 use Bakery\Tests\Stubs\Models\Comment;
 
-class CreateMutationTest extends FeatureTestCase
+class CreateMutationTest extends IntegrationTest
 {
     /** @test */
     public function it_does_not_allow_creating_entity_as_guest()

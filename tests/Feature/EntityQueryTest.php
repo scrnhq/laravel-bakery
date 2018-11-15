@@ -3,10 +3,10 @@
 namespace Bakery\Tests\Feature;
 
 use Bakery\Tests\Stubs\Models;
-use Bakery\Tests\FeatureTestCase;
+use Bakery\Tests\IntegrationTest;
 use Illuminate\Support\Facades\DB;
 
-class EntityQueryTest extends FeatureTestCase
+class EntityQueryTest extends IntegrationTest
 {
     /** @test */
     public function it_returns_single_entity()

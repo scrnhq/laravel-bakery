@@ -3,7 +3,6 @@
 namespace Bakery\Tests;
 
 use Bakery\Support\Schema;
-use Bakery\Support\DefaultSchema;
 use Bakery\Tests\Stubs\DummyType;
 use Bakery\Tests\Stubs\DummyModel;
 use Bakery\Tests\Stubs\DummyQuery;
@@ -53,19 +52,8 @@ class TestSchema extends Schema
     ];
 }
 
-class SchemaTest extends FeatureTestCase
+class SchemaTest extends IntegrationTest
 {
-    /** @test */
-    public function it_throws_exception_when_there_are_no_models_defined_with_default_schema()
-    {
-        app()['config']->set('bakery.models', []);
-
-        $this->expectException(InvariantViolation::class);
-
-        $schema = resolve(DefaultSchema::class);
-        $schema->toGraphQLSchema();
-    }
-
     /** @test */
     public function it_throws_exception_when_there_are_no_query_fields_defined_in_a_schema()
     {
@@ -154,10 +142,30 @@ class SchemaTest extends FeatureTestCase
     public function it_validates_the_graphql_schema()
     {
         /** @var Schema $schema */
-        $schema = resolve(DefaultSchema::class);
+        $schema = resolve(TestSchema::class);
         $schema = $schema->toGraphQLSchema();
 
         $this->assertInstanceOf(GraphQLSchema::class, $schema);
         $schema->assertValid();
+    }
+
+    /** @test */
+    public function it_can_load_the_model_schemas_from_a_given_directory()
+    {
+        $models = Schema::modelsIn(__DIR__.'/Stubs/Schemas', 'Bakery\\Tests\\Stubs\\Schemas\\');
+
+        $expected = [
+            'Bakery\Tests\Stubs\Schemas\ArticleSchema',
+            'Bakery\Tests\Stubs\Schemas\CategorySchema',
+            'Bakery\Tests\Stubs\Schemas\CommentSchema',
+            'Bakery\Tests\Stubs\Schemas\PhoneSchema',
+            'Bakery\Tests\Stubs\Schemas\RoleSchema',
+            'Bakery\Tests\Stubs\Schemas\TagSchema',
+            'Bakery\Tests\Stubs\Schemas\UserRoleSchema',
+            'Bakery\Tests\Stubs\Schemas\UpvoteSchema',
+            'Bakery\Tests\Stubs\Schemas\UserSchema',
+        ];
+
+        $this->assertEquals($expected, array_intersect($expected, $models));
     }
 }
