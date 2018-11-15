@@ -5,7 +5,6 @@
 [![Total Downloads](https://poser.pugx.org/scrnhq/laravel-bakery/downloads)](https://packagist.org/packages/scrnhq/laravel-bakery)
 [![codecov](https://codecov.io/gh/scrnhq/laravel-bakery/branch/master/graph/badge.svg)](https://codecov.io/gh/scrnhq/laravel-bakery)
 [![StyleCI](https://github.styleci.io/repos/109427894/shield?style=flat)](https://github.styleci.io/repos/109427894)
-[![Maintainability](https://api.codeclimate.com/v1/badges/de462571125eb6bf7af2/maintainability)](https://codeclimate.com/github/scrnhq/laravel-bakery/maintainability)
 
 An on-the-fly GraphQL Schema generator from Eloquent models for Laravel.
 
