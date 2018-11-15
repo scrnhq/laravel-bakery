@@ -287,6 +287,9 @@ Another key feature of GraphQL that Bakery fully supports are mutations. Bakery 
 `update`, and `delete` mutations for each registered model. Bakery also seamlessly uses Laravel's policies to
 authorize the actions of your users.
 
+> Having policies for your models is required for Bakery mutations to work. See 
+> https://laravel.com/docs/5.6/authorization for more information.
+
 For example, with the model schemas mentioned above, you could create a `Post` with a simple GraphQL mutation.
 
 ```gql
