@@ -69,6 +69,18 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Bakery Schema
+    |--------------------------------------------------------------------------
+    |
+    | This configuration option determines the schema to be used for
+    | GraphQL requests.
+    |
+    */
+
+    'schema' => \Bakery\Support\DefaultSchema::class,
+
+    /*
+    |--------------------------------------------------------------------------
     | Bakery PostgreSQL Full-text Search Dictionary
     |--------------------------------------------------------------------------
     |
