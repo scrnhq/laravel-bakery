@@ -2,10 +2,10 @@
 
 namespace Bakery\Tests\Feature;
 
-use Bakery\Tests\Models;
-use Bakery\Tests\FeatureTestCase;
+use Bakery\Tests\Stubs\Models;
+use Bakery\Tests\IntegrationTest;
 
-class DetachPivotMutationTest extends FeatureTestCase
+class DetachPivotMutationTest extends IntegrationTest
 {
     /** @test */
     public function it_lets_you_detach_pivot_ids()

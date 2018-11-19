@@ -2,11 +2,11 @@
 
 namespace Bakery\Tests\Feature;
 
-use Bakery\Tests\Models;
-use Bakery\Tests\FeatureTestCase;
+use Bakery\Tests\Stubs\Models;
+use Bakery\Tests\IntegrationTest;
 use Illuminate\Support\Facades\DB;
 
-class EntityQueryTest extends FeatureTestCase
+class EntityQueryTest extends IntegrationTest
 {
     /** @test */
     public function it_returns_single_entity()
@@ -116,6 +116,32 @@ class EntityQueryTest extends FeatureTestCase
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
         $response->assertJsonFragment(['id' => $article->id]);
+    }
+
+    /** @test */
+    public function it_can_filter_a_relation()
+    {
+        $user = factory(Models\User::class)->create();
+        $article = factory(Models\Article::class)->create(['user_id' => $user->id]);
+
+        factory(Models\Comment::class)->create(['article_id' => $article->id, 'body' => 'Cool story']);
+        factory(Models\Comment::class)->create(['article_id' => $article->id, 'body' => 'Boo!']);
+
+        $query = '
+            query {
+                article {
+                    id
+                    comments(filter: { body: "Cool story"}) {
+                        id
+                        body
+                    }
+                }
+            }
+        ';
+
+        $response = $this->json('GET', '/graphql', ['query' => $query]);
+        $response->assertJsonFragment(['body' => 'Cool story'])
+            ->assertJsonMissing(['body' => 'Boo!']);
     }
 
     /** @test */
@@ -298,6 +324,7 @@ class EntityQueryTest extends FeatureTestCase
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
         $response->assertJsonFragment(['user' => null]);
+        $response->assertJsonStructure(['errors']);
     }
 
     /** @test */

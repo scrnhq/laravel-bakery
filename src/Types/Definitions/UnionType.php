@@ -13,7 +13,7 @@ abstract class UnionType extends Type implements NamedType
     protected $typeResolver;
 
     /**
-     * Receives $value from resolver of the parent field and returns concrete Object Type for this $value.
+     * Receives $value from resolver of the parent field and returns concrete Object BakeField for this $value.
      *
      * @param $value
      * @param $context
@@ -52,17 +52,18 @@ abstract class UnionType extends Type implements NamedType
     /**
      * Get the type resolver.
      *
+     * @param $value
+     * @param $context
+     * @param \GraphQL\Type\Definition\ResolveInfo $info
      * @return callable
      */
-    public function getTypeResolver(): callable
+    public function getTypeResolver($value, $context, ResolveInfo $info)
     {
-        return function ($value, $context, ResolveInfo $info) {
-            if (isset($this->typeResolver)) {
-                return call_user_func_array($this->typeResolver, [$value, $context, $info]);
-            }
+        if (isset($this->typeResolver)) {
+            return call_user_func_array($this->typeResolver, [$value, $context, $info]);
+        }
 
-            return $this->resolveType($value, $context, $info);
-        };
+        return $this->resolveType($value, $context, $info);
     }
 
     /**
@@ -75,9 +76,9 @@ abstract class UnionType extends Type implements NamedType
         return [
             'name' => $this->name(),
             'types' => collect($this->types())->map(function (Type $type) {
-                return $type->toType();
+                return $type->toNamedType();
             })->toArray(),
-            'resolveType' => $this->getTypeResolver(),
+            'resolveType' => [$this, 'getTypeResolver'],
         ];
     }
 

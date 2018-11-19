@@ -2,6 +2,7 @@
 
 namespace Bakery\Types\Definitions;
 
+use Bakery\Fields\Field;
 use Illuminate\Support\Collection;
 use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\Type as GraphQLType;
@@ -17,8 +18,8 @@ class InputType extends ObjectType
     {
         $fields = collect($this->fields());
 
-        return $fields->map(function (Type $field) {
-            return $field->toInputField();
+        return $fields->map(function (Field $field) {
+            return $field->getType()->toType();
         });
     }
 
@@ -31,13 +32,7 @@ class InputType extends ObjectType
     {
         return [
             'name' => $this->name(),
-            'fields' => function () {
-                return $this->getFields()->map(function ($field) {
-                    $field['resolve'] = null;
-
-                    return $field;
-                })->toArray();
-            },
+            'fields' => [$this, 'resolveFields'],
         ];
     }
 

@@ -2,42 +2,70 @@
 
 namespace Bakery;
 
-use Bakery\Events\BakeryModelSaved;
-use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
-use Bakery\Listeners\PersistQueuedDatabaseTransactions;
+use GraphQL\Validator\DocumentValidator;
+use GraphQL\Validator\Rules\DisableIntrospection;
 
 class BakeryServiceProvider extends ServiceProvider
 {
     /**
-     * Abstract type to bind Bakery as in the Service Container.
+     * Bootstrap any package services.
      *
-     * @var string
+     * @return void
      */
-    public static $abstract = 'bakery';
-
-    /**
-     * Get the path of the configuration file.
-     *
-     * @return string
-     */
-    private function getConfigPath()
+    public function boot()
     {
-        return __DIR__.'/../config/bakery.php';
+        $this->registerRoutes();
+        $this->registerPublishing();
+
+        $this->loadViewsFrom(
+            __DIR__.'/../resources/views', 'bakery'
+        );
     }
 
     /**
-     * Register the service provider.
+     * Register the package routes.
+     *
+     * @return void
+     */
+    protected function registerRoutes()
+    {
+        if (! config('bakery.path')) {
+            return;
+        }
+
+        $this->loadRoutesFrom(__DIR__.'/Http/routes.php');
+    }
+
+    /**
+     * Register the package's publishable resources.
+     *
+     * @return void
+     */
+    protected function registerPublishing()
+    {
+        $this->publishes([
+            __DIR__.'/../config/bakery.php' => config_path('bakery.php'),
+        ], 'bakery-config');
+    }
+
+    /**
+     * Register any application services.
      *
      * @return void
      */
     public function register()
     {
-        $this->mergeConfigFrom($this->getConfigPath(), static::$abstract);
+        $this->mergeConfigFrom(
+            __DIR__.'/../config/bakery.php', 'bakery'
+        );
 
-        $this->loadHelpers();
         $this->registerBakery();
-        $this->registerRoute();
+
+        $this->commands([
+            Console\InstallCommand::class,
+            Console\ModelSchemaCommand::class,
+        ]);
     }
 
     /**
@@ -45,92 +73,26 @@ class BakeryServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    public function registerBakery()
+    protected function registerBakery()
     {
-        $this->app->singleton(static::$abstract, function () {
-            return new Bakery();
+        $this->app->singleton(Bakery::class, function () {
+            $bakery = new Bakery();
+
+            $this->registerSecurityRules();
+
+            return $bakery;
         });
     }
 
     /**
-     * Register the Bakery route.
+     * Register the GraphQL security rules.
      *
      * @return void
      */
-    protected function registerRoute()
+    protected function registerSecurityRules()
     {
-        $router = $this->app['router'];
-
-        $router->any(
-            $this->app['config']->get('bakery.route'),
-            $this->app['config']->get('bakery.controller')
-        )->name('graphql');
-
-        $router->get(
-            $this->app['config']->get('bakery.graphiqlRoute'),
-            $this->app['config']->get('bakery.graphiqlController')
-        )->name('graphiql');
-    }
-
-    /**
-     * Perform post-registration booting of services.
-     *
-     * @return void
-     */
-    public function boot()
-    {
-        $this->bootBakery();
-        $this->bootPublishes();
-    }
-
-    public function bootPublishes()
-    {
-        $this->publishes([
-            $this->getConfigPath() => config_path('bakery.php'),
-        ], 'bakery');
-    }
-
-    public function bootBakery()
-    {
-        $this->registerViews();
-        $this->registerListeners();
-    }
-
-    /**
-     * Register the views.
-     *
-     * @return void
-     */
-    public function registerViews()
-    {
-        $this->loadViewsFrom(__DIR__.'/views', static::$abstract);
-    }
-
-    /**
-     * Register the listeners.
-     *
-     * @return void
-     */
-    protected function registerListeners()
-    {
-        Event::listen(
-            BakeryModelSaved::class,
-            PersistQueuedDatabaseTransactions::class
-        );
-    }
-
-    protected function loadHelpers()
-    {
-        require __DIR__.'/helpers.php';
-    }
-
-    /**
-     * Get the services provided by the provider.
-     *
-     * @return array
-     */
-    public function provides()
-    {
-        return [static::$abstract];
+        if (config('bakery.security.disableIntrospection') === true) {
+            DocumentValidator::addRule(new DisableIntrospection());
+        }
     }
 }

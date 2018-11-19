@@ -2,12 +2,20 @@
 
 namespace Bakery\Tests;
 
-class BakeryServiceProviderTest extends FeatureTestCase
+use Bakery\Bakery;
+
+class BakeryServiceProviderTest extends IntegrationTest
 {
     /** @test */
     public function it_is_bound()
     {
-        $this->assertTrue(app()->bound('bakery'));
+        $this->assertTrue(app()->bound(Bakery::class));
+    }
+
+    /** @test */
+    public function it_resolves_as_singleton()
+    {
+        $this->assertSame(resolve(Bakery::class), resolve(Bakery::class));
     }
 
     /** @test */

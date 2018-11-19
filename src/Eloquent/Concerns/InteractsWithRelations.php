@@ -5,19 +5,34 @@ namespace Bakery\Eloquent\Concerns;
 use RuntimeException;
 use Bakery\Utils\Utils;
 use GraphQL\Error\UserError;
+use Bakery\Support\Facades\Bakery;
 use Illuminate\Database\Eloquent\Model;
 use Bakery\Exceptions\InvariantViolation;
 use Illuminate\Database\Eloquent\Relations;
-use Illuminate\Auth\Access\AuthorizationException;
 
 trait InteractsWithRelations
 {
+    /**
+     * @var \Bakery\Support\TypeRegistry
+     */
+    protected $registry;
+
+    /**
+     * @var \Illuminate\Database\Eloquent\Model
+     */
+    protected $instance;
+
+    /**
+     * @var \Illuminate\Contracts\Auth\Access\Gate
+     */
+    protected $gate;
+
     /**
      * The relationships that are supported by Bakery.
      *
      * @var array
      */
-    private $relationships = [
+    protected $relationships = [
         Relations\HasOne::class,
         Relations\HasMany::class,
         Relations\BelongsTo::class,
@@ -27,22 +42,10 @@ trait InteractsWithRelations
     ];
 
     /**
-     * Check if the user is authorised to create or update a relationship.
-     *
-     * @param string $policy
-     * @param array $attributes
-     * @throws AuthorizationException
+     * @param \Closure $closure
+     * @return void
      */
-    protected function authorize(string $policy, $attributes = null)
-    {
-        $allowed = $this->gate()->allows($policy, [$this, $attributes]);
-
-        if (! $allowed) {
-            throw new AuthorizationException(
-                'Not allowed to perform '.$policy.' on '.get_class($this)
-            );
-        }
-    }
+    abstract protected function queue(\Closure $closure);
 
     /**
      * Fill the relations in the model.
@@ -69,7 +72,6 @@ trait InteractsWithRelations
      * Check the policies for the relations in the model.
      *
      * @param array $relations
-     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     protected function checkRelations(array $relations)
     {
@@ -104,7 +106,6 @@ trait InteractsWithRelations
      * Check the policies for the connections in the model.
      *
      * @param array $connections
-     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     protected function checkConnections(array $connections)
     {
@@ -142,8 +143,11 @@ trait InteractsWithRelations
      */
     protected function fillBelongsToRelation(Relations\BelongsTo $relation, $attributes = [])
     {
-        $related = $relation->getRelated()->createWithInput($attributes);
-        $relation->associate($related);
+        $related = $relation->getRelated();
+        $modelSchema = $this->registry->getSchemaForModel($related);
+        $model = $modelSchema->create($attributes);
+
+        $relation->associate($model);
     }
 
     /**
@@ -164,11 +168,11 @@ trait InteractsWithRelations
             return;
         }
 
-        $this->transactionQueue[] = function () use ($id, $relation) {
+        $this->queue(function () use ($id, $relation) {
             $model = $relation->getRelated()->findOrFail($id);
             $model->setAttribute($relation->getForeignKeyName(), $relation->getParentKey());
             $model->save();
-        };
+        });
     }
 
     /**
@@ -177,16 +181,18 @@ trait InteractsWithRelations
      * @param Relations\HasOne $relation
      * @param mixed $attributes
      * @return void
+     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     protected function fillHasOneRelation(Relations\HasOne $relation, $attributes)
     {
-        $model = $relation->getRelated();
-        $model->fillWithInput($attributes);
+        $related = $relation->getRelated();
+        $modelSchema = $this->registry->getSchemaForModel($related);
+        $modelSchema->fill($attributes);
 
-        $this->transactionQueue[] = function () use ($model, $relation) {
-            $model->setAttribute($relation->getForeignKeyName(), $relation->getParentKey());
-            $model->save();
-        };
+        $this->queue(function () use ($modelSchema, $relation) {
+            $modelSchema->instance->setAttribute($relation->getForeignKeyName(), $relation->getParentKey());
+            $modelSchema->save();
+        });
     }
 
     /**
@@ -198,9 +204,9 @@ trait InteractsWithRelations
      */
     protected function connectHasManyRelation(Relations\HasMany $relation, array $ids)
     {
-        $this->transactionQueue[] = function () use ($relation, $ids) {
+        $this->queue(function () use ($relation, $ids) {
             $relation->sync($ids);
-        };
+        });
     }
 
     /**
@@ -212,24 +218,24 @@ trait InteractsWithRelations
      */
     protected function fillHasManyRelation(Relations\HasMany $relation, array $values)
     {
-        $this->transactionQueue[] = function () use ($relation, $values) {
+        $this->queue(function () use ($relation, $values) {
             $related = $relation->getRelated();
             $relation->delete();
 
             foreach ($values as $attributes) {
-                $model = $related->newInstance();
-                $model->fillWithInput($attributes);
-                $model->setAttribute($relation->getForeignKeyName(), $relation->getParentKey());
-                $model->save();
+                $modelSchema = $this->registry->resolveSchemaForModel(get_class($related));
+                $modelSchema->make($attributes);
+                $modelSchema->getModel()->setAttribute($relation->getForeignKeyName(), $relation->getParentKey());
+                $modelSchema->save();
             }
-        };
+        });
     }
 
     /**
      * Connect the belongs to many relation.
      *
      * @param Relations\BelongsToMany $relation
-     * @param array $ids
+     * @param array $data
      * @return void
      */
     public function connectBelongsToManyRelation(Relations\BelongsToMany $relation, array $data)
@@ -245,9 +251,9 @@ trait InteractsWithRelations
             return [$data[$relatedKey] => $data[$accessor]];
         });
 
-        $this->transactionQueue[] = function () use ($relation, $data) {
+        $this->queue(function () use ($relation, $data) {
             $relation->sync($data);
-        };
+        });
     }
 
     /**
@@ -263,13 +269,14 @@ trait InteractsWithRelations
         $instances = collect();
         $related = $relation->getRelated();
         $accessor = $relation->getPivotAccessor();
+        $relatedSchema = $this->registry->getSchemaForModel($related);
 
         foreach ($value as $attributes) {
-            $instances[] = $related->createWithInput($attributes);
+            $instances[] = $relatedSchema->create($attributes);
             $pivots[] = $attributes[$accessor] ?? null;
         }
 
-        $this->transactionQueue[] = function () use ($relation, $instances, $pivots) {
+        $this->queue(function () use ($relation, $instances, $pivots) {
             $data = $instances->pluck('id')->mapWithKeys(function ($id, $key) use ($pivots) {
                 $pivot = $pivots[$key] ?? null;
 
@@ -277,7 +284,7 @@ trait InteractsWithRelations
             });
 
             $relation->sync($data);
-        };
+        });
     }
 
     /**
@@ -297,7 +304,13 @@ trait InteractsWithRelations
 
         if (is_array($data)) {
             if (count($data) !== 1) {
-                throw new UserError(sprintf('There must be only one key with polymorphic input. %s given for relation %s.', count($data), $relation->getRelation()));
+                throw new UserError(
+                    sprintf(
+                        'There must be only one key with polymorphic input. %s given for relation %s.',
+                        count($data),
+                        $relation->getRelation()
+                    )
+                );
             }
 
             $data = collect($data);
@@ -330,7 +343,13 @@ trait InteractsWithRelations
 
         if (is_array($data)) {
             if (count($data) !== 1) {
-                throw new UserError(sprintf('There must be only one key with polymorphic input. %s given for relation %s.', count($data), $relation->getRelation()));
+                throw new UserError(
+                    sprintf(
+                        'There must be only one key with polymorphic input. %s given for relation %s.',
+                        count($data),
+                        $relation->getRelation()
+                    )
+                );
             }
 
             $data = collect($data);
@@ -340,25 +359,26 @@ trait InteractsWithRelations
             });
 
             $model = $this->getPolymorphicModel($relation, $key);
-
-            $instance = $model->createWithInput($attributes);
+            $modelSchema = $this->registry->getSchemaForModel($model);
+            $instance = $modelSchema->create($attributes);
             $relation->associate($instance);
         }
     }
 
     /**
      * Get the polymorphic type that belongs to the relation so we can figure
-     * out the model..
+     * out the model.
      *
      * @param \Illuminate\Database\Eloquent\Relations\MorphTo $relation
      * @param string $key
-     * @return \Illuminate\Database\Eloquent\Model|\Bakery\Contracts\Mutable
+     * @return \Illuminate\Database\Eloquent\Model
      */
     protected function getPolymorphicModel(Relations\MorphTo $relation, string $key): Model
     {
-        $type = array_get($this->getSchema()->getRelationFields(), $relation->getRelation());
+        /** @var \Bakery\Fields\PolymorphicField $type */
+        $type = array_get($this->getRelationFields(), $relation->getRelation());
 
-        return resolve($type->getDefinitionByKey($key))->getModel();
+        return resolve($type->getModelSchemaByKey($key))->getModel();
     }
 
     /**
@@ -370,18 +390,17 @@ trait InteractsWithRelations
      */
     protected function connectMorphManyRelation(Relations\MorphMany $relation, array $ids)
     {
-        $this->transactionQueue[] = function () use ($relation, $ids) {
+        $this->queue(function () use ($relation, $ids) {
             $relation->each(function (Model $model) use ($relation) {
                 $model->setAttribute($relation->getMorphType(), null);
                 $model->setAttribute($relation->getForeignKeyName(), null);
-
                 $model->save();
             });
 
             $models = $relation->getRelated()->newQuery()->whereIn($relation->getRelated()->getKeyName(), $ids)->get();
 
             $relation->saveMany($models);
-        };
+        });
     }
 
     /**
@@ -393,18 +412,18 @@ trait InteractsWithRelations
      */
     protected function fillMorphManyRelation(Relations\MorphMany $relation, array $values)
     {
-        $this->transactionQueue[] = function () use ($relation, $values) {
-            $related = $relation->getRelated();
+        $this->queue(function () use ($relation, $values) {
             $relation->delete();
+            $related = $relation->getRelated();
+            $relatedSchema = $this->registry->getSchemaForModel($related);
 
             foreach ($values as $attributes) {
-                $model = $related->newInstance();
-                $model->fillWithInput($attributes);
-                $model->setAttribute($relation->getMorphType(), $relation->getMorphClass());
-                $model->setAttribute($relation->getForeignKeyName(), $relation->getParentKey());
-                $model->save();
+                $relatedSchema->make($attributes);
+                $relatedSchema->getModel()->setAttribute($relation->getMorphType(), $relation->getMorphClass());
+                $relatedSchema->getModel()->setAttribute($relation->getForeignKeyName(), $relation->getParentKey());
+                $relatedSchema->save();
             }
-        };
+        });
     }
 
     /**
@@ -416,15 +435,11 @@ trait InteractsWithRelations
     protected function resolveRelation(string $relation): Relations\Relation
     {
         Utils::invariant(
-            method_exists($this, $relation),
-            class_basename($this).' has no relation named '.$relation
+            method_exists($this->instance, $relation),
+            class_basename($this->instance).' has no relation named '.$relation
         );
 
-        $resolvedRelation = $this->{$relation}();
-
-        // After we resolved it we unset it because we don't actually
-        // want to use the results of the relation.
-        // unset($this->{$relation});
+        $resolvedRelation = $this->instance->{$relation}();
 
         return $resolvedRelation;
     }

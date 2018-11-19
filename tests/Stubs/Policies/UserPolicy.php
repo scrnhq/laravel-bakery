@@ -2,7 +2,7 @@
 
 namespace Bakery\Tests\Stubs\Policies;
 
-use Bakery\Tests\Models\User;
+use Bakery\Tests\Stubs\Models\User;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class UserPolicy

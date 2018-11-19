@@ -3,41 +3,40 @@
 namespace Bakery\Tests;
 
 use Bakery\Support\Schema;
-use Bakery\Support\DefaultSchema;
 use Bakery\Tests\Stubs\DummyType;
-use Bakery\Tests\Stubs\DummyClass;
 use Bakery\Tests\Stubs\DummyModel;
 use Bakery\Tests\Stubs\DummyQuery;
 use Bakery\Tests\Stubs\DummyMutation;
-use Bakery\Tests\Stubs\DummyReadOnly;
+use Bakery\Tests\Stubs\DummyModelSchema;
 use Bakery\Exceptions\InvariantViolation;
 use GraphQL\Type\Schema as GraphQLSchema;
+use Bakery\Tests\Stubs\DummyReadOnlySchema;
 
 class NotResourceSchema extends Schema
 {
     protected $models = [
-        DummyClass::class,
+        DummyModel::class,
     ];
 }
 
 class InlineEloquentSchema extends Schema
 {
     protected $models = [
-        DummyModel::class,
+        DummyModelSchema::class,
     ];
 }
 
 class ReadOnlySchema extends Schema
 {
     protected $models = [
-        DummyReadOnly::class,
+        DummyReadOnlySchema::class,
     ];
 }
 
 class TestSchema extends Schema
 {
     protected $models = [
-        DummyModel::class,
+        DummyModelSchema::class,
     ];
 
     protected $queries = [
@@ -49,29 +48,18 @@ class TestSchema extends Schema
     ];
 
     protected $types = [
-        'DummyModel' => DummyType::class,
+        'DummyModelSchema' => DummyType::class,
     ];
 }
 
-class SchemaTest extends FeatureTestCase
+class SchemaTest extends IntegrationTest
 {
-    /** @test */
-    public function it_throws_exception_when_there_are_no_models_defined_with_default_schema()
-    {
-        app()['config']->set('bakery.models', []);
-
-        $this->expectException(InvariantViolation::class);
-
-        $schema = new DefaultSchema();
-        $schema->toGraphQLSchema();
-    }
-
     /** @test */
     public function it_throws_exception_when_there_are_no_query_fields_defined_in_a_schema()
     {
         $this->expectException(InvariantViolation::class);
 
-        $schema = new Schema();
+        $schema = resolve(Schema::class);
         $schema->toGraphQLSchema();
     }
 
@@ -80,14 +68,14 @@ class SchemaTest extends FeatureTestCase
     {
         $this->expectException(InvariantViolation::class);
 
-        $schema = new NotResourceSchema();
+        $schema = resolve(NotResourceSchema::class);
         $schema->toGraphQLSchema();
     }
 
     /** @test */
     public function it_registers_class_that_does_extend_the_correct_class()
     {
-        $schema = new InlineEloquentSchema();
+        $schema = resolve(InlineEloquentSchema::class);
         $schema->toGraphQLSchema();
         $queries = $schema->getQueries();
 
@@ -98,7 +86,7 @@ class SchemaTest extends FeatureTestCase
     /** @test */
     public function it_ignores_mutations_for_read_only_models()
     {
-        $schema = new ReadOnlySchema();
+        $schema = resolve(ReadOnlySchema::class);
         $schema->toGraphQLSchema();
         $mutations = $schema->getMutations();
         $queries = $schema->getQueries();
@@ -111,7 +99,7 @@ class SchemaTest extends FeatureTestCase
     /** @test */
     public function it_can_override_entity_queries()
     {
-        $schema = new TestSchema();
+        $schema = resolve(TestSchema::class);
         $schema->toGraphQLSchema();
         $queries = $schema->getQueries();
 
@@ -121,7 +109,7 @@ class SchemaTest extends FeatureTestCase
     /** @test */
     public function it_builds_the_entity_mutations()
     {
-        $schema = new TestSchema();
+        $schema = resolve(TestSchema::class);
         $schema->toGraphQLSchema();
         $mutations = $schema->getMutations();
 
@@ -133,7 +121,7 @@ class SchemaTest extends FeatureTestCase
     /** @test */
     public function it_can_override_entity_mutations()
     {
-        $schema = new TestSchema();
+        $schema = resolve(TestSchema::class);
         $schema->toGraphQLSchema();
         $mutations = $schema->getMutations();
 
@@ -143,22 +131,41 @@ class SchemaTest extends FeatureTestCase
     /** @test */
     public function it_can_override_types()
     {
-        $schema = new TestSchema();
+        $schema = resolve(TestSchema::class);
+        $schema->toGraphQLSchema();
         $types = $schema->getTypes();
 
-        $this->assertEquals(DummyType::class, $types['DummyModel']);
+        $this->assertEquals(DummyType::class, $types['DummyModelSchema']);
     }
 
     /** @test */
-    public function it_returns_the_graphql_schema()
+    public function it_validates_the_graphql_schema()
     {
-        $schema = new TestSchema();
-        $schema->toGraphQLSchema();
-        $graphQLschema = $schema->toGraphQLSchema();
+        /** @var Schema $schema */
+        $schema = resolve(TestSchema::class);
+        $schema = $schema->toGraphQLSchema();
 
-        $this->assertInstanceOf(GraphQLSchema::class, $graphQLschema);
-        $this->assertContains('DummyModel', $graphQLschema->getTypeMap());
+        $this->assertInstanceOf(GraphQLSchema::class, $schema);
+        $schema->assertValid();
+    }
 
-        $graphQLschema->assertValid();
+    /** @test */
+    public function it_can_load_the_model_schemas_from_a_given_directory()
+    {
+        $models = Schema::modelsIn(__DIR__.'/Stubs/Schemas', 'Bakery\\Tests\\Stubs\\Schemas\\');
+
+        $expected = [
+            'Bakery\Tests\Stubs\Schemas\ArticleSchema',
+            'Bakery\Tests\Stubs\Schemas\CategorySchema',
+            'Bakery\Tests\Stubs\Schemas\CommentSchema',
+            'Bakery\Tests\Stubs\Schemas\PhoneSchema',
+            'Bakery\Tests\Stubs\Schemas\RoleSchema',
+            'Bakery\Tests\Stubs\Schemas\TagSchema',
+            'Bakery\Tests\Stubs\Schemas\UserRoleSchema',
+            'Bakery\Tests\Stubs\Schemas\UpvoteSchema',
+            'Bakery\Tests\Stubs\Schemas\UserSchema',
+        ];
+
+        $this->assertEquals($expected, array_intersect($expected, $models));
     }
 }

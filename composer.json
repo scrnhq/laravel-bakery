@@ -1,11 +1,11 @@
 {
   "name": "scrnhq/laravel-bakery",
   "description": "An on-the-fly GraphQL Schema generator from Eloquent models for Laravel.",
-  "license": "MIT",
   "keywords": [
     "laravel",
     "graphql"
   ],
+  "license": "MIT",
   "authors": [
     {
       "name": "Erik Gaal",
@@ -17,10 +17,10 @@
     }
   ],
   "require": {
-    "php": "^7.1",
-    "laravel/framework": "5.7.*",
-    "webonyx/graphql-php": "^0.12.5",
-    "mockery/mockery": "^1.2"
+    "php": ">=7.1.0",
+    "illuminate/support": "5.7.*",
+    "webonyx/graphql-php": "^0.12.0",
+    "ext-json": "*"
   },
   "require-dev": {
     "orchestra/testbench": "~3.0",
@@ -29,7 +29,10 @@
   "autoload": {
     "psr-4": {
       "Bakery\\": "src"
-    }
+    },
+    "files": [
+      "src/helpers.php"
+    ]
   },
   "autoload-dev": {
     "psr-4": {
@@ -37,8 +40,7 @@
     }
   },
   "scripts": {
-    "test": "vendor/bin/phpunit",
-    "test:watch": "vendor/bin/phpunit-watcher watch"
+    "test": "vendor/bin/phpunit"
   },
   "extra": {
     "laravel": {

@@ -2,18 +2,15 @@
 
 namespace Bakery\Mutations;
 
-use Bakery\Support\Facades\Bakery;
+use Bakery\Fields\Field;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations;
+use GraphQL\Type\Definition\ResolveInfo;
+use Bakery\Types\Concerns\InteractsWithPivot;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
-class AttachPivotMutation extends EntityMutation
+class AttachPivotMutation extends EloquentMutation
 {
-    /**
-     * The pivot relationship.
-     *
-     * @var Relations\BelongsToMany
-     */
-    protected $pivotRelation;
+    use InteractsWithPivot;
 
     /**
      * Get the name of the mutation.
@@ -22,40 +19,13 @@ class AttachPivotMutation extends EntityMutation
      */
     public function name(): string
     {
-        if (property_exists($this, 'name')) {
+        if (isset($this->name)) {
             return $this->name;
         }
 
-        $relation = studly_case($this->pivotRelation->getRelationName());
+        $relation = studly_case($this->pivotRelationName);
 
-        return 'attach'.$relation.'On'.$this->schema->typename();
-    }
-
-    /**
-     * Set the pivot relation.
-     *
-     * @param Relations\BelongsToMany $relation
-     * @return \Bakery\Mutations\AttachPivotMutation
-     */
-    public function setPivotRelation(Relations\BelongsToMany $relation)
-    {
-        $this->pivotRelation = $relation;
-
-        return $this;
-    }
-
-    /**
-     * Get the schema of the pivot model.
-     *
-     * @return mixed
-     */
-    protected function getPivotSchema()
-    {
-        $pivot = $this->pivotRelation->getPivotClass();
-
-        return Bakery::hasModelSchema($pivot)
-            ? resolve(Bakery::getModelSchema($pivot))
-            : null;
+        return 'attach'.$relation.'On'.$this->modelSchema->typename();
     }
 
     /**
@@ -65,17 +35,31 @@ class AttachPivotMutation extends EntityMutation
      */
     public function args(): array
     {
-        $args = collect($this->schema->getLookupFields());
-        $relation = $this->pivotRelation->getRelationName();
+        $args = $this->modelSchema->getLookupFields()->map(function (Field $field) {
+            return $field->getType();
+        });
 
-        if ($this->getPivotSchema()) {
+        $relation = $this->relation->getRelationName();
+
+        if ($this->getPivotModelSchema()) {
             $typename = studly_case($relation).'PivotInput';
-            $args->put('input', Bakery::type($typename)->list());
+            $args->put('input', $this->registry->type($typename)->list());
         } else {
-            $args->put('input', Bakery::ID()->list());
+            $args->put('input', $this->registry->ID()->list());
         }
 
         return $args->toArray();
+    }
+
+    /**
+     * Get the pivot relation.
+     *
+     * @param \Illuminate\Database\Eloquent\Model $model
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
+    protected function getRelation(Model $model): BelongsToMany
+    {
+        return $model->{$this->pivotRelationName}();
     }
 
     /**
@@ -84,22 +68,23 @@ class AttachPivotMutation extends EntityMutation
      * @param  mixed $root
      * @param  array $args
      * @param  mixed $context
+     * @param \GraphQL\Type\Definition\ResolveInfo $info
      * @return Model
      * @throws \Illuminate\Auth\Access\AuthorizationException
      */
-    public function resolve($root, array $args, $context): Model
+    public function resolve($root, array $args, $context, ResolveInfo $info): Model
     {
-        $model = $this->findOrFail($root, $args, $context);
-        $relation = $model->{$this->pivotRelation->getRelationName()}();
+        $model = $this->findOrFail($root, $args, $context, $info);
+        $relation = $this->getRelation($model);
+        $modelSchema = $this->registry->getSchemaForModel($model);
 
         $permission = 'set'.studly_case($relation->getRelationName());
-        $this->authorize($permission, $model);
+        $modelSchema->authorize($permission, $model);
 
-        $input = $args['input'];
         $relatedKey = $relation->getRelated()->getKeyName();
         $accessor = $relation->getPivotAccessor();
 
-        $data = collect($input)->mapWithKeys(function ($data, $key) use ($accessor, $relatedKey) {
+        $data = collect($args['input'])->mapWithKeys(function ($data, $key) use ($accessor, $relatedKey) {
             if (! is_array($data)) {
                 return [$key => $data];
             }

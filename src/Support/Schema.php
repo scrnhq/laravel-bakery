@@ -4,27 +4,37 @@ namespace Bakery\Support;
 
 use Bakery\Types;
 use Bakery\Utils\Utils;
-use Bakery\Eloquent\Mutable;
 use GraphQL\Type\SchemaConfig;
-use Bakery\Support\Facades\Bakery;
+use Bakery\Eloquent\ModelSchema;
 use Bakery\Types\Definitions\Type;
 use Illuminate\Support\Collection;
-use Bakery\Eloquent\Introspectable;
+use Bakery\Fields\PolymorphicField;
 use Bakery\Mutations\CreateMutation;
 use Bakery\Mutations\DeleteMutation;
 use Bakery\Mutations\UpdateMutation;
+use Symfony\Component\Finder\Finder;
 use Bakery\Queries\SingleEntityQuery;
 use GraphQL\Type\Definition\Directive;
 use GraphQL\Type\Definition\ObjectType;
 use Bakery\Mutations\AttachPivotMutation;
 use Bakery\Mutations\DetachPivotMutation;
-use Bakery\Queries\EntityCollectionQuery;
 use GraphQL\Type\Schema as GraphQLSchema;
+use Bakery\Queries\EloquentCollectionQuery;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Schema
 {
+    /**
+     * @var TypeRegistry
+     */
+    protected $registry;
+
+    /**
+     * @var array
+     */
+    protected $data;
+
     /**
      * The models of the schema.
      *
@@ -61,6 +71,23 @@ class Schema
     protected $directives = [];
 
     /**
+     * The generated GraphQLSchema.
+     *
+     * @var GraphQLSchema
+     */
+    protected $graphQLSchema;
+
+    /**
+     * Schema constructor.
+     *
+     * @param \Bakery\Bakery
+     */
+    public function __construct()
+    {
+        $this->registry = new TypeRegistry();
+    }
+
+    /**
      * Define the models of the schema.
      * This method can be overridden for complex implementations.
      *
@@ -80,6 +107,22 @@ class Schema
     protected function types(): array
     {
         return $this->types;
+    }
+
+    /**
+     * @return \Bakery\Support\TypeRegistry
+     */
+    public function getRegistry(): TypeRegistry
+    {
+        return $this->registry;
+    }
+
+    /**
+     * @param \Bakery\Support\TypeRegistry $registry
+     */
+    public function setRegistry(TypeRegistry $registry)
+    {
+        $this->registry = $registry;
     }
 
     /**
@@ -117,34 +160,13 @@ class Schema
 
     /**
      * Get the models of the schema.
+     * TODO: Rename this to getModelSchemas ?
      *
      * @return \Illuminate\Support\Collection
      */
     protected function getModels(): Collection
     {
         return collect($this->models());
-    }
-
-    /**
-     * Check if the schema is read only.
-     *
-     * If the schema (the one with the introspectable trait) has a static
-     * property called read only, we will use that to determine.
-     *
-     * Otherwise we check if the underlying model has the mutable trait.
-     *
-     * @param mixed $class
-     * @return bool
-     */
-    protected function isReadOnly($class)
-    {
-        if (property_exists($class, 'readOnly')) {
-            return $class::$readOnly;
-        }
-
-        $model = is_string($class) ? resolve($class)->getModel() : $class;
-
-        return ! Utils::usesTrait($model, Mutable::class);
     }
 
     /**
@@ -169,49 +191,51 @@ class Schema
      */
     protected function getModelTypes(): Collection
     {
-        return $this->getModels()->reduce(function (Collection $types, string $model) {
-            $definition = resolve($model);
-            $instance = $definition->getModel();
+        return $this->getModels()->reduce(function (Collection $types, string $class) {
+            $schema = $this->registry->getModelSchema($class);
 
-            if ($instance instanceof Pivot) {
-                $types = $types->merge($this->getPivotModelTypes($model));
+            if ($schema->getModel() instanceof Pivot) {
+                $types = $types->merge($this->getPivotModelTypes($schema));
             } else {
-                $types->push(new Types\EntityType($model))
-                      ->push(new Types\EntityCollectionType($model))
-                      ->push(new Types\EntityLookupType($model))
-                      ->push(new Types\CollectionFilterType($model))
-                      ->push(new Types\CollectionRootSearchType($model))
-                      ->push(new Types\CollectionSearchType($model))
-                      ->push(new Types\CollectionOrderByType($model));
+                $types->push(new Types\EntityType($this->registry, $schema))
+                      ->push(new Types\EntityLookupType($this->registry, $schema))
+                      ->push(new Types\CollectionFilterType($this->registry, $schema))
+                      ->push(new Types\CollectionOrderByType($this->registry, $schema));
 
-                if (! $this->isReadOnly($model)) {
-                    $types->push(new Types\CreateInputType($model))
-                          ->push(new Types\UpdateInputType($model));
+                if ($schema->isIndexable()) {
+                    $types->push(new Types\EntityCollectionType($this->registry, $schema))
+                          ->push(new Types\CollectionRootSearchType($this->registry, $schema))
+                          ->push(new Types\CollectionSearchType($this->registry, $schema));
+                }
+
+                if ($schema->isMutable()) {
+                    $types->push(new Types\CreateInputType($this->registry, $schema))
+                          ->push(new Types\UpdateInputType($this->registry, $schema));
                 }
             }
 
             // Filter through the regular fields and get the polymorphic types.
-            $definition->getFields()->filter(function ($field) {
-                return $field instanceof Types\Definitions\PolymorphicType;
-            })->each(function ($field, $key) use ($definition, &$types) {
-                $types = $types->merge($this->getPolymorphicFieldTypes($definition, $key, $field));
+            $schema->getFields()->filter(function ($field) {
+                return $field instanceof PolymorphicField;
+            })->each(function ($field, $key) use ($schema, &$types) {
+                $types = $types->merge($this->getPolymorphicFieldTypes($schema, $key, $field));
             });
 
             // Filter through the relations of the model and get the
             // belongsToMany relations and get the pivot input types
             // for that relation.
-            $definition->getRelations()->filter(function ($relation) {
+            $schema->getRelations()->filter(function ($relation) {
                 return $relation instanceof BelongsToMany;
-            })->each(function ($relation) use ($model, &$types) {
-                $types = $types->merge($this->getPivotInputTypes($model, $relation));
+            })->each(function ($relation) use ($schema, &$types) {
+                $types = $types->merge($this->getPivotInputTypes($relation));
             });
 
             // Filter through the relation fields and get the the
             // polymorphic types for the relations.
-            $definition->getRelationFields()->filter(function ($field) {
-                return $field instanceof Types\Definitions\PolymorphicType;
-            })->each(function ($field, $key) use ($definition, &$types) {
-                $types = $types->merge($this->getPolymorphicRelationshipTypes($definition, $key, $field));
+            $schema->getRelationFields()->filter(function ($field) {
+                return $field instanceof PolymorphicField;
+            })->each(function ($field, $key) use ($schema, &$types) {
+                $types = $types->merge($this->getPolymorphicRelationshipTypes($schema, $key, $field));
             });
 
             return $types;
@@ -221,72 +245,76 @@ class Schema
     /**
      * Get the types for a pivot model.
      *
-     * @param $model
+     * @param \Bakery\Eloquent\ModelSchema $modelSchema
      * @return array
      */
-    protected function getPivotModelTypes($model): array
+    protected function getPivotModelTypes(ModelSchema $modelSchema): array
     {
         return [
-            new Types\EntityType($model),
-            new Types\CreatePivotInputType($model),
+            new Types\EntityType($this->registry, $modelSchema),
+            new Types\CreatePivotInputType($this->registry, $modelSchema),
         ];
     }
 
     /**
      * Get the pivot input types.
      *
-     * @param string $model
      * @param BelongsToMany $relation
      * @return array
      */
-    protected function getPivotInputTypes(string $model, BelongsToMany $relation): array
+    protected function getPivotInputTypes(BelongsToMany $relation): array
     {
         // We actually want to create pivot input types for the reverse side here, but we approach
         // it from this side because we have the relevant information here (relation name, pivot accessor)
         // so we grab the model schema from the related one and pass it through.
-        $related = Bakery::getModelSchema($relation->getRelated());
+        $related = $this->registry->getSchemaForModel($relation->getRelated());
 
         return [
-            (new Types\CreateWithPivotInputType($related))->setPivotRelation($relation),
-            (new Types\PivotInputType($related))->setPivotRelation($relation),
+            (new Types\CreateWithPivotInputType($this->registry, $related))->setPivotRelation($relation),
+            (new Types\PivotInputType($this->registry, $related))->setPivotRelation($relation),
         ];
     }
 
     /**
      * Get the types for a polymorphic field.
      *
-     * @param \Bakery\Contracts\Introspectable $definition
+     * @param \Bakery\Eloquent\ModelSchema $modelSchema
      * @param string $key
-     * @param \Bakery\Types\Definitions\PolymorphicType $type
+     * @param \Bakery\Fields\PolymorphicField $field
      * @return array
      */
-    protected function getPolymorphicFieldTypes($definition, string $key, Types\Definitions\PolymorphicType $type): array
+    protected function getPolymorphicFieldTypes(ModelSchema $modelSchema, string $key, PolymorphicField $field): array
     {
-        $typename = Utils::typename($key).'On'.$definition->typename();
-        $definitions = $type->getDefinitions();
-        $typeResolver = $type->getTypeResolver();
+        $typename = Utils::typename($key).'On'.$modelSchema->typename();
+        $modelSchemas = $field->getModelSchemas();
+        $typeResolver = $field->getTypeResolver();
 
-        return [(new Types\UnionEntityType($definitions))->setName($typename)->typeResolver($typeResolver)];
+        return [
+            (new Types\UnionEntityType($this->registry))
+                ->setName($typename)
+                ->typeResolver($typeResolver)
+                ->setModelSchemas($modelSchemas),
+        ];
     }
 
     /**
      * Get the types for a polymorphic relationship.
      *
-     * @param \Bakery\Contracts\Introspectable $definition
+     * @param \Bakery\Eloquent\ModelSchema $modelSchema
      * @param string $key
-     * @param \Bakery\Types\Definitions\PolymorphicType $type
+     * @param \Bakery\Fields\PolymorphicField $type
      * @return array
      */
-    protected function getPolymorphicRelationshipTypes($definition, string $key, Types\Definitions\PolymorphicType $type): array
+    protected function getPolymorphicRelationshipTypes(ModelSchema $modelSchema, string $key, PolymorphicField $type): array
     {
-        $typename = Utils::typename($key).'On'.$definition->typename();
-        $definitions = $type->getDefinitions();
+        $typename = Utils::typename($key).'On'.$modelSchema->typename();
+        $modelSchemas = $type->getModelSchemas();
         $typeResolver = $type->getTypeResolver();
 
         return [
-            (new Types\UnionEntityType($definitions))->setName($typename)->typeResolver($typeResolver),
-            (new Types\CreateUnionEntityInputType($definitions))->setName($typename),
-            (new Types\AttachUnionEntityInputType($definitions))->setName($typename),
+            (new Types\UnionEntityType($this->registry))->setName($typename)->typeResolver($typeResolver)->setModelSchemas($modelSchemas),
+            (new Types\CreateUnionEntityInputType($this->registry))->setName($typename)->setModelSchemas($modelSchemas),
+            (new Types\AttachUnionEntityInputType($this->registry))->setName($typename)->setModelSchemas($modelSchemas),
         ];
     }
 
@@ -314,8 +342,8 @@ class Schema
             ->merge($this->getModelQueries());
 
         foreach ($this->queries as $name => $query) {
-            $query = is_object($query) ?: resolve($query);
-            $name = is_string($name) ? $name : $query->name;
+            $query = is_object($query) ?: new $query($this->registry);
+            $name = is_string($name) ? $name : $query->getName();
             $queries->put($name, $query);
         }
 
@@ -331,15 +359,17 @@ class Schema
     {
         $queries = collect();
 
-        foreach ($this->getModels() as $model) {
-            $instance = resolve($model)->getModel();
+        foreach ($this->getModels() as $modelSchema) {
+            $modelSchema = $this->registry->getModelSchema($modelSchema);
 
-            if (! $instance instanceof Pivot) {
-                $entityQuery = new SingleEntityQuery($model);
-                $queries->put($entityQuery->name, $entityQuery);
+            if (! $modelSchema->getModel() instanceof Pivot) {
+                $entityQuery = new SingleEntityQuery($this->registry, $modelSchema);
+                $queries->put($entityQuery->getName(), $entityQuery);
 
-                $collectionQuery = new EntityCollectionQuery($model);
-                $queries->put($collectionQuery->name, $collectionQuery);
+                if ($modelSchema->isIndexable()) {
+                    $collectionQuery = new EloquentCollectionQuery($this->registry, $modelSchema);
+                    $queries->put($collectionQuery->getName(), $collectionQuery);
+                }
             }
         }
 
@@ -357,8 +387,8 @@ class Schema
             ->merge($this->getModelMutations());
 
         foreach ($this->mutations as $name => $mutation) {
-            $mutation = is_object($mutation) ?: resolve($mutation);
-            $name = is_string($name) ? $name : $mutation->name;
+            $mutation = is_object($mutation) ?: new $mutation($this->registry);
+            $name = is_string($name) ? $name : $mutation->getName();
             $mutations->put($name, $mutation);
         }
 
@@ -374,28 +404,27 @@ class Schema
     {
         $mutations = collect();
 
-        foreach ($this->getModels() as $model) {
-            $schema = resolve($model);
-            $instance = $schema->getModel();
+        foreach ($this->getModels() as $class) {
+            $modelSchema = $this->registry->getModelSchema($class);
 
-            $pivotRelations = $schema->getRelations()->filter(function ($relation) {
+            $pivotRelations = $modelSchema->getRelations()->filter(function ($relation) {
                 return $relation instanceof BelongsToMany;
             });
 
-            if (! $this->isReadOnly($model) && ! $instance instanceof Pivot) {
-                $createMutation = new CreateMutation($model);
-                $mutations->put($createMutation->name, $createMutation);
+            if ($modelSchema->isMutable() && ! $modelSchema->getModel() instanceof Pivot) {
+                $createMutation = new CreateMutation($this->registry, $modelSchema);
+                $mutations->put($createMutation->getName(), $createMutation);
 
-                $updateMutation = new UpdateMutation($model);
-                $mutations->put($updateMutation->name, $updateMutation);
+                $updateMutation = new UpdateMutation($this->registry, $modelSchema);
+                $mutations->put($updateMutation->getName(), $updateMutation);
 
-                $deleteMutation = new DeleteMutation($model);
-                $mutations->put($deleteMutation->name, $deleteMutation);
+                $deleteMutation = new DeleteMutation($this->registry, $modelSchema);
+                $mutations->put($deleteMutation->getName(), $deleteMutation);
             }
 
             foreach ($pivotRelations as $relation) {
                 $mutations = $mutations->merge(
-                    $this->getModelPivotMutations($model, $relation)
+                    $this->getModelPivotMutations($modelSchema, $relation)
                 );
             }
         }
@@ -406,68 +435,76 @@ class Schema
     /**
      * Get the pivot mutations for a model and a relationship.
      *
-     * @param  string $model
+     * @param \Bakery\Eloquent\ModelSchema $modelSchema
      * @param BelongsToMany $relation
      * @return Collection
      */
-    protected function getModelPivotMutations(string $model, BelongsToMany $relation): Collection
+    protected function getModelPivotMutations(ModelSchema $modelSchema, BelongsToMany $relation): Collection
     {
         $mutations = collect();
 
-        $mutation = (new AttachPivotMutation($model))->setPivotRelation($relation);
-        $mutations->put($mutation->name, $mutation);
+        $mutation = (new AttachPivotMutation($this->registry, $modelSchema))->setPivotRelation($relation);
+        $mutations->put($mutation->getName(), $mutation);
 
-        $mutation = (new DetachPivotMutation($model))->setPivotRelation($relation);
-        $mutations->put($mutation->name, $mutation);
+        $mutation = (new DetachPivotMutation($this->registry, $modelSchema))->setPivotRelation($relation);
+        $mutations->put($mutation->getName(), $mutation);
 
         return $mutations;
     }
 
     /**
-     * Convert field sto array.
+     * Prepare the schema.
      *
-     * @param $fields
      * @return array
      */
-    public function fieldsToArray($fields): array
+    protected function prepareSchema(): array
     {
-        return array_map(function ($field) {
-            return $field->toArray();
-        }, $fields);
+        $models = $this->getModels();
+        $this->registry->addModelSchemas($models);
+
+        $types = $this->getTypes();
+        $this->registry->addTypes($types);
+
+        $queries = $this->getQueries();
+        $mutations = $this->getMutations();
+
+        $this->data = [
+            'queries' => $queries,
+            'mutations' => $mutations,
+        ];
+
+        return $this->data;
     }
 
     /**
      * Convert the bakery schema to a GraphQL schema.
      *
      * @return GraphQLSchema
+     * @throws \Exception
      */
     public function toGraphQLSchema(): GraphQLSchema
     {
-        $this->verifyModels();
-        Bakery::addModelSchemas($this->getModels());
-        Bakery::addTypes($this->getTypes());
+        $this->bindTypeRegistry();
+
+        if (isset($this->data)) {
+            $data = $this->data;
+        } else {
+            $data = $this->prepareSchema();
+        }
 
         $config = SchemaConfig::create();
 
+        Utils::invariant(count($data['queries']) > 0, 'There must be query fields defined in the schema.');
+
         // Build the query
-        $query = $this->makeObjectType(
-            $this->fieldsToArray($this->getQueries()),
-            ['name' => 'Query']
-        );
-
-        Utils::invariant(count($query->getFields()) > 0, 'There must be query fields defined in the schema.');
-
-        if (count($query->getFields()) > 0) {
-            $config->setQuery($query);
-        }
+        $query = (new RootQuery($this->registry, $data['queries']))->toType();
+        $config->setQuery($query);
 
         // Build the mutation
-        $mutation = $this->makeObjectType(
-            $this->fieldsToArray($this->getMutations()),
-            ['name' => 'Mutation']
-        );
+        $mutation = null;
 
-        if (count($mutation->getFields()) > 0) {
+        if (count($data['mutations']) > 0) {
+            $mutation = (new RootMutation($this->registry, $data['mutations']))->toType();
             $config->setMutation($mutation);
         }
 
@@ -479,54 +516,103 @@ class Schema
             if ($name === $query->name) {
                 return $query;
             }
+
             if ($name === $mutation->name) {
                 return $mutation;
             }
 
-            return Bakery::resolve($name);
+            return $this->registry->resolve($name);
         });
 
         return new GraphQLSchema($config);
     }
 
     /**
-     * Verify if the models correctly have the introspectable trait.
-     *
-     * @return void
+     * Bind the type registry of the schema to the IoC container of Laravel.
+     * This lets us resolve the type registry from static calls via the `Type` and `Field` helpers.
+     * From now on every call to `resolve(TypeRegistry::class)` will resolve in this instance.
      */
-    protected function verifyModels()
+    protected function bindTypeRegistry()
     {
-        foreach ($this->getModels() as $model) {
-            Utils::invariant(
-                Utils::usesTrait($model, Introspectable::class),
-                $model.' does not have the '.Introspectable::class.' trait'
-            );
-        }
+        app()->instance(TypeRegistry::class, $this->registry);
     }
 
-    protected function makeObjectType($type, $options = []): ObjectType
+    /**
+     * @param $type
+     * @param array $options
+     * @return \GraphQL\Type\Definition\ObjectType
+     */
+    protected function makeObjectType($type, array $options = []): ObjectType
     {
         $objectType = null;
+
         if ($type instanceof ObjectType) {
             $objectType = $type;
         } elseif (is_array($type)) {
             $objectType = $this->makeObjectTypeFromFields($type, $options);
         } else {
-            $objectType = $this->makeObjectTypeFromClass($type, $options);
+            $objectType = $this->makeObjectTypeFromClass($type);
         }
 
         return $objectType;
     }
 
-    protected function makeObjectTypeFromFields($fields, $options = [])
+    /**
+     * @param $fields
+     * @param array $options
+     * @return \GraphQL\Type\Definition\ObjectType
+     */
+    protected function makeObjectTypeFromFields($fields, $options = []): ObjectType
     {
         return new ObjectType(array_merge([
             'fields' => $fields,
         ], $options));
     }
 
-    protected function makeObjectTypeFromClass(Type $class, $options = [])
+    /**
+     * @param \Bakery\Types\Definitions\Type $class
+     * @return \GraphQL\Type\Definition\Type
+     */
+    protected function makeObjectTypeFromClass(Type $class): \GraphQL\Type\Definition\Type
     {
         return $class->toType();
+    }
+
+    /**
+     * Get the models in the given directory.
+     *
+     * @param string $directory
+     * @param string|null $namespace
+     * @return array
+     */
+    public static function modelsIn($directory, $namespace = null)
+    {
+        if (is_null($namespace)) {
+            $namespace = app()->getNamespace();
+        }
+
+        $models = [];
+
+        foreach ((new Finder)->files()->in($directory) as $file) {
+            $class = $namespace.str_replace(['/', '.php'], ['\\', ''], $file->getRelativePathname());
+
+            if (is_subclass_of($class, ModelSchema::class)) {
+                $models[] = $class;
+            }
+        }
+
+        return $models;
+    }
+
+    /**
+     * @return array
+     * @throws \Exception
+     */
+    public function __sleep()
+    {
+        $schema = $this->toGraphQLSchema();
+        $schema->assertValid();
+
+        return ['registry', 'data'];
     }
 }

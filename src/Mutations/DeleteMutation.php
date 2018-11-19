@@ -2,11 +2,12 @@
 
 namespace Bakery\Mutations;
 
-use Bakery\Support\Facades\Bakery;
+use Bakery\Fields\Field;
 use Bakery\Types\Definitions\Type;
 use Illuminate\Database\Eloquent\Model;
+use GraphQL\Type\Definition\ResolveInfo;
 
-class DeleteMutation extends EntityMutation
+class DeleteMutation extends EloquentMutation
 {
     /**
      * Get the name of the mutation.
@@ -15,11 +16,11 @@ class DeleteMutation extends EntityMutation
      */
     public function name(): string
     {
-        if (property_exists($this, 'name')) {
+        if (isset($this->name)) {
             return $this->name;
         }
 
-        return 'delete'.$this->schema->typename();
+        return 'delete'.$this->modelSchema->typename();
     }
 
     /**
@@ -29,7 +30,7 @@ class DeleteMutation extends EntityMutation
      */
     public function type(): Type
     {
-        return Bakery::boolean();
+        return $this->registry->boolean();
     }
 
     /**
@@ -39,7 +40,9 @@ class DeleteMutation extends EntityMutation
      */
     public function args(): array
     {
-        return $this->schema->getLookupFields()->toArray();
+        return $this->modelSchema->getLookupFields()->map(function (Field $field) {
+            return $field->getType();
+        })->toArray();
     }
 
     /**
@@ -48,14 +51,15 @@ class DeleteMutation extends EntityMutation
      * @param  mixed $root
      * @param  array $args
      * @param  mixed $context
+     * @param \GraphQL\Type\Definition\ResolveInfo $info
      * @return Model
      * @throws \Illuminate\Auth\Access\AuthorizationException
-     * @throws \Exception
      */
-    public function resolve($root, array $args, $context): Model
+    public function resolve($root, array $args, $context, ResolveInfo $info): Model
     {
-        $model = $this->findOrFail($root, $args, $context);
-        $this->authorize('delete', $model);
+        $model = $this->findOrFail($root, $args, $context, $info);
+        $modelSchema = $this->registry->getSchemaForModel($model);
+        $modelSchema->authorize('delete');
 
         $model->delete();
 

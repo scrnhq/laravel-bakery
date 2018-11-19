@@ -2,22 +2,18 @@
 
 namespace Bakery\Types;
 
-use Bakery\Concerns\ModelAware;
-use Bakery\Support\Facades\Bakery;
-use Bakery\Types\Definitions\InputType;
+use Bakery\Types\Definitions\EloquentInputType;
 
-class CollectionRootSearchType extends InputType
+class CollectionRootSearchType extends EloquentInputType
 {
-    use ModelAware;
-
     /**
-     * Get the name of the Collection Root Search Type.
+     * Get the name of the Collection Root Search BakeField.
      *
      * @return string
      */
     public function name(): string
     {
-        return $this->schema->typename().'RootSearch';
+        return $this->modelSchema->typename().'RootSearch';
     }
 
     /**
@@ -28,8 +24,8 @@ class CollectionRootSearchType extends InputType
     public function fields(): array
     {
         return [
-            'query' => Bakery::string(),
-            'fields' => Bakery::type($this->schema->typename().'Search'),
+            'query' => $this->registry->field($this->registry->string()),
+            'fields' => $this->registry->field($this->modelSchema->typename().'Search'),
         ];
     }
 }

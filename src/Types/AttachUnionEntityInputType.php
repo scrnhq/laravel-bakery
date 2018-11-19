@@ -3,10 +3,11 @@
 namespace Bakery\Types;
 
 use Bakery\Utils\Utils;
-use Bakery\Support\Facades\Bakery;
+use Bakery\Eloquent\ModelSchema;
+use Bakery\Types\Definitions\InputType;
 use Bakery\Types\Concerns\InteractsWithPolymorphism;
 
-class AttachUnionEntityInputType extends MutationInputType
+class AttachUnionEntityInputType extends InputType
 {
     use InteractsWithPolymorphism;
 
@@ -17,22 +18,21 @@ class AttachUnionEntityInputType extends MutationInputType
      */
     public function fields(): array
     {
-        return collect($this->definitions)->reduce(function (array $fields, string $definition) {
-            $definition = resolve($definition);
-
-            $fields[Utils::single($definition->typename())] = Bakery::ID()->nullable();
+        return $this->getModelSchemas()->reduce(function (array $fields, ModelSchema $modelSchema) {
+            $key = Utils::single($modelSchema->typename());
+            $fields[$key] = $this->registry->field($this->registry->ID())->nullable();
 
             return $fields;
         }, []);
     }
 
     /**
-     * Get the name of the Create Union Input Type.
+     * Get the name of the Create Union Input BakeField.
      *
      * @param $name
-     * @return string
+     * @return \Bakery\Types\AttachUnionEntityInputType
      */
-    public function setName($name)
+    public function setName($name): self
     {
         $this->name = 'Attach'.$name.'Input';
 

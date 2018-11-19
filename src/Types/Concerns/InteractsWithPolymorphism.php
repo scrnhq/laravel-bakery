@@ -3,8 +3,7 @@
 namespace Bakery\Types\Concerns;
 
 use Bakery\Utils\Utils;
-use Bakery\Concerns\ModelAware;
-use Bakery\Eloquent\Introspectable;
+use Illuminate\Support\Collection;
 
 trait InteractsWithPolymorphism
 {
@@ -12,40 +11,40 @@ trait InteractsWithPolymorphism
      * The definitions of the type.
      * @var array
      */
-    protected $definitions;
+    protected $modelSchemas;
 
     /**
-     * InteractsWithPolymorphism constructor.
-     * @param array $definitions
+     * @var \Bakery\Support\TypeRegistry
      */
-    public function __construct(array $definitions = [])
+    protected $registry;
+
+    /**
+     * Set the model schemas.
+     *
+     * @param array $modelSchemas
+     * @return \Bakery\Types\Concerns\InteractsWithPolymorphism
+     */
+    public function setModelSchemas(array $modelSchemas)
     {
-        if (isset($definitions)) {
-            $this->definitions = $definitions;
-        }
+        $this->modelSchemas = $modelSchemas;
 
-        Utils::invariant(! empty($this->definitions), 'No definitions defined on "'.get_class($this).'"');
-
-        // If this type uses the model aware trait it is doing something
-        // with relationships and we want to check the definitions to use the introspectable trait.
-        if (Utils::usesTrait($this, ModelAware::class)) {
-            $this->checkIntrospectable();
-        }
+        return $this;
     }
 
     /**
-     * Check if the definitions use the introspectable trait.
+     * Get the model schemas of the polymorphic type.
      *
-     * @return void
+     * @return \Illuminate\Support\Collection
      */
-    protected function checkIntrospectable(): void
+    public function getModelSchemas(): Collection
     {
-        foreach ($this->definitions as $definition) {
-            $schema = resolve($definition);
-            Utils::invariant(
-                Utils::usesTrait($schema, Introspectable::class),
-                class_basename($schema).' does not use the '.Introspectable::class.' trait.'
-            );
-        }
+        Utils::invariant(
+            ! empty($this->modelSchemas),
+            'No model schemas defined on "'.get_class($this).'"'
+        );
+
+        return collect($this->modelSchemas)->map(function (string $class) {
+            return $this->registry->getModelSchema($class);
+        });
     }
 }

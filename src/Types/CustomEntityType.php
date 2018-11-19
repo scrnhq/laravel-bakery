@@ -18,6 +18,6 @@ abstract class CustomEntityType extends EntityType
             return $this->name;
         }
 
-        return Utils::typename(str_before(class_basename($this), 'Type'));
+        return Utils::typename(str_before(class_basename($this), 'BakeField'));
     }
 }

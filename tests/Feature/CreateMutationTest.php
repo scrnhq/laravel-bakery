@@ -2,12 +2,12 @@
 
 namespace Bakery\Tests\Feature;
 
-use Bakery\Tests\Models;
-use Bakery\Tests\Models\Article;
-use Bakery\Tests\Models\Comment;
-use Bakery\Tests\FeatureTestCase;
+use Bakery\Tests\Stubs\Models;
+use Bakery\Tests\IntegrationTest;
+use Bakery\Tests\Stubs\Models\Article;
+use Bakery\Tests\Stubs\Models\Comment;
 
-class CreateMutationTest extends FeatureTestCase
+class CreateMutationTest extends IntegrationTest
 {
     /** @test */
     public function it_does_not_allow_creating_entity_as_guest()
@@ -536,7 +536,7 @@ class CreateMutationTest extends FeatureTestCase
         $user = factory(Models\User::class)->create();
         $this->actingAs($user);
 
-        $article = factory(Article::class)->create();
+        $article = factory(Models\Article::class)->create();
 
         $query = '
             mutation {

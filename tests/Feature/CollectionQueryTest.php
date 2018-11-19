@@ -2,11 +2,11 @@
 
 namespace Bakery\Tests\Feature;
 
-use Bakery\Tests\Models;
-use Bakery\Tests\FeatureTestCase;
+use Bakery\Tests\Stubs\Models;
+use Bakery\Tests\IntegrationTest;
 use Illuminate\Support\Facades\DB;
 
-class CollectionQueryTest extends FeatureTestCase
+class CollectionQueryTest extends IntegrationTest
 {
     /** @test */
     public function it_returns_collection_of_entities_with_pagination()
@@ -316,6 +316,7 @@ class CollectionQueryTest extends FeatureTestCase
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
         $response->assertStatus(200);
+        $response->assertJsonMissing(['errors']);
         $result = json_decode($response->getContent())->data->articles;
         $this->assertEquals($result->items[0]->id, $articleByJoe->id);
         $this->assertEquals($result->items[1]->id, $articleByJane->id);
@@ -499,5 +500,27 @@ class CollectionQueryTest extends FeatureTestCase
 
         $response->assertJsonStructure(['data' => ['articles' => ['items' => [['comments' => [['user' => ['id'], 'article' => ['title']]]]]]]]);
         $this->assertCount(5, DB::getQueryLog());
+    }
+
+    /** @test */
+    public function it_cannot_query_models_that_are_not_indexable()
+    {
+        $user = factory(Models\User::class)->create();
+        factory(Models\Phone::class)->create();
+
+        $this->actingAs($user);
+
+        $query = '
+            query {
+                phones {
+                    items {
+                        id
+                    }
+                }
+            }
+        ';
+
+        $response = $this->postJson('/graphql', ['query' => $query]);
+        $this->assertContains('Cannot query field "phones"', $response->json('errors.0.message'));
     }
 }
