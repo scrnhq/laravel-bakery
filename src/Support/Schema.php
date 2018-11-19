@@ -198,12 +198,15 @@ class Schema
                 $types = $types->merge($this->getPivotModelTypes($schema));
             } else {
                 $types->push(new Types\EntityType($this->registry, $schema))
-                      ->push(new Types\EntityCollectionType($this->registry, $schema))
                       ->push(new Types\EntityLookupType($this->registry, $schema))
                       ->push(new Types\CollectionFilterType($this->registry, $schema))
-                      ->push(new Types\CollectionRootSearchType($this->registry, $schema))
-                      ->push(new Types\CollectionSearchType($this->registry, $schema))
                       ->push(new Types\CollectionOrderByType($this->registry, $schema));
+
+                if ($schema->isIndexable()) {
+                    $types->push(new Types\EntityCollectionType($this->registry, $schema))
+                          ->push(new Types\CollectionRootSearchType($this->registry, $schema))
+                          ->push(new Types\CollectionSearchType($this->registry, $schema));
+                }
 
                 if ($schema->isMutable()) {
                     $types->push(new Types\CreateInputType($this->registry, $schema))
@@ -363,8 +366,10 @@ class Schema
                 $entityQuery = new SingleEntityQuery($this->registry, $modelSchema);
                 $queries->put($entityQuery->getName(), $entityQuery);
 
-                $collectionQuery = new EloquentCollectionQuery($this->registry, $modelSchema);
-                $queries->put($collectionQuery->getName(), $collectionQuery);
+                if ($modelSchema->isIndexable()) {
+                    $collectionQuery = new EloquentCollectionQuery($this->registry, $modelSchema);
+                    $queries->put($collectionQuery->getName(), $collectionQuery);
+                }
             }
         }
 
