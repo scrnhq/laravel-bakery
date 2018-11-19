@@ -501,7 +501,7 @@ class CollectionQueryTest extends IntegrationTest
         $response->assertJsonStructure(['data' => ['articles' => ['items' => [['comments' => [['user' => ['id'], 'article' => ['title']]]]]]]]);
         $this->assertCount(5, DB::getQueryLog());
     }
-    
+
     /** @test */
     public function it_cannot_query_models_that_are_not_indexable()
     {
