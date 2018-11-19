@@ -240,8 +240,12 @@ class Type
     public function toType(): GraphQLType
     {
         $type = $this->getType();
-        $type = $this->isList() ? GraphQLType::listOf($type) : $type;
         $type = $this->isNullable() ? $type : GraphQLType::nonNull($type);
+
+        if ($this->isList()) {
+            $type = GraphQLType::listOf($type);
+            $type = $this->isNullable() ? $type : GraphQLType::nonNull($type);
+        }
 
         return $type;
     }
