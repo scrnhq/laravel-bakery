@@ -51,7 +51,7 @@ abstract class ModelSchema
     protected $mutable = true;
 
     /**
-     * Indicates if the model can be.
+     * Indicates if the model can be indexed.
      *
      * @var bool
      */
