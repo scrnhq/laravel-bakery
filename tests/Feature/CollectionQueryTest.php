@@ -501,4 +501,26 @@ class CollectionQueryTest extends IntegrationTest
         $response->assertJsonStructure(['data' => ['articles' => ['items' => [['comments' => [['user' => ['id'], 'article' => ['title']]]]]]]]);
         $this->assertCount(5, DB::getQueryLog());
     }
+
+    /** @test */
+    public function it_cannot_query_models_that_are_not_indexable()
+    {
+        $user = factory(Models\User::class)->create();
+        factory(Models\Phone::class)->create();
+
+        $this->actingAs($user);
+
+        $query = '
+            query {
+                phones {
+                    items {
+                        id
+                    }
+                }
+            }
+        ';
+
+        $response = $this->postJson('/graphql', ['query' => $query]);
+        $this->assertContains('Cannot query field "phones"', $response->json('errors.0.message'));
+    }
 }

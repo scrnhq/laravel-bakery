@@ -51,6 +51,13 @@ abstract class ModelSchema
     protected $mutable = true;
 
     /**
+     * Indicates if the model can be indexed.
+     *
+     * @var bool
+     */
+    protected $indexable = true;
+
+    /**
      * The bound fields.
      *
      * @var Collection
@@ -152,6 +159,16 @@ abstract class ModelSchema
         }
 
         return $this->mutable;
+    }
+
+    /**
+     * Determine if the model is indexable.
+     *
+     * @return bool
+     */
+    public function isIndexable()
+    {
+        return $this->indexable;
     }
 
     /**

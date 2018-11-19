@@ -10,6 +10,8 @@ class PhoneSchema extends ModelSchema
 {
     protected $model = Phone::class;
 
+    protected $indexable = false;
+
     public function fields(): array
     {
         return [
