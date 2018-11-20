@@ -4,6 +4,7 @@ namespace Bakery\Fields;
 
 use Bakery\Support\TypeRegistry;
 use Bakery\Types\Definitions\Type;
+use Illuminate\Foundation\Auth\User;
 use GraphQL\Type\Definition\ResolveInfo;
 use Illuminate\Contracts\Auth\Access\Gate;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -83,6 +84,17 @@ class Field
         if ($type) {
             $this->type = $type;
         }
+    }
+
+    /**
+     * Return a gate instance for the user.
+     *
+     * @param \Illuminate\Foundation\Auth\User|null $user
+     * @return \Illuminate\Contracts\Auth\Access\Gate
+     */
+    protected function getGate(?User $user = null): Gate
+    {
+        return app(Gate::class)->forUser($user);
     }
 
     /**
@@ -440,21 +452,24 @@ class Field
     protected function checkPolicy($source, $args, $context, ResolveInfo $info)
     {
         $user = auth()->user();
+        $gate = $this->getGate($user);
         $policy = $this->viewPolicy;
-        /** @var Gate $gate */
-        $gate = app(Gate::class)->forUser($user);
         $fieldName = $info->fieldName;
+
         // Check if the policy method is callable
         if (($policy instanceof \Closure || is_callable_tuple($policy)) && $policy($user, $source, $args, $context, $info)) {
             return true;
         }
+
         // Check if there is a policy with this name
         if (is_string($policy) && $gate->check($policy, $source)) {
             return true;
         }
+
         if ($this->nullable) {
             return false;
         }
+
         throw new AuthorizationException('Cannot read property "'.$fieldName.'" of '.get_class($source));
     }
 
@@ -477,9 +492,7 @@ class Field
         }
 
         $user = auth()->user();
-
-        /** @var Gate $gate */
-        $gate = app(Gate::class)->forUser($user);
+        $gate = $this->getGate($user);
 
         // Check if the policy method is a closure.
         if (($policy instanceof \Closure || is_callable_tuple($policy)) && $policy($user, $source, $value)) {
