@@ -272,7 +272,7 @@ class Type
             $type = $this->hasNullableItems() ? $type : GraphQLType::nonNull($type);
             $type = $this->isNullable()
                 ? GraphQLType::listOf($type)
-                : GraphQLType::listOf(GraphQLType::nonNull($type));
+                : GraphQLType::nonNull(GraphQLType::listOf($type));
         } else {
             $type = $this->isNullable() ? $type : GraphQLType::nonNull($type);
         }
