@@ -15,12 +15,12 @@ An on-the-fly GraphQL Schema generator from Eloquent models for Laravel.
 
 ## Version Compatibility
 
-| Laravel | Bakery |
-| :------ | :----- |
-| 5.4.x   | 1.0.x  |
-| 5.5.x   | 1.0.x  |
-| 5.6.x   | 2.0.x  |
-| 5.7.x   | 2.1.x  |
+| Laravel | Bakery | Support |
+| :------ | :----- | :------ |
+| 5.4.x   | 1.0.x  |         |
+| 5.5.x   | 1.0.x  |         |
+| 5.6.x   | 2.0.x  | ✅      |
+| 5.7.x   | 2.1.x  | ✅      |
 
 ## Installation
 
