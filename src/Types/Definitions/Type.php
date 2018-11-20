@@ -61,6 +61,13 @@ class Type
     protected $list = false;
 
     /**
+     * Whether the items of the list are nullable.
+     *
+     * @var bool
+     */
+    protected $nullableItems = false;
+
+    /**
      * Construct a new type.
      *
      * @param \Bakery\Support\TypeRegistry $registry
@@ -180,6 +187,26 @@ class Type
     }
 
     /**
+     * Returns if the list has nullable items.
+     *
+     * @return bool
+     */
+    public function hasNullableItems(): bool
+    {
+        return $this->nullableItems;
+    }
+
+    /**
+     * Define if the items are nullable.
+     *
+     * @param bool $value
+     */
+    public function setNullableItems(bool $value = true)
+    {
+        $this->nullableItems = $value;
+    }
+
+    /**
      * Set a name on the type.
      *
      * @param $name
@@ -240,10 +267,13 @@ class Type
     public function toType(): GraphQLType
     {
         $type = $this->getType();
-        $type = $this->isNullable() ? $type : GraphQLType::nonNull($type);
 
         if ($this->isList()) {
-            $type = GraphQLType::listOf($type);
+            $type = $this->hasNullableItems() ? $type : GraphQLType::nonNull($type);
+            $type = $this->isNullable()
+                ? GraphQLType::listOf($type)
+                : GraphQLType::listOf(GraphQLType::nonNull($type));
+        } else {
             $type = $this->isNullable() ? $type : GraphQLType::nonNull($type);
         }
 
@@ -282,4 +312,5 @@ class Type
     {
         //
     }
+
 }
