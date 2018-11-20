@@ -7,7 +7,6 @@ use Bakery\Tests\Stubs\Policies;
 use Bakery\BakeryServiceProvider;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Contracts\Auth\Access\Gate;
-use Orchestra\Database\ConsoleServiceProvider;
 use Bakery\Tests\Fixtures\IntegrationTestSchema;
 use Illuminate\Foundation\Testing\Concerns\InteractsWithDatabase;
 
@@ -60,7 +59,6 @@ abstract class IntegrationTest extends TestCase
     protected function getPackageProviders($app)
     {
         return [
-            ConsoleServiceProvider::class,
             BakeryServiceProvider::class,
         ];
     }
