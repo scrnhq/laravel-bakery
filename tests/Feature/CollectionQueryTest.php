@@ -256,6 +256,54 @@ class CollectionQueryTest extends IntegrationTest
     }
 
     /** @test */
+    public function it_can_filter_with_null_AND_and_OR_filters()
+    {
+        $userOne = factory(Models\User::class)->create();
+        $userTwo = factory(Models\User::class)->create();
+        $articleOne = factory(Models\Article::class)->create([
+            'title' => 'Hello world',
+            'content' => 'Lorem ipsum',
+            'user_id' => $userOne->id,
+        ]);
+        $articleTwo = factory(Models\Article::class)->create([
+            'title' => 'Hello world',
+            'content' => 'Lorem ipsum',
+            'user_id' => $userOne->id,
+        ]);
+        $articleThree = factory(Models\Article::class)->create([
+            'title' => 'Hello world',
+            'content' => 'Lorem ipsum',
+            'user_id' => $userTwo->id,
+        ]);
+
+        $query = '
+            query {
+                articles(filter: {
+                    AND: [
+                        { user: { id: "'.$userOne->id.'" } }, 
+                        null,
+                        { OR: [null] },
+                    ]
+                }) {
+                    items {
+                        id
+                    }
+                    pagination {
+                        total
+                    }
+                }
+            }
+        ';
+
+        $response = $this->json('GET', '/graphql', ['query' => $query]);
+        $response->assertStatus(200);
+        $response->assertJsonFragment(['total' => 2]);
+        $response->assertJsonFragment(['id' => $articleOne->id]);
+        $response->assertJsonFragment(['id' => $articleTwo->id]);
+        $response->assertJsonMissing(['id' => $articleThree->id]);
+    }
+
+    /** @test */
     public function it_can_order_by_field()
     {
         $first = factory(Models\Article::class)->create(['title' => 'Hello world']);
