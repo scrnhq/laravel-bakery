@@ -3,7 +3,6 @@
 namespace Bakery\Traits;
 
 use Bakery\Support\Facades\Bakery;
-use Bakery\Support\TypeRegistry;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\Grammars;
