@@ -49,6 +49,11 @@ class Field
     /**
      * @var bool
      */
+    protected $nullableItems = false;
+
+    /**
+     * @var bool
+     */
     protected $fillable = true;
 
     /**
@@ -138,6 +143,7 @@ class Field
 
         $type->nullable($this->isNullable());
         $type->list($this->isList());
+        $type->nullableItems($this->hasNullableItems());
 
         return $type->setRegistry($this->getRegistry());
     }
@@ -263,6 +269,29 @@ class Field
     public function isNullable(): bool
     {
         return $this->nullable;
+    }
+
+    /**
+     * Set if the field has nullable items.
+     *
+     * @param bool $nullable
+     * @return \Bakery\Fields\Field
+     */
+    public function nullableItems(bool $nullable = true): self
+    {
+        $this->nullableItems = $nullable;
+
+        return $this;
+    }
+
+    /**
+     * Return if the field has nullable items.
+     *
+     * @return bool
+     */
+    public function hasNullableItems(): bool
+    {
+        return $this->nullableItems;
     }
 
     /**
