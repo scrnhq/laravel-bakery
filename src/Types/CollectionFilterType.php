@@ -34,7 +34,7 @@ class CollectionFilterType extends EloquentInputType
             ->put('OR', $this->registry->field($this->registry->type($this->name()))->list());
 
         return $fields->map(function (Field $type) {
-            return $type->nullable();
+            return $type->nullable()->nullableItems();
         })->toArray();
     }
 

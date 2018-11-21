@@ -201,7 +201,7 @@ class Type
      *
      * @param bool $value
      */
-    public function setNullableItems(bool $value = true)
+    public function nullableItems(bool $value = true)
     {
         $this->nullableItems = $value;
     }
