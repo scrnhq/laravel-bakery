@@ -3,6 +3,7 @@
 namespace Bakery\Traits;
 
 use Bakery\Support\Facades\Bakery;
+use Bakery\Support\TypeRegistry;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\Grammars;
@@ -23,6 +24,11 @@ trait SearchesQueries
      */
     protected function applySearch(Builder $query, array $args)
     {
+        // If the query is empty, we don't need to perform any search.
+        if (empty($args['query'])) {
+            return $query;
+        }
+
         /** @var \Illuminate\Database\Connection $connection */
         $connection = DB::connection();
 
@@ -75,7 +81,7 @@ trait SearchesQueries
         $this->joinRelation($query, $relation, 'left');
 
         foreach ($fields as $key => $value) {
-            $schema = Bakery::getSchemaForModel(get_class($related));
+            $schema = $this->registry->getSchemaForModel($related);
 
             $relations = $schema->getRelationFields();
             if ($relations->keys()->contains($key)) {

@@ -3,7 +3,8 @@
 namespace Bakery\Types;
 
 use Bakery\Fields\Field;
-use Bakery\Types\Definitions\EloquentType;
+use Bakery\Fields\EloquentField;
+use GraphQL\Type\Definition\StringType;
 use Bakery\Types\Definitions\EloquentInputType;
 
 class CollectionSearchType extends EloquentInputType
@@ -25,18 +26,18 @@ class CollectionSearchType extends EloquentInputType
      */
     public function fields(): array
     {
-        $fields = collect($this->modelSchema->getFields());
-
-        $fields->each(function (Field $field, $name) use (&$fields) {
-            $fields->put($name, $this->registry->field($this->registry->boolean())->nullable());
+        $fields = $this->modelSchema->getFields()->filter(function (Field $field) {
+            return $field->getType()->getType() instanceof StringType;
+        })->map(function (Field $field) {
+            return $this->registry->field($this->registry->boolean())->nullable();
         });
 
-        foreach ($this->modelSchema->getRelationFields() as $relation => $field) {
-            if ($field instanceof EloquentType) {
-                $fields[$relation] = $this->registry->field($field->getName().'Search')->nullable();
-            }
-        }
+        $relations = $this->modelSchema->getRelationFields()->filter(function (Field $field) {
+            return $field instanceof EloquentField;
+        })->map(function (EloquentField $field) {
+            return $this->registry->field($field->getName().'Search')->nullable();
+        });
 
-        return $fields->toArray();
+        return $fields->merge($relations)->toArray();
     }
 }

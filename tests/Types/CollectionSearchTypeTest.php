@@ -1,0 +1,40 @@
+<?php
+
+namespace Bakery\Tests\Types;
+
+use Bakery\Tests\TestCase;
+use Bakery\Types\CollectionSearchType;
+use Bakery\Tests\Stubs\Schemas\ArticleSchema;
+use Bakery\Tests\Fixtures\IntegrationTestSchema;
+
+class CollectionSearchTypeTest extends TestCase
+{
+    /** @test */
+    public function it_generates_search_fields_for_string_scalar_fields()
+    {
+        $schema = new IntegrationTestSchema();
+        $schema->toGraphQLSchema();
+        $type = new CollectionSearchType($schema->getRegistry(), new ArticleSchema($schema->getRegistry()));
+
+        $actual = $type->resolveFields();
+        $this->assertArrayHasKey('slug', $actual);
+        $this->assertArrayHasKey('title', $actual);
+        $this->assertArrayHasKey('content', $actual);
+        $this->assertArrayNotHasKey('created_at', $actual);
+    }
+
+    /** @test */
+    public function it_generates_search_fields_for_relation_fields()
+    {
+        $schema = new IntegrationTestSchema();
+        $schema->toGraphQLSchema();
+        $type = new CollectionSearchType($schema->getRegistry(), new ArticleSchema($schema->getRegistry()));
+
+        $actual = $type->resolveFields();
+        $this->assertArrayHasKey('user', $actual);
+        $this->assertArrayHasKey('tags', $actual);
+        $this->assertArrayHasKey('category', $actual);
+        $this->assertArrayHasKey('comments', $actual);
+        $this->assertArrayHasKey('upvotes', $actual);
+    }
+}
