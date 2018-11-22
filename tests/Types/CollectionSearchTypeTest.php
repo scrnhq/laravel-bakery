@@ -17,9 +17,10 @@ class CollectionSearchTypeTest extends TestCase
         $type = new CollectionSearchType($schema->getRegistry(), new ArticleSchema($schema->getRegistry()));
 
         $actual = $type->resolveFields();
-        $this->assertArrayHasKey('slug', $actual);
         $this->assertArrayHasKey('title', $actual);
         $this->assertArrayHasKey('content', $actual);
+
+        $this->assertArrayNotHasKey('slug', $actual);
         $this->assertArrayNotHasKey('created_at', $actual);
     }
 
@@ -32,9 +33,10 @@ class CollectionSearchTypeTest extends TestCase
 
         $actual = $type->resolveFields();
         $this->assertArrayHasKey('user', $actual);
-        $this->assertArrayHasKey('tags', $actual);
-        $this->assertArrayHasKey('category', $actual);
-        $this->assertArrayHasKey('comments', $actual);
-        $this->assertArrayHasKey('upvotes', $actual);
+
+        $this->assertArrayNotHasKey('tags', $actual);
+        $this->assertArrayNotHasKey('category', $actual);
+        $this->assertArrayNotHasKey('comments', $actual);
+        $this->assertArrayNotHasKey('upvotes', $actual);
     }
 }

@@ -14,8 +14,8 @@ class ArticleSchema extends ModelSchema
     {
         return [
             'slug' => Field::string()->unique(),
-            'title' => Field::string(),
-            'content' => Field::string(),
+            'title' => Field::string()->searchable(),
+            'content' => Field::string()->searchable(),
             'created_at' => Field::type('Timestamp')->fillable(false),
         ];
     }
@@ -23,7 +23,7 @@ class ArticleSchema extends ModelSchema
     public function relations(): array
     {
         return [
-            'user' => Field::model(UserSchema::class)->nullable(),
+            'user' => Field::model(UserSchema::class)->nullable()->searchable(),
             'tags' => Field::collection(TagSchema::class)->nullable(),
             'category' => Field::model(CategorySchema::class)->nullable(),
             'comments' => Field::collection(CommentSchema::class),

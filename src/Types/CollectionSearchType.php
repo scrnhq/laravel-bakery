@@ -4,7 +4,6 @@ namespace Bakery\Types;
 
 use Bakery\Fields\Field;
 use Bakery\Fields\EloquentField;
-use GraphQL\Type\Definition\StringType;
 use Bakery\Types\Definitions\EloquentInputType;
 
 class CollectionSearchType extends EloquentInputType
@@ -26,16 +25,14 @@ class CollectionSearchType extends EloquentInputType
      */
     public function fields(): array
     {
-        $fields = $this->modelSchema->getFields()->filter(function (Field $field) {
-            return $field->getType()->getType() instanceof StringType;
-        })->map(function (Field $field) {
-            return $this->registry->field($this->registry->boolean())->nullable();
-        });
+        $fields = $this->modelSchema->getSearchableFields()->map(function (Field $field) {
+                return $this->registry->field($this->registry->boolean())->nullable();
+            });
 
-        $relations = $this->modelSchema->getRelationFields()->filter(function (Field $field) {
-            return $field instanceof EloquentField;
-        })->map(function (EloquentField $field) {
-            return $this->registry->field($field->getName().'Search')->nullable();
+        $relations = $this->modelSchema->getSearchableRelationFields()->map(function (EloquentField $field) {
+            $searchTypeName = $field->getName().'Search';
+
+            return $this->registry->field($searchTypeName)->nullable();
         });
 
         return $fields->merge($relations)->toArray();
