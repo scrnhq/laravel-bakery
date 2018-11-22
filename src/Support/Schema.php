@@ -202,10 +202,13 @@ class Schema
                       ->push(new Types\CollectionFilterType($this->registry, $schema))
                       ->push(new Types\CollectionOrderByType($this->registry, $schema));
 
+                if ($schema->isSearchable()) {
+                    $types->push(new Types\CollectionSearchType($this->registry, $schema));
+                }
+
                 if ($schema->isIndexable()) {
                     $types->push(new Types\EntityCollectionType($this->registry, $schema))
-                          ->push(new Types\CollectionRootSearchType($this->registry, $schema))
-                          ->push(new Types\CollectionSearchType($this->registry, $schema));
+                          ->push(new Types\CollectionRootSearchType($this->registry, $schema));
                 }
 
                 if ($schema->isMutable()) {

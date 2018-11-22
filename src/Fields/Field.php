@@ -59,6 +59,11 @@ class Field
     /**
      * @var bool
      */
+    protected $searchable = false;
+
+    /**
+     * @var bool
+     */
     protected $unique = false;
 
     /**
@@ -327,6 +332,29 @@ class Field
     public function isFillable(): bool
     {
         return $this->fillable;
+    }
+
+    /**
+     * Set if the field is searchable.
+     *
+     * @param bool $searchable
+     * @return \Bakery\Fields\Field
+     */
+    public function searchable(bool $searchable = true): self
+    {
+        $this->searchable = $searchable;
+
+        return $this;
+    }
+
+    /**
+     * Return if the field is searchable.
+     *
+     * @return bool
+     */
+    public function isSearchable(): bool
+    {
+        return $this->searchable;
     }
 
     /**

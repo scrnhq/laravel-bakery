@@ -24,7 +24,7 @@ class CollectionRootSearchType extends EloquentInputType
     public function fields(): array
     {
         return [
-            'query' => $this->registry->field($this->registry->string()),
+            'query' => $this->registry->field($this->registry->string())->nullable(),
             'fields' => $this->registry->field($this->modelSchema->typename().'Search'),
         ];
     }
