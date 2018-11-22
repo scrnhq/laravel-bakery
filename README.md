@@ -35,7 +35,7 @@ or require in `composer.json`:
 ```json
 {
     "require": {
-        "scrnhq/laravel-bakery": "^2.0"
+        "scrnhq/laravel-bakery": "^2.1"
     }
 }
 ```
