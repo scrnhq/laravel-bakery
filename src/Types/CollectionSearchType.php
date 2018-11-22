@@ -26,8 +26,8 @@ class CollectionSearchType extends EloquentInputType
     public function fields(): array
     {
         $fields = $this->modelSchema->getSearchableFields()->map(function (Field $field) {
-                return $this->registry->field($this->registry->boolean())->nullable();
-            });
+            return $this->registry->field($this->registry->boolean())->nullable();
+        });
 
         $relations = $this->modelSchema->getSearchableRelationFields()->map(function (EloquentField $field) {
             $searchTypeName = $field->getName().'Search';
