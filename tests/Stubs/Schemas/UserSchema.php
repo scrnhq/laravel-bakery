@@ -14,8 +14,8 @@ class UserSchema extends ModelSchema
     public function fields(): array
     {
         return [
-            'name' => Field::string(),
-            'email' => Field::string()->unique(),
+            'name' => Field::string()->searchable(),
+            'email' => Field::string()->unique()->searchable(),
             'type' => Field::string()->canStoreWhen('setType'),
             'password' => Field::string()->canSeeWhen('readPassword'),
             'secret_information' => Field::string()

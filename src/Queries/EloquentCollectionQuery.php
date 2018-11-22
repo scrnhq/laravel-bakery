@@ -59,8 +59,11 @@ class EloquentCollectionQuery extends EloquentQuery
             'page' => $this->registry->int()->nullable(),
             'count' => $this->registry->int()->nullable(),
             'filter' => $this->registry->type($this->modelSchema->typename().'Filter')->nullable(),
-            'search' => $this->registry->type($this->modelSchema->typename().'RootSearch')->nullable(),
         ]);
+
+        if ($this->modelSchema->isSearchable()) {
+            $args->put('search', $this->registry->type($this->modelSchema->typename().'RootSearch')->nullable());
+        }
 
         if (! empty($this->modelSchema->getFields())) {
             $args->put('orderBy', $this->registry->type($this->modelSchema->typename().'OrderBy')->nullable());

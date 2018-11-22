@@ -172,6 +172,16 @@ abstract class ModelSchema
     }
 
     /**
+     * Returns if the schema is searchable.
+     *
+     * @return bool
+     */
+    public function isSearchable()
+    {
+        return $this->getSearchableFields()->merge($this->getSearchableRelationFields())->isNotEmpty();
+    }
+
+    /**
      * Return the typename of the model schema.
      *
      * @return string
@@ -228,6 +238,30 @@ abstract class ModelSchema
     {
         return $this->getFields()->filter(function (Field $field) {
             return $field->isFillable();
+        });
+    }
+
+    /**
+     * The fields that can be used in fulltext search.
+     *
+     * @return \Illuminate\Support\Collection
+     */
+    public function getSearchableFields(): Collection
+    {
+        return $this->getFields()->filter(function (Field $field) {
+            return $field->isSearchable();
+        });
+    }
+
+    /**
+     * The relation fields that can be used in fulltext search.
+     *
+     * @return \Illuminate\Support\Collection
+     */
+    public function getSearchableRelationFields(): Collection
+    {
+        return $this->getRelationFields()->filter(function (Field $field) {
+            return $field->isSearchable();
         });
     }
 

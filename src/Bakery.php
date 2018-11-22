@@ -65,24 +65,4 @@ class Bakery
             ['endpoint' => route($route), 'headers' => $headers]
         );
     }
-
-    /**
-     * Get the type instances of Bakery.
-     *
-     * @return array
-     */
-    public function getTypeInstances()
-    {
-        return $this->typeInstances;
-    }
-
-    /**
-     * Set the type instances.
-     *
-     * @param array $typeInstances
-     */
-    public function setTypeInstances(array $typeInstances)
-    {
-        $this->typeInstances = $typeInstances;
-    }
 }
