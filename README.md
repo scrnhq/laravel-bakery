@@ -68,6 +68,8 @@ query {
 
 ## Model schemas
 
+Model schemas are classes that lets you connect your Eloquent models with the GraphQL API. In there you can define which fields are available, which of them can be mutated and much more.
+
 By default, Bakery model schema's are stored in the `app\Bakery` directory. You can generate a new model schema using
 the handy `bakery:modelschema` Artisan command.
 
@@ -288,7 +290,7 @@ Another key feature of GraphQL that Bakery fully supports are mutations. Bakery 
 authorize the actions of your users.
 
 > Having policies for your models is required for Bakery mutations to work. See 
-> https://laravel.com/docs/5.6/authorization for more information.
+> https://laravel.com/docs/5.7/authorization for more information.
 
 For example, with the model schemas mentioned above, you could create a `Post` with a simple GraphQL mutation.
 
