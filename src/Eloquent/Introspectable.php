@@ -68,6 +68,10 @@ trait Introspectable
      */
     private function getKeyField(): array
     {
+        if (! $this->getKeyName()) {
+            return [];
+        }
+
         return [$this->getKeyName() => Bakery::ID()];
     }
 
