@@ -49,6 +49,11 @@ class AttachPivotMutationTest extends IntegrationTest
                     { id: "'.$role->id.'", customPivot: { comment: "foobar" } }
                 ]) {
                     id
+                    customRoles {
+                        customPivot {
+                            comment
+                        }
+                    }
                 }
             }
         ';
