@@ -209,6 +209,10 @@ abstract class ModelSchema
     {
         $key = $this->instance->getKeyName();
 
+        if (! $key) {
+            return [];
+        }
+
         return [$key => $this->registry->field($this->registry->ID())->fillable(false)->unique()];
     }
 
