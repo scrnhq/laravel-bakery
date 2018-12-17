@@ -16,7 +16,7 @@ class UserSchema extends ModelSchema
         return [
             'name' => Field::string()->searchable(),
             'email' => Field::string()->unique()->searchable(),
-            'type' => Field::string()->canStoreWhen('setType'),
+            'type' => Field::string()->nullableOnCreate()->canStoreWhen('setType'),
             'password' => Field::string()->canSeeWhen('readPassword'),
             'secret_information' => Field::string()
                 ->canSee(function (?Authenticatable $user, User $source) {

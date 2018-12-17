@@ -47,6 +47,13 @@ class Field
     protected $nullable = false;
 
     /**
+     * Indicates if the field can be omitted on create.
+     *
+     * @var bool
+     */
+    protected $nullableOnCreate = false;
+
+    /**
      * @var bool
      */
     protected $nullableItems = false;
@@ -274,6 +281,29 @@ class Field
     public function isNullable(): bool
     {
         return $this->nullable;
+    }
+
+    /**
+     * Set if the field can be omitted on create.
+     *
+     * @param bool $nullable
+     * @return \Bakery\Fields\Field
+     */
+    public function nullableOnCreate(bool $nullable = true): self
+    {
+        $this->nullableOnCreate = $nullable;
+
+        return $this;
+    }
+
+    /**
+     * Determine if the field can be omitted on create.
+     *
+     * @return bool
+     */
+    public function isNullableOnCreate()
+    {
+        return $this->nullableOnCreate;
     }
 
     /**
