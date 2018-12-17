@@ -11,4 +11,9 @@ class UserRole extends Pivot
     public $fillable = [
         'comment',
     ];
+
+    public function tag()
+    {
+        $this->belongsTo(Tag::class);
+    }
 }
