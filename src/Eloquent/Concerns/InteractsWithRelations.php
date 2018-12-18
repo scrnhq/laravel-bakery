@@ -236,12 +236,16 @@ trait InteractsWithRelations
      *
      * @param Relations\BelongsToMany $relation
      * @param array $data
+     * @param bool $detaching
      * @return void
      */
-    public function connectBelongsToManyRelation(Relations\BelongsToMany $relation, array $data)
+    public function connectBelongsToManyRelation(Relations\BelongsToMany $relation, array $data, $detaching = true)
     {
         $accessor = $relation->getPivotAccessor();
         $relatedKey = $relation->getRelated()->getKeyName();
+
+        $pivotClass = $relation->getPivotClass();
+        $pivotInstance = resolve($pivotClass);
 
         $data = collect($data)->mapWithKeys(function ($data, $key) use ($accessor, $relatedKey) {
             if (! is_array($data)) {
@@ -249,10 +253,28 @@ trait InteractsWithRelations
             }
 
             return [$data[$relatedKey] => $data[$accessor]];
+        })->map(function ($attributes) use ($pivotClass) {
+            if (! is_array($attributes)) {
+                return $attributes;
+            }
+
+            $instance = new $pivotClass;
+            $pivotSchema = $this->registry->getSchemaForModel($instance);
+            $pivotSchema->fill($attributes);
+
+            return $pivotSchema->getInstance()->getAttributes();
         });
 
-        $this->queue(function () use ($relation, $data) {
-            $relation->sync($data);
+        $this->queue(function () use ($pivotInstance, $data, $detaching, $relation) {
+            if ($pivotInstance) {
+                $pivotInstance::unguard();
+            }
+
+            $relation->sync($data, $detaching);
+
+            if ($pivotInstance) {
+                $pivotInstance::reguard();
+            }
         });
     }
 

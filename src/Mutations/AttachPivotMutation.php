@@ -3,6 +3,7 @@
 namespace Bakery\Mutations;
 
 use Bakery\Fields\Field;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
 use GraphQL\Type\Definition\ResolveInfo;
 use Bakery\Types\Concerns\InteractsWithPivot;
@@ -74,26 +75,20 @@ class AttachPivotMutation extends EloquentMutation
      */
     public function resolve($root, array $args, $context, ResolveInfo $info): Model
     {
+        $input = $args['input'];
         $model = $this->findOrFail($root, $args, $context, $info);
-        $relation = $this->getRelation($model);
-        $modelSchema = $this->registry->getSchemaForModel($model);
 
-        $permission = 'set'.studly_case($relation->getRelationName());
-        $modelSchema->authorize($permission, $model);
+        return DB::transaction(function () use ($input, $model) {
+            $modelSchema = $this->registry->getSchemaForModel($model);
 
-        $relatedKey = $relation->getRelated()->getKeyName();
-        $accessor = $relation->getPivotAccessor();
+            $relation = $this->getRelation($model);
 
-        $data = collect($args['input'])->mapWithKeys(function ($data, $key) use ($accessor, $relatedKey) {
-            if (! is_array($data)) {
-                return [$key => $data];
-            }
+            $permission = 'set'.studly_case($relation->getRelationName());
+            $modelSchema->authorize($permission, $model);
+            $modelSchema->connectBelongsToManyRelation($relation, $input, false);
+            $modelSchema->save();
 
-            return [$data[$relatedKey] => $data[$accessor]];
+            return $modelSchema->getInstance();
         });
-
-        $relation->attach($data);
-
-        return $model;
     }
 }
