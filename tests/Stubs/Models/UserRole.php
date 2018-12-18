@@ -8,7 +8,8 @@ class UserRole extends Pivot
 {
     protected $primaryKey = null;
 
-    public $fillable = [
-        'comment',
-    ];
+    public function tag()
+    {
+        return $this->belongsTo(Tag::class);
+    }
 }

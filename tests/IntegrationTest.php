@@ -42,6 +42,7 @@ abstract class IntegrationTest extends TestCase
         $this->gate = resolve(Gate::class);
         $this->gate->policy(Models\User::class, Policies\UserPolicy::class);
         $this->gate->policy(Models\Role::class, Policies\RolePolicy::class);
+        $this->gate->policy(Models\UserRole::class, Policies\UserRolePolicy::class);
         $this->gate->policy(Models\Article::class, Policies\ArticlePolicy::class);
         $this->gate->policy(Models\Phone::class, Policies\PhonePolicy::class);
         $this->gate->policy(Models\Comment::class, Policies\CommentPolicy::class);

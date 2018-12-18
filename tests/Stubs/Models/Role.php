@@ -19,7 +19,7 @@ class Role extends Model
     {
         return $this->belongsToMany(User::class)
             ->using(UserRole::class)
-            ->withPivot('comment')
+            ->withPivot(['comment', 'tag_id'])
             ->withTimestamps();
     }
 }

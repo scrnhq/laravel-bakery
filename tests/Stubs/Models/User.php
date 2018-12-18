@@ -40,7 +40,7 @@ class User extends Authenticatable
         return $this->belongsToMany(Role::class)
             ->as('customPivot')
             ->using(UserRole::class)
-            ->withPivot('comment')
+            ->withPivot(['comment', 'tag_id'])
             ->withTimestamps();
     }
 }

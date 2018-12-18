@@ -13,6 +13,7 @@ class CreateRoleUserTable extends Migration
         Schema::create('role_user', function ($table) {
             $table->unsignedInteger('user_id');
             $table->unsignedInteger('role_id');
+            $table->unsignedInteger('tag_id')->nullable();
             $table->text('comment')->nullable();
             $table->timestamps();
 
@@ -22,6 +23,10 @@ class CreateRoleUserTable extends Migration
 
             $table->foreign('role_id')
                 ->references('id')->on('roles')
+                ->onDelete('cascade');
+
+            $table->foreign('tag_id')
+                ->references('id')->on('tags')
                 ->onDelete('cascade');
         });
     }
