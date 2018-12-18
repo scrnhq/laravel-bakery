@@ -18,4 +18,9 @@ class UserRolePolicy
     {
         return true;
     }
+
+    public function createTag(): bool
+    {
+        return true;
+    }
 }
