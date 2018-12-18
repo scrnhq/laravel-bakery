@@ -13,7 +13,14 @@ class UserRoleSchema extends ModelSchema
     public function fields(): array
     {
         return [
-            'comment' => Field::string(),
+            'comment' => Field::string()->nullable(),
+        ];
+    }
+
+    public function relations(): array
+    {
+        return [
+            'tag' => Field::model(TagSchema::class)->nullable(),
         ];
     }
 }

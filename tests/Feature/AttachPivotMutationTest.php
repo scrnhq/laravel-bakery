@@ -68,6 +68,73 @@ class AttachPivotMutationTest extends IntegrationTest
     }
 
     /** @test */
+    public function it_lets_you_attach_pivot_ids_with_pivot_relation_data()
+    {
+        $user = factory(User::class)->create();
+        $role = factory(Role::class)->create();
+        $tag = factory(Tag::class)->create();
+        $this->actingAs($user);
+
+        $query = '
+            mutation {
+                attachCustomRolesOnUser(id: "'.$user->id.'", input: [
+                    { id: "'.$role->id.'", customPivot: {tagId: "'.$tag->id.'" } }
+                ]) {
+                    id
+                    customRoles {
+                        customPivot {
+                            comment
+                        }
+                    }
+                }
+            }
+        ';
+
+        $response = $this->json('GET', '/graphql', ['query' => $query]);
+        $response->assertJsonKey('id');
+        $this->assertDatabaseHas('role_user', [
+            'user_id' => '1',
+            'role_id' => '1',
+            'tag_id' => '1',
+        ]);
+    }
+
+    /** @test */
+    public function it_lets_you_attach_pivot_with_create()
+    {
+        $user = factory(User::class)->create();
+        $role = factory(Role::class)->create();
+        $this->actingAs($user);
+
+        $query = '
+            mutation {
+                attachCustomRolesOnUser(id: "'.$user->id.'", input: [
+                    { id: "'.$role->id.'", customPivot: {tag: {name: "foobar"} } }
+                ]) {
+                    id
+                    customRoles {
+                        customPivot {
+                            comment
+                        }
+                    }
+                }
+            }
+        ';
+
+        $response = $this->json('GET', '/graphql', ['query' => $query]);
+        $response->assertJsonKey('id');
+        $this->assertDatabaseHas('role_user', [
+            'user_id' => '1',
+            'role_id' => '1',
+            'tag_id' => '1',
+        ]);
+
+        $this->assertDatabaseHas('tags', [
+            'name' => 'foobar',
+        ]);
+    }
+
+    /** @test */
     public function it_lets_you_attach_pivot_ids_with_pivot_data_inversed()
     {
         $user = factory(User::class)->create();
