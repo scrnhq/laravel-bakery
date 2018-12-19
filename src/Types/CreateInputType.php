@@ -49,8 +49,8 @@ class CreateInputType extends EloquentMutationInputType
         $fields = parent::getFillableFields();
         $defaults = $this->model->getAttributes();
 
-        return $fields->map(function (Field $field, $key) use ($defaults) {
-            if (in_array($key, array_keys($defaults))) {
+        return $fields->map(function (Field $field) use ($defaults) {
+            if ($field->isNullableOnCreate()) {
                 return $field->nullable();
             }
 
