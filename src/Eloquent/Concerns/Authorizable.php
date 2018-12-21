@@ -2,9 +2,9 @@
 
 namespace Bakery\Eloquent;
 
-use Illuminate\Auth\Access\AuthorizationException;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Auth\Access\AuthorizationException;
 
 trait Authorizable
 {
@@ -123,7 +123,7 @@ trait Authorizable
      */
     public function authorize(string $ability, $arguments = []): void
     {
-        if (!$this->authorized($ability, $arguments)) {
+        if (! $this->authorized($ability, $arguments)) {
             throw new AuthorizationException("Not allowed to perform {$ability} on {$this->getModelClass()}");
         }
     }
