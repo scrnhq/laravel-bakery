@@ -2,11 +2,13 @@
 
 namespace Bakery\Tests;
 
-use Bakery\Tests\Stubs\Models;
-use Bakery\Tests\Stubs\Policies;
+use Mockery;
 use Bakery\BakeryServiceProvider;
+use Bakery\Tests\Fixtures\Models;
+use Bakery\Tests\Fixtures\Policies;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Contracts\Auth\Access\Gate;
+use Illuminate\Contracts\Auth\Authenticatable;
 use Bakery\Tests\Fixtures\IntegrationTestSchema;
 use Illuminate\Foundation\Testing\Concerns\InteractsWithDatabase;
 
@@ -19,6 +21,13 @@ abstract class IntegrationTest extends TestCase
      * @var \Illuminate\Contracts\Auth\Access\Gate
      */
     private $gate;
+
+    /**
+     * The user that is currently authenticated as.
+     *
+     * @var mixed
+     */
+    protected $user;
 
     /**
      * Setup the test environment.
@@ -34,9 +43,9 @@ abstract class IntegrationTest extends TestCase
         // Disable exception handling for easier testing.
         $this->withoutExceptionHandling();
 
-        $this->loadMigrationsFrom(__DIR__.'/migrations');
+        $this->loadMigrationsFrom(__DIR__.'/Migrations');
 
-        $this->withFactories(__DIR__.'/factories');
+        $this->withFactories(__DIR__.'/Factories');
 
         $this->gate = resolve(Gate::class);
         $this->gate->policy(Models\User::class, Policies\UserPolicy::class);
@@ -45,10 +54,7 @@ abstract class IntegrationTest extends TestCase
         $this->gate->policy(Models\Article::class, Policies\ArticlePolicy::class);
         $this->gate->policy(Models\Phone::class, Policies\PhonePolicy::class);
         $this->gate->policy(Models\Comment::class, Policies\CommentPolicy::class);
-        $this->gate->policy(Models\Upvote::class, Policies\UpvotePolicy::class);
         $this->gate->policy(Models\Tag::class, Policies\TagPolicy::class);
-
-        config()->set('bakery.schema', IntegrationTestSchema::class);
     }
 
     /**
@@ -72,12 +78,46 @@ abstract class IntegrationTest extends TestCase
      */
     protected function getEnvironmentSetUp($app)
     {
+        $app['config']->set('bakery.schema', IntegrationTestSchema::class);
+
         $app['config']->set('database.default', 'sqlite');
 
         $app['config']->set('database.connections.sqlite', [
             'driver' => 'sqlite',
             'database' => ':memory:',
             'prefix' => '',
+        ]);
+    }
+
+    /**
+     * Authenticate as an anonymous user.
+     *
+     * @return $this
+     */
+    public function authenticate()
+    {
+        $this->user = Mockery::mock(Authenticatable::class);
+
+        $this->actingAs($this->user);
+
+        $this->user->shouldReceive('getAuthIdentifier')->andReturn(1);
+        $this->user->shouldReceive('getKey')->andReturn(1);
+
+        return $this;
+    }
+
+    /**
+     * Visit the GraphQL endpoint.
+     *
+     * @param string $query
+     * @param array|null $variables
+     * @return \Illuminate\Foundation\Testing\TestResponse
+     */
+    protected function graphql(string $query, array $variables = [])
+    {
+        return $this->postJson('/graphql', [
+            'query' => $query,
+            'variables' => $variables,
         ]);
     }
 }
