@@ -8,6 +8,8 @@ class CreateRolesTable extends Migration
 {
     /**
      * Run the migrations.
+     *
+     * @return void
      */
     public function up()
     {
@@ -16,10 +18,24 @@ class CreateRolesTable extends Migration
             $table->string('name');
             $table->timestamps();
         });
+
+        Schema::create('role_user', function (Blueprint $table) {
+            $table->increments('id');
+            $table->unsignedInteger('user_id');
+            $table->unsignedInteger('role_id');
+            $table->boolean('admin')->nullable();
+            $table->timestamps();
+        });
     }
 
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
     public function down()
     {
-        Schema::drop('roles');
+        Schema::dropIfExists('roles');
+        Schema::dropIfExists('user_roles');
     }
 }

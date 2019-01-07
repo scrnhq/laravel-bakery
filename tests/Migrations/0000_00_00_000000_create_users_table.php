@@ -8,22 +8,30 @@ class CreateUsersTable extends Migration
 {
     /**
      * Run the migrations.
+     *
+     * @return void
      */
     public function up()
     {
         Schema::create('users', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('email')->unique();
             $table->string('name');
-            $table->string('type');
+            $table->string('email')->unique();
             $table->string('password');
-            $table->string('secret_information')->nullable();
+            $table->boolean('admin');
+            $table->rememberToken();
+            $table->string('restricted')->default('Yes');
             $table->timestamps();
         });
     }
 
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
     public function down()
     {
-        Schema::drop('users');
+        Schema::dropIfExists('users');
     }
 }

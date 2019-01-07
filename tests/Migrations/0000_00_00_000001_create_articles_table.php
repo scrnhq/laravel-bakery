@@ -8,6 +8,8 @@ class CreateArticlesTable extends Migration
 {
     /**
      * Run the migrations.
+     *
+     * @return void
      */
     public function up()
     {
@@ -15,24 +17,19 @@ class CreateArticlesTable extends Migration
             $table->increments('id');
             $table->string('title');
             $table->string('slug');
-            $table->text('content');
-            $table->timestamp('published_at')->nullable();
-            $table->unsignedInteger('category_id')->nullable();
-            $table->unsignedInteger('user_id');
+            $table->text('content')->nullable();
+            $table->unsignedInteger('user_id')->index()->nullable();
             $table->timestamps();
-
-            $table->foreign('category_id')
-                ->references('id')->on('categories')
-                ->onDelete('set null');
-
-            $table->foreign('user_id')
-                ->references('id')->on('users')
-                ->onDelete('cascade');
         });
     }
 
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
     public function down()
     {
-        Schema::drop('articles');
+        Schema::dropIfExists('articles');
     }
 }
