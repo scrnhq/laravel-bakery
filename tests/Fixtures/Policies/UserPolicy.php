@@ -29,18 +29,23 @@ class UserPolicy
         return $_SERVER['graphql.user.addArticle'] ?? true;
     }
 
-    public function attachCustomRole(): bool
+    public function attachRole(): bool
     {
-        return $_SERVER['graphql.user.attachCustomRole'] ?? true;
+        return $_SERVER['graphql.user.attachRole'] ?? true;
     }
 
-    public function detachCustomRole(): bool
+    public function detachRole(): bool
     {
-        return $_SERVER['graphql.user.detachCustomRole'] ?? true;
+        return $_SERVER['graphql.user.detachRole'] ?? true;
     }
 
-    public function viewPassword(): bool
+    public function viewRestricted(): bool
     {
-        return $_SERVER['graphql.user.viewPassword'] ?? true;
+        return $_SERVER['graphql.user.viewRestricted'] ?? true;
+    }
+
+    public function storeRestricted(): bool
+    {
+        return $_SERVER['graphql.user.storeRestricted'] ?? true;
     }
 }
