@@ -2,11 +2,11 @@
 
 namespace Bakery\Tests\Feature;
 
-use Bakery\Tests\Fixtures\Models\Article;
-use Bakery\Tests\Fixtures\Models\Phone;
 use Bakery\Tests\IntegrationTest;
 use Bakery\Tests\Fixtures\Models\Role;
 use Bakery\Tests\Fixtures\Models\User;
+use Bakery\Tests\Fixtures\Models\Phone;
+use Bakery\Tests\Fixtures\Models\Article;
 
 class AuthorizationTest extends IntegrationTest
 {
@@ -38,7 +38,7 @@ class AuthorizationTest extends IntegrationTest
         $user = User::first();
         $this->assertNull($user->phone);
     }
-    
+
     /** @test */
     public function it_cant_save_has_one_if_not_authorized()
     {
