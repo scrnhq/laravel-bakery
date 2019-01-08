@@ -22,7 +22,8 @@ class CommentSchema extends ModelSchema
         return [
             'author' => Field::model(UserSchema::class),
             'commentable' => Field::polymorphic([
-                ArticleSchema::class
+                ArticleSchema::class,
+                UserSchema::class, // Not really, just for testing.
             ]),
         ];
     }
