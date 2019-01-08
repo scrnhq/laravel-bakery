@@ -3,8 +3,6 @@
 namespace Bakery\Tests\Fixtures;
 
 use Bakery\Support\Schema;
-use Bakery\Tests\Fixtures\Types;
-use Bakery\Tests\Fixtures\Schemas;
 
 class IntegrationTestSchema extends Schema
 {
