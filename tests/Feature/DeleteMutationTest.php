@@ -2,86 +2,76 @@
 
 namespace Bakery\Tests\Feature;
 
-use Bakery\Tests\Stubs\Models;
 use Bakery\Tests\IntegrationTest;
+use Illuminate\Support\Facades\Gate;
+use Bakery\Tests\Fixtures\Models\User;
+use Bakery\Tests\Fixtures\Models\Article;
 
 class DeleteMutationTest extends IntegrationTest
 {
-    /** @test */
-    public function it_does_not_allow_deleting_entity_as_guest()
+    public function setUp()
     {
-        $this->withExceptionHandling();
+        parent::setUp();
 
-        $article = factory(Models\Article::class)->create();
-
-        $query = '
-            mutation {
-                deleteArticle(id: '.$article->id.')
-            }
-        ';
-
-        $this->json('GET', '/graphql', ['query' => $query]);
-        $this->assertDatabaseHas('articles', ['id' => $article->id]);
+        $this->authenticate();
     }
 
     /** @test */
-    public function it_does_not_allow_deleting_entity_as_user_when_there_is_no_policy()
+    public function it_can_delete_models()
     {
-        $this->withExceptionHandling();
-        $this->actingAs(factory(Models\User::class)->create());
+        $user = factory(User::class)->create();
 
-        $role = factory(Models\Role::class)->create();
+        $this->graphql('mutation($id: ID!) { deleteUser(id: $id) }', [
+            'id' => $user->id,
+        ]);
 
-        $query = '
-            mutation {
-                deleteRole(id: '.$role->id.')
-            }
-        ';
-
-        $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $response->assertJsonMissing(['data']);
-        $this->assertDatabaseHas('roles', ['id' => $role->id]);
+        $user = User::first();
+        $this->assertNull($user);
     }
 
     /** @test */
-    public function it_does_allow_deleting_entity_as_user_when_it_is_allowed_by_policy()
+    public function it_cant_update_models_if_the_model_has_no_policy()
     {
-        $user = factory(Models\User::class)->create();
-        $article = factory(Models\Article::class)->create();
+        Gate::policy(User::class, null);
 
-        $this->actingAs($user);
+        $user = factory(User::class)->create();
 
-        $query = '
-            mutation {
-                deleteArticle(id: '.$article->id.')
-            }
-        ';
+        $this->withExceptionHandling()->graphql('mutation($id: ID!) { deleteUser(id: $id) }', [
+            'id' => $user->id,
+        ]);
 
-        $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $response->assertJsonFragment(['deleteArticle' => true]);
-        $this->assertDatabaseMissing('articles', ['id' => $article->id]);
+        $user = User::first();
+        $this->assertNotNull($user);
+    }
+
+    /** @test */
+    public function it_cant_update_models_if_not_authorized()
+    {
+        $_SERVER['graphql.user.deletable'] = false;
+
+        $user = factory(User::class)->create();
+
+        $this->withExceptionHandling()->graphql('mutation($id: ID!) { deleteUser(id: $id) }', [
+            'id' => $user->id,
+        ]);
+
+        unset($_SERVER['graphql.user.deletable']);
+
+        $user = User::first();
+        $this->assertNotNull($user);
     }
 
     /** @test */
     public function it_throws_too_many_results_exception_when_lookup_is_not_specific_enough()
     {
-        $this->withExceptionHandling();
-
-        $user = factory(Models\User::class)->create();
-        factory(Models\Article::class, 2)->create([
+        factory(Article::class, 2)->create([
             'slug' => 'hello-world',
         ]);
 
-        $this->actingAs($user);
+        $response = $this->withExceptionHandling()->graphql('mutation($slug: String!) { deleteArticle(slug: $slug) }', [
+            'slug' => 'hello-world',
+        ]);
 
-        $query = '
-            mutation {
-                deleteArticle(slug: "hello-world")
-            }
-        ';
-
-        $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $response->assertJsonMissing(['data']);
-        $this->assertDatabaseHas('articles', ['slug' => 'hello-world']);
+        $response->assertJsonFragment(['message' => 'Too many results for model [Bakery\Tests\Fixtures\Models\Article]']);
     }
 }
