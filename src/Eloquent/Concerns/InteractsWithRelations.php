@@ -5,7 +5,6 @@ namespace Bakery\Eloquent\Concerns;
 use RuntimeException;
 use Bakery\Utils\Utils;
 use GraphQL\Error\UserError;
-use Bakery\Support\Facades\Bakery;
 use Illuminate\Database\Eloquent\Model;
 use Bakery\Exceptions\InvariantViolation;
 use Illuminate\Database\Eloquent\Relations;
@@ -76,8 +75,7 @@ trait InteractsWithRelations
     protected function checkRelations(array $relations)
     {
         foreach ($relations as $key => $attributes) {
-            $policyMethod = 'create'.studly_case($key);
-            $this->authorize($policyMethod, $attributes);
+            // TODO:
         }
     }
 
@@ -110,8 +108,7 @@ trait InteractsWithRelations
     protected function checkConnections(array $connections)
     {
         foreach ($connections as $key => $attributes) {
-            $policyMethod = 'set'.studly_case($this->getRelationOfConnection($key));
-            $this->authorize($policyMethod, $attributes);
+            // TODO:
         }
     }
 
@@ -121,6 +118,7 @@ trait InteractsWithRelations
      * @param Relations\BelongsTo $relation
      * @param mixed $id
      * @return void
+     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     protected function connectBelongsToRelation(Relations\BelongsTo $relation, $id)
     {
@@ -131,6 +129,9 @@ trait InteractsWithRelations
         }
 
         $model = $relation->getRelated()->findOrFail($id);
+        $schema = $this->registry->getSchemaForModel($model);
+        $schema->authorizeToAdd($this->getModel());
+
         $relation->associate($model);
     }
 
@@ -140,12 +141,14 @@ trait InteractsWithRelations
      * @param Relations\BelongsTo $relation
      * @param array $attributes
      * @return void
+     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     protected function fillBelongsToRelation(Relations\BelongsTo $relation, $attributes = [])
     {
         $related = $relation->getRelated();
-        $modelSchema = $this->registry->getSchemaForModel($related);
-        $model = $modelSchema->create($attributes);
+        $schema = $this->registry->getSchemaForModel($related);
+        $model = $schema->createIfAuthorized($attributes);
+        $schema->authorizeToAdd($this->getModel());
 
         $relation->associate($model);
     }
@@ -170,6 +173,7 @@ trait InteractsWithRelations
 
         $this->queue(function () use ($id, $relation) {
             $model = $relation->getRelated()->findOrFail($id);
+            $this->authorizeToAdd($model);
             $model->setAttribute($relation->getForeignKeyName(), $relation->getParentKey());
             $model->save();
         });
@@ -187,7 +191,9 @@ trait InteractsWithRelations
     {
         $related = $relation->getRelated();
         $modelSchema = $this->registry->getSchemaForModel($related);
+        $modelSchema->authorizeToCreate();
         $modelSchema->fill($attributes);
+        $this->authorizeToAdd($modelSchema->getModel());
 
         $this->queue(function () use ($modelSchema, $relation) {
             $modelSchema->instance->setAttribute($relation->getForeignKeyName(), $relation->getParentKey());
@@ -205,7 +211,13 @@ trait InteractsWithRelations
     protected function connectHasManyRelation(Relations\HasMany $relation, array $ids)
     {
         $this->queue(function () use ($relation, $ids) {
-            $relation->sync($ids);
+            $models = $relation->getModel()->findMany($ids);
+
+            foreach ($models as $model) {
+                $this->authorizeToAdd($model);
+            }
+
+            $relation->saveMany($models);
         });
     }
 
@@ -223,9 +235,10 @@ trait InteractsWithRelations
             $relation->delete();
 
             foreach ($values as $attributes) {
-                $modelSchema = $this->registry->resolveSchemaForModel(get_class($related));
-                $modelSchema->make($attributes);
-                $modelSchema->getModel()->setAttribute($relation->getForeignKeyName(), $relation->getParentKey());
+                $modelSchema = $this->registry->resolveSchemaForModel($related);
+                $modelSchema->authorizeToCreate();
+                $model = $modelSchema->make($attributes);
+                $model->setAttribute($relation->getForeignKeyName(), $relation->getParentKey());
                 $modelSchema->save();
             }
         });
@@ -270,7 +283,15 @@ trait InteractsWithRelations
                 $pivotInstance::unguard();
             }
 
-            $relation->sync($data, $detaching);
+            $results = $relation->sync($data, $detaching);
+
+            foreach ($relation->getRelated()->findMany($results['attached']) as $model) {
+                $this->authorizeToAttach($model);
+            }
+
+            foreach ($relation->getRelated()->findMany($results['detached']) as $model) {
+                $this->authorizeToDetach($model);
+            }
 
             if ($pivotInstance) {
                 $pivotInstance::reguard();
@@ -285,7 +306,7 @@ trait InteractsWithRelations
      * @param array $value
      * @return void
      */
-    protected function fillBelongsToManyRelation(Relations\BelongsToMany $relation, array $value)
+    protected function fillBelongsToManyRelation(Relations\BelongsToMany $relation, array $value, $detaching = true)
     {
         $pivots = collect();
         $instances = collect();
@@ -294,18 +315,26 @@ trait InteractsWithRelations
         $relatedSchema = $this->registry->getSchemaForModel($related);
 
         foreach ($value as $attributes) {
-            $instances[] = $relatedSchema->create($attributes);
+            $instances[] = $relatedSchema->createIfAuthorized($attributes);
             $pivots[] = $attributes[$accessor] ?? null;
         }
 
-        $this->queue(function () use ($relation, $instances, $pivots) {
+        $this->queue(function () use ($detaching, $relation, $instances, $pivots) {
             $data = $instances->pluck('id')->mapWithKeys(function ($id, $key) use ($pivots) {
                 $pivot = $pivots[$key] ?? null;
 
                 return $pivot ? [$id => $pivot] : [$key => $id];
             });
 
-            $relation->sync($data);
+            $results = $relation->sync($data, $detaching);
+
+            foreach ($relation->getRelated()->findMany($results['attached']) as $model) {
+                $this->authorizeToAttach($model);
+            }
+
+            foreach ($relation->getRelated()->findMany($results['detached']) as $model) {
+                $this->authorizeToDetach($model);
+            }
         });
     }
 
@@ -344,6 +373,8 @@ trait InteractsWithRelations
             $model = $this->getPolymorphicModel($relation, $key);
 
             $instance = $model->findOrFail($id);
+            $modelSchema = $this->registry->getSchemaForModel($instance);
+            $modelSchema->authorizeToAdd($this->getModel());
             $relation->associate($instance);
         }
     }

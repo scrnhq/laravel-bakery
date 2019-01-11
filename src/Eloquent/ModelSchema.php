@@ -9,12 +9,13 @@ use Bakery\Support\TypeRegistry;
 use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
+use Bakery\Eloquent\Concerns\Authorizable;
 use Bakery\Eloquent\Concerns\MutatesModel;
 use Illuminate\Contracts\Auth\Access\Gate;
-use Illuminate\Auth\Access\AuthorizationException;
 
 abstract class ModelSchema
 {
+    use Authorizable;
     use MutatesModel;
 
     /**
@@ -106,8 +107,7 @@ abstract class ModelSchema
     }
 
     /**
-     * Define the fields of the model.
-     * This method can be overridden.
+     * Get the fields of the model.
      *
      * @return array
      */
@@ -117,8 +117,7 @@ abstract class ModelSchema
     }
 
     /**
-     * Define the relation fields of the schema.
-     * This method can be overridden.
+     * Get the relation fields of the model.
      *
      * @return array
      */
@@ -367,28 +366,6 @@ abstract class ModelSchema
         return collect($this->getRelationFields())->map(function (Field $field, $key) {
             return $field->isList() ? str_singular($key).'Ids' : $key.'Id';
         });
-    }
-
-    /**
-     * Check if the user is authorised to perform an action on the model.
-     *
-     * @param string $policy
-     * @param array $attributes
-     * @throws AuthorizationException
-     */
-    public function authorize(string $policy, $attributes = null)
-    {
-        // If the instance on the model schema does not exist or has not been modified we don't want to use it for
-        // authorization checks. This usually happens if we have to check if an instance can be created at all.
-        $model = $this->instance->exists || $this->instance->isDirty() ? $this->instance : get_class($this->instance);
-
-        $allowed = $this->getGate()->allows($policy, [$model, $attributes]);
-
-        if (! $allowed) {
-            throw new AuthorizationException(
-                'Not allowed to perform '.$policy.' on '.$this->getModelClass()
-            );
-        }
     }
 
     /**

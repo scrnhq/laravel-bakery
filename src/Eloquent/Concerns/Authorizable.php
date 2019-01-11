@@ -1,6 +1,6 @@
 <?php
 
-namespace Bakery\Eloquent;
+namespace Bakery\Eloquent\Concerns;
 
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Database\Eloquent\Model;
@@ -16,7 +16,7 @@ trait Authorizable
      */
     public function authorizeToCreate(): void
     {
-        if ($this->authorizedToCreate()) {
+        if (! static::authorizedToCreate()) {
             throw new AuthorizationException("Not allowed to perform create on {$this->getModelClass()}");
         }
     }
@@ -43,7 +43,7 @@ trait Authorizable
     }
 
     /**
-     *  Determine if the current user can update the model.
+     * Determine if the current user can update the model.
      *
      * @return bool
      */
@@ -64,13 +64,26 @@ trait Authorizable
     }
 
     /**
-     *  Determine if the current user can delete the model.
+     * Determine if the current user can delete the model.
      *
      * @return bool
      */
     public function authorizedToDelete(): bool
     {
-        return $this->authorized('update');
+        return $this->authorized('delete');
+    }
+
+    /**
+     * Determine if the current user can add the given model to the model or throw an exception.
+     *
+     * @param \Illuminate\Database\Eloquent\Model $model
+     * @throws \Illuminate\Auth\Access\AuthorizationException
+     */
+    public function authorizeToAdd(Model $model): void
+    {
+        $method = 'add'.str_singular(class_basename($model));
+
+        $this->authorize($method, [$model]);
     }
 
     /**
@@ -83,7 +96,20 @@ trait Authorizable
     {
         $method = 'add'.str_singular(class_basename($model));
 
-        return $this->authorized($method, $model);
+        return $this->authorized($method, [$model]);
+    }
+
+    /**
+     * Determine if the current user can attach the given model to the model.
+     *
+     * @param \Illuminate\Database\Eloquent\Model $model
+     * @throws \Illuminate\Auth\Access\AuthorizationException
+     */
+    public function authorizeToAttach(Model $model): void
+    {
+        $method = 'attach'.str_singular(class_basename($model));
+
+        $this->authorize($method, [$model]);
     }
 
     /**
@@ -96,7 +122,20 @@ trait Authorizable
     {
         $method = 'attach'.str_singular(class_basename($model));
 
-        return $this->authorized($method, $model);
+        return $this->authorized($method, [$model]);
+    }
+
+    /**
+     * Determine if the current user can detach the given model from the model.
+     *
+     * @param \Illuminate\Database\Eloquent\Model $model
+     * @throws \Illuminate\Auth\Access\AuthorizationException
+     */
+    public function authorizeToDetach(Model $model): void
+    {
+        $method = 'detach'.str_singular(class_basename($model));
+
+        $this->authorize($method, [$model]);
     }
 
     /**
@@ -132,11 +171,11 @@ trait Authorizable
      * Determine if the current user has a given ability.
      *
      * @param string $ability
-     * @param array|null $arguments
+     * @param array $arguments
      * @return bool
      */
-    public function authorized(string $ability, $arguments = []): bool
+    public function authorized(string $ability, array $arguments = []): bool
     {
-        return Gate::check($ability, $arguments ? array_merge($this->instance, $arguments) : $this->instance);
+        return Gate::check($ability, $arguments ? array_merge([$this->instance], $arguments) : $this->instance);
     }
 }

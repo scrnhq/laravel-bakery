@@ -62,7 +62,6 @@ class DetachPivotMutation extends EloquentMutation
      * @param  mixed $context
      * @param \GraphQL\Type\Definition\ResolveInfo $info
      * @return Model
-     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     public function resolve($root, array $args, $context, ResolveInfo $info): Model
     {
@@ -70,10 +69,11 @@ class DetachPivotMutation extends EloquentMutation
         $modelSchema = $this->registry->getSchemaForModel($model);
         $relation = $this->getRelation($model);
 
-        $permission = 'set'.studly_case($relation->getRelationName());
-        $modelSchema->authorize($permission);
+        $models = $relation->findMany($args['input'])->each(function (Model $model) use ($relation, $modelSchema) {
+            $modelSchema->authorizeToDetach($model);
+        });
 
-        $relation->detach($args['input']);
+        $relation->detach($models);
 
         return $model;
     }
