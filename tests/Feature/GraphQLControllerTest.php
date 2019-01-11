@@ -2,8 +2,8 @@
 
 namespace Bakery\Tests\Feature;
 
-use DB;
 use Bakery\Tests\IntegrationTest;
+use Illuminate\Support\Facades\DB;
 
 class GraphQLControllerTest extends IntegrationTest
 {

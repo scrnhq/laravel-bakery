@@ -3,10 +3,10 @@
 namespace Bakery\Tests\Feature;
 
 use Bakery\Tests\IntegrationTest;
-use Bakery\Tests\Stubs\Models\Tag;
-use Bakery\Tests\Stubs\Models\Role;
-use Bakery\Tests\Stubs\Models\User;
-use Bakery\Tests\Stubs\Models\Article;
+use Bakery\Tests\Fixtures\Models\Tag;
+use Bakery\Tests\Fixtures\Models\Role;
+use Bakery\Tests\Fixtures\Models\User;
+use Bakery\Tests\Fixtures\Models\Article;
 
 class AttachPivotMutationTest extends IntegrationTest
 {

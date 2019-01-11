@@ -11,6 +11,7 @@ use Illuminate\Contracts\Auth\Access\Gate;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Bakery\Tests\Fixtures\IntegrationTestSchema;
 use Illuminate\Foundation\Testing\Concerns\InteractsWithDatabase;
+use Illuminate\Foundation\Testing\Concerns\InteractsWithExceptionHandling;
 
 abstract class IntegrationTest extends TestCase
 {

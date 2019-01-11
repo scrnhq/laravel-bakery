@@ -2,16 +2,20 @@
 
 namespace Bakery\Tests\Feature;
 
-use Bakery\Tests\Stubs\Models;
 use Bakery\Tests\IntegrationTest;
 use Illuminate\Support\Facades\DB;
+use Bakery\Tests\Fixtures\Models\Role;
+use Bakery\Tests\Fixtures\Models\User;
+use Bakery\Tests\Fixtures\Models\Phone;
+use Bakery\Tests\Fixtures\Models\Article;
+use Bakery\Tests\Fixtures\Models\Comment;
 
 class EntityQueryTest extends IntegrationTest
 {
     /** @test */
     public function it_returns_single_entity()
     {
-        $article = factory(Models\Article::class)->create();
+        $article = factory(Article::class)->create();
 
         $query = '
             query {
@@ -30,7 +34,7 @@ class EntityQueryTest extends IntegrationTest
     /** @test */
     public function it_returns_single_entity_for_a_lookup_field()
     {
-        $article = factory(Models\Article::class)->create();
+        $article = factory(Article::class)->create();
 
         $query = '
             query {
@@ -49,7 +53,7 @@ class EntityQueryTest extends IntegrationTest
     /** @test */
     public function it_returns_null_when_there_are_no_results()
     {
-        factory(Models\Article::class)->create();
+        factory(Article::class)->create();
 
         $query = '
             query {
@@ -59,15 +63,13 @@ class EntityQueryTest extends IntegrationTest
             }
         ';
 
-        $response = $this->json('GET', '/graphql', ['query' => $query]);
         $response->assertJsonFragment(['article' => null]);
     }
 
     /** @test */
     public function it_throws_too_many_results_exception_if_lookup_is_not_specific_enough()
     {
-        $this->withExceptionHandling();
-        factory(Models\Article::class, 2)->create(['slug' => 'slug']);
+        factory(Article::class, 2)->create(['slug' => 'hello-world']);
 
         $query = '
             query {
@@ -84,8 +86,8 @@ class EntityQueryTest extends IntegrationTest
     /** @test */
     public function it_can_lookup_entities_by_relational_fields()
     {
-        $user = factory(Models\User::class)->create();
-        $article = factory(Models\Article::class)->create(['user_id' => $user->id]);
+        $user = factory(User::class)->create();
+        $article = factory(Article::class)->create(['user_id' => $user->id]);
 
         $query = '
             query {
@@ -102,9 +104,9 @@ class EntityQueryTest extends IntegrationTest
     /** @test */
     public function it_can_lookup_entities_by_nested_relational_fields()
     {
-        $user = factory(Models\User::class)->create();
-        $article = factory(Models\Article::class)->create(['user_id' => $user->id]);
-        $phone = factory(Models\Phone::class)->create(['user_id' => $user->id]);
+        $user = factory(User::class)->create();
+        $article = factory(Article::class)->create(['user_id' => $user->id]);
+        $phone = factory(Phone::class)->create(['user_id' => $user->id]);
 
         $query = '
             query {
@@ -121,11 +123,11 @@ class EntityQueryTest extends IntegrationTest
     /** @test */
     public function it_can_filter_a_relation()
     {
-        $user = factory(Models\User::class)->create();
-        $article = factory(Models\Article::class)->create(['user_id' => $user->id]);
+        $user = factory(User::class)->create();
+        $article = factory(Article::class)->create(['user_id' => $user->id]);
 
-        factory(Models\Comment::class)->create(['article_id' => $article->id, 'body' => 'Cool story']);
-        factory(Models\Comment::class)->create(['article_id' => $article->id, 'body' => 'Boo!']);
+        factory(Comment::class)->create(['article_id' => $article->id, 'body' => 'Cool story']);
+        factory(Comment::class)->create(['article_id' => $article->id, 'body' => 'Boo!']);
 
         $query = '
             query {
@@ -140,15 +142,14 @@ class EntityQueryTest extends IntegrationTest
         ';
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $response->assertJsonFragment(['body' => 'Cool story'])
-            ->assertJsonMissing(['body' => 'Boo!']);
+        $response->assertJsonFragment(['body' => 'Cool story'])->assertJsonMissing(['body' => 'Boo!']);
     }
 
     /** @test */
     public function it_checks_if_the_viewer_is_not_allowed_to_read_a_field()
     {
         $this->withExceptionHandling();
-        $user = factory(Models\User::class)->create();
+        $user = factory(User::class)->create();
 
         $query = '
             query {
@@ -167,7 +168,7 @@ class EntityQueryTest extends IntegrationTest
     public function it_checks_if_the_viewer_is_not_allowed_to_read_a_nullable_field_and_returns_null()
     {
         $secret = 'secr3t';
-        $user = factory(Models\User::class)->create([
+        $user = factory(User::class)->create([
             'secret_information' => $secret,
         ]);
 
@@ -188,7 +189,7 @@ class EntityQueryTest extends IntegrationTest
     public function it_checks_if_the_viewer_is_allowed_to_read_a_field()
     {
         $secret = 'secr3t';
-        $user = factory(Models\User::class)->create([
+        $user = factory(User::class)->create([
             'secret_information' => $secret,
         ]);
 
@@ -211,8 +212,8 @@ class EntityQueryTest extends IntegrationTest
     public function it_checks_if_the_viewer_is_not_allowed_to_read_a_relation()
     {
         $this->withExceptionHandling();
-        $user = factory(Models\User::class)->create();
-        factory(Models\Article::class)->create([
+        $user = factory(User::class)->create();
+        factory(Article::class)->create([
             'user_id' => $user->id,
         ]);
 
@@ -236,8 +237,8 @@ class EntityQueryTest extends IntegrationTest
     public function it_checks_if_the_viewer_is_not_allowed_to_read_relation_ids()
     {
         $this->withExceptionHandling();
-        $user = factory(Models\User::class)->create();
-        factory(Models\Article::class)->create([
+        $user = factory(User::class)->create();
+        factory(Article::class)->create([
             'user_id' => $user->id,
         ]);
 
@@ -257,8 +258,8 @@ class EntityQueryTest extends IntegrationTest
     /** @test */
     public function it_checks_if_the_viewer_is_allowed_to_read_a_relation()
     {
-        $user = factory(Models\User::class)->create();
-        $article = factory(Models\Article::class)->create([
+        $user = factory(User::class)->create();
+        $article = factory(Article::class)->create([
             'user_id' => $user->id,
         ]);
 
@@ -285,8 +286,8 @@ class EntityQueryTest extends IntegrationTest
     /** @test */
     public function it_checks_if_the_viewer_is_allowed_to_read_relation_ids()
     {
-        $user = factory(Models\User::class)->create();
-        $article = factory(Models\Article::class)->create([
+        $user = factory(User::class)->create();
+        $article = factory(Article::class)->create([
             'user_id' => $user->id,
         ]);
 
@@ -311,7 +312,7 @@ class EntityQueryTest extends IntegrationTest
     public function it_checks_if_the_viewer_is_not_allowed_to_read_a_field_by_policy()
     {
         $this->withExceptionHandling();
-        $user = factory(Models\User::class)->create();
+        $user = factory(User::class)->create();
 
         $query = '
             query {
@@ -330,7 +331,7 @@ class EntityQueryTest extends IntegrationTest
     /** @test */
     public function it_checks_if_the_viewer_is_allowed_to_read_a_field_by_policy()
     {
-        $user = factory(Models\User::class)->create();
+        $user = factory(User::class)->create();
 
         $this->actingAs($user);
 
@@ -350,8 +351,8 @@ class EntityQueryTest extends IntegrationTest
     /** @test */
     public function it_shows_the_count_for_many_relationships()
     {
-        $user = factory(Models\User::class)->create();
-        factory(Models\Article::class, 3)->create([
+        $user = factory(User::class)->create();
+        factory(Article::class, 3)->create([
             'user_id' => $user->id,
         ]);
 
@@ -373,11 +374,11 @@ class EntityQueryTest extends IntegrationTest
     /** @test */
     public function it_eager_loads_the_relationships()
     {
-        $user = factory(Models\User::class)->create();
-        $articles = factory(Models\Article::class, 25)->create(['user_id' => $user->id]);
+        $user = factory(User::class)->create();
+        $articles = factory(Article::class, 25)->create(['user_id' => $user->id]);
 
         foreach ($articles as $article) {
-            factory(Models\Comment::class, 3)->create(['article_id' => $article->id]);
+            factory(Comment::class, 3)->create(['article_id' => $article->id]);
         }
 
         $this->actingAs($user);
@@ -411,8 +412,8 @@ class EntityQueryTest extends IntegrationTest
     /** @test */
     public function it_exposes_pivot_data_on_many_to_many_relationships()
     {
-        $user = factory(Models\User::class)->create();
-        $role = factory(Models\Role::class)->create();
+        $user = factory(User::class)->create();
+        $role = factory(Role::class)->create();
         $user->customRoles()->attach($role, ['comment' => 'foobar']);
 
         $query = '
@@ -435,8 +436,8 @@ class EntityQueryTest extends IntegrationTest
     /** @test */
     public function it_exposes_pivot_data_on_many_to_many_relationships_with_custom_pivot_and_custom_relation_name()
     {
-        $user = factory(Models\User::class)->create();
-        $role = factory(Models\Role::class)->create();
+        $user = factory(User::class)->create();
+        $role = factory(Role::class)->create();
         $user->customRoles()->attach($role, ['comment' => 'foobar']);
 
         $query = '
@@ -459,7 +460,7 @@ class EntityQueryTest extends IntegrationTest
     /** @test */
     public function it_returns_data_for_a_morph_to_relationship()
     {
-        $article = factory(Models\Article::class)->create();
+        $article = factory(Article::class)->create();
         $upvote = $article->upvotes()->create();
 
         $query = '
@@ -491,7 +492,7 @@ class EntityQueryTest extends IntegrationTest
     /** @test */
     public function it_returns_data_for_a_morph_many_relationship()
     {
-        $article = factory(Models\Article::class)->create();
+        $article = factory(Article::class)->create();
         $article->upvotes()->create();
         $article->upvotes()->create();
 

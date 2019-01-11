@@ -4,8 +4,8 @@ namespace Bakery\Tests;
 
 use Bakery\Support\TypeRegistry;
 use Bakery\Exceptions\TypeNotFound;
-use Bakery\Tests\Stubs\Models\User;
-use Bakery\Tests\Stubs\Schemas\UserSchema;
+use Bakery\Tests\Fixtures\Models\User;
+use Bakery\Tests\Fixtures\Schemas\UserSchema;
 use Bakery\Tests\Fixtures\IntegrationTestSchema;
 
 class TypeRegistryTest extends IntegrationTest

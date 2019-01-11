@@ -10,7 +10,8 @@ class Role extends Model
     {
         return $this->belongsToMany(User::class)
             ->as($_SERVER['eloquent.role.users.pivot'] ?? 'pivot')
+            ->using(UserRole::class)
             ->withPivot(['admin'])
-            ->using(UserRole::class);
+            ->withTimestamps();
     }
 }

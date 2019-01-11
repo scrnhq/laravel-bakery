@@ -18,4 +18,14 @@ class RolePolicy
     {
         return $_SERVER['graphql.role.deletable'] ?? true;
     }
+
+    public function attachUser(): bool
+    {
+        return $_SERVER['graphql.role.attachUser'] ?? true;
+    }
+
+    public function detachUser(): bool
+    {
+        return $_SERVER['graphql.role.detachUser'] ?? true;
+    }
 }

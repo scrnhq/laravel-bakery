@@ -20,11 +20,16 @@ class User extends Authenticatable
         return $this->hasMany(Article::class);
     }
 
-    public function customRoles()
+    public function comments()
     {
-        return $this->belongsToMany(Role::class)->as('customPivot')
-            ->withPivot(['admin'])
+        return $this->hasMany(Comment::class);
+    }
+
+    public function roles()
+    {
+        return $this->belongsToMany(Role::class)
             ->using(UserRole::class)
+            ->withPivot(['admin'])
             ->withTimestamps();
     }
 }

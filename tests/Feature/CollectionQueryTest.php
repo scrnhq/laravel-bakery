@@ -2,16 +2,19 @@
 
 namespace Bakery\Tests\Feature;
 
-use Bakery\Tests\Stubs\Models;
 use Bakery\Tests\IntegrationTest;
 use Illuminate\Support\Facades\DB;
+use Bakery\Tests\Fixtures\Models\User;
+use Bakery\Tests\Fixtures\Models\Phone;
+use Bakery\Tests\Fixtures\Models\Article;
+use Bakery\Tests\Fixtures\Models\Comment;
 
 class CollectionQueryTest extends IntegrationTest
 {
     /** @test */
     public function it_returns_collection_of_entities_with_pagination()
     {
-        factory(Models\Article::class, 3)->create();
+        factory(Article::class, 3)->create();
 
         $query = '
             query {
@@ -55,7 +58,7 @@ class CollectionQueryTest extends IntegrationTest
     /** @test */
     public function it_can_fetch_the_next_page()
     {
-        factory(Models\Article::class, 30)->create();
+        factory(Article::class, 30)->create();
 
         $query = '
             query {
@@ -83,10 +86,10 @@ class CollectionQueryTest extends IntegrationTest
     /** @test */
     public function it_can_filter_by_its_fields()
     {
-        factory(Models\Article::class)->create([
+        factory(Article::class)->create([
             'title' => 'foo',
         ]);
-        factory(Models\Article::class)->create([
+        factory(Article::class)->create([
             'title' => 'bar',
         ]);
 
@@ -116,9 +119,9 @@ class CollectionQueryTest extends IntegrationTest
     /** @test */
     public function it_can_filter_with_dyanmic_field_filters()
     {
-        factory(Models\Article::class)->create(['title' => 'Hello world']);
-        factory(Models\Article::class)->create(['title' => 'Hello mars']);
-        factory(Models\Article::class)->create(['title' => 'Goodbye world']);
+        factory(Article::class)->create(['title' => 'Hello world']);
+        factory(Article::class)->create(['title' => 'Hello mars']);
+        factory(Article::class)->create(['title' => 'Goodbye world']);
 
         $query = '
             query {
@@ -147,9 +150,9 @@ class CollectionQueryTest extends IntegrationTest
     /** @test */
     public function it_can_filter_with_AND_filters()
     {
-        factory(Models\Article::class)->create(['title' => 'Hello world', 'content' => 'foo']);
-        factory(Models\Article::class)->create(['title' => 'Hello mars', 'content' => 'bar']);
-        factory(Models\Article::class)->create(['title' => 'Goodbye world', 'content' => 'baz']);
+        factory(Article::class)->create(['title' => 'Hello world', 'content' => 'foo']);
+        factory(Article::class)->create(['title' => 'Hello mars', 'content' => 'bar']);
+        factory(Article::class)->create(['title' => 'Goodbye world', 'content' => 'baz']);
 
         $query = '
             query {
@@ -179,9 +182,9 @@ class CollectionQueryTest extends IntegrationTest
     /** @test */
     public function it_can_filter_with_OR_filters()
     {
-        factory(Models\Article::class)->create(['title' => 'Hello world', 'content' => 'foo']);
-        factory(Models\Article::class)->create(['title' => 'Hello mars', 'content' => 'bar']);
-        factory(Models\Article::class)->create(['title' => 'Goodbye world', 'content' => 'baz']);
+        factory(Article::class)->create(['title' => 'Hello world', 'content' => 'foo']);
+        factory(Article::class)->create(['title' => 'Hello mars', 'content' => 'bar']);
+        factory(Article::class)->create(['title' => 'Goodbye world', 'content' => 'baz']);
 
         $query = '
             query {
@@ -211,19 +214,19 @@ class CollectionQueryTest extends IntegrationTest
     /** @test */
     public function it_can_filter_with_AND_and_OR_filters()
     {
-        $userOne = factory(Models\User::class)->create();
-        $userTwo = factory(Models\User::class)->create();
-        $articleOne = factory(Models\Article::class)->create([
+        $userOne = factory(User::class)->create();
+        $userTwo = factory(User::class)->create();
+        $articleOne = factory(Article::class)->create([
             'title' => 'Hello world',
             'content' => 'Lorem ipsum',
             'user_id' => $userOne->id,
         ]);
-        $articleTwo = factory(Models\Article::class)->create([
+        $articleTwo = factory(Article::class)->create([
             'title' => 'Hello world',
             'content' => 'Lorem ipsum',
             'user_id' => $userOne->id,
         ]);
-        $articleThree = factory(Models\Article::class)->create([
+        $articleThree = factory(Article::class)->create([
             'title' => 'Hello world',
             'content' => 'Lorem ipsum',
             'user_id' => $userTwo->id,
@@ -258,19 +261,19 @@ class CollectionQueryTest extends IntegrationTest
     /** @test */
     public function it_can_filter_with_null_AND_and_OR_filters()
     {
-        $userOne = factory(Models\User::class)->create();
-        $userTwo = factory(Models\User::class)->create();
-        $articleOne = factory(Models\Article::class)->create([
+        $userOne = factory(User::class)->create();
+        $userTwo = factory(User::class)->create();
+        $articleOne = factory(Article::class)->create([
             'title' => 'Hello world',
             'content' => 'Lorem ipsum',
             'user_id' => $userOne->id,
         ]);
-        $articleTwo = factory(Models\Article::class)->create([
+        $articleTwo = factory(Article::class)->create([
             'title' => 'Hello world',
             'content' => 'Lorem ipsum',
             'user_id' => $userOne->id,
         ]);
-        $articleThree = factory(Models\Article::class)->create([
+        $articleThree = factory(Article::class)->create([
             'title' => 'Hello world',
             'content' => 'Lorem ipsum',
             'user_id' => $userTwo->id,
@@ -306,9 +309,9 @@ class CollectionQueryTest extends IntegrationTest
     /** @test */
     public function it_can_order_by_field()
     {
-        $first = factory(Models\Article::class)->create(['title' => 'Hello world']);
-        $second = factory(Models\Article::class)->create(['title' => 'Hello mars']);
-        $third = factory(Models\Article::class)->create(['title' => 'Goodbye world']);
+        $first = factory(Article::class)->create(['title' => 'Hello world']);
+        $second = factory(Article::class)->create(['title' => 'Hello mars']);
+        $third = factory(Article::class)->create(['title' => 'Goodbye world']);
 
         $query = '
             query {
@@ -331,17 +334,17 @@ class CollectionQueryTest extends IntegrationTest
     /** @test */
     public function it_can_order_by_combination_of_nested_relations()
     {
-        $john = factory(Models\User::class)->create(['email' => 'john.doe@example.com']);
-        $jane = factory(Models\User::class)->create(['email' => 'jane.doe@example.com']);
-        $joe = factory(Models\User::class)->create(['email' => 'joe.doe@example.com']);
+        $john = factory(User::class)->create(['email' => 'john.doe@example.com']);
+        $jane = factory(User::class)->create(['email' => 'jane.doe@example.com']);
+        $joe = factory(User::class)->create(['email' => 'joe.doe@example.com']);
 
-        $johnsPhone = factory(Models\Phone::class)->create(['number' => '1', 'user_id' => $john->id]);
-        $janesPhone = factory(Models\Phone::class)->create(['number' => '2', 'user_id' => $jane->id]);
-        $joesPhone = factory(Models\Phone::class)->create(['number' => '3', 'user_id' => $joe->id]);
+        $johnsPhone = factory(Phone::class)->create(['number' => '1', 'user_id' => $john->id]);
+        $janesPhone = factory(Phone::class)->create(['number' => '2', 'user_id' => $jane->id]);
+        $joesPhone = factory(Phone::class)->create(['number' => '3', 'user_id' => $joe->id]);
 
-        $articleByJohn = factory(Models\Article::class)->create(['title' => 'Hello world', 'user_id' => $john->id]);
-        $articleByJane = factory(Models\Article::class)->create(['title' => 'Hello world', 'user_id' => $jane->id]);
-        $articleByJoe = factory(Models\Article::class)->create(['title' => 'Hello mars', 'user_id' => $joe->id]);
+        $articleByJohn = factory(Article::class)->create(['title' => 'Hello world', 'user_id' => $john->id]);
+        $articleByJane = factory(Article::class)->create(['title' => 'Hello world', 'user_id' => $jane->id]);
+        $articleByJoe = factory(Article::class)->create(['title' => 'Hello mars', 'user_id' => $joe->id]);
 
         $query = '
             query {
@@ -373,15 +376,15 @@ class CollectionQueryTest extends IntegrationTest
 
     public function it_can_filter_by_nested_relations()
     {
-        $firstUser = factory(Models\User::class)->create();
-        $secondUser = factory(Models\User::class)->create();
+        $firstUser = factory(User::class)->create();
+        $secondUser = factory(User::class)->create();
 
-        factory(Models\Phone::class)->create([
+        factory(Phone::class)->create([
             'user_id' => $firstUser->id,
         ]);
 
-        factory(Models\Article::class, 2)->create(['user_id' => $firstUser->id]);
-        factory(Models\Article::class)->create(['user_id' => $secondUser->id]);
+        factory(Article::class, 2)->create(['user_id' => $firstUser->id]);
+        factory(Article::class)->create(['user_id' => $secondUser->id]);
 
         $query = '
             query {
@@ -413,13 +416,13 @@ class CollectionQueryTest extends IntegrationTest
     /** @test */
     public function it_can_filter_with_AND_and_OR_filters_on_relationships()
     {
-        $firstUser = factory(Models\User::class)->create();
-        $phone = factory(Models\Phone::class)->create(['user_id' => $firstUser->id]);
+        $firstUser = factory(User::class)->create();
+        $phone = factory(Phone::class)->create(['user_id' => $firstUser->id]);
 
-        $secondUser = factory(Models\User::class)->create();
-        $article = factory(Models\Article::class)->create(['user_id' => $secondUser->id]);
+        $secondUser = factory(User::class)->create();
+        $article = factory(Article::class)->create(['user_id' => $secondUser->id]);
 
-        $thirdUser = factory(Models\User::class)->create();
+        $thirdUser = factory(User::class)->create();
 
         $query = '
             query {
@@ -453,7 +456,7 @@ class CollectionQueryTest extends IntegrationTest
         // with any other DB it returns the query
         // but we can make sure that the GraphQL
         // side of things is working correctly with this test.
-        factory(Models\Article::class, 3)->create();
+        factory(Article::class, 3)->create();
 
         $query = '
             query {
@@ -480,11 +483,11 @@ class CollectionQueryTest extends IntegrationTest
     /** @test */
     public function it_eager_loads_the_relationships()
     {
-        $user = factory(Models\User::class)->create();
-        $articles = factory(Models\Article::class, 25)->create();
+        $user = factory(User::class)->create();
+        $articles = factory(Article::class, 25)->create();
 
         foreach ($articles as $article) {
-            factory(Models\Comment::class, 3)->create(['article_id' => $article->id]);
+            factory(Comment::class, 3)->create(['article_id' => $article->id]);
         }
 
         $this->actingAs($user);
@@ -515,11 +518,11 @@ class CollectionQueryTest extends IntegrationTest
     /** @test */
     public function it_eager_loads_sibling_relationships()
     {
-        $user = factory(Models\User::class)->create();
-        $articles = factory(Models\Article::class, 25)->create();
+        $user = factory(User::class)->create();
+        $articles = factory(Article::class, 25)->create();
 
         foreach ($articles as $article) {
-            factory(Models\Comment::class, 3)->create(['article_id' => $article->id]);
+            factory(Comment::class, 3)->create(['article_id' => $article->id]);
         }
 
         $this->actingAs($user);
@@ -553,8 +556,8 @@ class CollectionQueryTest extends IntegrationTest
     /** @test */
     public function it_cannot_query_models_that_are_not_indexable()
     {
-        $user = factory(Models\User::class)->create();
-        factory(Models\Phone::class)->create();
+        $user = factory(User::class)->create();
+        factory(Phone::class)->create();
 
         $this->actingAs($user);
 
