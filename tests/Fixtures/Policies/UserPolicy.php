@@ -19,9 +19,9 @@ class UserPolicy
         return $_SERVER['graphql.user.deletable'] ?? true;
     }
 
-    public function savePhone(): bool
+    public function addPhone(): bool
     {
-        return $_SERVER['graphql.user.savePhone'] ?? true;
+        return $_SERVER['graphql.user.addPhone'] ?? true;
     }
 
     public function addArticle(): bool

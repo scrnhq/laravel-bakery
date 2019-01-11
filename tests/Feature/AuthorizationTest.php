@@ -40,11 +40,11 @@ class AuthorizationTest extends IntegrationTest
     }
 
     /** @test */
-    public function it_cant_create_and_save_has_one_if_not_authorized_to_save()
+    public function it_cant_create_and_add_has_one_if_not_authorized_to_save()
     {
         $user = factory(User::class)->create();
 
-        $_SERVER['graphql.user.savePhone'] = false;
+        $_SERVER['graphql.user.addPhone'] = false;
 
         $this->withExceptionHandling()->graphql('mutation($id: ID!, $input: UpdateUserInput!) { updateUser(id: $id, input: $input) { id } }', [
             'id' => $user->id,
@@ -55,7 +55,7 @@ class AuthorizationTest extends IntegrationTest
             ],
         ]);
 
-        unset($_SERVER['graphql.user.savePhone']);
+        unset($_SERVER['graphql.user.addPhone']);
 
         $user = User::first();
         $this->assertNull($user->phone);
@@ -67,7 +67,7 @@ class AuthorizationTest extends IntegrationTest
         $user = factory(User::class)->create();
         $phone = factory(Phone::class)->create();
 
-        $_SERVER['graphql.user.savePhone'] = false;
+        $_SERVER['graphql.user.addPhone'] = false;
 
         $this->withExceptionHandling()->graphql('mutation($id: ID!, $input: UpdateUserInput!) { updateUser(id: $id, input: $input) { id } }', [
             'id' => $user->id,
@@ -76,7 +76,7 @@ class AuthorizationTest extends IntegrationTest
             ],
         ]);
 
-        unset($_SERVER['graphql.user.savePhone']);
+        unset($_SERVER['graphql.user.addPhone']);
 
         $user = User::first();
         $this->assertNull($user->phone);
