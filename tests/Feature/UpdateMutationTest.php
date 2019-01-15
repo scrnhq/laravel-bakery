@@ -5,7 +5,9 @@ namespace Bakery\Tests\Feature;
 use Bakery\Tests\IntegrationTest;
 use Illuminate\Support\Facades\Gate;
 use Bakery\Tests\Fixtures\Models\User;
+use Bakery\Tests\Fixtures\Models\Phone;
 use Bakery\Tests\Fixtures\Models\Article;
+use Bakery\Tests\Fixtures\Models\Comment;
 
 class UpdateMutationTest extends IntegrationTest
 {
@@ -104,6 +106,100 @@ class UpdateMutationTest extends IntegrationTest
         $this->assertEquals('No', $user->restricted);
 
         unset($_SERVER['graphql.user.viewRestricted']);
+    }
+
+    /** @test */
+    public function it_can_remove_a_has_one_relationship_with_id_field()
+    {
+        factory(Phone::class)->create();
+
+        $this->graphql('mutation($input: UpdateUserInput!) { updateUser(input: $input) { id } }', [
+            'input' => [
+                'phoneId' => null,
+            ],
+        ]);
+
+        $user = User::first();
+        $this->assertNull($user->phone);
+        $phone = Phone::first();
+        $this->assertNull($phone);
+    }
+
+    /** @test */
+    public function it_can_remove_has_one_relationship()
+    {
+        factory(Phone::class)->create();
+
+        $this->graphql('mutation($input: UpdateUserInput!) { updateUser(input: $input) { id } }', [
+            'input' => [
+                'phone' => null,
+            ],
+        ]);
+
+        $user = User::first();
+        $this->assertNull($user->phone);
+        $phone = Phone::first();
+        $this->assertNull($phone);
+    }
+
+    /** @test */
+    public function it_can_remove_a_belongs_to_relationship_with_id_field()
+    {
+        factory(Article::class)->create();
+
+        $this->graphql('mutation($input: UpdateArticleInput!) { updateArticle(input: $input) { id } }', [
+            'input' => [
+                'userId' => null,
+            ],
+        ]);
+
+        $article = Article::first();
+        $this->assertNull($article->user);
+    }
+    
+    /** @test */
+    public function it_can_remove_a_belongs_to_relationship()
+    {
+        factory(Article::class)->create();
+
+        $this->graphql('mutation($input: UpdateArticleInput!) { updateArticle(input: $input) { id } }', [
+            'input' => [
+                'user' => null,
+            ],
+        ]);
+
+        $article = Article::first();
+        $this->assertNull($article->user);
+    }
+
+    /** @test */
+    public function it_can_remove_a_morph_to_relationship_with_id_field()
+    {
+        factory(Comment::class)->create();
+
+        $this->graphql('mutation($input: UpdateCommentInput!) { updateComment(input: $input) { id } }', [
+            'input' => [
+                'commentableId' => null,
+            ],
+        ]);
+
+        $comment = Comment::first();
+        $this->assertNull($comment->commentable);
+    }
+
+    /** @test */
+    public function it_can_remove_a_morph_to_relationship()
+    {
+        factory(Comment::class)->create();
+
+        $this->graphql('mutation($input: UpdateCommentInput!) { updateComment(input: $input) { id } }', [
+            'input' => [
+                'commentable' => null,
+            ],
+        ]);
+
+        $comment = Comment::first();
+        $this->assertNull($comment->commentable);
     }
 
     /** @test */

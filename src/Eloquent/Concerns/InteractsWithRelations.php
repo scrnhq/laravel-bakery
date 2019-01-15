@@ -123,7 +123,7 @@ trait InteractsWithRelations
     protected function connectBelongsToRelation(Relations\BelongsTo $relation, $id)
     {
         if (! $id) {
-            $relation->associate(null);
+            $relation->dissociate();
 
             return;
         }
@@ -145,6 +145,12 @@ trait InteractsWithRelations
      */
     protected function fillBelongsToRelation(Relations\BelongsTo $relation, $attributes = [])
     {
+        if (! $attributes) {
+            $relation->dissociate();
+
+            return;
+        }
+
         $related = $relation->getRelated();
         $schema = $this->registry->getSchemaForModel($related);
         $model = $schema->createIfAuthorized($attributes);
@@ -163,10 +169,7 @@ trait InteractsWithRelations
     protected function connectHasOneRelation(Relations\HasOne $relation, $id)
     {
         if (! $id) {
-            if ($related = $relation->getResults()) {
-                $related->setAttribute($relation->getForeignKeyName(), null);
-                $related->save();
-            }
+            $relation->delete();
 
             return;
         }
@@ -188,6 +191,12 @@ trait InteractsWithRelations
      */
     protected function fillHasOneRelation(Relations\HasOne $relation, $attributes)
     {
+        if (! $attributes) {
+            $relation->delete();
+
+            return;
+        }
+
         $related = $relation->getRelated();
         $modelSchema = $this->registry->getSchemaForModel($related);
         $modelSchema->authorizeToCreate();
@@ -348,20 +357,14 @@ trait InteractsWithRelations
     protected function connectMorphToRelation(Relations\MorphTo $relation, $data)
     {
         if (! $data) {
-            $relation->associate(null);
+            $relation->dissociate();
 
             return;
         }
 
         if (is_array($data)) {
             if (count($data) !== 1) {
-                throw new UserError(
-                    sprintf(
-                        'There must be only one key with polymorphic input. %s given for relation %s.',
-                        count($data),
-                        $relation->getRelation()
-                    )
-                );
+                throw new UserError(sprintf('There must be only one key with polymorphic input. %s given for relation %s.', count($data), $relation->getRelation()));
             }
 
             $data = collect($data);
@@ -389,20 +392,14 @@ trait InteractsWithRelations
     protected function fillMorphToRelation(Relations\MorphTo $relation, $data)
     {
         if (! $data) {
-            $relation->associate(null);
+            $relation->dissociate();
 
             return;
         }
 
         if (is_array($data)) {
             if (count($data) !== 1) {
-                throw new UserError(
-                    sprintf(
-                        'There must be only one key with polymorphic input. %s given for relation %s.',
-                        count($data),
-                        $relation->getRelation()
-                    )
-                );
+                throw new UserError(sprintf('There must be only one key with polymorphic input. %s given for relation %s.', count($data), $relation->getRelation()));
             }
 
             $data = collect($data);
@@ -487,10 +484,7 @@ trait InteractsWithRelations
      */
     protected function resolveRelation(string $relation): Relations\Relation
     {
-        Utils::invariant(
-            method_exists($this->instance, $relation),
-            class_basename($this->instance).' has no relation named '.$relation
-        );
+        Utils::invariant(method_exists($this->instance, $relation), class_basename($this->instance).' has no relation named '.$relation);
 
         $resolvedRelation = $this->instance->{$relation}();
 
