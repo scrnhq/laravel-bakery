@@ -506,7 +506,8 @@ class Field
      */
     public function authorizeToRead($source, $fieldName)
     {
-        if (($result = $this->authorizedToRead($source)) || $this->nullable) {
+        $result = $this->authorizedToRead($source);
+        if ($result || $this->nullable) {
             return $result;
         }
 
@@ -552,8 +553,12 @@ class Field
      */
     public function authorizeToStore($source, $value, $fieldName): bool
     {
-        if ($this->authorizedToRead($source) && ($result = $this->authorizedToStore($source, $value))) {
-            return $result;
+        if ($this->authorizedToRead($source)) {
+            $result = $this->authorizedToStore($source, $value);
+
+            if ($result) {
+                return $result;
+            }
         }
 
         throw new AuthorizationException('Cannot set property "'.$fieldName.'" of '.get_class($source));

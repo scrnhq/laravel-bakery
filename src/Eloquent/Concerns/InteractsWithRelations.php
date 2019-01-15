@@ -364,7 +364,13 @@ trait InteractsWithRelations
 
         if (is_array($data)) {
             if (count($data) !== 1) {
-                throw new UserError(sprintf('There must be only one key with polymorphic input. %s given for relation %s.', count($data), $relation->getRelation()));
+                throw new UserError(
+                    sprintf(
+                        'There must be only one key with polymorphic input. %s given for relation %s.',
+                        count($data),
+                        $relation->getRelation()
+                    )
+                );
             }
 
             $data = collect($data);
@@ -399,7 +405,13 @@ trait InteractsWithRelations
 
         if (is_array($data)) {
             if (count($data) !== 1) {
-                throw new UserError(sprintf('There must be only one key with polymorphic input. %s given for relation %s.', count($data), $relation->getRelation()));
+                throw new UserError(
+                    sprintf(
+                        'There must be only one key with polymorphic input. %s given for relation %s.',
+                        count($data),
+                        $relation->getRelation()
+                    )
+                );
             }
 
             $data = collect($data);
@@ -484,7 +496,10 @@ trait InteractsWithRelations
      */
     protected function resolveRelation(string $relation): Relations\Relation
     {
-        Utils::invariant(method_exists($this->instance, $relation), class_basename($this->instance).' has no relation named '.$relation);
+        Utils::invariant(
+            method_exists($this->instance, $relation),
+            class_basename($this->instance).' has no relation named '.$relation
+        );
 
         $resolvedRelation = $this->instance->{$relation}();
 
