@@ -156,7 +156,7 @@ class UpdateMutationTest extends IntegrationTest
         $article = Article::first();
         $this->assertNull($article->user);
     }
-    
+
     /** @test */
     public function it_can_remove_a_belongs_to_relationship()
     {

@@ -11,7 +11,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Bakery\Eloquent\Concerns\Authorizable;
 use Bakery\Eloquent\Concerns\MutatesModel;
-use Illuminate\Contracts\Auth\Access\Gate;
 
 abstract class ModelSchema
 {
