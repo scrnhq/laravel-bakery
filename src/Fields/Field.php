@@ -5,9 +5,9 @@ namespace Bakery\Fields;
 use Bakery\Support\TypeRegistry;
 use Bakery\Types\Definitions\Type;
 use Illuminate\Foundation\Auth\User;
+use Illuminate\Support\Facades\Gate;
 use GraphQL\Type\Definition\ResolveInfo;
 use Illuminate\Auth\Access\AuthorizationException;
-use Illuminate\Support\Facades\Gate;
 
 class Field
 {
