@@ -20,6 +20,7 @@ class UserRoleSchema extends ModelSchema
     public function relations(): array
     {
         return [
+            'tag' => Field::model(TagSchema::class)->nullable(),
         ];
     }
 }

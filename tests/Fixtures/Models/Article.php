@@ -9,6 +9,8 @@ class Article extends Model
 {
     use BakeryTransactionalAware;
 
+    protected $keyType = 'string';
+
     public function user()
     {
         return $this->belongsTo(User::class);

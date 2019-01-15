@@ -16,7 +16,9 @@ class UserSchema extends ModelSchema
             'name' => Field::string()->searchable(),
             'email' => Field::string()->unique()->searchable(),
             'admin' => Field::boolean()->canStoreWhen('setAdmin'),
-            'password' => Field::string()->canSeeWhen('readPassword'),
+            'password' => Field::string()->canSee(function () {
+                return $_SERVER['graphql.user.canSeePassword'] ?? true;
+            }),
             'restricted' => Field::string()->canSeeWhen('viewRestricted')->canStoreWhen('storeRestricted')->nullable(),
         ];
     }
@@ -24,7 +26,9 @@ class UserSchema extends ModelSchema
     public function relations(): array
     {
         return [
-            'articles' => Field::collection(ArticleSchema::class),
+            'articles' => Field::collection(ArticleSchema::class)->canSee(function () {
+                return $_SERVER['graphql.user.canSeeArticles'] ?? true;
+            }),
             'roles' => Field::collection(RoleSchema::class),
             'phone' => Field::model(PhoneSchema::class),
         ];

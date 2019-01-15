@@ -27,6 +27,7 @@ class FieldTest extends IntegrationTest
     {
         parent::setUp();
 
+        $this->authenticate();
         $this->schema = new DefaultSchema();
         $this->registry = $this->schema->getRegistry();
     }
@@ -35,7 +36,6 @@ class FieldTest extends IntegrationTest
     public function it_can_set_a_store_policy_with_a_closure()
     {
         $user = new User();
-        $this->actingAs($user);
 
         $field = new Field($this->registry);
         $field->canStore(function () {
@@ -51,7 +51,6 @@ class FieldTest extends IntegrationTest
         $this->expectException(AuthorizationException::class);
 
         $user = new User();
-        $this->actingAs($user);
 
         $field = new Field($this->registry);
         $field->canStore(function () {
@@ -65,11 +64,10 @@ class FieldTest extends IntegrationTest
     public function it_can_set_a_store_policy_with_a_policy_name_that_returns_true()
     {
         $user = new User();
-        $this->actingAs($user);
         $field = new Field($this->registry);
-        $field->canStoreWhen('setEmail');
+        $field->canStoreWhen('storeRestricted');
 
-        $this->assertTrue($field->checkStorePolicy($user, 'email', 'value'));
+        $this->assertTrue($field->checkStorePolicy($user, 'restricted', 'No'));
     }
 
     /** @test */
@@ -78,7 +76,6 @@ class FieldTest extends IntegrationTest
         $this->expectException(AuthorizationException::class);
 
         $user = new User();
-        $this->actingAs($user);
 
         $field = new Field($this->registry);
         $field->canStoreWhen('setType');
@@ -92,7 +89,6 @@ class FieldTest extends IntegrationTest
         $this->expectException(AuthorizationException::class);
 
         $user = new User();
-        $this->actingAs($user);
 
         $field = new Field($this->registry);
         $field->canStoreWhen('nonExistingPolicy');

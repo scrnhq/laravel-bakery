@@ -174,8 +174,7 @@ trait InteractsWithRelations
         $this->queue(function () use ($id, $relation) {
             $model = $relation->getRelated()->findOrFail($id);
             $this->authorizeToAdd($model);
-            $model->setAttribute($relation->getForeignKeyName(), $relation->getParentKey());
-            $model->save();
+            $relation->save($model);
         });
     }
 
@@ -193,10 +192,10 @@ trait InteractsWithRelations
         $modelSchema = $this->registry->getSchemaForModel($related);
         $modelSchema->authorizeToCreate();
         $modelSchema->fill($attributes);
-        $this->authorizeToAdd($modelSchema->getModel());
 
         $this->queue(function () use ($modelSchema, $relation) {
-            $modelSchema->instance->setAttribute($relation->getForeignKeyName(), $relation->getParentKey());
+            $this->authorizeToAdd($modelSchema->getModel());
+            $relation->save($modelSchema->getInstance());
             $modelSchema->save();
         });
     }
@@ -235,10 +234,11 @@ trait InteractsWithRelations
             $relation->delete();
 
             foreach ($values as $attributes) {
-                $modelSchema = $this->registry->resolveSchemaForModel($related);
+                $modelSchema = $this->registry->getSchemaForModel($related);
                 $modelSchema->authorizeToCreate();
                 $model = $modelSchema->make($attributes);
-                $model->setAttribute($relation->getForeignKeyName(), $relation->getParentKey());
+                $this->authorizeToAdd($model);
+                $relation->save($model);
                 $modelSchema->save();
             }
         });

@@ -6,8 +6,8 @@ use Bakery\Support\TypeRegistry;
 use Bakery\Types\Definitions\Type;
 use Illuminate\Foundation\Auth\User;
 use GraphQL\Type\Definition\ResolveInfo;
-use Illuminate\Contracts\Auth\Access\Gate;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Support\Facades\Gate;
 
 class Field
 {
@@ -99,10 +99,10 @@ class Field
     /**
      * Return a gate instance for the user.
      *
-     * @param \Illuminate\Foundation\Auth\User|null $user
+     * @param \Illuminate\Contracts\Auth\Authenticatable|mixed $user
      * @return \Illuminate\Contracts\Auth\Access\Gate
      */
-    protected function getGate(?User $user = null): Gate
+    protected function getGate($user = null): Gate
     {
         return app(Gate::class)->forUser($user);
     }
@@ -506,12 +506,12 @@ class Field
      * @return bool
      * @throws \Illuminate\Auth\Access\AuthorizationException
      */
-    protected function checkPolicy($source, $args, $context, ResolveInfo $info)
+    public function checkPolicy($source, $args, $context, ResolveInfo $info)
     {
-        $user = auth()->user();
-        $gate = $this->getGate($user);
         $policy = $this->viewPolicy;
         $fieldName = $info->fieldName;
+
+        $user = auth()->user();
 
         // Check if the policy method is callable
         if (($policy instanceof \Closure || is_callable_tuple($policy)) && $policy($user, $source, $args, $context, $info)) {
@@ -519,7 +519,7 @@ class Field
         }
 
         // Check if there is a policy with this name
-        if (is_string($policy) && $gate->check($policy, $source)) {
+        if (is_string($policy) && Gate::check($policy, $source)) {
             return true;
         }
 
@@ -549,7 +549,6 @@ class Field
         }
 
         $user = auth()->user();
-        $gate = $this->getGate($user);
 
         // Check if the policy method is a closure.
         if (($policy instanceof \Closure || is_callable_tuple($policy)) && $policy($user, $source, $value)) {
@@ -557,7 +556,7 @@ class Field
         }
 
         // Check if there is a policy with this name
-        if (is_string($policy) && $gate->check($policy, [$source, $value])) {
+        if (is_string($policy) && Gate::check($policy, [$source, $value])) {
             return true;
         }
 

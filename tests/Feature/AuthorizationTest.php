@@ -18,6 +18,199 @@ class AuthorizationTest extends IntegrationTest
     }
 
     /** @test */
+    public function it_cant_read_a_field_if_not_authorize_and_returns_null()
+    {
+        $user = factory(User::class)->create();
+
+        $_SERVER['graphql.user.canSeePassword'] = false;
+
+        $query = '
+            query($id: ID!) {
+                user(id: $id) {
+                    id
+                    password
+                }
+            }
+        ';
+
+        $response = $this->withExceptionHandling()->graphql($query, ['id' => $user->id]);
+        $response->assertJsonFragment(['user' => null]);
+
+        unset($_SERVER['graphql.user.canSeePassword']);
+    }
+
+    /** @test */
+    public function it_cant_read_nullable_field_if_not_authorized_and_returns_null_for_field()
+    {
+        $user = factory(User::class)->create();
+
+        $_SERVER['graphql.user.viewRestricted'] = false;
+
+        $query = '
+            query($id: ID!) {
+                user(id: $id) {
+                    id
+                    restricted
+                }
+            }
+        ';
+
+        $response = $this->graphql($query, ['id' => $user->id]);
+        $response->assertJsonFragment(['restricted' => null]);
+
+        unset($_SERVER['graphql.user.viewRestricted']);
+    }
+
+    /** @test */
+    public function it_can_read_field_if_authorized()
+    {
+        $user = factory(User::class)->create();
+
+        $query = '
+            query($id: ID!) {
+                user(id: $id) {
+                    id
+                    restricted
+                }
+            }
+        ';
+
+        $response = $this->graphql($query, ['id' => $user->id]);
+        $response->assertJsonFragment(['restricted' => 'Yes']);
+    }
+
+    /** @test */
+    public function it_cant_read_a_relation_if_not_authorized_and_returns_null()
+    {
+        $article = factory(Article::class)->create();
+
+        $_SERVER['graphql.user.canSeeArticles'] = false;
+
+        $query = '
+            query($id: ID!) {
+                user(id: $id) {
+                    id
+                    articles {
+                        id
+                        title
+                    }
+                }
+            }
+        ';
+
+        $response = $this->withExceptionHandling()->graphql($query, ['id' => $article->user->id]);
+        $response->assertJsonFragment(['user' => null]);
+
+        unset($_SERVER['graphql.user.canSeeArticles']);
+    }
+
+    /** @test */
+    public function it_cant_read_relation_ids_if_not_authorized_and_returns_null()
+    {
+        $article = factory(Article::class)->create();
+
+        $_SERVER['graphql.user.canSeeArticles'] = false;
+
+        $query = '
+            query($id: ID!) {
+                user(id: $id) {
+                    id
+                    articles {
+                        id
+                        title
+                    }
+                }
+            }
+        ';
+
+        $response = $this->withExceptionHandling()->graphql($query, ['id' => $article->user->id]);
+        $response->assertJsonFragment(['user' => null]);
+
+        unset($_SERVER['graphql.user.canSeeArticles']);
+    }
+
+    /** @test */
+    public function it_can_read_a_relation_if_authorized()
+    {
+        $article = factory(Article::class)->create();
+
+        $query = '
+            query($id: ID!) {
+                user(id: $id) {
+                    id
+                    articles {
+                        id
+                        title
+                    }
+                }
+            }
+        ';
+
+        $response = $this->graphql($query, ['id' => $article->user->id]);
+        $response->assertJsonStructure(['data' => ['user' => ['articles']]]);
+        $response->assertJsonFragment(['title' => $article->title]);
+    }
+
+    /** @test */
+    public function it_can_read_relation_ids_if_authorized()
+    {
+        $article = factory(Article::class)->create();
+
+        $query = '
+            query($id: ID!) {
+                user(id: $id) {
+                    id
+                    articleIds
+                }
+            }
+        ';
+
+        $response = $this->graphql($query, ['id' => $article->user->id]);
+        $response->assertJsonStructure(['data' => ['user' => ['articleIds']]]);
+        $response->assertJsonFragment(['articleIds' => [$article->id]]);
+    }
+
+    /** @test */
+    public function it_cant_read_a_field_if_not_authorized_by_policy()
+    {
+        $user = factory(User::class)->create();
+
+        $_SERVER['graphql.user.viewRestricted'] = false;
+
+        $query = '
+            query($id: ID!) {
+                user(id: $id) {
+                    id
+                    restricted
+                }
+            }
+        ';
+
+        $response = $this->withExceptionHandling()->graphql($query, ['id' => $user->id]);
+        $response->assertJsonFragment(['restricted' => null]);
+
+        unset($_SERVER['graphql.user.viewRestricted']);
+    }
+
+    /** @test */
+    public function it_can_read_a_field_if_authorized_by_policy()
+    {
+        $user = factory(User::class)->create();
+
+        $query = '
+            query($id: ID!) {
+                user(id: $id) {
+                    id
+                    restricted
+                }
+            }
+        ';
+
+        $response = $this->withExceptionHandling()->graphql($query, ['id' => $user->id]);
+        $response->assertJsonFragment(['restricted' => 'Yes']);
+    }
+
+    /** @test */
     public function it_cant_create_and_save_has_one_if_not_authorized_to_create()
     {
         $user = factory(User::class)->create();

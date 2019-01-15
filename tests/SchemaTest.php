@@ -91,8 +91,8 @@ class SchemaTest extends IntegrationTest
         $mutations = $schema->getMutations();
         $queries = $schema->getQueries();
 
-        $this->assertArrayHasKey('model', $queries);
-        $this->assertArrayHasKey('models', $queries);
+        $this->assertArrayHasKey('dummyModel', $queries);
+        $this->assertArrayHasKey('dummyModels', $queries);
         $this->assertEmpty($mutations);
     }
 
@@ -156,13 +156,11 @@ class SchemaTest extends IntegrationTest
 
         $expected = [
             'Bakery\Tests\Fixtures\Schemas\ArticleSchema',
-            'Bakery\Tests\Fixtures\Schemas\CategorySchema',
             'Bakery\Tests\Fixtures\Schemas\CommentSchema',
             'Bakery\Tests\Fixtures\Schemas\PhoneSchema',
             'Bakery\Tests\Fixtures\Schemas\RoleSchema',
             'Bakery\Tests\Fixtures\Schemas\TagSchema',
             'Bakery\Tests\Fixtures\Schemas\UserRoleSchema',
-            'Bakery\Tests\Fixtures\Schemas\UpvoteSchema',
             'Bakery\Tests\Fixtures\Schemas\UserSchema',
         ];
 

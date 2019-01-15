@@ -18,7 +18,6 @@ class CollectionSearchTypeTest extends TestCase
 
         $actual = $type->resolveFields();
         $this->assertArrayHasKey('title', $actual);
-        $this->assertArrayHasKey('content', $actual);
 
         $this->assertArrayNotHasKey('slug', $actual);
         $this->assertArrayNotHasKey('created_at', $actual);

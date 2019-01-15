@@ -24,6 +24,7 @@ class CreateRolesTable extends Migration
             $table->unsignedInteger('user_id');
             $table->unsignedInteger('role_id');
             $table->boolean('admin')->nullable();
+            $table->unsignedInteger('tag_id')->nullable();
             $table->timestamps();
         });
     }

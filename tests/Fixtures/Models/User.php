@@ -10,6 +10,8 @@ class User extends Authenticatable
         'admin' => false,
     ];
 
+    protected $keyType = 'string';
+
     public function phone()
     {
         return $this->hasOne(Phone::class);
@@ -28,6 +30,7 @@ class User extends Authenticatable
     public function roles()
     {
         return $this->belongsToMany(Role::class)
+            ->as($_SERVER['eloquent.user.roles.pivot'] ?? 'pivot')
             ->using(UserRole::class)
             ->withPivot(['admin'])
             ->withTimestamps();

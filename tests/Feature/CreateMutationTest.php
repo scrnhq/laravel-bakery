@@ -135,7 +135,7 @@ class CreateMutationTest extends IntegrationTest
     /** @test */
     public function it_can_create_a_belongs_to_relationship()
     {
-        $this->withExceptionHandling()->graphql('mutation($input: CreatePhoneInput!) { createPhone(input: $input) { id } }', [
+        $this->graphql('mutation($input: CreatePhoneInput!) { createPhone(input: $input) { id } }', [
             'input' => [
                 'number' => '+31612345678',
                 'user' => [
@@ -410,6 +410,49 @@ class CreateMutationTest extends IntegrationTest
     }
 
     /** @test */
+    public function it_can_create_a_morph_to_many_relationship()
+    {
+        $user = factory(User::class)->create();
+
+        $this->graphql('mutation($input: CreateArticleInput!) { createArticle(input: $input) { id } }', [
+            'input' => [
+                'title' => 'Hello world!',
+                'slug' => 'hello-world',
+                'userId' => $user->id,
+                'tags' => [
+                    [
+                        'name' => 'News',
+                    ],
+                ],
+            ],
+        ]);
+
+        $article = Article::first();
+        $this->assertEquals('News', $article->tags->first()->name);
+    }
+
+    /** @test */
+    public function it_can_attach_a_morph_to_many_relationship()
+    {
+        $user = factory(User::class)->create();
+        $tag = factory(Tag::class)->create();
+
+        $this->graphql('mutation($input: CreateArticleInput!) { createArticle(input: $input) { id } }', [
+            'input' => [
+                'title' => 'Hello world!',
+                'slug' => 'hello-world',
+                'userId' => $user->id,
+                'tagIds' => [
+                    $tag->id,
+                ],
+            ],
+        ]);
+
+        $article = Article::first();
+        $this->assertTrue($article->tags->contains($tag));
+    }
+
+    /** @test */
     public function it_can_create_a_morphed_by_many_relationship()
     {
         $user = factory(User::class)->create();
@@ -487,9 +530,7 @@ class CreateMutationTest extends IntegrationTest
     /** @test */
     public function it_throws_exception_when_passing_multiple_keys_to_morph_to_relationship()
     {
-        $this->withExceptionHandling();
-
-        $response = $this->graphql('mutation($input: CreateCommentInput!) { createComment(input: $input) { id } }', [
+        $response = $this->withExceptionHandling()->graphql('mutation($input: CreateCommentInput!) { createComment(input: $input) { id } }', [
             'input' => [
                 'body' => 'Great post!',
                 'commentableId' => [

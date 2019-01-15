@@ -17,5 +17,6 @@ $factory->define(Bakery\Tests\Fixtures\Models\User::class, function (Faker\Gener
         'name' => $faker->name,
         'email' => $faker->unique()->safeEmail,
         'password' => $faker->password,
+        'restricted' => 'Yes',
     ];
 });

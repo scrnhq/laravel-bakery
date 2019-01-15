@@ -18,4 +18,19 @@ class TagPolicy
     {
         return $_SERVER['graphql.tag.deletable'] ?? true;
     }
+
+    public function attachArticle(): bool
+    {
+        return $_SERVER['graphql.tag.attachArticle'] ?? true;
+    }
+
+    public function detachArticle(): bool
+    {
+        return $_SERVER['graphql.tag.attachArticle'] ?? true;
+    }
+
+    public function addUserRole(): bool
+    {
+        return $_SERVER['graphql.tag.addUserRole'] ?? true;
+    }
 }

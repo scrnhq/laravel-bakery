@@ -45,11 +45,11 @@ class DetachPivotMutationTest extends IntegrationTest
         $user = factory(User::class)->create();
         $role = factory(Role::class)->create();
         $this->actingAs($user);
-        $user->customRoles()->sync($role);
+        $user->roles()->sync($role);
 
         $query = '
             mutation {
-                detachCustomRolesOnUser(id: "'.$user->id.'", input: [
+                detachRolesOnUser(id: "'.$user->id.'", input: [
                     "'.$role->id.'"
                 ]) {
                     id

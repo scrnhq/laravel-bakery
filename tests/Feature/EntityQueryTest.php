@@ -12,42 +12,35 @@ use Bakery\Tests\Fixtures\Models\Comment;
 
 class EntityQueryTest extends IntegrationTest
 {
-    /** @test */
-    public function it_returns_single_entity()
+    public function setUp()
     {
-        $article = factory(Article::class)->create();
+        parent::setUp();
 
-        $query = '
-            query {
-                article(id: "'.$article->id.'") {
-                    id
-                }
-            }
-        ';
-
-        $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $response->assertStatus(200);
-        $response->assertJsonKey('article');
-        $response->assertJsonFragment(['id' => $article->id]);
+        $this->authenticate();
     }
 
     /** @test */
-    public function it_returns_single_entity_for_a_lookup_field()
+    public function it_can_query_an_entity_by_id()
     {
         $article = factory(Article::class)->create();
 
-        $query = '
-            query {
-                article(slug: "'.$article->slug.'") {
-                    id
-                }
-            }
-        ';
+        $response = $this->graphql('query($id: ID!) {
+            article(id: $id) { id }
+        }', ['id' => $article->id]);
 
-        $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $response->assertStatus(200);
-        $response->assertJsonStructure(['data' => ['article']]);
-        $response->assertJsonFragment(['id' => $article->id]);
+        $response->assertJsonFragment(['article' => ['id' => '1']]);
+    }
+
+    /** @test */
+    public function it_can_query_an_entity_by_unique_field()
+    {
+        $article = factory(Article::class)->create();
+
+        $response = $this->graphql('query($slug: String!) {
+            article(slug: $slug) { id }
+        }', ['slug' => $article->slug]);
+
+        $response->assertJsonFragment(['article' => ['id' => '1']]);
     }
 
     /** @test */
@@ -55,13 +48,9 @@ class EntityQueryTest extends IntegrationTest
     {
         factory(Article::class)->create();
 
-        $query = '
-            query {
-                article(slug: "no-match") {
-                    id
-                }
-            }
-        ';
+        $response = $this->graphql('query($slug: String!) {
+            article(slug: $slug) { id }
+        }', ['slug' => 'no-match']);
 
         $response->assertJsonFragment(['article' => null]);
     }
@@ -71,16 +60,12 @@ class EntityQueryTest extends IntegrationTest
     {
         factory(Article::class, 2)->create(['slug' => 'hello-world']);
 
-        $query = '
-            query {
-                article(slug: "slug") {
-                    id
-                }
-            }
-        ';
+        $response = $this->withExceptionHandling()->graphql('query($slug: String!) {
+            article(slug: $slug) { id }
+        }', ['slug' => 'hello-world']);
 
-        $response = $this->json('GET', '/graphql', ['query' => $query]);
         $response->assertJsonFragment(['article' => null]);
+        $response->assertJsonFragment(['message' => 'Too many results for model [Bakery\Tests\Fixtures\Models\Article]']);
     }
 
     /** @test */
@@ -97,7 +82,7 @@ class EntityQueryTest extends IntegrationTest
             }
         ';
 
-        $response = $this->json('GET', '/graphql', ['query' => $query]);
+        $response = $this->graphql($query);
         $response->assertJsonFragment(['id' => $article->id]);
     }
 
@@ -116,7 +101,7 @@ class EntityQueryTest extends IntegrationTest
             }
         ';
 
-        $response = $this->json('GET', '/graphql', ['query' => $query]);
+        $response = $this->graphql($query);
         $response->assertJsonFragment(['id' => $article->id]);
     }
 
@@ -126,8 +111,8 @@ class EntityQueryTest extends IntegrationTest
         $user = factory(User::class)->create();
         $article = factory(Article::class)->create(['user_id' => $user->id]);
 
-        factory(Comment::class)->create(['article_id' => $article->id, 'body' => 'Cool story']);
-        factory(Comment::class)->create(['article_id' => $article->id, 'body' => 'Boo!']);
+        factory(Comment::class)->create(['commentable_id' => $article->id, 'body' => 'Cool story']);
+        factory(Comment::class)->create(['commentable_id' => $article->id, 'body' => 'Boo!']);
 
         $query = '
             query {
@@ -141,211 +126,8 @@ class EntityQueryTest extends IntegrationTest
             }
         ';
 
-        $response = $this->json('GET', '/graphql', ['query' => $query]);
+        $response = $this->graphql($query);
         $response->assertJsonFragment(['body' => 'Cool story'])->assertJsonMissing(['body' => 'Boo!']);
-    }
-
-    /** @test */
-    public function it_checks_if_the_viewer_is_not_allowed_to_read_a_field()
-    {
-        $this->withExceptionHandling();
-        $user = factory(User::class)->create();
-
-        $query = '
-            query {
-                user(id: "'.$user->id.'") {
-                    id
-                    password
-                }
-            }
-        ';
-
-        $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $response->assertJsonFragment(['user' => null]);
-    }
-
-    /** @test */
-    public function it_checks_if_the_viewer_is_not_allowed_to_read_a_nullable_field_and_returns_null()
-    {
-        $secret = 'secr3t';
-        $user = factory(User::class)->create([
-            'secret_information' => $secret,
-        ]);
-
-        $query = '
-            query {
-                user(id: "'.$user->id.'") {
-                    id
-                    secret_information
-                }
-            }
-        ';
-
-        $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $response->assertJsonFragment(['secret_information' => null]);
-    }
-
-    /** @test */
-    public function it_checks_if_the_viewer_is_allowed_to_read_a_field()
-    {
-        $secret = 'secr3t';
-        $user = factory(User::class)->create([
-            'secret_information' => $secret,
-        ]);
-
-        $this->actingAs($user);
-
-        $query = '
-            query {
-                user(id: "'.$user->id.'") {
-                    id
-                    secret_information
-                }
-            }
-        ';
-
-        $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $response->assertJsonFragment(['secret_information' => $secret]);
-    }
-
-    /** @test */
-    public function it_checks_if_the_viewer_is_not_allowed_to_read_a_relation()
-    {
-        $this->withExceptionHandling();
-        $user = factory(User::class)->create();
-        factory(Article::class)->create([
-            'user_id' => $user->id,
-        ]);
-
-        $query = '
-            query {
-                user(id: "'.$user->id.'") {
-                    id
-                    articles {
-                        id
-                        title
-                    }
-                }
-            }
-        ';
-
-        $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $response->assertJsonFragment(['user' => null]);
-    }
-
-    /** @test */
-    public function it_checks_if_the_viewer_is_not_allowed_to_read_relation_ids()
-    {
-        $this->withExceptionHandling();
-        $user = factory(User::class)->create();
-        factory(Article::class)->create([
-            'user_id' => $user->id,
-        ]);
-
-        $query = '
-            query {
-                user(id: "'.$user->id.'") {
-                    id
-                    articleIds
-                }
-            }
-        ';
-
-        $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $response->assertJsonFragment(['user' => null]);
-    }
-
-    /** @test */
-    public function it_checks_if_the_viewer_is_allowed_to_read_a_relation()
-    {
-        $user = factory(User::class)->create();
-        $article = factory(Article::class)->create([
-            'user_id' => $user->id,
-        ]);
-
-        $this->actingAs($user);
-
-        $query = '
-            query {
-                user(id: "'.$user->id.'") {
-                    id
-                    articles {
-                        id
-                        title
-                    }
-                }
-            }
-        ';
-
-        $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $response->assertJsonKey('user');
-        $response->assertJsonStructure(['data' => ['user' => ['articles' => 'id']]]);
-        $response->assertJsonFragment(['title' => $article->title]);
-    }
-
-    /** @test */
-    public function it_checks_if_the_viewer_is_allowed_to_read_relation_ids()
-    {
-        $user = factory(User::class)->create();
-        $article = factory(Article::class)->create([
-            'user_id' => $user->id,
-        ]);
-
-        $this->actingAs($user);
-
-        $query = '
-            query {
-                user(id: "'.$user->id.'") {
-                    id
-                    articleIds
-                }
-            }
-        ';
-
-        $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $response->assertJsonKey('user');
-        $response->assertJsonStructure(['data' => ['user' => ['articleIds']]]);
-        $response->assertJsonFragment(['articleIds' => [$article->id]]);
-    }
-
-    /** @test */
-    public function it_checks_if_the_viewer_is_not_allowed_to_read_a_field_by_policy()
-    {
-        $this->withExceptionHandling();
-        $user = factory(User::class)->create();
-
-        $query = '
-            query {
-                user(id: "'.$user->id.'") {
-                    id
-                    password
-                }
-            }
-        ';
-
-        $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $response->assertJsonFragment(['user' => null]);
-        $response->assertJsonStructure(['errors']);
-    }
-
-    /** @test */
-    public function it_checks_if_the_viewer_is_allowed_to_read_a_field_by_policy()
-    {
-        $user = factory(User::class)->create();
-
-        $this->actingAs($user);
-
-        $query = '
-            query {
-                user(id: "'.$user->id.'") {
-                    id
-                    password
-                }
-            }
-        ';
-
-        $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $response->assertJsonFragment(['password' => $user->password]);
     }
 
     /** @test */
@@ -356,8 +138,6 @@ class EntityQueryTest extends IntegrationTest
             'user_id' => $user->id,
         ]);
 
-        $this->actingAs($user);
-
         $query = '
             query {
                 user(id: "'.$user->id.'") {
@@ -367,7 +147,7 @@ class EntityQueryTest extends IntegrationTest
             }
         ';
 
-        $response = $this->json('GET', '/graphql', ['query' => $query]);
+        $response = $this->graphql($query);
         $response->assertJsonFragment(['articles_count' => 3]);
     }
 
@@ -378,10 +158,8 @@ class EntityQueryTest extends IntegrationTest
         $articles = factory(Article::class, 25)->create(['user_id' => $user->id]);
 
         foreach ($articles as $article) {
-            factory(Comment::class, 3)->create(['article_id' => $article->id]);
+            factory(Comment::class, 3)->create(['commentable_id' => $article->id]);
         }
-
-        $this->actingAs($user);
 
         $query = '
             query {
@@ -391,7 +169,7 @@ class EntityQueryTest extends IntegrationTest
                         id
                         comments {
                             id
-                            user {
+                            author {
                                 id
                             }
                         }
@@ -401,12 +179,12 @@ class EntityQueryTest extends IntegrationTest
         ';
 
         DB::enableQueryLog();
-        $response = $this->json('GET', '/graphql', ['query' => $query]);
+        $response = $this->graphql($query);
         DB::disableQueryLog();
 
         $this->assertCount(4, DB::getQueryLog());
 
-        $response->assertJsonStructure(['data' => ['user' => ['articles' => [['comments' => [['user' => ['id']]]]]]]]);
+        $response->assertJsonStructure(['data' => ['user' => ['articles' => [['comments' => [['author' => ['id']]]]]]]]);
     }
 
     /** @test */
@@ -414,7 +192,7 @@ class EntityQueryTest extends IntegrationTest
     {
         $user = factory(User::class)->create();
         $role = factory(Role::class)->create();
-        $user->customRoles()->attach($role, ['comment' => 'foobar']);
+        $user->roles()->attach($role, ['admin' => true]);
 
         $query = '
             query {
@@ -422,70 +200,67 @@ class EntityQueryTest extends IntegrationTest
                     users {
                         id
                         pivot {
-                            comment
+                            admin
                         }
                     }
                 }
             }
         ';
 
-        $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $response->assertJsonFragment(['comment' => 'foobar']);
+        $response = $this->graphql($query);
+        $response->assertJsonFragment(['admin' => true]);
     }
 
     /** @test */
-    public function it_exposes_pivot_data_on_many_to_many_relationships_with_custom_pivot_and_custom_relation_name()
+    public function it_exposes_pivot_data_on_many_to_many_relationships_with_custom_pivot()
     {
         $user = factory(User::class)->create();
         $role = factory(Role::class)->create();
-        $user->customRoles()->attach($role, ['comment' => 'foobar']);
+        $user->roles()->attach($role, ['admin' => true]);
+
+        $_SERVER['eloquent.user.roles.pivot'] = 'customPivot';
 
         $query = '
             query {
                 user(id: "'.$user->id.'") {
-                    customRoles {
+                    roles {
                         id
                         customPivot {
-                            comment
+                            admin
                         }
                     }
                 }
             }
         ';
 
-        $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $response->assertJsonFragment(['comment' => 'foobar']);
+        $response = $this->graphql($query);
+        $response->assertJsonFragment(['admin' => true]);
+
+        unset($_SERVER['eloquent.user.roles.pivot']);
     }
 
     /** @test */
     public function it_returns_data_for_a_morph_to_relationship()
     {
-        $article = factory(Article::class)->create();
-        $upvote = $article->upvotes()->create();
+        $comment = factory(Comment::class)->create();
 
         $query = '
             query {
-                upvote(id: "'.$upvote->id.'") {
-                    upvoteable {
-                        ... on Comment {
-                            __typename
-                            id
-                        }
+                comment(id: "'.$comment->id.'") {
+                    commentable {
                         ... on Article {
                             __typename
                             id
-                            title
                         }
                     }
                 }
             }
         ';
 
-        $response = $this->json('GET', '/graphql', ['query' => $query]);
+        $response = $this->graphql($query);
         $response->assertJsonFragment([
             '__typename' => 'Article',
-            'id' => $article->id,
-            'title' => $article->title,
+            'id' => $comment->commentable->id,
         ]);
     }
 
@@ -493,22 +268,21 @@ class EntityQueryTest extends IntegrationTest
     public function it_returns_data_for_a_morph_many_relationship()
     {
         $article = factory(Article::class)->create();
-        $article->upvotes()->create();
-        $article->upvotes()->create();
+        factory(Comment::class, 2)->create(['commentable_id' => $article->id]);
 
         $query = '
             query {
                 article(id: "'.$article->id.'") {
-                    upvotes {
+                    comments {
                         id
                     }
                 }
             }
         ';
 
-        $response = $this->json('GET', '/graphql', ['query' => $query]);
+        $response = $this->graphql($query);
         $response->assertJsonFragment([
-            'upvotes' => [
+            'comments' => [
                 ['id' => '1'],
                 ['id' => '2'],
             ],

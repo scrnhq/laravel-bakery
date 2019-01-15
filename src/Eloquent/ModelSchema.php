@@ -89,7 +89,7 @@ abstract class ModelSchema
 
             Utils::invariant(
                 is_subclass_of($model, Model::class),
-                'Defined model on '.class_basename($this).' is not an instance of '.Model::class
+                'Defined model on '.class_basename($this).' is not a subclass of '.Model::class
             );
 
             $this->instance = resolve($model);

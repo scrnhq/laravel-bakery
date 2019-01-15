@@ -29,6 +29,11 @@ class UserPolicy
         return $_SERVER['graphql.user.addArticle'] ?? true;
     }
 
+    public function addComment(): bool
+    {
+        return $_SERVER['graphql.user.addComment'] ?? true;
+    }
+
     public function attachRole(): bool
     {
         return $_SERVER['graphql.user.attachRole'] ?? true;
@@ -37,6 +42,11 @@ class UserPolicy
     public function detachRole(): bool
     {
         return $_SERVER['graphql.user.detachRole'] ?? true;
+    }
+
+    public function viewPassword(): bool
+    {
+        return $_SERVER['graphql.user.viewPassword'] ?? true;
     }
 
     public function viewRestricted(): bool
