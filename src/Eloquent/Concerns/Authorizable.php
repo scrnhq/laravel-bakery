@@ -9,7 +9,7 @@ use Illuminate\Auth\Access\AuthorizationException;
 trait Authorizable
 {
     /**
-     * Determine if the current user can create a new model of throw an exception.
+     * Determine if the current user can create a new model or throw an exception.
      *
      * @return void
      * @throws \Illuminate\Auth\Access\AuthorizationException
