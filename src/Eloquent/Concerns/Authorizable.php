@@ -28,7 +28,7 @@ trait Authorizable
      */
     public function authorizedToCreate(): bool
     {
-        return Gate::check('create', $this->getModelClass());
+        return $this->authorized('create');
     }
 
     /**
@@ -176,6 +176,6 @@ trait Authorizable
      */
     public function authorized(string $ability, array $arguments = []): bool
     {
-        return Gate::check($ability, $arguments ? array_merge([$this->instance], $arguments) : $this->instance);
+        return Gate::check($ability, $arguments ? array_merge([$this->instance ?? $this->getModelClass()], $arguments) : $this->instance);
     }
 }
