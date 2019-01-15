@@ -484,7 +484,7 @@ class Field
     public function resolveField($source, array $args, $context, ResolveInfo $info)
     {
         if (isset($this->viewPolicy)) {
-            if (! $this->checkPolicy($source, $args, $context, $info)) {
+            if (! $this->authorizeToRead($source, $info->fieldName)) {
                 return null;
             }
         }
@@ -497,24 +497,39 @@ class Field
     }
 
     /**
-     * Check the policy of the field to determine if the user can view the field.
+     * Determine if the current user can read the field of the model or throw an exception if not nullable.
      *
-     * @param $source
-     * @param $args
-     * @param $context
-     * @param ResolveInfo $info
+     * @param mixed $source
+     * @param string $fieldName
      * @return bool
      * @throws \Illuminate\Auth\Access\AuthorizationException
      */
-    public function checkPolicy($source, $args, $context, ResolveInfo $info)
+    public function authorizeToRead($source, $fieldName)
+    {
+        if (($result = $this->authorizedToRead($source)) || $this->nullable) {
+            return $result;
+        }
+
+        throw new AuthorizationException('Cannot read property "'.$fieldName.'" of '.get_class($source));
+    }
+
+    /**
+     * Determine if the current user can read the field of the model.
+     *
+     * @param mixed $source
+     * @return bool
+     */
+    public function authorizedToRead($source): bool
     {
         $policy = $this->viewPolicy;
-        $fieldName = $info->fieldName;
 
-        $user = auth()->user();
+        // Check if there is a policy.
+        if (! $policy) {
+            return true;
+        }
 
         // Check if the policy method is callable
-        if (($policy instanceof \Closure || is_callable_tuple($policy)) && $policy($user, $source, $args, $context, $info)) {
+        if (($policy instanceof \Closure || is_callable_tuple($policy)) && $policy($source)) {
             return true;
         }
 
@@ -523,23 +538,35 @@ class Field
             return true;
         }
 
-        if ($this->nullable) {
-            return false;
-        }
-
-        throw new AuthorizationException('Cannot read property "'.$fieldName.'" of '.get_class($source));
+        return false;
     }
 
     /**
-     * Check the store policy of the type.
+     * Determine if the current user can store the value on the model or throw an exception.
      *
-     * @param $source
-     * @param $fieldName
-     * @param $value
+     * @param mixed $source
+     * @param mixed $value
+     * @param string $fieldName
      * @return bool
      * @throws \Illuminate\Auth\Access\AuthorizationException
      */
-    public function checkStorePolicy($source, $fieldName, $value): bool
+    public function authorizeToStore($source, $value, $fieldName): bool
+    {
+        if ($this->authorizedToRead($source) && ($result = $this->authorizedToStore($source, $value))) {
+            return $result;
+        }
+
+        throw new AuthorizationException('Cannot set property "'.$fieldName.'" of '.get_class($source));
+    }
+
+    /**
+     * Determine if the current user can store the value on the model.
+     *
+     * @param mixed $source
+     * @param mixed $value
+     * @return bool
+     */
+    public function authorizedToStore($source, $value): bool
     {
         $policy = $this->storePolicy;
 
@@ -548,10 +575,8 @@ class Field
             return true;
         }
 
-        $user = auth()->user();
-
         // Check if the policy method is a closure.
-        if (($policy instanceof \Closure || is_callable_tuple($policy)) && $policy($user, $source, $value)) {
+        if (($policy instanceof \Closure || is_callable_tuple($policy)) && $policy($source, $value)) {
             return true;
         }
 
@@ -560,7 +585,7 @@ class Field
             return true;
         }
 
-        throw new AuthorizationException('Cannot set property "'.$fieldName.'" of '.get_class($source));
+        return false;
     }
 
     /**

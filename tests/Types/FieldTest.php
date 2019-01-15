@@ -42,7 +42,7 @@ class FieldTest extends IntegrationTest
             return true;
         });
 
-        $this->assertTrue($field->checkStorePolicy($user, 'email', 'value'));
+        $this->assertTrue($field->authorizeToStore($user, 'email', 'value'));
     }
 
     /** @test */
@@ -57,7 +57,7 @@ class FieldTest extends IntegrationTest
             return false;
         });
 
-        $field->checkStorePolicy($user, 'email', 'value');
+        $field->authorizeToStore($user, 'email', 'value');
     }
 
     /** @test */
@@ -67,7 +67,7 @@ class FieldTest extends IntegrationTest
         $field = new Field($this->registry);
         $field->canStoreWhen('storeRestricted');
 
-        $this->assertTrue($field->checkStorePolicy($user, 'restricted', 'No'));
+        $this->assertTrue($field->authorizeToStore($user, 'restricted', 'No'));
     }
 
     /** @test */
@@ -80,7 +80,7 @@ class FieldTest extends IntegrationTest
         $field = new Field($this->registry);
         $field->canStoreWhen('setType');
 
-        $this->assertTrue($field->checkStorePolicy($user, 'email', 'value'));
+        $this->assertTrue($field->authorizeToStore($user, 'email', 'value'));
     }
 
     /** @test */
@@ -93,6 +93,6 @@ class FieldTest extends IntegrationTest
         $field = new Field($this->registry);
         $field->canStoreWhen('nonExistingPolicy');
 
-        $this->assertTrue($field->checkStorePolicy($user, 'email', 'value'));
+        $this->assertTrue($field->authorizeToStore($user, 'email', 'value'));
     }
 }
