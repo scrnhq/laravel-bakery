@@ -59,20 +59,6 @@ abstract class ModelSchema
     protected $indexable = true;
 
     /**
-     * The bound fields.
-     *
-     * @var Collection
-     */
-    private $fields;
-
-    /**
-     * The bound relations.
-     *
-     * @var Collection
-     */
-    private $relations;
-
-    /**
      * ModelSchema constructor.
      *
      * @param \Bakery\Support\TypeRegistry $registry
@@ -222,10 +208,6 @@ abstract class ModelSchema
      */
     public function getFields(): Collection
     {
-        if (isset($this->fields)) {
-            return $this->fields;
-        }
-
         return collect($this->getKeyField())->merge($this->fields());
     }
 
@@ -317,10 +299,6 @@ abstract class ModelSchema
      */
     public function getRelationFields(): Collection
     {
-        if (isset($this->relations)) {
-            return $this->relations;
-        }
-
         return collect($this->relations());
     }
 
@@ -379,22 +357,6 @@ abstract class ModelSchema
     }
 
     /**
-     * Set the instance on the model schema.
-     *
-     * @param \Illuminate\Database\Eloquent\Model $instance
-     */
-    public function setInstance(Model $instance): void
-    {
-        $model = $this->getModel();
-        Utils::invariant(
-            $instance instanceof $model,
-            'Can not set instance of '.get_class($instance).' on '.get_class($this).' as it differs from defined model which is: '.$this->getModelClass()
-        );
-
-        $this->instance = $instance;
-    }
-
-    /**
      * Get the registry of the model schema.
      *
      * @return \Bakery\Support\TypeRegistry
@@ -402,30 +364,6 @@ abstract class ModelSchema
     public function getRegistry(): TypeRegistry
     {
         return $this->registry;
-    }
-
-    /**
-     * Set the registry of the model schema.
-     *
-     * @param \Bakery\Support\TypeRegistry $registry
-     */
-    public function setRegistry(TypeRegistry $registry): void
-    {
-        $this->registry = $registry;
-    }
-
-    /**
-     * Get an instance to the Laravel gate.
-     *
-     * @return \Illuminate\Contracts\Auth\Access\Gate
-     */
-    public function getGate(): Gate
-    {
-        if (! $this->gate) {
-            $this->gate = resolve(Gate::class);
-        }
-
-        return $this->gate;
     }
 
     /**
