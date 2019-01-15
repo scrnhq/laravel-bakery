@@ -2,7 +2,6 @@
 
 namespace Bakery\Types;
 
-use Closure;
 use Bakery\Utils\Utils;
 use Bakery\Fields\EloquentField;
 use Bakery\Traits\FiltersQueries;
