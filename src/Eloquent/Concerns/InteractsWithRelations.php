@@ -257,11 +257,11 @@ trait InteractsWithRelations
      * Connect the belongs to many relation.
      *
      * @param Relations\BelongsToMany $relation
-     * @param array $data
+     * @param array $ids
      * @param bool $detaching
      * @return void
      */
-    public function connectBelongsToManyRelation(Relations\BelongsToMany $relation, array $data, $detaching = true)
+    public function connectBelongsToManyRelation(Relations\BelongsToMany $relation, array $ids, $detaching = true)
     {
         $accessor = $relation->getPivotAccessor();
         $relatedKey = $relation->getRelated()->getKeyName();
@@ -269,7 +269,7 @@ trait InteractsWithRelations
         $pivotClass = $relation->getPivotClass();
         $pivotInstance = resolve($pivotClass);
 
-        $data = collect($data)->mapWithKeys(function ($data, $key) use ($accessor, $relatedKey) {
+        $ids = collect($ids)->mapWithKeys(function ($data, $key) use ($accessor, $relatedKey) {
             if (! is_array($data)) {
                 return [$key => $data];
             }
@@ -287,24 +287,22 @@ trait InteractsWithRelations
             return $pivotSchema->getInstance()->getAttributes();
         });
 
-        $this->queue(function () use ($pivotInstance, $data, $detaching, $relation) {
-            if ($pivotInstance) {
-                $pivotInstance::unguard();
-            }
+        $this->queue(function () use ($pivotInstance, $ids, $detaching, $relation) {
+            $current = $relation->newQuery()->pluck($relation->getRelatedPivotKeyName());
 
-            $results = $relation->sync($data, $detaching);
+            $detach = $current->diff($ids->keys());
 
-            foreach ($relation->getRelated()->findMany($results['attached']) as $model) {
-                $this->authorizeToAttach($model);
-            }
-
-            foreach ($relation->getRelated()->findMany($results['detached']) as $model) {
+            $relation->getRelated()->newQuery()->findMany($detach)->each(function (Model $model) {
                 $this->authorizeToDetach($model);
-            }
+            });
 
-            if ($pivotInstance) {
-                $pivotInstance::reguard();
-            }
+            $attach = $ids->keys()->diff($current);
+
+            $relation->getRelated()->newQuery()->findMany($attach)->each(function (Model $model) {
+                $this->authorizeToAttach($model);
+            });
+
+            $relation->sync($ids, $detaching);
         });
     }
 
@@ -313,6 +311,7 @@ trait InteractsWithRelations
      *
      * @param Relations\BelongsToMany $relation
      * @param array $value
+     * @param bool $detaching
      * @return void
      */
     protected function fillBelongsToManyRelation(Relations\BelongsToMany $relation, array $value, $detaching = true)
@@ -337,13 +336,13 @@ trait InteractsWithRelations
 
             $results = $relation->sync($data, $detaching);
 
-            foreach ($relation->getRelated()->findMany($results['attached']) as $model) {
-                $this->authorizeToAttach($model);
-            }
-
-            foreach ($relation->getRelated()->findMany($results['detached']) as $model) {
+            $relation->getRelated()->newQuery()->findMany($results['detached'])->each(function (Model $model) {
                 $this->authorizeToDetach($model);
-            }
+            });
+
+            $relation->getRelated()->newQuery()->findMany($results['attached'])->each(function (Model $model) {
+                $this->authorizeToAttach($model);
+            });
         });
     }
 
@@ -364,13 +363,7 @@ trait InteractsWithRelations
 
         if (is_array($data)) {
             if (count($data) !== 1) {
-                throw new UserError(
-                    sprintf(
-                        'There must be only one key with polymorphic input. %s given for relation %s.',
-                        count($data),
-                        $relation->getRelation()
-                    )
-                );
+                throw new UserError(sprintf('There must be only one key with polymorphic input. %s given for relation %s.', count($data), $relation->getRelation()));
             }
 
             $data = collect($data);
@@ -405,13 +398,7 @@ trait InteractsWithRelations
 
         if (is_array($data)) {
             if (count($data) !== 1) {
-                throw new UserError(
-                    sprintf(
-                        'There must be only one key with polymorphic input. %s given for relation %s.',
-                        count($data),
-                        $relation->getRelation()
-                    )
-                );
+                throw new UserError(sprintf('There must be only one key with polymorphic input. %s given for relation %s.', count($data), $relation->getRelation()));
             }
 
             $data = collect($data);
@@ -496,10 +483,7 @@ trait InteractsWithRelations
      */
     protected function resolveRelation(string $relation): Relations\Relation
     {
-        Utils::invariant(
-            method_exists($this->instance, $relation),
-            class_basename($this->instance).' has no relation named '.$relation
-        );
+        Utils::invariant(method_exists($this->instance, $relation), class_basename($this->instance).' has no relation named '.$relation);
 
         $resolvedRelation = $this->instance->{$relation}();
 

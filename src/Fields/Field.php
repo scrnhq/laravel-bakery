@@ -97,17 +97,6 @@ class Field
     }
 
     /**
-     * Return a gate instance for the user.
-     *
-     * @param \Illuminate\Contracts\Auth\Authenticatable|mixed $user
-     * @return \Illuminate\Contracts\Auth\Access\Gate
-     */
-    protected function getGate($user = null): Gate
-    {
-        return app(Gate::class)->forUser($user);
-    }
-
-    /**
      * @return \Bakery\Support\TypeRegistry
      */
     public function getRegistry(): TypeRegistry

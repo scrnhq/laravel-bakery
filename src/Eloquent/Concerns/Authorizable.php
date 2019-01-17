@@ -176,6 +176,8 @@ trait Authorizable
      */
     public function authorized(string $ability, array $arguments = []): bool
     {
-        return Gate::check($ability, $arguments ? array_merge([$this->instance ?? $this->getModelClass()], $arguments) : $this->instance);
+        $arguments = array_merge([$this->instance ?? $this->getModelClass()], $arguments);
+
+        return Gate::check($ability, $arguments);
     }
 }
