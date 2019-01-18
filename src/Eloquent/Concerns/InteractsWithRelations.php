@@ -68,18 +68,6 @@ trait InteractsWithRelations
     }
 
     /**
-     * Check the policies for the relations in the model.
-     *
-     * @param array $relations
-     */
-    protected function checkRelations(array $relations)
-    {
-        foreach ($relations as $key => $attributes) {
-            // TODO:
-        }
-    }
-
-    /**
      * Fill the connections in the model.
      *
      * @param array $connections
@@ -97,18 +85,6 @@ trait InteractsWithRelations
             }
 
             $this->{$method}($relation, $attributes);
-        }
-    }
-
-    /**
-     * Check the policies for the connections in the model.
-     *
-     * @param array $connections
-     */
-    protected function checkConnections(array $connections)
-    {
-        foreach ($connections as $key => $attributes) {
-            // TODO:
         }
     }
 

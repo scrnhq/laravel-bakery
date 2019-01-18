@@ -145,8 +145,6 @@ trait MutatesModel
         $this->fillConnections($connections);
 
         $this->checkScalars($scalars);
-        $this->checkRelations($relations);
-        $this->checkConnections($connections);
 
         return $this;
     }
