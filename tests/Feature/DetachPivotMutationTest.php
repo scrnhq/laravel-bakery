@@ -2,19 +2,22 @@
 
 namespace Bakery\Tests\Feature;
 
-use Bakery\Tests\Stubs\Models;
 use Bakery\Tests\IntegrationTest;
+use Bakery\Tests\Fixtures\Models\Tag;
+use Bakery\Tests\Fixtures\Models\Role;
+use Bakery\Tests\Fixtures\Models\User;
+use Bakery\Tests\Fixtures\Models\Article;
 
 class DetachPivotMutationTest extends IntegrationTest
 {
     /** @test */
     public function it_lets_you_detach_pivot_ids()
     {
-        $user = factory(Models\User::class)->create();
+        $user = factory(User::class)->create();
         $this->actingAs($user);
 
-        $article = factory(Models\Article::class)->create();
-        $tags = factory(Models\Tag::class, 3)->create();
+        $article = factory(Article::class)->create();
+        $tags = factory(Tag::class, 3)->create();
 
         $article->tags()->sync($tags);
 
@@ -39,14 +42,14 @@ class DetachPivotMutationTest extends IntegrationTest
     /** @test */
     public function it_lets_you_detach_pivot_ids_with_pivot_data()
     {
-        $user = factory(Models\User::class)->create();
-        $role = factory(Models\Role::class)->create();
+        $user = factory(User::class)->create();
+        $role = factory(Role::class)->create();
         $this->actingAs($user);
-        $user->customRoles()->sync($role);
+        $user->roles()->sync($role);
 
         $query = '
             mutation {
-                detachCustomRolesOnUser(id: "'.$user->id.'", input: [
+                detachRolesOnUser(id: "'.$user->id.'", input: [
                     "'.$role->id.'"
                 ]) {
                     id
@@ -65,8 +68,8 @@ class DetachPivotMutationTest extends IntegrationTest
     /** @test */
     public function it_lets_you_detach_pivot_ids_with_pivot_data_inversed()
     {
-        $user = factory(Models\User::class)->create();
-        $role = factory(Models\Role::class)->create();
+        $user = factory(User::class)->create();
+        $role = factory(Role::class)->create();
         $this->actingAs($user);
         $role->users()->sync($role);
 

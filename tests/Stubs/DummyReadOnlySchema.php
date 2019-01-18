@@ -6,7 +6,7 @@ use Bakery\Eloquent\ModelSchema;
 
 class DummyReadOnlySchema extends ModelSchema
 {
-    protected $model = Model::class;
+    protected $model = DummyModel::class;
 
     protected $mutable = false;
 }

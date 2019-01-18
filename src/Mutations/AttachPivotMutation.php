@@ -83,8 +83,6 @@ class AttachPivotMutation extends EloquentMutation
 
             $relation = $this->getRelation($model);
 
-            $permission = 'set'.studly_case($relation->getRelationName());
-            $modelSchema->authorize($permission, $model);
             $modelSchema->connectBelongsToManyRelation($relation, $input, false);
             $modelSchema->save();
 

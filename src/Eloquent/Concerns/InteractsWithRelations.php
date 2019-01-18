@@ -5,7 +5,6 @@ namespace Bakery\Eloquent\Concerns;
 use RuntimeException;
 use Bakery\Utils\Utils;
 use GraphQL\Error\UserError;
-use Bakery\Support\Facades\Bakery;
 use Illuminate\Database\Eloquent\Model;
 use Bakery\Exceptions\InvariantViolation;
 use Illuminate\Database\Eloquent\Relations;
@@ -69,19 +68,6 @@ trait InteractsWithRelations
     }
 
     /**
-     * Check the policies for the relations in the model.
-     *
-     * @param array $relations
-     */
-    protected function checkRelations(array $relations)
-    {
-        foreach ($relations as $key => $attributes) {
-            $policyMethod = 'create'.studly_case($key);
-            $this->authorize($policyMethod, $attributes);
-        }
-    }
-
-    /**
      * Fill the connections in the model.
      *
      * @param array $connections
@@ -103,34 +89,25 @@ trait InteractsWithRelations
     }
 
     /**
-     * Check the policies for the connections in the model.
-     *
-     * @param array $connections
-     */
-    protected function checkConnections(array $connections)
-    {
-        foreach ($connections as $key => $attributes) {
-            $policyMethod = 'set'.studly_case($this->getRelationOfConnection($key));
-            $this->authorize($policyMethod, $attributes);
-        }
-    }
-
-    /**
      * Connect a belongs to relation.
      *
      * @param Relations\BelongsTo $relation
      * @param mixed $id
      * @return void
+     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     protected function connectBelongsToRelation(Relations\BelongsTo $relation, $id)
     {
         if (! $id) {
-            $relation->associate(null);
+            $relation->dissociate();
 
             return;
         }
 
         $model = $relation->getRelated()->findOrFail($id);
+        $schema = $this->registry->getSchemaForModel($model);
+        $schema->authorizeToAdd($this->getModel());
+
         $relation->associate($model);
     }
 
@@ -140,12 +117,20 @@ trait InteractsWithRelations
      * @param Relations\BelongsTo $relation
      * @param array $attributes
      * @return void
+     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     protected function fillBelongsToRelation(Relations\BelongsTo $relation, $attributes = [])
     {
+        if (! $attributes) {
+            $relation->dissociate();
+
+            return;
+        }
+
         $related = $relation->getRelated();
-        $modelSchema = $this->registry->getSchemaForModel($related);
-        $model = $modelSchema->create($attributes);
+        $schema = $this->registry->getSchemaForModel($related);
+        $model = $schema->createIfAuthorized($attributes);
+        $schema->authorizeToAdd($this->getModel());
 
         $relation->associate($model);
     }
@@ -160,18 +145,15 @@ trait InteractsWithRelations
     protected function connectHasOneRelation(Relations\HasOne $relation, $id)
     {
         if (! $id) {
-            if ($related = $relation->getResults()) {
-                $related->setAttribute($relation->getForeignKeyName(), null);
-                $related->save();
-            }
+            $relation->delete();
 
             return;
         }
 
         $this->queue(function () use ($id, $relation) {
             $model = $relation->getRelated()->findOrFail($id);
-            $model->setAttribute($relation->getForeignKeyName(), $relation->getParentKey());
-            $model->save();
+            $this->authorizeToAdd($model);
+            $relation->save($model);
         });
     }
 
@@ -185,12 +167,20 @@ trait InteractsWithRelations
      */
     protected function fillHasOneRelation(Relations\HasOne $relation, $attributes)
     {
+        if (! $attributes) {
+            $relation->delete();
+
+            return;
+        }
+
         $related = $relation->getRelated();
         $modelSchema = $this->registry->getSchemaForModel($related);
+        $modelSchema->authorizeToCreate();
         $modelSchema->fill($attributes);
 
         $this->queue(function () use ($modelSchema, $relation) {
-            $modelSchema->instance->setAttribute($relation->getForeignKeyName(), $relation->getParentKey());
+            $this->authorizeToAdd($modelSchema->getModel());
+            $relation->save($modelSchema->getInstance());
             $modelSchema->save();
         });
     }
@@ -205,7 +195,13 @@ trait InteractsWithRelations
     protected function connectHasManyRelation(Relations\HasMany $relation, array $ids)
     {
         $this->queue(function () use ($relation, $ids) {
-            $relation->sync($ids);
+            $models = $relation->getModel()->findMany($ids);
+
+            foreach ($models as $model) {
+                $this->authorizeToAdd($model);
+            }
+
+            $relation->saveMany($models);
         });
     }
 
@@ -223,9 +219,11 @@ trait InteractsWithRelations
             $relation->delete();
 
             foreach ($values as $attributes) {
-                $modelSchema = $this->registry->resolveSchemaForModel(get_class($related));
-                $modelSchema->make($attributes);
-                $modelSchema->getModel()->setAttribute($relation->getForeignKeyName(), $relation->getParentKey());
+                $modelSchema = $this->registry->getSchemaForModel($related);
+                $modelSchema->authorizeToCreate();
+                $model = $modelSchema->make($attributes);
+                $this->authorizeToAdd($model);
+                $relation->save($model);
                 $modelSchema->save();
             }
         });
@@ -235,11 +233,11 @@ trait InteractsWithRelations
      * Connect the belongs to many relation.
      *
      * @param Relations\BelongsToMany $relation
-     * @param array $data
+     * @param array $ids
      * @param bool $detaching
      * @return void
      */
-    public function connectBelongsToManyRelation(Relations\BelongsToMany $relation, array $data, $detaching = true)
+    public function connectBelongsToManyRelation(Relations\BelongsToMany $relation, array $ids, $detaching = true)
     {
         $accessor = $relation->getPivotAccessor();
         $relatedKey = $relation->getRelated()->getKeyName();
@@ -247,7 +245,7 @@ trait InteractsWithRelations
         $pivotClass = $relation->getPivotClass();
         $pivotInstance = resolve($pivotClass);
 
-        $data = collect($data)->mapWithKeys(function ($data, $key) use ($accessor, $relatedKey) {
+        $ids = collect($ids)->mapWithKeys(function ($data, $key) use ($accessor, $relatedKey) {
             if (! is_array($data)) {
                 return [$key => $data];
             }
@@ -265,16 +263,22 @@ trait InteractsWithRelations
             return $pivotSchema->getInstance()->getAttributes();
         });
 
-        $this->queue(function () use ($pivotInstance, $data, $detaching, $relation) {
-            if ($pivotInstance) {
-                $pivotInstance::unguard();
-            }
+        $this->queue(function () use ($pivotInstance, $ids, $detaching, $relation) {
+            $current = $relation->newQuery()->pluck($relation->getRelatedPivotKeyName());
 
-            $relation->sync($data, $detaching);
+            $detach = $current->diff($ids->keys());
 
-            if ($pivotInstance) {
-                $pivotInstance::reguard();
-            }
+            $relation->getRelated()->newQuery()->findMany($detach)->each(function (Model $model) {
+                $this->authorizeToDetach($model);
+            });
+
+            $attach = $ids->keys()->diff($current);
+
+            $relation->getRelated()->newQuery()->findMany($attach)->each(function (Model $model) {
+                $this->authorizeToAttach($model);
+            });
+
+            $relation->sync($ids, $detaching);
         });
     }
 
@@ -283,9 +287,10 @@ trait InteractsWithRelations
      *
      * @param Relations\BelongsToMany $relation
      * @param array $value
+     * @param bool $detaching
      * @return void
      */
-    protected function fillBelongsToManyRelation(Relations\BelongsToMany $relation, array $value)
+    protected function fillBelongsToManyRelation(Relations\BelongsToMany $relation, array $value, $detaching = true)
     {
         $pivots = collect();
         $instances = collect();
@@ -294,18 +299,26 @@ trait InteractsWithRelations
         $relatedSchema = $this->registry->getSchemaForModel($related);
 
         foreach ($value as $attributes) {
-            $instances[] = $relatedSchema->create($attributes);
+            $instances[] = $relatedSchema->createIfAuthorized($attributes);
             $pivots[] = $attributes[$accessor] ?? null;
         }
 
-        $this->queue(function () use ($relation, $instances, $pivots) {
+        $this->queue(function () use ($detaching, $relation, $instances, $pivots) {
             $data = $instances->pluck('id')->mapWithKeys(function ($id, $key) use ($pivots) {
                 $pivot = $pivots[$key] ?? null;
 
                 return $pivot ? [$id => $pivot] : [$key => $id];
             });
 
-            $relation->sync($data);
+            $results = $relation->sync($data, $detaching);
+
+            $relation->getRelated()->newQuery()->findMany($results['detached'])->each(function (Model $model) {
+                $this->authorizeToDetach($model);
+            });
+
+            $relation->getRelated()->newQuery()->findMany($results['attached'])->each(function (Model $model) {
+                $this->authorizeToAttach($model);
+            });
         });
     }
 
@@ -319,20 +332,14 @@ trait InteractsWithRelations
     protected function connectMorphToRelation(Relations\MorphTo $relation, $data)
     {
         if (! $data) {
-            $relation->associate(null);
+            $relation->dissociate();
 
             return;
         }
 
         if (is_array($data)) {
             if (count($data) !== 1) {
-                throw new UserError(
-                    sprintf(
-                        'There must be only one key with polymorphic input. %s given for relation %s.',
-                        count($data),
-                        $relation->getRelation()
-                    )
-                );
+                throw new UserError(sprintf('There must be only one key with polymorphic input. %s given for relation %s.', count($data), $relation->getRelation()));
             }
 
             $data = collect($data);
@@ -344,6 +351,8 @@ trait InteractsWithRelations
             $model = $this->getPolymorphicModel($relation, $key);
 
             $instance = $model->findOrFail($id);
+            $modelSchema = $this->registry->getSchemaForModel($instance);
+            $modelSchema->authorizeToAdd($this->getModel());
             $relation->associate($instance);
         }
     }
@@ -358,20 +367,14 @@ trait InteractsWithRelations
     protected function fillMorphToRelation(Relations\MorphTo $relation, $data)
     {
         if (! $data) {
-            $relation->associate(null);
+            $relation->dissociate();
 
             return;
         }
 
         if (is_array($data)) {
             if (count($data) !== 1) {
-                throw new UserError(
-                    sprintf(
-                        'There must be only one key with polymorphic input. %s given for relation %s.',
-                        count($data),
-                        $relation->getRelation()
-                    )
-                );
+                throw new UserError(sprintf('There must be only one key with polymorphic input. %s given for relation %s.', count($data), $relation->getRelation()));
             }
 
             $data = collect($data);
@@ -456,10 +459,7 @@ trait InteractsWithRelations
      */
     protected function resolveRelation(string $relation): Relations\Relation
     {
-        Utils::invariant(
-            method_exists($this->instance, $relation),
-            class_basename($this->instance).' has no relation named '.$relation
-        );
+        Utils::invariant(method_exists($this->instance, $relation), class_basename($this->instance).' has no relation named '.$relation);
 
         $resolvedRelation = $this->instance->{$relation}();
 

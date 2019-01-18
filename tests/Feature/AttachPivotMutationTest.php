@@ -3,10 +3,10 @@
 namespace Bakery\Tests\Feature;
 
 use Bakery\Tests\IntegrationTest;
-use Bakery\Tests\Stubs\Models\Tag;
-use Bakery\Tests\Stubs\Models\Role;
-use Bakery\Tests\Stubs\Models\User;
-use Bakery\Tests\Stubs\Models\Article;
+use Bakery\Tests\Fixtures\Models\Tag;
+use Bakery\Tests\Fixtures\Models\Role;
+use Bakery\Tests\Fixtures\Models\User;
+use Bakery\Tests\Fixtures\Models\Article;
 
 class AttachPivotMutationTest extends IntegrationTest
 {
@@ -45,15 +45,10 @@ class AttachPivotMutationTest extends IntegrationTest
 
         $query = '
             mutation {
-                attachCustomRolesOnUser(id: "'.$user->id.'", input: [
-                    { id: "'.$role->id.'", customPivot: { comment: "foobar" } }
+                attachRolesOnUser(id: "'.$user->id.'", input: [
+                    { id: "'.$role->id.'", pivot: { admin: true } }
                 ]) {
                     id
-                    customRoles {
-                        customPivot {
-                            comment
-                        }
-                    }
                 }
             }
         ';
@@ -63,7 +58,7 @@ class AttachPivotMutationTest extends IntegrationTest
         $this->assertDatabaseHas('role_user', [
             'user_id' => '1',
             'role_id' => '1',
-            'comment' => 'foobar',
+            'admin' => true,
         ]);
     }
 
@@ -77,15 +72,10 @@ class AttachPivotMutationTest extends IntegrationTest
 
         $query = '
             mutation {
-                attachCustomRolesOnUser(id: "'.$user->id.'", input: [
-                    { id: "'.$role->id.'", customPivot: {tagId: "'.$tag->id.'" } }
+                attachRolesOnUser(id: "'.$user->id.'", input: [
+                    { id: "'.$role->id.'", pivot: {tagId: "'.$tag->id.'" } }
                 ]) {
                     id
-                    customRoles {
-                        customPivot {
-                            comment
-                        }
-                    }
                 }
             }
         ';
@@ -108,15 +98,10 @@ class AttachPivotMutationTest extends IntegrationTest
 
         $query = '
             mutation {
-                attachCustomRolesOnUser(id: "'.$user->id.'", input: [
-                    { id: "'.$role->id.'", customPivot: {tag: {name: "foobar"} } }
+                attachRolesOnUser(id: "'.$user->id.'", input: [
+                    { id: "'.$role->id.'", pivot: {tag: {name: "foobar"} } }
                 ]) {
                     id
-                    customRoles {
-                        customPivot {
-                            comment
-                        }
-                    }
                 }
             }
         ';
@@ -144,7 +129,7 @@ class AttachPivotMutationTest extends IntegrationTest
         $query = '
             mutation {
                 attachUsersOnRole(id: "'.$role->id.'", input: [
-                    { id: "'.$user->id.'", pivot: { comment: "foobar" } }
+                    { id: "'.$user->id.'", pivot: { admin: true } }
                 ]) {
                     id
                 }
@@ -156,7 +141,7 @@ class AttachPivotMutationTest extends IntegrationTest
         $this->assertDatabaseHas('role_user', [
             'user_id' => '1',
             'role_id' => '1',
-            'comment' => 'foobar',
+            'admin' => true,
         ]);
     }
 }

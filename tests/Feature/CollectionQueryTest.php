@@ -2,16 +2,26 @@
 
 namespace Bakery\Tests\Feature;
 
-use Bakery\Tests\Stubs\Models;
 use Bakery\Tests\IntegrationTest;
 use Illuminate\Support\Facades\DB;
+use Bakery\Tests\Fixtures\Models\User;
+use Bakery\Tests\Fixtures\Models\Phone;
+use Bakery\Tests\Fixtures\Models\Article;
+use Bakery\Tests\Fixtures\Models\Comment;
 
 class CollectionQueryTest extends IntegrationTest
 {
+    public function setUp()
+    {
+        parent::setUp();
+
+        $this->authenticate();
+    }
+
     /** @test */
     public function it_returns_collection_of_entities_with_pagination()
     {
-        factory(Models\Article::class, 3)->create();
+        factory(Article::class, 3)->create();
 
         $query = '
             query {
@@ -31,9 +41,7 @@ class CollectionQueryTest extends IntegrationTest
             }
         ';
 
-        $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $response->assertStatus(200);
-        $response->assertJsonKey('articles');
+        $response = $this->graphql($query);
         $response->assertJsonStructure([
             'data' => [
                 'articles' => [
@@ -55,7 +63,7 @@ class CollectionQueryTest extends IntegrationTest
     /** @test */
     public function it_can_fetch_the_next_page()
     {
-        factory(Models\Article::class, 30)->create();
+        factory(Article::class, 30)->create();
 
         $query = '
             query {
@@ -75,18 +83,17 @@ class CollectionQueryTest extends IntegrationTest
             }
         ';
 
-        $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $response->assertStatus(200);
+        $response = $this->graphql($query);
         $response->assertJsonFragment(['current_page' => 2]);
     }
 
     /** @test */
     public function it_can_filter_by_its_fields()
     {
-        factory(Models\Article::class)->create([
+        factory(Article::class)->create([
             'title' => 'foo',
         ]);
-        factory(Models\Article::class)->create([
+        factory(Article::class)->create([
             'title' => 'bar',
         ]);
 
@@ -106,8 +113,8 @@ class CollectionQueryTest extends IntegrationTest
             }
         ';
 
-        $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $response->assertStatus(200);
+        $response = $this->graphql($query);
+
         $response->assertJsonFragment(['total' => 1]);
         $response->assertJsonFragment(['title' => 'foo']);
         $response->assertJsonMissing(['title' => 'bar']);
@@ -116,9 +123,9 @@ class CollectionQueryTest extends IntegrationTest
     /** @test */
     public function it_can_filter_with_dyanmic_field_filters()
     {
-        factory(Models\Article::class)->create(['title' => 'Hello world']);
-        factory(Models\Article::class)->create(['title' => 'Hello mars']);
-        factory(Models\Article::class)->create(['title' => 'Goodbye world']);
+        factory(Article::class)->create(['title' => 'Hello world']);
+        factory(Article::class)->create(['title' => 'Hello mars']);
+        factory(Article::class)->create(['title' => 'Goodbye world']);
 
         $query = '
             query {
@@ -136,8 +143,7 @@ class CollectionQueryTest extends IntegrationTest
             }
         ';
 
-        $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $response->assertStatus(200);
+        $response = $this->graphql($query);
         $response->assertJsonFragment(['total' => 2]);
         $response->assertJsonFragment(['title' => 'Hello world']);
         $response->assertJsonFragment(['title' => 'Hello mars']);
@@ -147,19 +153,19 @@ class CollectionQueryTest extends IntegrationTest
     /** @test */
     public function it_can_filter_with_AND_filters()
     {
-        factory(Models\Article::class)->create(['title' => 'Hello world', 'content' => 'foo']);
-        factory(Models\Article::class)->create(['title' => 'Hello mars', 'content' => 'bar']);
-        factory(Models\Article::class)->create(['title' => 'Goodbye world', 'content' => 'baz']);
+        factory(Article::class)->create(['title' => 'Hello world', 'slug' => 'hello-world']);
+        factory(Article::class)->create(['title' => 'Hello mars', 'slug' => 'hello-mars']);
+        factory(Article::class)->create(['title' => 'Goodbye world', 'slug' => 'goodbye-world']);
 
         $query = '
             query {
                 articles(filter: {
-                    AND: [{title_contains: "hello"}, {content: "foo"}]
+                    AND: [{title_contains: "hello"}, {slug: "hello-world"}]
                 }) {
                     items {
                         id
                         title
-                        content
+                        slug
                     }
                     pagination {
                         total
@@ -168,30 +174,28 @@ class CollectionQueryTest extends IntegrationTest
             }
         ';
 
-        $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $response->assertStatus(200);
+        $response = $this->graphql($query);
         $response->assertJsonFragment(['total' => 1]);
-        $response->assertJsonFragment(['title' => 'Hello world', 'content' => 'foo']);
-        $response->assertJsonMissing(['title' => 'Hello mars', 'content' => 'bar']);
-        $response->assertJsonMissing(['title' => 'Goodbye world', 'content' => 'baz']);
+        $response->assertJsonFragment(['title' => 'Hello world', 'slug' => 'hello-world']);
+        $response->assertJsonMissing(['title' => 'Hello mars', 'slug' => 'hello-mars']);
+        $response->assertJsonMissing(['title' => 'Goodbye world', 'slug' => 'goodbye-world']);
     }
 
     /** @test */
     public function it_can_filter_with_OR_filters()
     {
-        factory(Models\Article::class)->create(['title' => 'Hello world', 'content' => 'foo']);
-        factory(Models\Article::class)->create(['title' => 'Hello mars', 'content' => 'bar']);
-        factory(Models\Article::class)->create(['title' => 'Goodbye world', 'content' => 'baz']);
+        factory(Article::class)->create(['title' => 'Hello world']);
+        factory(Article::class)->create(['title' => 'Hello mars']);
+        factory(Article::class)->create(['title' => 'Goodbye mars']);
 
         $query = '
             query {
                 articles(filter: {
-                    OR: [{title_contains: "hello"}, {content: "bar"}]
+                    OR: [{title_contains: "world"}, {title_contains: "goodbye"}]
                 }) {
                     items {
                         id
                         title
-                        content
                     }
                     pagination {
                         total
@@ -200,32 +204,31 @@ class CollectionQueryTest extends IntegrationTest
             }
         ';
 
-        $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $response->assertStatus(200);
+        $response = $this->graphql($query);
         $response->assertJsonFragment(['total' => 2]);
-        $response->assertJsonFragment(['title' => 'Hello world', 'content' => 'foo']);
-        $response->assertJsonFragment(['title' => 'Hello mars', 'content' => 'bar']);
-        $response->assertJsonMissing(['title' => 'Goodbye world', 'content' => 'baz']);
+        $response->assertJsonFragment(['title' => 'Hello world']);
+        $response->assertJsonFragment(['title' => 'Goodbye mars']);
+        $response->assertJsonMissing(['title' => 'Hello mars']);
     }
 
     /** @test */
     public function it_can_filter_with_AND_and_OR_filters()
     {
-        $userOne = factory(Models\User::class)->create();
-        $userTwo = factory(Models\User::class)->create();
-        $articleOne = factory(Models\Article::class)->create([
+        $userOne = factory(User::class)->create();
+        $userTwo = factory(User::class)->create();
+        factory(Article::class)->create([
             'title' => 'Hello world',
-            'content' => 'Lorem ipsum',
+            'slug' => 'hello-world',
             'user_id' => $userOne->id,
         ]);
-        $articleTwo = factory(Models\Article::class)->create([
-            'title' => 'Hello world',
-            'content' => 'Lorem ipsum',
+        factory(Article::class)->create([
+            'title' => 'Hello mars',
+            'slug' => 'hello-mars',
             'user_id' => $userOne->id,
         ]);
-        $articleThree = factory(Models\Article::class)->create([
-            'title' => 'Hello world',
-            'content' => 'Lorem ipsum',
+        factory(Article::class)->create([
+            'title' => 'Goodbye world',
+            'slug' => 'goodbye-world',
             'user_id' => $userTwo->id,
         ]);
 
@@ -234,11 +237,12 @@ class CollectionQueryTest extends IntegrationTest
                 articles(filter: {
                     AND: [
                         { user: { id: "'.$userOne->id.'" } }, 
-                        { OR: [{title_contains: "hello"}, {content: "Lorem Ipsum"}] },
+                        { OR: [{title: "Hello world"}, {slug: "hello-mars"}] },
                     ]
                 }) {
                     items {
                         id
+                        title
                     }
                     pagination {
                         total
@@ -247,32 +251,31 @@ class CollectionQueryTest extends IntegrationTest
             }
         ';
 
-        $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $response->assertStatus(200);
+        $response = $this->graphql($query);
         $response->assertJsonFragment(['total' => 2]);
-        $response->assertJsonFragment(['id' => $articleOne->id]);
-        $response->assertJsonFragment(['id' => $articleTwo->id]);
-        $response->assertJsonMissing(['id' => $articleThree->id]);
+        $response->assertJsonFragment(['id' => '1']);
+        $response->assertJsonFragment(['id' => '2']);
+        $response->assertJsonMissing(['id' => '3']);
     }
 
     /** @test */
     public function it_can_filter_with_null_AND_and_OR_filters()
     {
-        $userOne = factory(Models\User::class)->create();
-        $userTwo = factory(Models\User::class)->create();
-        $articleOne = factory(Models\Article::class)->create([
+        $userOne = factory(User::class)->create();
+        $userTwo = factory(User::class)->create();
+        factory(Article::class)->create([
             'title' => 'Hello world',
-            'content' => 'Lorem ipsum',
+            'slug' => 'hello-world',
             'user_id' => $userOne->id,
         ]);
-        $articleTwo = factory(Models\Article::class)->create([
-            'title' => 'Hello world',
-            'content' => 'Lorem ipsum',
+        factory(Article::class)->create([
+            'title' => 'Hello mars',
+            'slug' => 'hello-mars',
             'user_id' => $userOne->id,
         ]);
-        $articleThree = factory(Models\Article::class)->create([
-            'title' => 'Hello world',
-            'content' => 'Lorem ipsum',
+        factory(Article::class)->create([
+            'title' => 'Goodbye world',
+            'slug' => 'goodbye-world',
             'user_id' => $userTwo->id,
         ]);
 
@@ -295,20 +298,19 @@ class CollectionQueryTest extends IntegrationTest
             }
         ';
 
-        $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $response->assertStatus(200);
+        $response = $this->graphql($query);
         $response->assertJsonFragment(['total' => 2]);
-        $response->assertJsonFragment(['id' => $articleOne->id]);
-        $response->assertJsonFragment(['id' => $articleTwo->id]);
-        $response->assertJsonMissing(['id' => $articleThree->id]);
+        $response->assertJsonFragment(['id' => '1']);
+        $response->assertJsonFragment(['id' => '2']);
+        $response->assertJsonMissing(['id' => '3']);
     }
 
     /** @test */
     public function it_can_order_by_field()
     {
-        $first = factory(Models\Article::class)->create(['title' => 'Hello world']);
-        $second = factory(Models\Article::class)->create(['title' => 'Hello mars']);
-        $third = factory(Models\Article::class)->create(['title' => 'Goodbye world']);
+        $first = factory(Article::class)->create(['title' => 'Hello world']);
+        $second = factory(Article::class)->create(['title' => 'Hello mars']);
+        $third = factory(Article::class)->create(['title' => 'Goodbye world']);
 
         $query = '
             query {
@@ -320,8 +322,7 @@ class CollectionQueryTest extends IntegrationTest
             }
         ';
 
-        $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $response->assertStatus(200);
+        $response = $this->graphql($query);
         $result = json_decode($response->getContent())->data->articles;
         $this->assertEquals($result->items[0]->id, $third->id);
         $this->assertEquals($result->items[1]->id, $second->id);
@@ -331,17 +332,17 @@ class CollectionQueryTest extends IntegrationTest
     /** @test */
     public function it_can_order_by_combination_of_nested_relations()
     {
-        $john = factory(Models\User::class)->create(['email' => 'john.doe@example.com']);
-        $jane = factory(Models\User::class)->create(['email' => 'jane.doe@example.com']);
-        $joe = factory(Models\User::class)->create(['email' => 'joe.doe@example.com']);
+        $john = factory(User::class)->create(['email' => 'john.doe@example.com']);
+        $jane = factory(User::class)->create(['email' => 'jane.doe@example.com']);
+        $joe = factory(User::class)->create(['email' => 'joe.doe@example.com']);
 
-        $johnsPhone = factory(Models\Phone::class)->create(['number' => '1', 'user_id' => $john->id]);
-        $janesPhone = factory(Models\Phone::class)->create(['number' => '2', 'user_id' => $jane->id]);
-        $joesPhone = factory(Models\Phone::class)->create(['number' => '3', 'user_id' => $joe->id]);
+        factory(Phone::class)->create(['number' => '1', 'user_id' => $john->id]);
+        factory(Phone::class)->create(['number' => '2', 'user_id' => $jane->id]);
+        factory(Phone::class)->create(['number' => '3', 'user_id' => $joe->id]);
 
-        $articleByJohn = factory(Models\Article::class)->create(['title' => 'Hello world', 'user_id' => $john->id]);
-        $articleByJane = factory(Models\Article::class)->create(['title' => 'Hello world', 'user_id' => $jane->id]);
-        $articleByJoe = factory(Models\Article::class)->create(['title' => 'Hello mars', 'user_id' => $joe->id]);
+        $articleByJohn = factory(Article::class)->create(['title' => 'Hello world', 'user_id' => $john->id]);
+        $articleByJane = factory(Article::class)->create(['title' => 'Hello world', 'user_id' => $jane->id]);
+        $articleByJoe = factory(Article::class)->create(['title' => 'Hello mars', 'user_id' => $joe->id]);
 
         $query = '
             query {
@@ -362,26 +363,25 @@ class CollectionQueryTest extends IntegrationTest
             }
         ';
 
-        $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $response->assertStatus(200);
-        $response->assertJsonMissing(['errors']);
+        $response = $this->graphql($query);
         $result = json_decode($response->getContent())->data->articles;
         $this->assertEquals($result->items[0]->id, $articleByJoe->id);
         $this->assertEquals($result->items[1]->id, $articleByJane->id);
         $this->assertEquals($result->items[2]->id, $articleByJohn->id);
     }
 
+    /** @test */
     public function it_can_filter_by_nested_relations()
     {
-        $firstUser = factory(Models\User::class)->create();
-        $secondUser = factory(Models\User::class)->create();
+        $firstUser = factory(User::class)->create();
+        $secondUser = factory(User::class)->create();
 
-        factory(Models\Phone::class)->create([
+        factory(Phone::class)->create([
             'user_id' => $firstUser->id,
         ]);
 
-        factory(Models\Article::class, 2)->create(['user_id' => $firstUser->id]);
-        factory(Models\Article::class)->create(['user_id' => $secondUser->id]);
+        factory(Article::class, 2)->create(['user_id' => $firstUser->id]);
+        factory(Article::class)->create(['user_id' => $secondUser->id]);
 
         $query = '
             query {
@@ -403,23 +403,23 @@ class CollectionQueryTest extends IntegrationTest
             }
         ';
 
-        $response = $this->json('GET', '/graphql', ['query' => $query]);
+        $response = $this->graphql($query);
         $response->assertJsonFragment(['total' => 2]);
-        $response->assertJsonFragment(['id' => $firstUser->articles[0]->id]);
-        $response->assertJsonFragment(['id' => $firstUser->articles[1]->id]);
-        $response->assertJsonMissing(['id' => $secondUser->articles[0]->id]);
+        $response->assertJsonFragment(['id' => '1']);
+        $response->assertJsonFragment(['id' => '2']);
+        $response->assertJsonMissing(['id' => '3']);
     }
 
     /** @test */
     public function it_can_filter_with_AND_and_OR_filters_on_relationships()
     {
-        $firstUser = factory(Models\User::class)->create();
-        $phone = factory(Models\Phone::class)->create(['user_id' => $firstUser->id]);
+        $firstUser = factory(User::class)->create();
+        $phone = factory(Phone::class)->create(['user_id' => $firstUser->id]);
 
-        $secondUser = factory(Models\User::class)->create();
-        $article = factory(Models\Article::class)->create(['user_id' => $secondUser->id]);
+        $secondUser = factory(User::class)->create();
+        $article = factory(Article::class)->create(['user_id' => $secondUser->id]);
 
-        $thirdUser = factory(Models\User::class)->create();
+        factory(User::class)->create();
 
         $query = '
             query {
@@ -439,11 +439,11 @@ class CollectionQueryTest extends IntegrationTest
             }
         ';
 
-        $response = $this->json('GET', '/graphql', ['query' => $query]);
+        $response = $this->graphql($query);
         $response->assertJsonFragment(['total' => 2]);
-        $response->assertJsonFragment(['id' => $firstUser->id]);
-        $response->assertJsonFragment(['id' => $secondUser->id]);
-        $response->assertJsonMissing(['id' => $thirdUser->id]);
+        $response->assertJsonFragment(['id' => '1']);
+        $response->assertJsonFragment(['id' => '2']);
+        $response->assertJsonMissing(['id' => '3']);
     }
 
     /** @test */
@@ -453,7 +453,7 @@ class CollectionQueryTest extends IntegrationTest
         // with any other DB it returns the query
         // but we can make sure that the GraphQL
         // side of things is working correctly with this test.
-        factory(Models\Article::class, 3)->create();
+        factory(Article::class, 3)->create();
 
         $query = '
             query {
@@ -473,21 +473,18 @@ class CollectionQueryTest extends IntegrationTest
             }
         ';
 
-        $response = $this->json('GET', '/graphql', ['query' => $query]);
+        $response = $this->graphql($query);
         $response->assertJsonFragment(['total' => 3]);
     }
 
     /** @test */
     public function it_eager_loads_the_relationships()
     {
-        $user = factory(Models\User::class)->create();
-        $articles = factory(Models\Article::class, 25)->create();
+        $articles = factory(Article::class, 25)->create();
 
         foreach ($articles as $article) {
-            factory(Models\Comment::class, 3)->create(['article_id' => $article->id]);
+            factory(Comment::class, 3)->create(['commentable_id' => $article->id]);
         }
-
-        $this->actingAs($user);
 
         $query = '
             query {
@@ -495,7 +492,7 @@ class CollectionQueryTest extends IntegrationTest
                     items {
                         comments {
                             id
-                            user {
+                            author {
                                 id
                             }
                         }
@@ -505,24 +502,21 @@ class CollectionQueryTest extends IntegrationTest
         ';
 
         DB::enableQueryLog();
-        $response = $this->json('GET', '/graphql', ['query' => $query]);
+        $response = $this->graphql($query);
         DB::disableQueryLog();
 
-        $response->assertJsonStructure(['data' => ['articles' => ['items' => [['comments' => [['user' => ['id']]]]]]]]);
+        $response->assertJsonStructure(['data' => ['articles' => ['items' => [['comments' => [['author' => ['id']]]]]]]]);
         $this->assertCount(4, DB::getQueryLog());
     }
 
     /** @test */
     public function it_eager_loads_sibling_relationships()
     {
-        $user = factory(Models\User::class)->create();
-        $articles = factory(Models\Article::class, 25)->create();
+        $articles = factory(Article::class, 25)->create();
 
         foreach ($articles as $article) {
-            factory(Models\Comment::class, 3)->create(['article_id' => $article->id]);
+            factory(Comment::class, 3)->create(['commentable_id' => $article->id]);
         }
-
-        $this->actingAs($user);
 
         $query = '
             query {
@@ -530,11 +524,13 @@ class CollectionQueryTest extends IntegrationTest
                     items {
                         comments {
                             id
-                            user {
+                            author {
                                 id
                             }
-                            article {
-                                title
+                            commentable {
+                                ... on Article {
+                                    title
+                                }
                             }
                         }
                     }
@@ -543,20 +539,17 @@ class CollectionQueryTest extends IntegrationTest
         ';
 
         DB::enableQueryLog();
-        $response = $this->json('GET', '/graphql', ['query' => $query]);
+        $response = $this->graphql($query);
         DB::disableQueryLog();
 
-        $response->assertJsonStructure(['data' => ['articles' => ['items' => [['comments' => [['user' => ['id'], 'article' => ['title']]]]]]]]);
+        $response->assertJsonStructure(['data' => ['articles' => ['items' => [['comments' => [['author' => ['id'], 'commentable' => ['title']]]]]]]]);
         $this->assertCount(5, DB::getQueryLog());
     }
 
     /** @test */
     public function it_cannot_query_models_that_are_not_indexable()
     {
-        $user = factory(Models\User::class)->create();
-        factory(Models\Phone::class)->create();
-
-        $this->actingAs($user);
+        factory(Phone::class)->create();
 
         $query = '
             query {
@@ -568,7 +561,7 @@ class CollectionQueryTest extends IntegrationTest
             }
         ';
 
-        $response = $this->postJson('/graphql', ['query' => $query]);
+        $response = $this->graphql($query);
         $this->assertContains('Cannot query field "phones"', $response->json('errors.0.message'));
     }
 }

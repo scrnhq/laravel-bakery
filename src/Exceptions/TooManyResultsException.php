@@ -2,10 +2,9 @@
 
 namespace Bakery\Exceptions;
 
-use RuntimeException;
-use Illuminate\Support\Arr;
+use GraphQL\Error\UserError;
 
-class TooManyResultsException extends RuntimeException
+class TooManyResultsException extends UserError
 {
     /**
      * Name of the affected Eloquent model.
@@ -17,24 +16,44 @@ class TooManyResultsException extends RuntimeException
     /**
      * The affected model IDs.
      *
-     * @var int|array
+     * @var array
      */
     protected $ids;
 
     /**
      * Set the affected Eloquent model and instance ids.
      *
-     * @param  string  $model
-     * @param  int|array  $ids
+     * @param  string $model
+     * @param  array $ids
      * @return $this
      */
-    public function setModel($model, $ids = [])
+    public function setModel(string $model, array $ids = [])
     {
         $this->model = $model;
-        $this->ids = Arr::wrap($ids);
+        $this->ids = array_wrap($ids);
 
         $this->message = "Too many results for model [{$model}]";
 
         return $this;
+    }
+
+    /**
+     * Get the affected Eloquent model.
+     *
+     * @return string
+     */
+    public function getModel(): string
+    {
+        return $this->model;
+    }
+
+    /**
+     * Get the affected Eloquent model IDs.
+     *
+     * @return array
+     */
+    public function getIds(): array
+    {
+        return $this->ids;
     }
 }

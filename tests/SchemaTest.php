@@ -91,8 +91,8 @@ class SchemaTest extends IntegrationTest
         $mutations = $schema->getMutations();
         $queries = $schema->getQueries();
 
-        $this->assertArrayHasKey('model', $queries);
-        $this->assertArrayHasKey('models', $queries);
+        $this->assertArrayHasKey('dummyModel', $queries);
+        $this->assertArrayHasKey('dummyModels', $queries);
         $this->assertEmpty($mutations);
     }
 
@@ -152,18 +152,16 @@ class SchemaTest extends IntegrationTest
     /** @test */
     public function it_can_load_the_model_schemas_from_a_given_directory()
     {
-        $models = Schema::modelsIn(__DIR__.'/Stubs/Schemas', 'Bakery\\Tests\\Stubs\\Schemas\\');
+        $models = Schema::modelsIn(__DIR__.'/Fixtures/Schemas', 'Bakery\\Tests\\Fixtures\\Schemas\\');
 
         $expected = [
-            'Bakery\Tests\Stubs\Schemas\ArticleSchema',
-            'Bakery\Tests\Stubs\Schemas\CategorySchema',
-            'Bakery\Tests\Stubs\Schemas\CommentSchema',
-            'Bakery\Tests\Stubs\Schemas\PhoneSchema',
-            'Bakery\Tests\Stubs\Schemas\RoleSchema',
-            'Bakery\Tests\Stubs\Schemas\TagSchema',
-            'Bakery\Tests\Stubs\Schemas\UserRoleSchema',
-            'Bakery\Tests\Stubs\Schemas\UpvoteSchema',
-            'Bakery\Tests\Stubs\Schemas\UserSchema',
+            'Bakery\Tests\Fixtures\Schemas\ArticleSchema',
+            'Bakery\Tests\Fixtures\Schemas\CommentSchema',
+            'Bakery\Tests\Fixtures\Schemas\PhoneSchema',
+            'Bakery\Tests\Fixtures\Schemas\RoleSchema',
+            'Bakery\Tests\Fixtures\Schemas\TagSchema',
+            'Bakery\Tests\Fixtures\Schemas\UserRoleSchema',
+            'Bakery\Tests\Fixtures\Schemas\UserSchema',
         ];
 
         $this->assertEquals($expected, array_intersect($expected, $models));

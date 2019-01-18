@@ -3,10 +3,10 @@
 namespace Bakery\Tests\Traits;
 
 use Bakery\Tests\TestCase;
-use Bakery\Tests\Stubs\Models\Role;
-use Bakery\Tests\Stubs\Models\User;
 use Bakery\Traits\JoinsRelationships;
-use Bakery\Tests\Stubs\Models\Article;
+use Bakery\Tests\Fixtures\Models\Role;
+use Bakery\Tests\Fixtures\Models\User;
+use Bakery\Tests\Fixtures\Models\Article;
 
 class JoinsRelationshipsTest extends TestCase
 {

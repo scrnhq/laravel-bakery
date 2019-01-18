@@ -47,7 +47,7 @@ trait QueriesModel
         $results = $query->get();
 
         if ($results->count() > 1) {
-            throw (new TooManyResultsException)->setModel($this->class, $results->pluck($this->model->getKeyName()));
+            throw (new TooManyResultsException)->setModel(get_class($this->model), array_pluck($results, $this->model->getKeyName()));
         }
 
         return $results->first();

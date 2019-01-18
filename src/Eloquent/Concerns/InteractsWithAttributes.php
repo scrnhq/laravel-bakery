@@ -40,7 +40,7 @@ trait InteractsWithAttributes
             /** @var \Bakery\Fields\Field $field */
             $field = $this->getFields()->get($key);
 
-            $field->checkStorePolicy($this->instance, $key, $value);
+            $field->authorizeToStore($this->instance, $value, $key);
         }
     }
 }

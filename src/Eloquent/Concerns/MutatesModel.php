@@ -78,7 +78,7 @@ trait MutatesModel
     {
         return $this->transaction(function () use ($input) {
             $this->create($input);
-            $this->authorize('create');
+            $this->authorizeToCreate();
 
             return $this->instance;
         });
@@ -121,7 +121,7 @@ trait MutatesModel
      */
     public function updateIfAuthorized(array $input = []): Model
     {
-        $this->authorize('update');
+        $this->authorizeToUpdate();
         $this->update($input);
 
         return $this->instance;
@@ -145,8 +145,6 @@ trait MutatesModel
         $this->fillConnections($connections);
 
         $this->checkScalars($scalars);
-        $this->checkRelations($relations);
-        $this->checkConnections($connections);
 
         return $this;
     }

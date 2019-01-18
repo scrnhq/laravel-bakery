@@ -9,12 +9,12 @@ use Bakery\Support\TypeRegistry;
 use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
+use Bakery\Eloquent\Concerns\Authorizable;
 use Bakery\Eloquent\Concerns\MutatesModel;
-use Illuminate\Contracts\Auth\Access\Gate;
-use Illuminate\Auth\Access\AuthorizationException;
 
 abstract class ModelSchema
 {
+    use Authorizable;
     use MutatesModel;
 
     /**
@@ -58,20 +58,6 @@ abstract class ModelSchema
     protected $indexable = true;
 
     /**
-     * The bound fields.
-     *
-     * @var Collection
-     */
-    private $fields;
-
-    /**
-     * The bound relations.
-     *
-     * @var Collection
-     */
-    private $relations;
-
-    /**
      * ModelSchema constructor.
      *
      * @param \Bakery\Support\TypeRegistry $registry
@@ -88,7 +74,7 @@ abstract class ModelSchema
 
             Utils::invariant(
                 is_subclass_of($model, Model::class),
-                'Defined model on '.class_basename($this).' is not an instance of '.Model::class
+                'Defined model on '.class_basename($this).' is not a subclass of '.Model::class
             );
 
             $this->instance = resolve($model);
@@ -106,8 +92,7 @@ abstract class ModelSchema
     }
 
     /**
-     * Define the fields of the model.
-     * This method can be overridden.
+     * Get the fields of the model.
      *
      * @return array
      */
@@ -117,8 +102,7 @@ abstract class ModelSchema
     }
 
     /**
-     * Define the relation fields of the schema.
-     * This method can be overridden.
+     * Get the relation fields of the model.
      *
      * @return array
      */
@@ -223,10 +207,6 @@ abstract class ModelSchema
      */
     public function getFields(): Collection
     {
-        if (isset($this->fields)) {
-            return $this->fields;
-        }
-
         return collect($this->getKeyField())->merge($this->fields());
     }
 
@@ -318,10 +298,6 @@ abstract class ModelSchema
      */
     public function getRelationFields(): Collection
     {
-        if (isset($this->relations)) {
-            return $this->relations;
-        }
-
         return collect($this->relations());
     }
 
@@ -370,28 +346,6 @@ abstract class ModelSchema
     }
 
     /**
-     * Check if the user is authorised to perform an action on the model.
-     *
-     * @param string $policy
-     * @param array $attributes
-     * @throws AuthorizationException
-     */
-    public function authorize(string $policy, $attributes = null)
-    {
-        // If the instance on the model schema does not exist or has not been modified we don't want to use it for
-        // authorization checks. This usually happens if we have to check if an instance can be created at all.
-        $model = $this->instance->exists || $this->instance->isDirty() ? $this->instance : get_class($this->instance);
-
-        $allowed = $this->getGate()->allows($policy, [$model, $attributes]);
-
-        if (! $allowed) {
-            throw new AuthorizationException(
-                'Not allowed to perform '.$policy.' on '.$this->getModelClass()
-            );
-        }
-    }
-
-    /**
      * Get the instance of the model schema.
      *
      * @return \Illuminate\Database\Eloquent\Model
@@ -402,22 +356,6 @@ abstract class ModelSchema
     }
 
     /**
-     * Set the instance on the model schema.
-     *
-     * @param \Illuminate\Database\Eloquent\Model $instance
-     */
-    public function setInstance(Model $instance): void
-    {
-        $model = $this->getModel();
-        Utils::invariant(
-            $instance instanceof $model,
-            'Can not set instance of '.get_class($instance).' on '.get_class($this).' as it differs from defined model which is: '.$this->getModelClass()
-        );
-
-        $this->instance = $instance;
-    }
-
-    /**
      * Get the registry of the model schema.
      *
      * @return \Bakery\Support\TypeRegistry
@@ -425,30 +363,6 @@ abstract class ModelSchema
     public function getRegistry(): TypeRegistry
     {
         return $this->registry;
-    }
-
-    /**
-     * Set the registry of the model schema.
-     *
-     * @param \Bakery\Support\TypeRegistry $registry
-     */
-    public function setRegistry(TypeRegistry $registry): void
-    {
-        $this->registry = $registry;
-    }
-
-    /**
-     * Get an instance to the Laravel gate.
-     *
-     * @return \Illuminate\Contracts\Auth\Access\Gate
-     */
-    public function getGate(): Gate
-    {
-        if (! $this->gate) {
-            $this->gate = resolve(Gate::class);
-        }
-
-        return $this->gate;
     }
 
     /**

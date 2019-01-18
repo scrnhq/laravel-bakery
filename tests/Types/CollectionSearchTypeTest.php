@@ -4,8 +4,8 @@ namespace Bakery\Tests\Types;
 
 use Bakery\Tests\TestCase;
 use Bakery\Types\CollectionSearchType;
-use Bakery\Tests\Stubs\Schemas\ArticleSchema;
 use Bakery\Tests\Fixtures\IntegrationTestSchema;
+use Bakery\Tests\Fixtures\Schemas\ArticleSchema;
 
 class CollectionSearchTypeTest extends TestCase
 {
@@ -18,7 +18,6 @@ class CollectionSearchTypeTest extends TestCase
 
         $actual = $type->resolveFields();
         $this->assertArrayHasKey('title', $actual);
-        $this->assertArrayHasKey('content', $actual);
 
         $this->assertArrayNotHasKey('slug', $actual);
         $this->assertArrayNotHasKey('created_at', $actual);

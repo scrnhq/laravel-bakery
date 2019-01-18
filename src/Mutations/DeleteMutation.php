@@ -51,15 +51,16 @@ class DeleteMutation extends EloquentMutation
      * @param  mixed $root
      * @param  array $args
      * @param  mixed $context
-     * @param \GraphQL\Type\Definition\ResolveInfo $info
+     * @param  \GraphQL\Type\Definition\ResolveInfo $info
      * @return Model
      * @throws \Illuminate\Auth\Access\AuthorizationException
+     * @throws \Exception
      */
     public function resolve($root, array $args, $context, ResolveInfo $info): Model
     {
         $model = $this->findOrFail($root, $args, $context, $info);
         $modelSchema = $this->registry->getSchemaForModel($model);
-        $modelSchema->authorize('delete');
+        $modelSchema->authorizeToDelete();
 
         $model->delete();
 

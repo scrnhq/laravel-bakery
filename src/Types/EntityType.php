@@ -2,7 +2,6 @@
 
 namespace Bakery\Types;
 
-use Closure;
 use Bakery\Utils\Utils;
 use Bakery\Fields\EloquentField;
 use Bakery\Traits\FiltersQueries;
@@ -23,32 +22,6 @@ class EntityType extends EloquentType
     public function name(): string
     {
         return $this->modelSchema->typename();
-    }
-
-    /**
-     * Create the field resolver.
-     *
-     * @param array $field
-     * @param string $key
-     * @return Closure
-     */
-    protected function createFieldResolver(array $field, string $key): Closure
-    {
-        return function ($source, $args, $context) use ($key, $field) {
-            if (array_key_exists('policy', $field)) {
-                $this->checkPolicy($field, $key, $source, $args);
-            }
-
-            if (array_key_exists('resolve', $field)) {
-                return $field['resolve']($source, $args, $context);
-            } else {
-                if (is_array($source) || $source instanceof \ArrayAccess) {
-                    return $source[$key] ?? null;
-                } else {
-                    return $source->{$key};
-                }
-            }
-        };
     }
 
     /**

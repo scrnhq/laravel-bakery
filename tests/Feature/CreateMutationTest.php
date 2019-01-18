@@ -2,620 +2,544 @@
 
 namespace Bakery\Tests\Feature;
 
-use Bakery\Tests\Stubs\Models;
 use Bakery\Tests\IntegrationTest;
-use Bakery\Tests\Stubs\Models\Article;
-use Bakery\Tests\Stubs\Models\Comment;
+use Illuminate\Support\Facades\Gate;
+use Bakery\Tests\Fixtures\Models\Tag;
+use Bakery\Tests\Fixtures\Models\Role;
+use Bakery\Tests\Fixtures\Models\User;
+use Bakery\Tests\Fixtures\Models\Phone;
+use Bakery\Tests\Fixtures\Models\Article;
+use Bakery\Tests\Fixtures\Models\Comment;
 
 class CreateMutationTest extends IntegrationTest
 {
-    /** @test */
-    public function it_does_not_allow_creating_entity_as_guest()
+    public function setUp()
     {
-        $this->withExceptionHandling();
+        parent::setUp();
 
-        $query = '
-            mutation {
-                createArticle(input: {
-                    title: "Hello world!"
-                    slug: "hello-world"
-                    content: "Lorem ispum"
-                }) {
-                    id
-                }
-            }
-        ';
-
-        $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $response->assertJsonMissing(['data']);
-        $this->assertDatabaseMissing('articles', ['title' => 'Hello world!']);
+        $this->authenticate();
     }
 
     /** @test */
-    public function it_does_not_allow_creating_entity_as_user_when_there_is_no_policy()
+    public function it_can_create_models()
     {
-        $this->withExceptionHandling();
-        $this->actingAs(factory(Models\User::class)->create());
-
-        $query = '
-            mutation {
-                createCategory(input: {
-                    name: "some-category"
-                }) {
-                    id
-                }
-            }
-        ';
-
-        $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $response->assertJsonMissing(['data']);
-        $this->assertDatabaseMissing('categories', ['name' => 'some-category']);
-    }
-
-    /** @test */
-    public function it_does_allow_creating_entity_as_user_when_it_is_allowed_by_policy()
-    {
-        $user = factory(Models\User::class)->create();
-        $this->actingAs($user);
-
-        $query = '
-            mutation {
-                createArticle(input: {
-                    title: "Hello world!"
-                    slug: "hello-world"
-                    content: "Lorem ipsum"
-                    userId: 1,
-                }) {
-                    id
-                }
-            }
-        ';
-
-        $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $response->assertJsonKey('id');
-        $this->assertDatabaseHas('articles', ['title' => 'Hello world!']);
-    }
-
-    /** @test */
-    public function it_lets_you_create_a_has_one_relationship()
-    {
-        $user = factory(Models\User::class)->create();
-        $this->actingAs($user);
-
-        $query = '
-            mutation {
-                createUser(input: {
-                    email: "jane.doe@example.com",
-                    name: "Jane Doe",
-                    password: "secret",
-                    phone: { number: "+31612345678" },
-                }) {
-                    id
-                }
-            }
-        ';
-
-        $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $response->assertJsonKey('id');
-        $this->assertDatabaseHas('users', ['email' => 'jane.doe@example.com']);
-        $this->assertDatabaseHas('phones', ['number' => '+31612345678', 'user_id' => '2']);
-    }
-
-    /** @test */
-    public function it_lets_you_save_a_has_one_relationship()
-    {
-        $phone = factory(Models\Phone::class)->create();
-
-        $this->actingAs($phone->user);
-
-        $query = '
-            mutation {
-                createUser(input: {
-                    email: "jane.doe@example.com",
-                    name: "Jane Doe",
-                    password: "secret",
-                    phoneId: "'.$phone->id.'",
-                }) {
-                    id
-                }
-            }
-        ';
-
-        $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $response->assertJsonKey('id');
-        $this->assertDatabaseHas('users', ['email' => 'jane.doe@example.com']);
-        $this->assertDatabaseHas('phones', ['user_id' => '2']);
-    }
-
-    /** @test */
-    public function it_lets_you_set_a_has_one_relationship_to_null()
-    {
-        $user = factory(Models\User::class)->create();
-        $this->actingAs($user);
-
-        $query = '
-            mutation {
-                createUser(input: {
-                    email: "jane.doe@example.com",
-                    name: "Jane Doe",
-                    password: "secret",
-                    phoneId: null, 
-                }) {
-                    id
-                }
-            }
-        ';
-
-        $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $response->assertJsonKey('id');
-        $this->assertDatabaseHas('users', ['email' => 'jane.doe@example.com']);
-    }
-
-    /** @test */
-    public function it_lets_you_create_a_belongs_to_relationship()
-    {
-        $user = factory(Models\User::class)->create();
-
-        $this->actingAs($user);
-
-        $query = '
-            mutation {
-                createPhone(input: {
-                    number: "+31612345678",
-                    user: {
-                        name: "Jane Doe",
-                        email: "jane.doe@example.com",
-                        password: "secret",
-                    }
-                }) {
-                    id
-                }
-            }
-        ';
-
-        $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $response->assertJsonKey('id');
-        $this->assertDatabaseHas('phones', ['number' => '+31612345678', 'user_id' => '2']);
-        $this->assertDatabaseHas('users', ['name' => 'Jane Doe']);
-    }
-
-    /** @test */
-    public function it_lets_you_to_assign_a_belongs_to_relationship()
-    {
-        $user = factory(Models\User::class)->create();
-
-        $this->actingAs($user);
-
-        $article = factory(Models\Article::class)->create(['user_id' => 1]);
-
-        $query = '
-            mutation {
-                createComment(input: {
-                    body: "Cool story bro",
-                    userId: '.$user->id.'
-                    articleId: '.$article->id.'
-                }) {
-                    id
-                }
-            }
-        ';
-
-        $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $response->assertJsonKey('id');
-        $this->assertDatabaseHas('comments', ['id' => '1', 'article_id' => $article->id, 'user_id' => $user->id]);
-    }
-
-    /** @test */
-    public function it_lets_you_insert_a_has_many_relationship()
-    {
-        $user = factory(Models\User::class)->create();
-        $this->actingAs($user);
-
-        $query = '
-            mutation {
-                createArticle(input: {
-                    title: "Hello World"
-                    slug: "hello-world"
-                    content: "Lorem ipsum"
-                    userId: 1
-                    comments: [
-                        { body: "First!", userId: 1 }
-                        { body: "Great post!", userId: 1 }
-                    ]
-                }) {
-                    id
-                }
-            }
-        ';
-
-        $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $response->assertJsonKey('id');
-        $this->assertDatabaseHas('articles', ['title' => 'Hello World', 'user_id' => '1']);
-        $this->assertDatabaseHas('comments', ['body' => 'First!', 'article_id' => '1']);
-        $this->assertDatabaseHas('comments', ['body' => 'Great post!', 'article_id' => '1']);
-    }
-
-    /** @test */
-    public function it_lets_you_do_deep_nested_create_mutations()
-    {
-        $user = factory(Models\User::class)->create();
-        $this->actingAs($user);
-
-        $query = '
-            mutation {
-                createUser(input: {
-                    email: "jane.doe@example.com"
-                    name: "Jane Doe"
-                    password: "secret"
-                    articles: [{
-                        title: "Hello World!"
-                        slug: "hello-world" 
-                        content: "Lorem ipsum"
-                        comments: [
-                            { body: "First!", userId: 1 }
-                            { body: "Great post!", userId: 1 }
-                        ]
-                    }]
-                }) {
-                    id
-                }
-            }
-        ';
-
-        $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $response->assertJsonKey('id');
-        $this->assertDatabaseHas('users', ['email' => 'jane.doe@example.com', 'name' => 'Jane Doe']);
-        $this->assertDatabaseHas('articles', ['title' => 'Hello World!', 'user_id' => '2']);
-        $this->assertDatabaseHas('comments', ['body' => 'First!', 'article_id' => '1']);
-        $this->assertDatabaseHas('comments', ['body' => 'Great post!', 'article_id' => '1']);
-    }
-
-    /** @test */
-    public function it_lets_you_reset_a_belongs_to_relationship()
-    {
-        $user = factory(Models\User::class)->create();
-        $this->actingAs($user);
-
-        $query = '
-            mutation {
-                createArticle(input: {
-                    userId: "'.$user->id.'",
-                    categoryId: null,
-                    title: "Hello World!"
-                    slug: "hello-world" 
-                    content: "Lorem ipsum"
-                }) {
-                    id
-                }
-            }
-        ';
-
-        $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $response->assertJsonKey('id');
-        $this->assertDatabaseHas('articles', ['title' => 'Hello World!', 'category_id' => null]);
-    }
-
-    /** @test */
-    public function it_lets_you_attach_pivot_data()
-    {
-        $user = factory(Models\User::class)->create();
-        $this->actingAs($user);
-
-        $query = '
-            mutation {
-                createRole(input: {
-                    name: "administrator"
-                    userIds: [
-                        { id: "'.$user->id.'", pivot: { comment: "foobar" } }
-                    ],
-                }) {
-                    id
-                }
-            }
-        ';
-
-        $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $response->assertJsonKey('id');
-        $this->assertDatabaseHas('role_user', [
-            'user_id' => '1',
-            'role_id' => '1',
-            'comment' => 'foobar',
+        $this->graphql('mutation($input: CreateUserInput!) { createUser(input: $input) { id } }', [
+            'input' => [
+                'name' => 'John Doe',
+                'email' => 'john@example.com',
+                'password' => 'secret',
+            ],
         ]);
+
+        $user = User::first();
+        $this->assertEquals('John Doe', $user->name);
+        $this->assertEquals('john@example.com', $user->email);
+        $this->assertEquals('secret', $user->password);
     }
 
     /** @test */
-    public function it_lets_you_attach_pivot_data_with_custom_pivot()
+    public function it_cant_create_models_if_the_model_has_no_policy()
     {
-        $user = factory(Models\User::class)->create();
-        $role = factory(Models\Role::class)->create();
-        $this->actingAs($user);
+        Gate::policy(User::class, null);
 
-        $query = '
-            mutation {
-                createUser(input: {
-                    email: "jane.doe@example.com",
-                    name: "Jane Doe",
-                    password: "secret",
-                    customRoleIds: [
-                        { id: "'.$role->id.'", customPivot: { comment: "foobar" } }
-                    ],
-                }) {
-                    id
-                }
-            }
-        ';
-
-        $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $response->assertJsonKey('id');
-        $this->assertDatabaseHas('role_user', [
-            'user_id' => '2',
-            'role_id' => $role->id,
-            'comment' => 'foobar',
+        $this->withExceptionHandling()->graphql('mutation($input: CreateUserInput!) { createUser(input: $input) { id } }', [
+            'input' => [
+                'name' => 'John Doe',
+                'email' => 'john@example.com',
+                'password' => 'secret',
+            ],
         ]);
+
+        $user = User::first();
+        $this->assertNull($user);
     }
 
     /** @test */
-    public function it_lets_you_set_pivot_data_while_creating_relation()
+    public function it_cant_create_model_if_not_authorized()
     {
-        $user = factory(Models\User::class)->create();
-        $this->actingAs($user);
+        $_SERVER['graphql.user.creatable'] = false;
 
-        $query = '
-            mutation {
-                createRole(input: {
-                    name: "administrator",
-                    users: [
-                        {
-                            email: "jane.doe@example.com"
-                            name: "Jane Doe"
-                            password: "secret"
-                            pivot: {
-                                comment: "foobar"
-                            }
-                        }
-                    ],
-                }) {
-                    id
-                }
-            }
-        ';
-
-        $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $response->assertJsonKey('id');
-        $this->assertDatabaseHas('roles', ['id' => '1', 'name' => 'administrator']);
-        $this->assertDatabaseHas('users', ['id' => '2', 'email' => 'jane.doe@example.com']);
-        $this->assertDatabaseHas('role_user', [
-            'user_id' => '2',
-            'role_id' => '1',
-            'comment' => 'foobar',
+        $this->withExceptionHandling()->graphql('mutation($input: CreateUserInput!) { createUser(input: $input) { id } }', [
+            'input' => [
+                'name' => 'John Doe',
+                'email' => 'john@example.com',
+                'password' => 'secret',
+            ],
         ]);
+
+        unset($_SERVER['graphql.user.creatable']);
+
+        $user = User::first();
+        $this->assertNull($user);
     }
 
     /** @test */
-    public function it_lets_you_set_pivot_data_while_creating_relation_with_custom_pivot_accessor_and_relation_name()
+    public function it_can_create_a_has_one_relationship()
     {
-        $user = factory(Models\User::class)->create();
-        $this->actingAs($user);
-
-        $query = '
-            mutation {
-                createUser(input: {
-                    email: "jane.doe@example.com",
-                    name: "Jane Doe",
-                    password: "secret",
-                    customRoles: [
-                        { name: "administrator", customPivot: { comment: "foobar" } }
-                    ],
-                }) {
-                    id
-                }
-            }
-        ';
-
-        $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $response->assertJsonKey('id');
-        $this->assertDatabaseHas('roles', ['id' => '1', 'name' => 'administrator']);
-        $this->assertDatabaseHas('role_user', [
-            'user_id' => '2',
-            'role_id' => '1',
-            'comment' => 'foobar',
+        $this->graphql('mutation($input: CreateUserInput!) { createUser(input: $input) { id } }', [
+            'input' => [
+                'name' => 'John Doe',
+                'email' => 'john@example.com',
+                'password' => 'secret',
+                'phone' => [
+                    'number' => '+31612345678',
+                ],
+            ],
         ]);
+
+        $phone = Phone::first();
+        $this->assertEquals('+31612345678', $phone->number);
+        $this->assertEquals('1', $phone->user_id);
+
+        $user = User::first();
+        $this->assertEquals('john@example.com', $user->email);
     }
 
     /** @test */
-    public function it_lets_you_attach_a_morph_to_relation()
+    public function it_can_save_a_has_one_relationship()
     {
-        $user = factory(Models\User::class)->create();
-        $this->actingAs($user);
+        $phone = factory(Phone::class)->create();
 
-        $article = factory(Models\Article::class)->create();
+        $this->graphql('mutation($input: CreateUserInput!) { createUser(input: $input) { id } }', [
+            'input' => [
+                'name' => 'John Doe',
+                'email' => 'john@example.com',
+                'password' => 'secret',
+                'phoneId' => $phone->id,
+            ],
+        ]);
 
-        $query = '
-            mutation {
-                createUpvote(input: {
-                    upvoteableId: { article: "'.$article->id.'" }
-                }) {
-                    id
-                }
-            }
-        ';
-
-        $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $response->assertJsonKey('id');
-        $this->assertDatabaseHas('upvotes', ['upvoteable_id' => $article->id]);
+        $user = User::first();
+        $this->assertEquals($phone->user_id, $user->id);
     }
 
     /** @test */
-    public function it_lets_you_create_a_morph_to_relation()
+    public function it_can_create_with_null_has_one_relationship()
     {
-        $user = factory(Models\User::class)->create();
-        $this->actingAs($user);
+        $this->graphql('mutation($input: CreateUserInput!) { createUser(input: $input) { id } }', [
+            'input' => [
+                'name' => 'John Doe',
+                'email' => 'john@example.com',
+                'password' => 'secret',
+                'phoneId' => null,
+            ],
+        ]);
 
-        $article = factory(Models\Article::class)->create();
+        $user = User::first();
+        $this->assertEquals('john@example.com', $user->email);
 
-        $query = '
-            mutation {
-                createUpvote(input: {
-                    upvoteable: { comment: {
-                        body: "Cool story bro"
-                        userId: "'.$user->id.'"
-                        articleId: "'.$article->id.'"
-                    } }
-                }) {
-                    id
-                }
-            }
-        ';
-
-        $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $response->assertJsonKey('id');
-        $this->assertDatabaseHas('comments', ['body' => 'Cool story bro']);
-        $this->assertDatabaseHas('upvotes', ['upvoteable_id' => '1']);
+        $phone = Phone::first();
+        $this->assertNull($phone);
     }
 
     /** @test */
-    public function it_lets_you_attach_a_morph_many_relation()
+    public function it_can_create_a_belongs_to_relationship()
     {
-        $user = factory(Models\User::class)->create();
-        $this->actingAs($user);
+        $this->graphql('mutation($input: CreatePhoneInput!) { createPhone(input: $input) { id } }', [
+            'input' => [
+                'number' => '+31612345678',
+                'user' => [
+                    'name' => 'John Doe',
+                    'email' => 'john@example.com',
+                    'password' => 'secret',
+                ],
+            ],
+        ]);
 
-        $article = factory(Models\Article::class)->create();
-        $upvote = factory(Models\Upvote::class)->create();
-
-        $query = '
-            mutation {
-                createComment(input: {
-                    body: "Cool story bro"
-                    userId: "'.$user->id.'"
-                    articleId: "'.$article->id.'"
-                    upvoteIds: ["'.$upvote->id.'"]
-                }) {
-                    id
-                }
-            }
-        ';
-
-        $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $response->assertJsonKey('id');
-        $this->assertDatabaseHas('comments', ['article_id' => $article->id]);
-        $this->assertDatabaseHas('upvotes', ['upvoteable_id' => '1', 'upvoteable_type' => Comment::class]);
+        $phone = Phone::first();
+        $this->assertEquals('+31612345678', $phone->number);
+        $this->assertEquals('1', $phone->user_id);
+        $user = User::first();
+        $this->assertEquals('john@example.com', $user->email);
     }
 
     /** @test */
-    public function it_lets_you_create_a_morph_many_relation()
+    public function it_can_save_a_belongs_to_relationship()
     {
-        $user = factory(Models\User::class)->create();
-        $this->actingAs($user);
+        $user = factory(User::class)->create();
 
-        $article = factory(Models\Article::class)->create();
+        $this->graphql('mutation($input: CreatePhoneInput!) { createPhone(input: $input) { id } }', [
+            'input' => [
+                'number' => '+31612345678',
+                'userId' => $user->id,
+            ],
+        ]);
 
-        $query = '
-            mutation {
-                createComment(input: {
-                    body: "Cool story bro"
-                    userId: "'.$user->id.'"
-                    articleId: "'.$article->id.'"
-                    upvotes: [
-                        {  }
-                    ]
-                }) {
-                    id
-                }
-            }
-        ';
-
-        $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $response->assertJsonKey('id');
-        $this->assertDatabaseHas('comments', ['article_id' => $article->id]);
-        $this->assertDatabaseHas('upvotes', ['upvoteable_id' => '1', 'upvoteable_type' => Comment::class]);
+        $phone = Phone::first();
+        $this->assertEquals('+31612345678', $phone->number);
+        $this->assertEquals('1', $phone->user_id);
     }
 
     /** @test */
-    public function it_lets_you_attach_a_morphed_by_many_relation()
+    public function it_can_save_a_null_belongs_to_relationship()
     {
-        $user = factory(Models\User::class)->create();
-        $this->actingAs($user);
+        $this->graphql('mutation($input: CreateArticleInput!) { createArticle(input: $input) { id } }', [
+            'input' => [
+                'title' => 'Hello world!',
+                'slug' => 'hello-world',
+                'userId' => null,
+            ],
+        ]);
 
-        $article = factory(Models\Article::class)->create();
-
-        $query = '
-            mutation {
-                createTag(input: {
-                    name: "News"
-                    articleIds: ["'.$article->id.'"]
-                }) {
-                    id
-                }
-            }
-        ';
-
-        $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $response->assertJsonKey('id');
-        $this->assertDatabaseHas('tags', ['name' => 'News']);
-        $this->assertDatabaseHas('taggables', ['tag_id' => '1', 'taggable_type' => Article::class, 'taggable_id' => '1']);
+        $article = Article::first();
+        $this->assertNull($article->user_id);
     }
 
     /** @test */
-    public function it_lets_you_create_a_morphed_by_many_relation()
+    public function it_can_create_a_has_many_relationship()
     {
-        $user = factory(Models\User::class)->create();
-        $this->actingAs($user);
+        $this->graphql('mutation($input: CreateUserInput!) { createUser(input: $input) { id } }', [
+            'input' => [
+                'email' => 'john@example.com',
+                'name' => 'John Doe',
+                'password' => 'secret',
+                'articles' => [
+                    [
+                        'title' => 'Hello world!',
+                        'slug' => 'hello-world',
+                    ],
+                ],
+            ],
+        ]);
 
-        $query = '
-            mutation {
-                createTag(input: {
-                    name: "News"
-                    articles: [{
-                        title: "Hello world"
-                        slug: "hello-world"
-                        content: "Lorem ipsum"
-                        userId: "'.$user->id.'"
-                    }]
-                }) {
-                    id
-                }
-            }
-        ';
-
-        $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $response->assertJsonKey('id');
-        $this->assertDatabaseHas('articles', ['title' => 'Hello world']);
-        $this->assertDatabaseHas('tags', ['name' => 'News']);
-        $this->assertDatabaseHas('taggables', ['tag_id' => '1', 'taggable_type' => Article::class, 'taggable_id' => '1']);
+        $article = Article::first();
+        $this->assertEquals('Hello world!', $article->title);
+        $this->assertEquals('1', $article->user_id);
     }
 
     /** @test */
-    public function it_throws_exception_when_supplying_multiple_keys_to_polymorphic_input_field()
+    public function it_can_save_a_has_many_relationship()
     {
-        $this->withExceptionHandling();
+        $article = factory(Article::class)->create();
 
-        $user = factory(Models\User::class)->create();
-        $this->actingAs($user);
+        $this->graphql('mutation($input: CreateUserInput!) { createUser(input: $input) { id } }', [
+            'input' => [
+                'email' => 'john@example.com',
+                'name' => 'John Doe',
+                'password' => 'secret',
+                'articleIds' => [
+                    $article->id,
+                ],
+            ],
+        ]);
 
-        $article = factory(Models\Article::class)->create();
+        $article = Article::first();
+        $this->assertEquals('john@example.com', $article->user->email);
+    }
 
-        $query = '
-            mutation {
-                createUpvote(input: {
-                    upvoteable: { comment: {
-                        body: "Cool story bro"
-                        userId: "'.$user->id.'"
-                        articleId: "'.$article->id.'"
-                    }, article: {
-                        title: "This is wrong"
-                        slug: "this-is-wrong"
-                        content: "Lorem ipsum"
-                    }}
-                }) {
-                    id
-                }
-            }
-        ';
+    /** @test */
+    public function it_can_save_an_empty_has_many_relationship()
+    {
+        $this->graphql('mutation($input: CreateUserInput!) { createUser(input: $input) { id } }', [
+            'input' => [
+                'email' => 'john@example.com',
+                'name' => 'John Doe',
+                'password' => 'secret',
+                'articleIds' => [],
+            ],
+        ]);
 
-        $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $response->assertJsonFragment(['message' => 'There must be only one key with polymorphic input. 2 given for relation upvoteable.']);
-        $this->assertDatabaseMissing('comments', ['body' => 'Cool story bro']);
-        $this->assertDatabaseMissing('articles', ['title' => 'This is wrong']);
-        $this->assertDatabaseMissing('upvotes', ['upvoteable_id' => '1']);
+        $user = User::first();
+        $this->assertEmpty($user->articles);
+    }
+
+    /** @test */
+    public function it_can_create_belongs_to_many_with_pivot_data()
+    {
+        $this->graphql('mutation($input: CreateRoleInput!) { createRole(input: $input) { id } }', [
+            'input' => [
+                'name' => 'Administrator',
+                'users' => [
+                    [
+                        'email' => 'john@example.com',
+                        'name' => 'John Doe',
+                        'password' => 'secret',
+                        'pivot' => [
+                            'admin' => true,
+                        ],
+                    ],
+                ],
+            ],
+        ]);
+
+        $role = Role::first();
+        $this->assertEquals(true, $role->users[0]->pivot->admin);
+
+        $user = User::first();
+        $this->assertEquals('john@example.com', $user->email);
+    }
+
+    /** @test */
+    public function it_can_attach_belongs_to_many_with_pivot_data()
+    {
+        $user = factory(User::class)->create();
+
+        $this->graphql('mutation($input: CreateRoleInput!) { createRole(input: $input) { id } }', [
+            'input' => [
+                'name' => 'Administrator',
+                'userIds' => [
+                    [
+                        'id' => $user->id,
+                        'pivot' => [
+                            'admin' => true,
+                        ],
+                    ],
+                ],
+            ],
+        ]);
+
+        $role = Role::first();
+        $this->assertEquals(true, $role->users[0]->pivot->admin);
+    }
+
+    /** @test */
+    public function it_can_create_belongs_to_many_with_pivot_data_with_custom_pivot_accessor()
+    {
+        $user = factory(User::class)->create();
+
+        $_SERVER['eloquent.role.users.pivot'] = 'customPivot';
+
+        $this->graphql('mutation($input: CreateRoleInput!) { createRole(input: $input) { id } }', [
+            'input' => [
+                'name' => 'Administrator',
+                'userIds' => [
+                    [
+                        'id' => $user->id,
+                        'customPivot' => [
+                            'admin' => true,
+                        ],
+                    ],
+                ],
+            ],
+        ]);
+
+        $role = Role::first();
+        $this->assertEquals(true, $role->users[0]->customPivot->admin);
+
+        unset($_SERVER['eloquent.role.users.pivot']);
+    }
+
+    /** @test */
+    public function it_can_create_a_morph_to_relationship()
+    {
+        $user = factory(User::class)->create();
+
+        $this->graphql('mutation($input: CreateCommentInput!) { createComment(input: $input) { id } }', [
+            'input' => [
+                'authorId' => $user->id,
+                'body' => 'Great post!',
+                'commentable' => [
+                    'article' => [
+                        'title' => 'Hello world!',
+                        'slug' => 'hello-world',
+                    ],
+                ],
+            ],
+        ]);
+
+        $comment = Comment::first();
+        $this->assertEquals('1', $comment->commentable_id);
+        $article = Article::first();
+        $this->assertEquals('Hello world!', $article->title);
+    }
+
+    /** @test */
+    public function it_can_attach_a_morph_to_relationship()
+    {
+        $user = factory(User::class)->create();
+        $article = factory(Article::class)->create();
+
+        $this->graphql('mutation($input: CreateCommentInput!) { createComment(input: $input) { id } }', [
+            'input' => [
+                'authorId' => $user->id,
+                'body' => 'Great post!',
+                'commentableId' => [
+                    'article' => $article->id,
+                ],
+            ],
+        ]);
+
+        $comment = Comment::first();
+        $this->assertEquals('1', $comment->commentable_id);
+    }
+
+    /** @test */
+    public function it_can_create_a_morph_many_relationship()
+    {
+        $user = factory(User::class)->create();
+
+        $this->graphql('mutation($input: CreateArticleInput!) { createArticle(input: $input) { id } }', [
+            'input' => [
+                'userId' => $user->id,
+                'title' => 'Hello world!',
+                'slug' => 'hello-world',
+                'comments' => [
+                    [
+                        'body' => 'Great post!',
+                        'authorId' => $user->id,
+                    ],
+                ],
+            ],
+        ]);
+
+        $comment = Comment::first();
+        $this->assertEquals('Great post!', $comment->body);
+        $this->assertEquals('1', $comment->commentable_id);
+    }
+
+    /** @test */
+    public function it_can_attach_a_morph_many_relation()
+    {
+        $user = factory(User::class)->create();
+        $comment = factory(Comment::class)->create();
+
+        $this->graphql('mutation($input: CreateArticleInput!) { createArticle(input: $input) { id } }', [
+            'input' => [
+                'userId' => $user->id,
+                'title' => 'Hello world!',
+                'slug' => 'hello-world',
+                'commentIds' => [
+                    $comment->id,
+                ],
+            ],
+        ]);
+
+        $article = Article::all()->last();
+        $this->assertEquals('Hello world!', $article->title);
+        $this->assertTrue($article->comments->contains($comment));
+    }
+
+    /** @test */
+    public function it_can_create_a_morph_to_many_relationship()
+    {
+        $user = factory(User::class)->create();
+
+        $this->graphql('mutation($input: CreateArticleInput!) { createArticle(input: $input) { id } }', [
+            'input' => [
+                'title' => 'Hello world!',
+                'slug' => 'hello-world',
+                'userId' => $user->id,
+                'tags' => [
+                    [
+                        'name' => 'News',
+                    ],
+                ],
+            ],
+        ]);
+
+        $article = Article::first();
+        $this->assertEquals('News', $article->tags->first()->name);
+    }
+
+    /** @test */
+    public function it_can_attach_a_morph_to_many_relationship()
+    {
+        $user = factory(User::class)->create();
+        $tag = factory(Tag::class)->create();
+
+        $this->graphql('mutation($input: CreateArticleInput!) { createArticle(input: $input) { id } }', [
+            'input' => [
+                'title' => 'Hello world!',
+                'slug' => 'hello-world',
+                'userId' => $user->id,
+                'tagIds' => [
+                    $tag->id,
+                ],
+            ],
+        ]);
+
+        $article = Article::first();
+        $this->assertTrue($article->tags->contains($tag));
+    }
+
+    /** @test */
+    public function it_can_create_a_morphed_by_many_relationship()
+    {
+        $user = factory(User::class)->create();
+
+        $this->graphql('mutation($input: CreateTagInput!) { createTag(input: $input) { id } }', [
+            'input' => [
+                'name' => 'News',
+                'articles' => [
+                    [
+                        'title' => 'Hello world!',
+                        'slug' => 'hello-world',
+                        'userId' => $user->id,
+                    ],
+                ],
+            ],
+        ]);
+
+        $tag = Tag::first();
+        $this->assertEquals('Hello world!', $tag->articles->first()->title);
+    }
+
+    /** @test */
+    public function it_can_attach_a_morphed_by_many_relationship()
+    {
+        $article = factory(Article::class)->create();
+
+        $this->graphql('mutation($input: CreateTagInput!) { createTag(input: $input) { id } }', [
+            'input' => [
+                'name' => 'News',
+                'articleIds' => [
+                    $article->id,
+                ],
+            ],
+        ]);
+
+        $tag = Tag::first();
+        $this->assertTrue($tag->articles->contains($article));
+    }
+
+    /** @test */
+    public function it_can_create_nested_relationships()
+    {
+        $this->graphql('mutation($input: CreateUserInput!) { createUser(input: $input) { id } }', [
+            'input' => [
+                'email' => 'john@example.com',
+                'name' => 'John Doe',
+                'password' => 'secret',
+                'articles' => [
+                    [
+                        'title' => 'Hello world!',
+                        'slug' => 'hello-world',
+                        'comments' => [
+                            [
+                                'body' => 'Great post!',
+                                'author' => [
+                                    'name' => 'Jane Doe',
+                                    'email' => 'jane@example.com',
+                                    'password' => 'secret',
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ]);
+
+        $user = User::first();
+        $article = Article::first();
+        $comment = Comment::first();
+        $this->assertEquals('john@example.com', $user->email);
+        $this->assertEquals('1', $article->user_id);
+        $this->assertEquals('1', $comment->commentable_id);
+    }
+
+    /** @test */
+    public function it_throws_exception_when_passing_multiple_keys_to_morph_to_relationship()
+    {
+        $response = $this->withExceptionHandling()->graphql('mutation($input: CreateCommentInput!) { createComment(input: $input) { id } }', [
+            'input' => [
+                'body' => 'Great post!',
+                'commentableId' => [
+                    'article' => '1',
+                    'user' => '1',
+                ],
+            ],
+        ]);
+
+        $response->assertJsonFragment(['message' => 'There must be only one key with polymorphic input. 2 given for relation commentable.']);
     }
 }
