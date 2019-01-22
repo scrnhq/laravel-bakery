@@ -266,11 +266,13 @@ trait InteractsWithRelations
         $this->queue(function () use ($pivotInstance, $ids, $detaching, $relation) {
             $current = $relation->newQuery()->pluck($relation->getRelatedPivotKeyName());
 
-            $detach = $current->diff($ids->keys());
+            if ($detaching) {
+                $detach = $current->diff($ids->keys());
 
-            $relation->getRelated()->newQuery()->findMany($detach)->each(function (Model $model) {
-                $this->authorizeToDetach($model);
-            });
+                $relation->getRelated()->newQuery()->findMany($detach)->each(function (Model $model) {
+                    $this->authorizeToDetach($model);
+                });
+            }
 
             $attach = $ids->keys()->diff($current);
 
