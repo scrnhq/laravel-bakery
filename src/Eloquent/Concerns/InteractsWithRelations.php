@@ -233,29 +233,72 @@ trait InteractsWithRelations
      * Connect the belongs to many relation.
      *
      * @param Relations\BelongsToMany $relation
-     * @param array $ids
+     * @param array $values
      * @param bool $detaching
      * @return void
      */
-    public function connectBelongsToManyRelation(Relations\BelongsToMany $relation, array $ids, $detaching = true)
+    public function connectBelongsToManyRelation(Relations\BelongsToMany $relation, array $values, $detaching = true)
+    {
+        $pivotClass = $relation->getPivotClass();
+
+        if (is_subclass_of($pivotClass, Relations\Pivot::class))  {
+            $this->connectBelongsToManyWithPivot($relation, $values, $detaching);
+        } else {
+            $this->connectBelongsToManyWithoutPivot($relation, $values, $detaching);
+        }
+    }
+
+    /**
+     * Connect the belongs to many relation without pivot class.
+     *
+     * @param Relations\BelongsToMany $relation
+     * @param array $values
+     * @param bool $detaching
+     * @return void
+     */
+    protected function connectBelongsToManyWithoutPivot(Relations\BelongsToMany $relation, array $values, $detaching = true)
+    {
+        $values = collect($values);
+
+        $this->queue(function () use ($detaching, $relation, $values) {
+            $current = $relation->newQuery()->pluck($relation->getRelatedPivotKeyName());
+
+            if ($detaching) {
+                $detach = $current->diff($values);
+
+                $relation->getRelated()->newQuery()->findMany($detach)->each(function (Model $model) {
+                    $this->authorizeToDetach($model);
+                });
+            }
+
+            $attach = $values->diff($current);
+
+            $relation->getRelated()->newQuery()->findMany($attach)->each(function (Model $model) {
+                $this->authorizeToAttach($model);
+            });
+
+            $relation->sync($values, $detaching);
+        });
+    }
+
+    /**
+     * Connect the belongs to many relation with pivot class.
+     *
+     * @param Relations\BelongsToMany $relation
+     * @param array $values
+     * @param bool $detaching
+     * @return void
+     */
+    protected function connectBelongsToManyWithPivot(Relations\BelongsToMany $relation, array $values, $detaching = true)
     {
         $accessor = $relation->getPivotAccessor();
         $relatedKey = $relation->getRelated()->getKeyName();
 
         $pivotClass = $relation->getPivotClass();
-        $pivotInstance = resolve($pivotClass);
 
-        $ids = collect($ids)->mapWithKeys(function ($data, $key) use ($accessor, $relatedKey) {
-            if (! is_array($data)) {
-                return [$data => $key];
-            }
-
+        $values = collect($values)->mapWithKeys(function ($data) use ($accessor, $relatedKey) {
             return [$data[$relatedKey] => $data[$accessor]];
         })->map(function ($attributes) use ($pivotClass) {
-            if (! is_array($attributes)) {
-                return $attributes;
-            }
-
             $instance = new $pivotClass;
             $pivotSchema = $this->registry->getSchemaForModel($instance);
             $pivotSchema->fill($attributes);
@@ -263,24 +306,24 @@ trait InteractsWithRelations
             return $pivotSchema->getInstance()->getAttributes();
         });
 
-        $this->queue(function () use ($pivotInstance, $ids, $detaching, $relation) {
+        $this->queue(function () use ($values, $detaching, $relation) {
             $current = $relation->newQuery()->pluck($relation->getRelatedPivotKeyName());
 
             if ($detaching) {
-                $detach = $current->diff($ids->keys());
+                $detach = $current->diff($values->keys());
 
                 $relation->getRelated()->newQuery()->findMany($detach)->each(function (Model $model) {
                     $this->authorizeToDetach($model);
                 });
             }
 
-            $attach = $ids->keys()->diff($current);
+            $attach = $values->keys()->diff($current);
 
             $relation->getRelated()->newQuery()->findMany($attach)->each(function (Model $model) {
                 $this->authorizeToAttach($model);
             });
 
-            $relation->sync($ids, $detaching);
+            $relation->sync($values, $detaching);
         });
     }
 
