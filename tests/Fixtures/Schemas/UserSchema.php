@@ -30,6 +30,7 @@ class UserSchema extends ModelSchema
                 return $_SERVER['graphql.user.canSeeArticles'] ?? true;
             }),
             'roles' => Field::collection(RoleSchema::class),
+            'noPivotRoles' => Field::collection(RoleSchema::class),
             'phone' => Field::model(PhoneSchema::class),
         ];
     }

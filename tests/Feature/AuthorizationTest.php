@@ -418,72 +418,6 @@ class AuthorizationTest extends IntegrationTest
     }
 
     /** @test */
-    public function it_cant_create_and_attach_belongs_to_many_if_not_authorized_to_create()
-    {
-        $user = factory(User::class)->create();
-
-        $_SERVER['graphql.role.creatable'] = false;
-
-        $this->withExceptionHandling()->graphql('mutation($id: ID!, $input: UpdateUserInput!) { updateUser(id: $id, input: $input) { id } }', [
-            'id' => $user->id,
-            'input' => [
-                'roles' => [
-                    ['name' => 'Administrator', 'pivot' => []],
-                ],
-            ],
-        ]);
-
-        unset($_SERVER['graphql.role.creatable']);
-
-        $user = User::first();
-        $this->assertTrue($user->roles->isEmpty());
-    }
-
-    /** @test */
-    public function it_cant_create_and_attach_belongs_to_many_if_not_authorized_to_attach()
-    {
-        $user = factory(User::class)->create();
-
-        $_SERVER['graphql.user.attachRole'] = false;
-
-        $this->withExceptionHandling()->graphql('mutation($id: ID!, $input: UpdateUserInput!) { updateUser(id: $id, input: $input) { id } }', [
-            'id' => $user->id,
-            'input' => [
-                'roles' => [
-                    ['name' => 'Administrator', 'pivot' => []],
-                ],
-            ],
-        ]);
-
-        unset($_SERVER['graphql.user.attachRole']);
-
-        $user = User::first();
-        $this->assertTrue($user->roles->isEmpty());
-    }
-
-    /** @test */
-    public function it_cant_create_and_attach_belongs_to_many_if_not_authorized_to_detach()
-    {
-        $user = factory(User::class)->create();
-
-        $_SERVER['graphql.user.attachRole'] = false;
-
-        $this->withExceptionHandling()->graphql('mutation($id: ID!, $input: UpdateUserInput!) { updateUser(id: $id, input: $input) { id } }', [
-            'id' => $user->id,
-            'input' => [
-                'roles' => [
-                    ['name' => 'Administrator', 'pivot' => []],
-                ],
-            ],
-        ]);
-
-        unset($_SERVER['graphql.user.attachRole']);
-
-        $user = User::first();
-        $this->assertTrue($user->roles->isEmpty());
-    }
-
-    /** @test */
     public function it_cant_attach_belongs_to_many_if_not_authorized()
     {
         $user = factory(User::class)->create();
@@ -494,8 +428,8 @@ class AuthorizationTest extends IntegrationTest
         $this->withExceptionHandling()->graphql('mutation($id: ID!, $input: UpdateUserInput!) { updateUser(id: $id, input: $input) { id } }', [
             'id' => $user->id,
             'input' => [
-                'roleIds' => [
-                    ['id' => $role->id, 'pivot' => []],
+                'noPivotRoleIds' => [
+                    $role->id,
                 ],
             ],
         ]);
@@ -518,7 +452,7 @@ class AuthorizationTest extends IntegrationTest
         $this->withExceptionHandling()->graphql('mutation($id: ID!, $input: UpdateUserInput!) { updateUser(id: $id, input: $input) { id } }', [
             'id' => $user->id,
             'input' => [
-                'roleIds' => [],
+                'noPivotRoleIds' => [],
             ],
         ]);
 
@@ -530,6 +464,143 @@ class AuthorizationTest extends IntegrationTest
 
     /** @test */
     public function it_cant_sync_belongs_to_many_if_not_authorized_to_detach_existing()
+    {
+        $user = factory(User::class)->create();
+        $user->roles()->attach(factory(Role::class)->create());
+
+        $role = factory(Role::class)->create();
+
+        $_SERVER['graphql.user.detachRole'] = false;
+
+        $this->withExceptionHandling()->graphql('mutation($id: ID!, $input: UpdateUserInput!) { updateUser(id: $id, input: $input) { id } }', [
+            'id' => $user->id,
+            'input' => [
+                'noPivotRoleIds' => [
+                    $role->id,
+                ],
+            ],
+        ]);
+
+        unset($_SERVER['graphql.user.detachRole']);
+
+        $user = User::first();
+        $this->assertTrue($user->roles->isNotEmpty());
+        $this->assertFalse($user->roles->contains($role));
+    }
+
+    /** @test */
+    public function it_cant_create_and_attach_belongs_to_many_with_pivot_if_not_authorized_to_create()
+    {
+        $user = factory(User::class)->create();
+
+        $_SERVER['graphql.role.creatable'] = false;
+
+        $this->withExceptionHandling()->graphql('mutation($id: ID!, $input: UpdateUserInput!) { updateUser(id: $id, input: $input) { id } }', [
+            'id' => $user->id,
+            'input' => [
+                'roles' => [
+                    ['name' => 'Administrator', 'pivot' => []],
+                ],
+            ],
+        ]);
+
+        unset($_SERVER['graphql.role.creatable']);
+
+        $user = User::first();
+        $this->assertTrue($user->roles->isEmpty());
+    }
+
+    /** @test */
+    public function it_cant_create_and_attach_belongs_to_many_with_pivot_if_not_authorized_to_attach()
+    {
+        $user = factory(User::class)->create();
+
+        $_SERVER['graphql.user.attachRole'] = false;
+
+        $this->withExceptionHandling()->graphql('mutation($id: ID!, $input: UpdateUserInput!) { updateUser(id: $id, input: $input) { id } }', [
+            'id' => $user->id,
+            'input' => [
+                'roles' => [
+                    ['name' => 'Administrator', 'pivot' => []],
+                ],
+            ],
+        ]);
+
+        unset($_SERVER['graphql.user.attachRole']);
+
+        $user = User::first();
+        $this->assertTrue($user->roles->isEmpty());
+    }
+
+    /** @test */
+    public function it_cant_create_and_attach_belongs_to_many_with_pivot_if_not_authorized_to_detach()
+    {
+        $user = factory(User::class)->create();
+
+        $_SERVER['graphql.user.attachRole'] = false;
+
+        $this->withExceptionHandling()->graphql('mutation($id: ID!, $input: UpdateUserInput!) { updateUser(id: $id, input: $input) { id } }', [
+            'id' => $user->id,
+            'input' => [
+                'roles' => [
+                    ['name' => 'Administrator', 'pivot' => []],
+                ],
+            ],
+        ]);
+
+        unset($_SERVER['graphql.user.attachRole']);
+
+        $user = User::first();
+        $this->assertTrue($user->roles->isEmpty());
+    }
+
+    /** @test */
+    public function it_cant_attach_belongs_to_many_with_pivot_if_not_authorized()
+    {
+        $user = factory(User::class)->create();
+        $role = factory(Role::class)->create();
+
+        $_SERVER['graphql.user.attachRole'] = false;
+
+        $this->withExceptionHandling()->graphql('mutation($id: ID!, $input: UpdateUserInput!) { updateUser(id: $id, input: $input) { id } }', [
+            'id' => $user->id,
+            'input' => [
+                'roleIds' => [
+                    ['id' => $role->id, 'pivot' => []],
+                ],
+            ],
+        ]);
+
+        unset($_SERVER['graphql.user.attachRole']);
+
+        $user = User::first();
+        $this->assertTrue($user->roles->isEmpty());
+    }
+
+    /** @test */
+    public function it_cant_detach_belongs_to_many_without_pivot_if_not_authorized()
+    {
+        $user = factory(User::class)->create();
+        $role = factory(Role::class)->create();
+        $user->roles()->attach($role);
+
+        $_SERVER['graphql.user.detachRole'] = false;
+
+        $this->withExceptionHandling()->graphql('mutation($id: ID!, $input: UpdateUserInput!) { updateUser(id: $id, input: $input) { id } }', [
+            'id' => $user->id,
+            'input' => [
+                'roleIds' => [],
+            ],
+        ]);
+
+        unset($_SERVER['graphql.user.detachRole']);
+
+        $user = User::first();
+        $this->assertTrue($user->roles->isNotEmpty());
+    }
+
+    /** @test */
+    public function it_cant_sync_belongs_to_many_with_pivot_if_not_authorized_to_detach_existing()
     {
         $user = factory(User::class)->create();
         $user->roles()->attach(factory(Role::class)->create());
