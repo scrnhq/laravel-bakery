@@ -247,7 +247,7 @@ trait InteractsWithRelations
 
         $ids = collect($ids)->mapWithKeys(function ($data, $key) use ($accessor, $relatedKey) {
             if (! is_array($data)) {
-                return [$key => $data];
+                return [$data => $key];
             }
 
             return [$data[$relatedKey] => $data[$accessor]];
