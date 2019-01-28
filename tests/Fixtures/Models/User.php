@@ -35,4 +35,9 @@ class User extends Authenticatable
             ->withPivot(['admin'])
             ->withTimestamps();
     }
+
+    public function noPivotRoles()
+    {
+        return $this->belongsToMany(Role::class);
+    }
 }
