@@ -199,7 +199,7 @@ class EntityQueryTest extends IntegrationTest
                 role(id: "'.$role->id.'") {
                     users {
                         id
-                        pivot {
+                        rolePivot {
                             admin
                         }
                     }
@@ -225,7 +225,7 @@ class EntityQueryTest extends IntegrationTest
                 user(id: "'.$user->id.'") {
                     roles {
                         id
-                        customPivot {
+                        userPivot {
                             admin
                         }
                     }

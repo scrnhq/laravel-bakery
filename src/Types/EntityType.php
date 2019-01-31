@@ -201,12 +201,14 @@ class EntityType extends EloquentType
         }
 
         $pivotKey = camel_case(str_singular($key)).'Pivot';
-
-        $accessor = $relation->getPivotAccessor();
         $modelSchema = $this->registry->resolveSchemaForModel($pivot);
 
+        $related = $relation->getRelated();
+        $inverseRelation = $related->{str_plural(class_basename($this->model))}();
+        $accessor = $inverseRelation->getPivotAccessor();
+
         $fields->put($pivotKey, $this->registry->field($modelSchema->typename())
-            ->resolve(function ($model) use ($key, $accessor) {
+            ->resolve(function ($model) use ($accessor) {
                 return $model->{$accessor};
             })
         );
