@@ -206,7 +206,7 @@ class EntityType extends EloquentType
         $modelSchema = $this->registry->resolveSchemaForModel($pivot);
 
         $fields->put($pivotKey, $this->registry->field($modelSchema->typename())
-            ->resolve(function ($model)  use ($key, $accessor) {
+            ->resolve(function ($model) use ($key, $accessor) {
                 return $model->{$accessor};
             })
         );
