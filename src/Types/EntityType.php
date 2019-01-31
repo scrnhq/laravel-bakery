@@ -204,7 +204,8 @@ class EntityType extends EloquentType
         $modelSchema = $this->registry->resolveSchemaForModel($pivot);
 
         $related = $relation->getRelated();
-        $inverseRelation = $related->{str_plural(class_basename($this->model))}();
+        $inverseRelationName = $field->getInverse() ?? str_plural(class_basename($this->model));
+        $inverseRelation = $related->{$inverseRelationName}();
         $accessor = $inverseRelation->getPivotAccessor();
 
         $fields->put($pivotKey, $this->registry->field($modelSchema->typename())
