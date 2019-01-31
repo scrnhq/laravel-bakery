@@ -36,6 +36,11 @@ class User extends Authenticatable
             ->withTimestamps();
     }
 
+    public function rolesAlias()
+    {
+        return $this->roles();
+    }
+
     public function noPivotRoles()
     {
         return $this->belongsToMany(Role::class);
