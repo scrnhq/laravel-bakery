@@ -199,7 +199,7 @@ class EntityQueryTest extends IntegrationTest
                 role(id: "'.$role->id.'") {
                     users {
                         id
-                        pivot {
+                        rolePivot {
                             admin
                         }
                     }
@@ -225,7 +225,35 @@ class EntityQueryTest extends IntegrationTest
                 user(id: "'.$user->id.'") {
                     roles {
                         id
-                        customPivot {
+                        userPivot {
+                            admin
+                        }
+                    }
+                }
+            }
+        ';
+
+        $response = $this->graphql($query);
+        $response->assertJsonFragment(['admin' => true]);
+
+        unset($_SERVER['eloquent.user.roles.pivot']);
+    }
+
+    /** @test */
+    public function it_exposes_pivot_data_on_many_to_many_relationships_with_specified_inverse_relation()
+    {
+        $user = factory(User::class)->create();
+        $role = factory(Role::class)->create();
+        $user->roles()->attach($role, ['admin' => true]);
+
+        $_SERVER['eloquent.user.roles.inverseRelation'] = 'rolesAlias';
+
+        $query = '
+            query {
+                user(id: "'.$user->id.'") {
+                    roles {
+                        id
+                        userPivot {
                             admin
                         }
                     }

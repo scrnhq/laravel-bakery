@@ -14,6 +14,11 @@ class EloquentField extends Field
     protected $modelSchemaClass;
 
     /**
+     * @var string
+     */
+    protected $inverseRelationName;
+
+    /**
      * EloquentField constructor.
      *
      * @param \Bakery\Support\TypeRegistry $registry
@@ -24,6 +29,29 @@ class EloquentField extends Field
         $this->modelSchemaClass = $class;
 
         parent::__construct($registry);
+    }
+
+    /**
+     * Set the name of the inverse relationship.
+     *
+     * @param string $relationName
+     * @return $this
+     */
+    public function inverse(string $relationName): self
+    {
+        $this->inverseRelationName = $relationName;
+
+        return $this;
+    }
+
+    /**
+     * Get the name of the inverse relationship.
+     *
+     * @return string
+     */
+    public function getInverse(): ?string
+    {
+        return $this->inverseRelationName;
     }
 
     /**

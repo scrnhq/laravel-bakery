@@ -20,7 +20,8 @@ class RoleSchema extends ModelSchema
     public function relations(): array
     {
         return [
-            'users' => Field::collection(UserSchema::class),
+            'users' => Field::collection(UserSchema::class)
+                ->inverse($_SERVER['eloquent.user.roles.inverseRelation'] ?? 'roles'),
         ];
     }
 }
