@@ -204,7 +204,24 @@ class EntityType extends EloquentType
         $modelSchema = $this->registry->resolveSchemaForModel($pivot);
 
         $related = $relation->getRelated();
-        $inverseRelationName = $field->getInverse() ?? str_plural(class_basename($this->model));
+
+        if (! $field->getInverse()) {
+            $modelClassName = class_basename($this->model);
+            $relatedClassName = class_basename($related);
+            $guess = camel_case(str_plural($modelClassName));
+
+            Utils::invariant(
+                method_exists($related, $guess),
+                "Failed to guess the inverse relationship for `${key}` on `${modelClassName}`.\n".
+                "Guessed `${guess}` but could not find such relationship on `${relatedClassName}`.\n".
+                "You can specify the inverse relationship by calling the `inverse('relationName')` on the field."
+            );
+
+            $inverseRelationName = $guess;
+        } else {
+            $inverseRelationName = $field->getInverse();
+        }
+
         $inverseRelation = $related->{$inverseRelationName}();
         $accessor = $inverseRelation->getPivotAccessor();
 
