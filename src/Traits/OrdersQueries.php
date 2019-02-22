@@ -73,7 +73,7 @@ trait OrdersQueries
     protected function orderBy(Builder $query, string $column, string $ordering)
     {
         // Alias so this doesn't conflict with actually selected fields.
-        $alias = 'bakery_' . str_replace('.', '_', $column);
+        $alias = 'bakery_'.str_replace('.', '_', $column);
 
         $query->addSelect("{$column} as {$alias}");
 
