@@ -98,6 +98,9 @@ class EloquentCollectionQuery extends EloquentQuery
         $fields = $info->getFieldSelection(config('bakery.security.eagerLoadingMaxDepth'));
         $this->eagerLoadRelations($query, $fields['items'], $this->modelSchema);
 
+        // Select all columns from the table.
+        $query->addSelect($this->model->getTable().'.*');
+
         if (array_key_exists('filter', $args) && ! empty($args['filter'])) {
             $query = $this->applyFilters($query, $args['filter']);
         }
@@ -110,6 +113,6 @@ class EloquentCollectionQuery extends EloquentQuery
             $query = $this->applyOrderBy($query, $args['orderBy']);
         }
 
-        return $query->paginate($count, ['*'], 'page', $page);
+        return $query->distinct()->paginate($count, ['*'], 'page', $page);
     }
 }
