@@ -20,7 +20,7 @@ class JoinsRelationshipsTest extends TestCase
 
         $this->joinRelation($articles, $article->user());
 
-        $this->assertEquals('select `articles`.* from `articles` inner join `users` on `users`.`id` = `articles`.`user_id`', $articles->toSql());
+        $this->assertEquals('select * from `articles` inner join `users` on `users`.`id` = `articles`.`user_id`', $articles->toSql());
     }
 
     /** @test */
@@ -31,7 +31,7 @@ class JoinsRelationshipsTest extends TestCase
 
         $this->joinRelation($roles, $role->users());
 
-        $this->assertEquals('select `roles`.* from `roles` inner join `role_user` on `roles`.`id` = `role_user`.`role_id` inner join `users` on `role_user`.`user_id` = `users`.`id`', $roles->toSql());
+        $this->assertEquals('select * from `roles` inner join `role_user` on `roles`.`id` = `role_user`.`role_id` inner join `users` on `role_user`.`user_id` = `users`.`id`', $roles->toSql());
     }
 
     /** @test */
@@ -42,6 +42,6 @@ class JoinsRelationshipsTest extends TestCase
 
         $this->joinRelation($users, $user->articles());
 
-        $this->assertEquals('select `users`.* from `users` inner join `articles` on `articles`.`user_id` = `users`.`id`', $users->toSql());
+        $this->assertEquals('select * from `users` inner join `articles` on `articles`.`user_id` = `users`.`id`', $users->toSql());
     }
 }

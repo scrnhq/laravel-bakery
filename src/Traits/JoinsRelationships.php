@@ -32,8 +32,6 @@ trait JoinsRelationships
             $query->join($related->getTable(), $relation->getQualifiedForeignKeyName(), '=', $relation->getQualifiedParentKeyName(), $type, $where);
         }
 
-        $query->select($query->getModel()->getTable().'.*');
-
         return $query;
     }
 }
