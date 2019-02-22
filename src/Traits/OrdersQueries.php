@@ -72,6 +72,7 @@ trait OrdersQueries
      */
     protected function orderBy(Builder $query, string $column, string $ordering)
     {
+        $query->addSelect($column);
         return $query->orderBy($column, $ordering);
     }
 }
