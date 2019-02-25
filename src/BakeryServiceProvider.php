@@ -103,12 +103,6 @@ class BakeryServiceProvider extends ServiceProvider
      */
     protected function registerMacros()
     {
-        collect(glob(__DIR__.'/macros/*.php'))
-            ->mapWithKeys(function ($path) {
-                return [$path => pathinfo($path, PATHINFO_FILENAME)];
-            })
-            ->each(function ($macro, $path) {
-                require_once $path;
-            });
+        require_once __DIR__.'/macros/bakeryPaginate.php'; // TODO: Remove this once fixed upstream.
     }
 }
