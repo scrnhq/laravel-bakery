@@ -3,6 +3,7 @@
 namespace Bakery;
 
 use Illuminate\Support\ServiceProvider;
+use Bakery\Support\macros\BuilderMacros;
 use GraphQL\Validator\DocumentValidator;
 use GraphQL\Validator\Rules\DisableIntrospection;
 
@@ -56,11 +57,11 @@ class BakeryServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->mergeConfigFrom(
-            __DIR__.'/../config/bakery.php', 'bakery'
-        );
+        $this->mergeConfigFrom(__DIR__.'/../config/bakery.php', 'bakery');
 
         $this->registerBakery();
+
+        $this->registerMacros();
 
         $this->commands([
             Console\InstallCommand::class,
@@ -94,5 +95,21 @@ class BakeryServiceProvider extends ServiceProvider
         if (config('bakery.security.disableIntrospection') === true) {
             DocumentValidator::addRule(new DisableIntrospection());
         }
+    }
+
+    /**
+     * Register the macros used by Bakery.
+     *
+     * @return void
+     */
+    protected function registerMacros()
+    {
+        collect(glob(__DIR__.'/macros/*.php'))
+            ->mapWithKeys(function ($path) {
+                return [$path => pathinfo($path, PATHINFO_FILENAME)];
+            })
+            ->each(function ($macro, $path) {
+                require_once $path;
+            });
     }
 }
