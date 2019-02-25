@@ -3,7 +3,7 @@
 use Illuminate\Pagination\Paginator;
 use Illuminate\Database\Eloquent\Builder;
 
-/**
+/*
  * Paginate the given query.
  *
  * @param  int $perPage

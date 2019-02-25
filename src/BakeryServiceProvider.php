@@ -3,7 +3,6 @@
 namespace Bakery;
 
 use Illuminate\Support\ServiceProvider;
-use Bakery\Support\macros\BuilderMacros;
 use GraphQL\Validator\DocumentValidator;
 use GraphQL\Validator\Rules\DisableIntrospection;
 
