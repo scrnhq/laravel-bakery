@@ -374,14 +374,14 @@ class CollectionQueryTest extends IntegrationTest
     /** @test */
     public function it_can_order_by_relations_and_have_correct_pagination_count()
     {
-        $john = factory(User::class)->create(['email' => 'john.doe@example.com']);
-        $jane = factory(User::class)->create(['email' => 'jane.doe@example.com']);
-        $joe = factory(User::class)->create(['email' => 'joe.doe@example.com']);
+        $john = factory(Models\User::class)->create(['email' => 'john.doe@example.com']);
+        $jane = factory(Models\User::class)->create(['email' => 'jane.doe@example.com']);
+        $joe = factory(Models\User::class)->create(['email' => 'joe.doe@example.com']);
 
-        factory(Article::class)->create(['title' => 'Hello alpha', 'user_id' => $john->id]);
-        factory(Article::class)->create(['title' => 'Hello beta', 'user_id' => $john->id]);
-        factory(Article::class)->create(['title' => 'Hello gamma', 'user_id' => $jane->id]);
-        factory(Article::class)->create(['title' => 'Hello zeta', 'user_id' => $joe->id]);
+        factory(Models\Article::class)->create(['title' => 'Hello alpha', 'user_id' => $john->id]);
+        factory(Models\Article::class)->create(['title' => 'Hello beta', 'user_id' => $john->id]);
+        factory(Models\Article::class)->create(['title' => 'Hello gamma', 'user_id' => $jane->id]);
+        factory(Models\Article::class)->create(['title' => 'Hello zeta', 'user_id' => $joe->id]);
 
         $query = '
             query {
@@ -401,7 +401,7 @@ class CollectionQueryTest extends IntegrationTest
             }
         ';
 
-        $response = $this->graphql($query);
+        $response = $this->json('GET', '/graphql', ['query' => $query]);
         $result = json_decode($response->getContent())->data->users;
         $this->assertEquals(3, $result->pagination->total);
     }
