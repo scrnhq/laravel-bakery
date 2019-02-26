@@ -19,7 +19,9 @@ trait JoinsRelationships
         $related = $relation->getRelated();
 
         if ($relation instanceof Relations\BelongsTo) {
-            $query->join($related->getTable(), $relation->getQualifiedOwnerKeyName(), '=', $relation->getQualifiedForeignKey(), $type, $where);
+            $foreignKeyName = method_exists($relation, 'getQualifiedForeignKey')
+                ? $relation->getQualifiedForeignKey() : $relation->getQualifiedForeignKeyName();
+            $query->join($related->getTable(), $relation->getQualifiedOwnerKeyName(), '=', $foreignKeyName, $type, $where);
         } elseif ($relation instanceof Relations\BelongsToMany) {
             $foreignPivotKeyName = method_exists($relation, 'getQualifiedForeignPivotKeyName')
                 ? $relation->getQualifiedForeignPivotKeyName() : $relation->getQualifiedForeignKeyName();
