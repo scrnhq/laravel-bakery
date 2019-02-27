@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Contracts\Auth\Access\Gate;
 use Bakery\Tests\Fixtures\IntegrationTestSchema;
 use Illuminate\Foundation\Testing\Concerns\InteractsWithDatabase;
+use Illuminate\Foundation\Testing\Concerns\InteractsWithExceptionHandling;
 
 abstract class IntegrationTest extends TestCase
 {
@@ -25,7 +26,7 @@ abstract class IntegrationTest extends TestCase
      *
      * @return void
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
 
