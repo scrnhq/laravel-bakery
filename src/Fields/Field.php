@@ -99,12 +99,11 @@ class Field
     /**
      * Return a gate instance for the user.
      *
-     * @param \Illuminate\Foundation\Auth\User|null $user
      * @return \Illuminate\Contracts\Auth\Access\Gate
      */
-    protected function getGate(?User $user = null): Gate
+    protected function getGate(): Gate
     {
-        return app(Gate::class)->forUser($user);
+        return app(Gate::class);
     }
 
     /**
@@ -509,7 +508,7 @@ class Field
     protected function checkPolicy($source, $args, $context, ResolveInfo $info)
     {
         $user = auth()->user();
-        $gate = $this->getGate($user);
+        $gate = $this->getGate();
         $policy = $this->viewPolicy;
         $fieldName = $info->fieldName;
 
@@ -549,7 +548,7 @@ class Field
         }
 
         $user = auth()->user();
-        $gate = $this->getGate($user);
+        $gate = $this->getGate();
 
         // Check if the policy method is a closure.
         if (($policy instanceof \Closure || is_callable_tuple($policy)) && $policy($user, $source, $value)) {
