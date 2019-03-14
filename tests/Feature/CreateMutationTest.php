@@ -13,7 +13,7 @@ use Bakery\Tests\Fixtures\Models\Comment;
 
 class CreateMutationTest extends IntegrationTest
 {
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 

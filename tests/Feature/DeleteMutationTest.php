@@ -9,7 +9,7 @@ use Bakery\Tests\Fixtures\Models\Article;
 
 class DeleteMutationTest extends IntegrationTest
 {
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
