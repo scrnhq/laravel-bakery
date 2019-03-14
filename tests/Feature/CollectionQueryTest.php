@@ -11,7 +11,7 @@ use Bakery\Tests\Fixtures\Models\Comment;
 
 class CollectionQueryTest extends IntegrationTest
 {
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -373,14 +373,14 @@ class CollectionQueryTest extends IntegrationTest
     /** @test */
     public function it_can_order_by_relations_and_have_correct_pagination_count()
     {
-        $john = factory(Models\User::class)->create(['email' => 'john.doe@example.com']);
-        $jane = factory(Models\User::class)->create(['email' => 'jane.doe@example.com']);
-        $joe = factory(Models\User::class)->create(['email' => 'joe.doe@example.com']);
+        $john = factory(User::class)->create(['email' => 'john.doe@example.com']);
+        $jane = factory(User::class)->create(['email' => 'jane.doe@example.com']);
+        $joe = factory(User::class)->create(['email' => 'joe.doe@example.com']);
 
-        factory(Models\Article::class)->create(['title' => 'Hello alpha', 'user_id' => $john->id]);
-        factory(Models\Article::class)->create(['title' => 'Hello beta', 'user_id' => $john->id]);
-        factory(Models\Article::class)->create(['title' => 'Hello gamma', 'user_id' => $jane->id]);
-        factory(Models\Article::class)->create(['title' => 'Hello zeta', 'user_id' => $joe->id]);
+        factory(Article::class)->create(['title' => 'Hello alpha', 'user_id' => $john->id]);
+        factory(Article::class)->create(['title' => 'Hello beta', 'user_id' => $john->id]);
+        factory(Article::class)->create(['title' => 'Hello gamma', 'user_id' => $jane->id]);
+        factory(Article::class)->create(['title' => 'Hello zeta', 'user_id' => $joe->id]);
 
         $query = '
             query {

@@ -11,7 +11,7 @@ use Bakery\Tests\Fixtures\Models\Comment;
 
 class UpdateMutationTest extends IntegrationTest
 {
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 

@@ -12,7 +12,7 @@ use Bakery\Tests\Fixtures\Models\Comment;
 
 class EntityQueryTest extends IntegrationTest
 {
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 

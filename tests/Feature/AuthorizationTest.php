@@ -10,7 +10,7 @@ use Bakery\Tests\Fixtures\Models\Article;
 
 class AuthorizationTest extends IntegrationTest
 {
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
