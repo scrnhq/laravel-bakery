@@ -103,13 +103,14 @@ trait Authorizable
      * Determine if the current user can attach the given model to the model.
      *
      * @param \Illuminate\Database\Eloquent\Model $model
+     * @param array|null $pivot
      * @throws \Illuminate\Auth\Access\AuthorizationException
      */
-    public function authorizeToAttach(Model $model): void
+    public function authorizeToAttach(Model $model, array $pivot = null): void
     {
         $method = 'attach'.str_singular(class_basename($model));
 
-        $this->authorize($method, [$model]);
+        $this->authorize($method, [$model, $pivot]);
     }
 
     /**

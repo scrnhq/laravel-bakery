@@ -296,6 +296,7 @@ trait InteractsWithRelations
 
         $pivotClass = $relation->getPivotClass();
 
+        // Returns an associative array of [ id => pivot ]
         $values = collect($values)->mapWithKeys(function ($data) use ($accessor, $relatedKey) {
             return [$data[$relatedKey] => $data[$accessor]];
         })->map(function ($attributes) use ($pivotClass) {
@@ -319,8 +320,8 @@ trait InteractsWithRelations
 
             $attach = $values->keys()->diff($current);
 
-            $relation->getRelated()->newQuery()->findMany($attach)->each(function (Model $model) {
-                $this->authorizeToAttach($model);
+            $relation->getRelated()->newQuery()->findMany($attach)->each(function (Model $model) use ($values) {
+                $this->authorizeToAttach($model, $values->get($model->getKey()));
             });
 
             $relation->sync($values, $detaching);
