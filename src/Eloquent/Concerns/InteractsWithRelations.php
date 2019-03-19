@@ -319,8 +319,8 @@ trait InteractsWithRelations
 
             $attach = $values->keys()->diff($current);
 
-            $relation->getRelated()->newQuery()->findMany($attach)->each(function (Model $model) {
-                $this->authorizeToAttach($model);
+            $relation->getRelated()->newQuery()->findMany($attach)->each(function (Model $model) use ($values) {
+                $this->authorizeToAttach($model, $values->get($model->getKey()));
             });
 
             $relation->sync($values, $detaching);
