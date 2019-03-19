@@ -296,6 +296,7 @@ trait InteractsWithRelations
 
         $pivotClass = $relation->getPivotClass();
 
+        // Returns an associative array of [ id => pivot ]
         $values = collect($values)->mapWithKeys(function ($data) use ($accessor, $relatedKey) {
             return [$data[$relatedKey] => $data[$accessor]];
         })->map(function ($attributes) use ($pivotClass) {
