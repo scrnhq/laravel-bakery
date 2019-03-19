@@ -117,13 +117,14 @@ trait Authorizable
      * Determine if the current user can attach the given model to the model.
      *
      * @param \Illuminate\Database\Eloquent\Model $model
+     * @param array|null $pivot
      * @return bool
      */
-    public function authorizedToAttach(Model $model): bool
+    public function authorizedToAttach(Model $model, array $pivot = null): bool
     {
         $method = 'attach'.str_singular(class_basename($model));
 
-        return $this->authorized($method, [$model]);
+        return $this->authorized($method, [$model, $pivot]);
     }
 
     /**
