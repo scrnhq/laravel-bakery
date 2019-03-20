@@ -45,12 +45,46 @@ class DetachPivotMutationTest extends IntegrationTest
         $user = factory(User::class)->create();
         $role = factory(Role::class)->create();
         $this->actingAs($user);
-        $user->roles()->sync($role);
+        $user->roles()->attach([$role->getKey() => ['admin' => true]]);
+        $user->roles()->attach([$role->getKey() => ['admin' => false]]);
 
         $query = '
             mutation {
                 detachRolesOnUser(id: "'.$user->id.'", input: [
-                    "'.$role->id.'"
+                    { id: "'.$role->id.'", pivot: { admin: true }} 
+                ]) {
+                    id
+                }
+            }
+        ';
+
+        $response = $this->json('GET', '/graphql', ['query' => $query]);
+        $response->assertJsonKey('id');
+        $this->assertDatabaseHas('role_user', [
+            'user_id' => '1',
+            'role_id' => '1',
+            'admin' => false,
+        ]);
+        $this->assertDatabaseMissing('role_user', [
+            'user_id' => '1',
+            'role_id' => '1',
+            'admin' => true,
+        ]);
+    }
+
+    /** @test */
+    public function it_lets_you_detach_without_pivot_to_match_all_relatives()
+    {
+        $user = factory(User::class)->create();
+        $role = factory(Role::class)->create();
+        $this->actingAs($user);
+        $user->roles()->attach([$role->getKey() => ['admin' => true]]);
+        $user->roles()->attach([$role->getKey() => ['admin' => false]]);
+
+        $query = '
+            mutation {
+                detachRolesOnUser(id: "'.$user->id.'", input: [
+                    { id: "'.$role->id.'" } 
                 ]) {
                     id
                 }
@@ -71,12 +105,13 @@ class DetachPivotMutationTest extends IntegrationTest
         $user = factory(User::class)->create();
         $role = factory(Role::class)->create();
         $this->actingAs($user);
-        $role->users()->sync($role);
+        $role->users()->attach([$role->getKey() => ['admin' => true]]);
+        $role->users()->attach([$role->getKey() => ['admin' => false]]);
 
         $query = '
             mutation {
                 detachUsersOnRole(id: "'.$role->id.'", input: [
-                    "'.$user->id.'"
+                    { id: "'.$user->id.'", pivot: { admin: true }}
                 ]) {
                     id
                 }
@@ -85,9 +120,15 @@ class DetachPivotMutationTest extends IntegrationTest
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
         $response->assertJsonKey('id');
+        $this->assertDatabaseHas('role_user', [
+            'user_id' => '1',
+            'role_id' => '1',
+            'admin' => false,
+        ]);
         $this->assertDatabaseMissing('role_user', [
             'user_id' => '1',
             'role_id' => '1',
+            'admin' => true,
         ]);
     }
 }

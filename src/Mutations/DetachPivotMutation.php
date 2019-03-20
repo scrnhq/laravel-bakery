@@ -3,6 +3,7 @@
 namespace Bakery\Mutations;
 
 use Bakery\Fields\Field;
+use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Model;
 use GraphQL\Type\Definition\ResolveInfo;
 use Illuminate\Database\Eloquent\Relations;
@@ -46,12 +47,18 @@ class DetachPivotMutation extends EloquentMutation
      */
     public function args(): array
     {
-        return $this->modelSchema->getLookupFields()
-            ->map(function (Field $field) {
-                return $field->getType();
-            })
-            ->merge(['input' => $this->registry->ID()->list()])
-            ->toArray();
+        $relation = $this->relation->getRelationName();
+
+        if ($this->getPivotModelSchema()) {
+            $typename = Str::studly($relation).'PivotInput';
+            $type = $this->registry->type($typename)->list();
+        } else {
+            $type = $this->registry->ID()->list();
+        }
+
+        return $this->modelSchema->getLookupFields()->map(function (Field $field) {
+            return $field->getType();
+        })->merge(['input' => $type])->toArray();
     }
 
     /**
@@ -69,11 +76,31 @@ class DetachPivotMutation extends EloquentMutation
         $modelSchema = $this->registry->getSchemaForModel($model);
         $relation = $this->getRelation($model);
 
-        $models = $relation->findMany($args['input'])->each(function (Model $model) use ($relation, $modelSchema) {
-            $modelSchema->authorizeToDetach($model);
-        });
+        $input = collect($args['input']);
+        $pivotAccessor = $relation->getPivotAccessor();
 
-        $relation->detach($models);
+        $input->map(function ($input) use ($relation, $pivotAccessor, $model) {
+            $key = $input[$model->getKeyName()] ?? $input;
+            $pivotWhere = $input[$pivotAccessor] ?? [];
+
+            $query = $this->getRelation($model);
+
+            foreach ($pivotWhere as $column => $value) {
+                $query->wherePivot($column, $value);
+            }
+
+            $query->wherePivot($relation->getRelatedPivotKeyName(), $key);
+
+            return $query;
+        })->map(function (Relations\BelongsToMany $query) use ($relation, $modelSchema) {
+            $query->each(function (Model $related) use ($modelSchema) {
+                $modelSchema->authorizeToDetach($related);
+            });
+
+            return $query;
+        })->each(function (Relations\BelongsToMany $query) use ($relation) {
+            $query->detach();
+        });
 
         return $model;
     }

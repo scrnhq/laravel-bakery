@@ -3,6 +3,7 @@
 namespace Bakery\Mutations;
 
 use Bakery\Fields\Field;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
 use GraphQL\Type\Definition\ResolveInfo;
@@ -36,20 +37,21 @@ class AttachPivotMutation extends EloquentMutation
      */
     public function args(): array
     {
-        $args = $this->modelSchema->getLookupFields()->map(function (Field $field) {
-            return $field->getType();
-        });
-
         $relation = $this->relation->getRelationName();
 
         if ($this->getPivotModelSchema()) {
-            $typename = studly_case($relation).'PivotInput';
-            $args->put('input', $this->registry->type($typename)->list());
+            $typename = Str::studly($relation).'PivotInput';
+            $type = $this->registry->type($typename)->list();
         } else {
-            $args->put('input', $this->registry->ID()->list());
+            $type = $this->registry->ID()->list();
         }
 
-        return $args->toArray();
+        return $this->modelSchema->getLookupFields()
+            ->map(function (Field $field) {
+                return $field->getType();
+            })
+            ->merge(['input' => $type])
+            ->toArray();
     }
 
     /**
