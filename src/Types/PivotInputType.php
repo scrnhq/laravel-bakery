@@ -35,7 +35,7 @@ class PivotInputType extends EloquentMutationInputType
         $fields = collect()->put($relatedKey, $this->registry->field($this->registry->ID()));
 
         if ($modelSchema) {
-            $fields->put($accessor, $this->registry->field('Create'.$modelSchema->typename().'Input'));
+            $fields->put($accessor, $this->registry->field('Create'.$modelSchema->typename().'Input')->nullable());
         }
 
         return $fields->toArray();
