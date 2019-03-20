@@ -78,14 +78,20 @@ class DetachPivotMutation extends EloquentMutation
 
         $input = collect($args['input']);
         $pivotAccessor = $relation->getPivotAccessor();
+        $pivotSchema = $this->getPivotModelSchema();
 
-        $input->map(function ($input) use ($relation, $pivotAccessor, $model) {
+        $input->map(function ($input) use ($pivotSchema, $relation, $pivotAccessor, $model) {
             $key = $input[$model->getKeyName()] ?? $input;
             $pivotWhere = $input[$pivotAccessor] ?? [];
 
             $query = $this->getRelation($model);
 
             foreach ($pivotWhere as $column => $value) {
+                // Transform modelId to model_id.
+                if ($pivotSchema->getRelationFields()->keys()->contains(Str::before($column, 'Id'))) {
+                    $column = Str::snake($column);
+                }
+
                 $query->wherePivot($column, $value);
             }
 

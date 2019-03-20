@@ -100,6 +100,40 @@ class DetachPivotMutationTest extends IntegrationTest
     }
 
     /** @test */
+    public function it_lets_you_detach_with_relational_pivot_data()
+    {
+        $user = factory(User::class)->create();
+        $role = factory(Role::class)->create();
+        [$tag, $tagTwo] = factory(Tag::class, 2)->create();
+        $this->actingAs($user);
+        $user->roles()->attach([$role->getKey() => ['tag_id' => $tag->id]]);
+        $user->roles()->attach([$role->getKey() => ['tag_id' => $tagTwo->id]]);
+
+        $query = '
+            mutation {
+                detachRolesOnUser(id: "'.$user->id.'", input: [
+                    { id: "'.$role->id.'", pivot: { tagId: "'.$tag->id.'" } } 
+                ]) {
+                    id
+                }
+            }
+        ';
+
+        $response = $this->json('GET', '/graphql', ['query' => $query]);
+        $response->assertJsonKey('id');
+        $this->assertDatabaseHas('role_user', [
+            'user_id' => '1',
+            'role_id' => '1',
+            'tag_id' => $tagTwo->id,
+        ]);
+        $this->assertDatabaseMissing('role_user', [
+            'user_id' => '1',
+            'role_id' => '1',
+            'tag_id' => $tag->id,
+        ]);
+    }
+
+    /** @test */
     public function it_lets_you_detach_pivot_ids_with_pivot_data_inversed()
     {
         $user = factory(User::class)->create();
