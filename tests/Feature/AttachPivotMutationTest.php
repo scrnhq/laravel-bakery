@@ -37,6 +37,31 @@ class AttachPivotMutationTest extends IntegrationTest
     }
 
     /** @test */
+    public function it_lets_you_attach_pivot_ids_with_missing_pivot_data()
+    {
+        $user = factory(User::class)->create();
+        $role = factory(Role::class)->create();
+        $this->actingAs($user);
+
+        $query = '
+            mutation {
+                attachRolesOnUser(id: "'.$user->id.'", input: [
+                    { id: "'.$role->id.'" }
+                ]) {
+                    id
+                }
+            }
+        ';
+
+        $response = $this->json('GET', '/graphql', ['query' => $query]);
+        $response->assertJsonKey('id');
+        $this->assertDatabaseHas('role_user', [
+            'user_id' => '1',
+            'role_id' => '1',
+        ]);
+    }
+
+    /** @test */
     public function it_lets_you_attach_pivot_ids_with_pivot_data()
     {
         $user = factory(User::class)->create();
