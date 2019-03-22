@@ -241,7 +241,7 @@ trait InteractsWithRelations
     {
         $pivotClass = $relation->getPivotClass();
 
-        if (is_subclass_of($pivotClass, Relations\Pivot::class)) {
+        if (is_subclass_of($pivotClass, Relations\Pivot::class) && $this->registry->hasSchemaForModel($pivotClass)) {
             $this->connectBelongsToManyWithPivot($relation, $values, $detaching);
         } else {
             $this->connectBelongsToManyWithoutPivot($relation, $values, $detaching);
