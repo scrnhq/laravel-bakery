@@ -4,8 +4,8 @@ namespace Bakery\Types;
 
 use Bakery\Fields\Field;
 use Bakery\Fields\EloquentField;
-use Bakery\Types\Definitions\Type;
 use Illuminate\Support\Collection;
+use Bakery\Fields\PolymorphicField;
 use Bakery\Types\Definitions\EloquentInputType;
 
 class CollectionFilterType extends EloquentInputType
@@ -47,7 +47,9 @@ class CollectionFilterType extends EloquentInputType
     {
         $fields = $this->modelSchema->getFields();
 
-        return $fields->keys()->reduce(function (Collection $result, string $name) use ($fields) {
+        return $fields->except(function (Field $field) {
+            return $field instanceof PolymorphicField;
+        })->reduce(function (Collection $result, string $name) use ($fields) {
             $field = $fields->get($name);
 
             return $field->getType()->isLeafType() ? $result->merge($this->getFilters($name, $field)) : $result;

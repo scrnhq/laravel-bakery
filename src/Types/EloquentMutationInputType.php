@@ -27,7 +27,7 @@ abstract class EloquentMutationInputType extends EloquentInputType
     {
         return $this->modelSchema->getFillableFields()
             ->filter(function (Field $field) {
-                return $field->setRegistry($this->registry)->getType()->isLeafType();
+                return ! $field instanceof PolymorphicField && $field->setRegistry($this->registry)->getType()->isLeafType();
             });
     }
 
