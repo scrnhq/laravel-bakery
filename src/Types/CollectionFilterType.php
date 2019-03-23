@@ -49,7 +49,7 @@ class CollectionFilterType extends EloquentInputType
 
         return $fields->except(function (Field $field) {
             return $field instanceof PolymorphicField;
-        })->reduce(function (Collection $result, string $name) use ($fields) {
+        })->keys()->reduce(function (Collection $result, string $name) use ($fields) {
             $field = $fields->get($name);
 
             return $field->getType()->isLeafType() ? $result->merge($this->getFilters($name, $field)) : $result;
