@@ -47,7 +47,7 @@ class CollectionFilterType extends EloquentInputType
     {
         $fields = $this->modelSchema->getFields();
 
-        return $fields->except(function (Field $field) {
+        return $fields->reject(function (Field $field) {
             return $field instanceof PolymorphicField;
         })->keys()->reduce(function (Collection $result, string $name) use ($fields) {
             $field = $fields->get($name);
