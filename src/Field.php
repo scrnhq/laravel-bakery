@@ -4,9 +4,12 @@ namespace Bakery;
 
 use Bakery\Support\TypeRegistry;
 use Bakery\Fields\PolymorphicField;
+use Illuminate\Support\Traits\Macroable;
 
 class Field
 {
+    use Macroable;
+
     /**
      * Get the current bound registry.
      */
