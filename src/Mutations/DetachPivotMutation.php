@@ -108,6 +108,8 @@ class DetachPivotMutation extends EloquentMutation
             $query->detach();
         });
 
-        return $model;
+        // Refresh the model to accommodate for any side effects
+        // that the pivot relation may have caused.
+        return $model->refresh();
     }
 }

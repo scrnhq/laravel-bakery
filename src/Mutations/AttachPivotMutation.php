@@ -88,7 +88,9 @@ class AttachPivotMutation extends EloquentMutation
             $modelSchema->connectBelongsToManyRelation($relation, $input, false);
             $modelSchema->save();
 
-            return $modelSchema->getInstance();
+            // Refresh the model to accommodate for any side effects
+            // that the pivot relation may have caused.
+            return $modelSchema->getInstance()->refresh();
         });
     }
 }
