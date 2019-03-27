@@ -94,7 +94,6 @@ trait InteractsWithRelations
      * @param Relations\BelongsTo $relation
      * @param mixed $id
      * @return void
-     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     protected function connectBelongsToRelation(Relations\BelongsTo $relation, $id)
     {
@@ -106,9 +105,12 @@ trait InteractsWithRelations
 
         $model = $relation->getRelated()->findOrFail($id);
         $schema = $this->registry->getSchemaForModel($model);
-        $schema->authorizeToAdd($this->getModel());
 
         $relation->associate($model);
+
+        $this->queue(function () use ($schema) {
+            $schema->authorizeToAdd($this->getModel());
+        });
     }
 
     /**
@@ -117,7 +119,6 @@ trait InteractsWithRelations
      * @param Relations\BelongsTo $relation
      * @param array $attributes
      * @return void
-     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     protected function fillBelongsToRelation(Relations\BelongsTo $relation, $attributes = [])
     {
@@ -130,9 +131,12 @@ trait InteractsWithRelations
         $related = $relation->getRelated();
         $schema = $this->registry->getSchemaForModel($related);
         $model = $schema->createIfAuthorized($attributes);
-        $schema->authorizeToAdd($this->getModel());
 
         $relation->associate($model);
+
+        $this->queue(function () use ($schema) {
+            $schema->authorizeToAdd($this->getModel());
+        });
     }
 
     /**
@@ -256,8 +260,11 @@ trait InteractsWithRelations
      * @param bool $detaching
      * @return void
      */
-    protected function connectBelongsToManyWithoutPivot(Relations\BelongsToMany $relation, array $values, $detaching = true)
-    {
+    protected function connectBelongsToManyWithoutPivot(
+        Relations\BelongsToMany $relation,
+        array $values,
+        $detaching = true
+    ) {
         $values = collect($values);
 
         $this->queue(function () use ($detaching, $relation, $values) {
@@ -289,8 +296,11 @@ trait InteractsWithRelations
      * @param bool $detaching
      * @return void
      */
-    protected function connectBelongsToManyWithPivot(Relations\BelongsToMany $relation, array $values, $detaching = true)
-    {
+    protected function connectBelongsToManyWithPivot(
+        Relations\BelongsToMany $relation,
+        array $values,
+        $detaching = true
+    ) {
         $accessor = $relation->getPivotAccessor();
         $relatedKey = $relation->getRelated()->getKeyName();
 
