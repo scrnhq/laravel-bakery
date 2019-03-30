@@ -380,7 +380,7 @@ class AuthorizationTest extends IntegrationTest
         $this->withExceptionHandling()->graphql('mutation($id: ID!, $input: UpdateUserInput!) { updateUser(id: $id, input: $input) { id } }', [
             'id' => $user->id,
             'input' => [
-                'articles' => []
+                'articles' => [],
             ],
         ]);
 
