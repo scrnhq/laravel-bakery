@@ -18,4 +18,9 @@ class PhonePolicy
     {
         return $_SERVER['graphql.phone.deletable'] ?? true;
     }
+
+    public function removeUser(): bool
+    {
+        return $_SERVER['graphql.phone.removeUser'] ?? true;
+    }
 }

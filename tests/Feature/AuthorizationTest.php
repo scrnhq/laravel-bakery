@@ -276,6 +276,27 @@ class AuthorizationTest extends IntegrationTest
     }
 
     /** @test */
+    public function it_cant_remove_has_one_if_not_authorized()
+    {
+        $user = factory(User::class)->create();
+        factory(Phone::class)->create(['user_id' => $user->id]);
+
+        $_SERVER['graphql.user.removePhone'] = false;
+
+        $this->withExceptionHandling()->graphql('mutation($id: ID!, $input: UpdateUserInput!) { updateUser(id: $id, input: $input) { id } }', [
+            'id' => $user->id,
+            'input' => [
+                'phone' => null,
+            ],
+        ]);
+
+        unset($_SERVER['graphql.user.removePhone']);
+
+        $user = User::first();
+        $this->assertNotNull($user->phone);
+    }
+
+    /** @test */
     public function it_cant_create_and_add_has_many_if_not_authorized_to_create()
     {
         $user = factory(User::class)->create();
@@ -349,6 +370,27 @@ class AuthorizationTest extends IntegrationTest
     }
 
     /** @test */
+    public function it_cant_remove_has_many_if_not_authorized()
+    {
+        $user = factory(User::class)->create();
+        factory(Article::class)->create(['user_id' => $user->id]);
+
+        $_SERVER['graphql.user.removeArticle'] = false;
+
+        $this->withExceptionHandling()->graphql('mutation($id: ID!, $input: UpdateUserInput!) { updateUser(id: $id, input: $input) { id } }', [
+            'id' => $user->id,
+            'input' => [
+                'articles' => []
+            ],
+        ]);
+
+        unset($_SERVER['graphql.user.removeArticle']);
+
+        $user = User::first();
+        $this->assertTrue($user->articles->isNotEmpty());
+    }
+
+    /** @test */
     public function it_cant_create_and_add_belongs_to_if_not_authorized_to_create()
     {
         $article = factory(Article::class)->create(['user_id' => null]);
@@ -415,6 +457,27 @@ class AuthorizationTest extends IntegrationTest
 
         $article = Article::first();
         $this->assertNull($article->user);
+    }
+
+    /** @test */
+    public function it_cant_remove_belongs_to_if_not_authorized()
+    {
+        factory(User::class)->create();
+        $article = factory(Article::class)->create();
+
+        $_SERVER['graphql.user.removeArticle'] = false;
+
+        $this->withExceptionHandling()->graphql('mutation($id: ID!, $input: UpdateArticleInput!) { updateArticle(id: $id, input: $input) { id } }', [
+            'id' => $article->id,
+            'input' => [
+                'user' => null,
+            ],
+        ]);
+
+        unset($_SERVER['graphql.user.removeArticle']);
+
+        $article = Article::first();
+        $this->assertNotNull($article->user);
     }
 
     /** @test */

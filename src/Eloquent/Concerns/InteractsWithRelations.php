@@ -94,9 +94,17 @@ trait InteractsWithRelations
      * @param Relations\BelongsTo $relation
      * @param mixed $id
      * @return void
+     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     protected function connectBelongsToRelation(Relations\BelongsTo $relation, $id)
     {
+        $current = $relation->first();
+
+        if ($current) {
+            $currentSchema = $this->registry->getSchemaForModel($current);
+            $currentSchema->authorizeToRemove($this->getModel());
+        }
+
         if (! $id) {
             $relation->dissociate();
 
@@ -119,9 +127,17 @@ trait InteractsWithRelations
      * @param Relations\BelongsTo $relation
      * @param array $attributes
      * @return void
+     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     protected function fillBelongsToRelation(Relations\BelongsTo $relation, $attributes = [])
     {
+        $current = $relation->first();
+
+        if ($current) {
+            $currentSchema = $this->registry->getSchemaForModel($current);
+            $currentSchema->authorizeToRemove($this->getModel());
+        }
+
         if (! $attributes) {
             $relation->dissociate();
 
@@ -145,9 +161,16 @@ trait InteractsWithRelations
      * @param Relations\HasOne $relation
      * @param string $id
      * @return void
+     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     protected function connectHasOneRelation(Relations\HasOne $relation, $id)
     {
+        $current = $relation->first();
+
+        if ($current) {
+            $this->authorizeToRemove($current);
+        }
+
         if (! $id) {
             $relation->delete();
 
@@ -171,6 +194,12 @@ trait InteractsWithRelations
      */
     protected function fillHasOneRelation(Relations\HasOne $relation, $attributes)
     {
+        $current = $relation->first();
+
+        if ($current) {
+            $this->authorizeToRemove($current);
+        }
+
         if (! $attributes) {
             $relation->delete();
 
@@ -195,9 +224,17 @@ trait InteractsWithRelations
      * @param Relations\HasMany $relation
      * @param array $ids
      * @return void
+     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     protected function connectHasManyRelation(Relations\HasMany $relation, array $ids)
     {
+        $models = $relation->get();
+
+        foreach ($models as $model) {
+            $currentSchema = $this->registry->getSchemaForModel($model);
+            $currentSchema->authorizeToRemove($this->getModel());
+        }
+
         $this->queue(function () use ($relation, $ids) {
             $models = $relation->getModel()->findMany($ids);
 
@@ -215,9 +252,17 @@ trait InteractsWithRelations
      * @param Relations\HasMany $relation
      * @param array $values
      * @return void
+     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     protected function fillHasManyRelation(Relations\HasMany $relation, array $values)
     {
+        $models = $relation->get();
+
+        foreach ($models as $model) {
+            $currentSchema = $this->registry->getSchemaForModel($model);
+            $currentSchema->authorizeToRemove($this->getModel());
+        }
+
         $this->queue(function () use ($relation, $values) {
             $related = $relation->getRelated();
             $relation->delete();
