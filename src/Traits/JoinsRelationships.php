@@ -19,19 +19,23 @@ trait JoinsRelationships
         $related = $relation->getRelated();
 
         if ($relation instanceof Relations\BelongsTo) {
-            $foreignKeyName = method_exists($relation, 'getQualifiedForeignKey')
-                ? $relation->getQualifiedForeignKey() : $relation->getQualifiedForeignKeyName();
-            $query->join($related->getTable(), $relation->getQualifiedOwnerKeyName(), '=', $foreignKeyName, $type, $where);
-        } elseif ($relation instanceof Relations\BelongsToMany) {
-            $foreignPivotKeyName = method_exists($relation, 'getQualifiedForeignPivotKeyName')
-                ? $relation->getQualifiedForeignPivotKeyName() : $relation->getQualifiedForeignKeyName();
-            $relatedPivotKeyName = method_exists($relation, 'getQualifiedRelatedPivotKeyName')
-                ? $relation->getQualifiedRelatedPivotKeyName() : $relation->getQualifiedRelatedKeyName();
+            $ownerKeyName = $relation->getQualifiedOwnerKeyName();
+            $foreignKeyName = $relation->getQualifiedForeignKeyName();
 
-            $query->join($relation->getTable(), $relation->getQualifiedParentKeyName(), '=', $foreignPivotKeyName, $type, $where);
-            $query->join($related->getTable(), $relatedPivotKeyName, '=', $related->getQualifiedKeyName(), $type, $where);
+            $query->join($related->getTable(), $ownerKeyName, '=', $foreignKeyName, $type, $where);
+        } elseif ($relation instanceof Relations\BelongsToMany) {
+            $foreignPivotKeyName = $relation->getQualifiedForeignPivotKeyName();
+            $relatedPivotKeyName = $relation->getQualifiedRelatedPivotKeyName();
+            $parentKeyName = $relation->getQualifiedParentKeyName();
+            $relatedKeyName = $related->getQualifiedKeyName();
+
+            $query->join($relation->getTable(), $parentKeyName, '=', $foreignPivotKeyName, $type, $where);
+            $query->join($related->getTable(), $relatedPivotKeyName, '=', $relatedKeyName, $type, $where);
         } elseif ($relation instanceof Relations\HasOneOrMany) {
-            $query->join($related->getTable(), $relation->getQualifiedForeignKeyName(), '=', $relation->getQualifiedParentKeyName(), $type, $where);
+            $foreignKeyName = $relation->getQualifiedForeignKeyName();
+            $parentKeyName = $relation->getQualifiedParentKeyName();
+
+            $query->join($related->getTable(), $foreignKeyName, '=', $parentKeyName, $type, $where);
         }
 
         return $query;
