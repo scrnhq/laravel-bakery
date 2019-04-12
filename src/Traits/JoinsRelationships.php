@@ -27,7 +27,7 @@ trait JoinsRelationships
             $foreignPivotKeyName = $relation->getQualifiedForeignPivotKeyName();
             $relatedPivotKeyName = $relation->getQualifiedRelatedPivotKeyName();
             $parentKeyName = $relation->getQualifiedParentKeyName();
-            $relatedKeyName = $relation->getRelatedKeyName();
+            $relatedKeyName = $related->getQualifiedKeyName();
 
             $query->join($relation->getTable(), $parentKeyName, '=', $foreignPivotKeyName, $type, $where);
             $query->join($related->getTable(), $relatedPivotKeyName, '=', $relatedKeyName, $type, $where);
