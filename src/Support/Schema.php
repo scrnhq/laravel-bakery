@@ -2,6 +2,7 @@
 
 namespace Bakery\Support;
 
+use Bakery\Mutations\DeleteManyMutation;
 use Bakery\Types;
 use Bakery\Utils\Utils;
 use GraphQL\Type\SchemaConfig;
@@ -427,6 +428,9 @@ class Schema
 
                 $deleteMutation = new DeleteMutation($this->registry, $modelSchema);
                 $mutations->put($deleteMutation->getName(), $deleteMutation);
+
+                $deleteManyMutation = new DeleteManyMutation($this->registry, $modelSchema);
+                $mutations->put($deleteManyMutation->getName(), $deleteManyMutation);
             }
 
             foreach ($pivotRelations as $relation) {
