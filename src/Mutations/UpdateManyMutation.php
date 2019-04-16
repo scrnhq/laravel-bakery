@@ -2,14 +2,14 @@
 
 namespace Bakery\Mutations;
 
+use Bakery\Utils\Utils;
 use Bakery\Eloquent\ModelSchema;
 use Bakery\Support\TypeRegistry;
 use Bakery\Traits\FiltersQueries;
 use Bakery\Types\Definitions\Type;
-use Bakery\Utils\Utils;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
 use GraphQL\Type\Definition\ResolveInfo;
-use Illuminate\Support\Facades\DB;
 
 class UpdateManyMutation extends Mutation
 {

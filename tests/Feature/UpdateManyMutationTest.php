@@ -5,7 +5,7 @@ namespace Bakery\Tests\Feature;
 use Bakery\Tests\IntegrationTest;
 use Bakery\Tests\Fixtures\Models\Article;
 
-class CreateManyMutationTest extends IntegrationTest
+class UpdateManyMutationTest extends IntegrationTest
 {
     public function setUp(): void
     {
