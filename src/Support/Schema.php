@@ -2,7 +2,6 @@
 
 namespace Bakery\Support;
 
-use Bakery\Mutations\DeleteManyMutation;
 use Bakery\Types;
 use Bakery\Utils\Utils;
 use GraphQL\Type\SchemaConfig;
@@ -17,6 +16,7 @@ use Symfony\Component\Finder\Finder;
 use Bakery\Queries\SingleEntityQuery;
 use GraphQL\Type\Definition\Directive;
 use GraphQL\Type\Definition\ObjectType;
+use Bakery\Mutations\DeleteManyMutation;
 use Bakery\Mutations\UpdateManyMutation;
 use Bakery\Mutations\AttachPivotMutation;
 use Bakery\Mutations\DetachPivotMutation;
