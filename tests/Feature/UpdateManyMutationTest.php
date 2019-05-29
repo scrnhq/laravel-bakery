@@ -19,7 +19,7 @@ class UpdateManyMutationTest extends IntegrationTest
     {
         [$article] = factory(Article::class, 3)->create();
 
-        $response = $this->graphql('mutation($input: UpdateArticleInput!, $filter: ArticleFilter) { updateManyArticles(input: $input, filter: $filter) }', [
+        $response = $this->graphql('mutation($input: UpdateArticleInput!, $filter: ArticleFilter!) { updateManyArticles(input: $input, filter: $filter) }', [
             'input' => [
                 'title' => 'Hello world',
             ],
@@ -41,7 +41,7 @@ class UpdateManyMutationTest extends IntegrationTest
     {
         [$article] = factory(Article::class, 3)->create();
 
-        $response = $this->graphql('mutation($input: UpdateArticleInput!, $filter: ArticleFilter) { updateManyArticles(input: $input, filter: $filter) }', [
+        $response = $this->graphql('mutation($input: UpdateArticleInput!, $filter: ArticleFilter!) { updateManyArticles(input: $input, filter: $filter) }', [
             'input' => [
                 'title' => 'Hello world',
             ],

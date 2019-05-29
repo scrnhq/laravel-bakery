@@ -74,7 +74,7 @@ class UpdateManyMutation extends Mutation
         $inputTypeName = 'Update'.$this->modelSchema->typename().'Input';
 
         return [
-            'filter' => $this->registry->type($this->modelSchema->typename()),
+            'filter' => $this->registry->type($this->modelSchema->typename().'Filter'),
             'input' => $this->registry->type($inputTypeName),
         ];
     }

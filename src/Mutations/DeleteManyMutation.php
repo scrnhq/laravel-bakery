@@ -72,7 +72,7 @@ class DeleteManyMutation extends Mutation
     public function args(): array
     {
         return [
-            'filter' => $this->registry->type($this->modelSchema->typename()),
+            'filter' => $this->registry->type($this->modelSchema->typename().'Filter'),
         ];
     }
 

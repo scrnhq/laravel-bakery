@@ -19,7 +19,7 @@ class DeleteManyMutationTest extends IntegrationTest
     {
         [$article, $articleTwo, $articleThree] = factory(Article::class, 3)->create();
 
-        $response = $this->graphql('mutation($filter: ArticleFilter) { deleteManyArticles(filter: $filter) }', [
+        $response = $this->graphql('mutation($filter: ArticleFilter!) { deleteManyArticles(filter: $filter) }', [
             'filter' => [
                 'title' => $article->title,
             ],
@@ -38,7 +38,7 @@ class DeleteManyMutationTest extends IntegrationTest
     {
         [$article, $articleTwo, $articleThree] = factory(Article::class, 3)->create();
 
-        $response = $this->graphql('mutation($filter: ArticleFilter) { deleteManyArticles(filter: $filter) }', [
+        $response = $this->graphql('mutation($filter: ArticleFilter!) { deleteManyArticles(filter: $filter) }', [
             'filter' => [
                 'user' => [
                     'email' => $article->user->email,
