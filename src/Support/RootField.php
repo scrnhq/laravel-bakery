@@ -189,7 +189,7 @@ abstract class RootField
      * @param ResolveInfo $info
      * @return null
      */
-    public function abstractResolver($root, array $args, $context, ResolveInfo $info)
+    protected function abstractResolver($root, array $args, $context, ResolveInfo $info)
     {
         if (! method_exists($this, 'resolve')) {
             return null;
@@ -197,6 +197,33 @@ abstract class RootField
 
         $args = new Arguments($args);
 
+        $this->guard($args);
+        $this->validate($args);
+
+        return $this->resolve($args, $root, $context, $info);
+    }
+
+    /**
+     * Check if the user is authorized to perform the query.
+     * @param Arguments $args
+     */
+    protected function guard(Arguments $args): void
+    {
+        if (method_exists($this, 'authorize')) {
+            $authorized = $this->authorize($args);
+
+            if (! isset($authorized) && empty($authorized)) {
+                throw new UnauthorizedException();
+            }
+        }
+    }
+
+    /**
+     * Validate the arguments of the query.
+     * @param Arguments $args
+     */
+    protected function validate(Arguments $args): void
+    {
         if (method_exists($this, 'rules')) {
             $rules = $this->rules();
             $messages = method_exists($this, 'messages') ? $this->messages() : [];
@@ -207,15 +234,6 @@ abstract class RootField
                 throw new ValidationException($validator->getMessageBag());
             }
         }
-
-        if (method_exists($this, 'authorize')) {
-            $authorized = $this->authorize($args);
-            if (! isset($authorized) && empty($authorized)) {
-                throw new UnauthorizedException();
-            }
-        }
-
-        return $this->resolve($args, $root, $context, $info);
     }
 
     /**
