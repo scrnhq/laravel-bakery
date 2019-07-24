@@ -473,7 +473,7 @@ class Field
     public function resolveField($source, array $args, $context, ResolveInfo $info)
     {
         if (isset($this->viewPolicy)) {
-            if ( ! $this->authorizeToRead($source, $info->fieldName)) {
+            if (! $this->authorizeToRead($source, $info->fieldName)) {
                 return null;
             }
         }
@@ -514,7 +514,7 @@ class Field
         $policy = $this->viewPolicy;
 
         // Check if there is a policy.
-        if ( ! $policy) {
+        if (! $policy) {
             return true;
         }
 
@@ -565,7 +565,7 @@ class Field
         $policy = $this->storePolicy;
 
         // Check if there is a policy.
-        if ( ! $policy) {
+        if (! $policy) {
             return true;
         }
 

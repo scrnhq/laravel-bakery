@@ -6,7 +6,6 @@ use Bakery\Utils\Utils;
 use Bakery\Types\Definitions\Type;
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type as GraphQLType;
-use function Bakery\array_to_object;
 
 abstract class RootField
 {
@@ -173,7 +172,7 @@ abstract class RootField
      */
     private function getResolver()
     {
-        if ( ! method_exists($this, 'resolve')) {
+        if (! method_exists($this, 'resolve')) {
             return null;
         }
 
@@ -189,7 +188,7 @@ abstract class RootField
      */
     public function abstractResolver($root, array $args, $context, ResolveInfo $info)
     {
-        if ( ! method_exists($this, 'resolve')) {
+        if (! method_exists($this, 'resolve')) {
             return null;
         }
 

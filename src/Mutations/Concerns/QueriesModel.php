@@ -62,7 +62,7 @@ trait QueriesModel
     {
         $result = $this->find($args);
 
-        if ( ! $result) {
+        if (! $result) {
             throw (new ModelNotFoundException)->setModel(class_basename($this->model));
         }
 

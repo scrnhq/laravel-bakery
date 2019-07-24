@@ -9,8 +9,6 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
 use Bakery\Types\Concerns\InteractsWithPivot;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use function Bakery\array_to_object;
-use function Bakery\object_to_array;
 
 class AttachPivotMutation extends EloquentMutation
 {

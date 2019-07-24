@@ -32,7 +32,7 @@ class Arguments extends ArrayObject
      */
     public function offsetGet($offset)
     {
-        if ( ! $this->offsetExists($offset)) {
+        if (! $this->offsetExists($offset)) {
             return null;
         }
 
@@ -57,7 +57,7 @@ class Arguments extends ArrayObject
         $array = parent::getArrayCopy();
 
         foreach ($array as $key => $value) {
-            if ($value instanceof Arguments) {
+            if ($value instanceof self) {
                 $array[$key] = $value->getArrayCopy();
             }
         }
