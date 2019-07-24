@@ -3,8 +3,8 @@
 namespace Bakery\Fields;
 
 use Bakery\Support\TypeRegistry;
-use Bakery\Types\Definitions\RootType;
 use Illuminate\Support\Facades\Gate;
+use Bakery\Types\Definitions\RootType;
 use function Bakery\is_callable_tuple;
 use GraphQL\Type\Definition\ResolveInfo;
 use Illuminate\Auth\Access\AuthorizationException;
