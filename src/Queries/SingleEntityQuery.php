@@ -3,11 +3,13 @@
 namespace Bakery\Queries;
 
 use Bakery\Utils\Utils;
+use Bakery\Support\Arguments;
 use Bakery\Types\Definitions\Type;
 use Illuminate\Database\Eloquent\Model;
 use GraphQL\Type\Definition\ResolveInfo;
 use Illuminate\Database\Eloquent\Builder;
 use Bakery\Exceptions\TooManyResultsException;
+use function Bakery\object_to_array;
 
 class SingleEntityQuery extends EloquentQuery
 {
@@ -48,13 +50,13 @@ class SingleEntityQuery extends EloquentQuery
     /**
      * Resolve the EloquentQuery.
      *
+     * @param Arguments $args
      * @param mixed $root
-     * @param array $args
      * @param mixed $context
      * @param \GraphQL\Type\Definition\ResolveInfo $info
      * @return \Illuminate\Database\Eloquent\Model|null ?Model
      */
-    public function resolve($root, array $args, $context, ResolveInfo $info): ?Model
+    public function resolve(Arguments $args, $root, $context, ResolveInfo $info): ?Model
     {
         $primaryKey = $this->model->getKeyName();
 
@@ -63,18 +65,19 @@ class SingleEntityQuery extends EloquentQuery
         $fields = $info->getFieldSelection(config('bakery.security.eagerLoadingMaxDepth'));
         $this->eagerLoadRelations($query, $fields, $this->modelSchema);
 
-        if (array_key_exists($primaryKey, $args)) {
-            return $query->find($args[$primaryKey]);
+        if ($args->primaryKey) {
+            return $query->find($args->primaryKey);
         }
 
-        $results = $this->queryByArgs($query, $args)->get();
+        $results = $this->queryByArgs($query, $args->toArray())->get();
 
         if ($results->count() < 1) {
             return null;
         }
 
         if ($results->count() > 1) {
-            throw (new TooManyResultsException)->setModel(get_class($this->model), array_pluck($results, $this->model->getKeyName()));
+            throw (new TooManyResultsException)->setModel(get_class($this->model),
+                array_pluck($results, $this->model->getKeyName()));
         }
 
         return $results->first();

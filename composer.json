@@ -17,7 +17,7 @@
     }
   ],
   "require": {
-    "php": ">=7.1.0",
+    "php": ">=7.2.0",
     "illuminate/support": "5.8.*",
     "webonyx/graphql-php": "^0.13.0",
     "ext-json": "*"
@@ -32,10 +32,7 @@
   "autoload": {
     "psr-4": {
       "Bakery\\": "src"
-    },
-    "files": [
-      "src/helpers.php"
-    ]
+    }
   },
   "autoload-dev": {
     "psr-4": {

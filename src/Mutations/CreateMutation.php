@@ -2,9 +2,9 @@
 
 namespace Bakery\Mutations;
 
+use Bakery\Support\Arguments;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
-use GraphQL\Type\Definition\ResolveInfo;
 
 class CreateMutation extends EloquentMutation
 {
@@ -25,15 +25,12 @@ class CreateMutation extends EloquentMutation
     /**
      * Resolve the mutation.
      *
-     * @param  mixed $root
-     * @param  array $args
-     * @param  mixed $context
-     * @param \GraphQL\Type\Definition\ResolveInfo $info
+     * @param Arguments $args
      * @return Model
      */
-    public function resolve($root, array $args, $context, ResolveInfo $info): Model
+    public function resolve(Arguments $args): Model
     {
-        $input = $args['input'];
+        $input = $args->input->toArray();
 
         return DB::transaction(function () use ($input) {
             return $this->getModelSchema()->createIfAuthorized($input);

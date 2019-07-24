@@ -6,8 +6,6 @@ use Bakery\Utils\Utils;
 use Bakery\Eloquent\ModelSchema;
 use Bakery\Support\TypeRegistry;
 use Bakery\Types\Definitions\Type;
-use Illuminate\Database\Eloquent\Model;
-use GraphQL\Type\Definition\ResolveInfo;
 
 abstract class EloquentMutation extends Mutation
 {
@@ -85,17 +83,6 @@ abstract class EloquentMutation extends Mutation
             'input' => $this->registry->type($inputTypeName)->nullable(false),
         ];
     }
-
-    /**
-     * Resolve the mutation.
-     *
-     * @param mixed $root
-     * @param mixed $args
-     * @param mixed $context
-     * @param \GraphQL\Type\Definition\ResolveInfo $info
-     * @return Model
-     */
-    abstract public function resolve($root, array $args, $context, ResolveInfo $info): Model;
 
     /**
      * @return \Bakery\Eloquent\ModelSchema
