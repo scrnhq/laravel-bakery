@@ -2,9 +2,12 @@
 
 namespace Bakery\Support;
 
+use Bakery\Exceptions\UnauthorizedException;
+use Bakery\Exceptions\ValidationException;
 use Bakery\Utils\Utils;
 use Bakery\Types\Definitions\Type;
 use GraphQL\Type\Definition\ResolveInfo;
+use Illuminate\Support\Facades\Validator;
 use GraphQL\Type\Definition\Type as GraphQLType;
 
 abstract class RootField
@@ -172,7 +175,7 @@ abstract class RootField
      */
     private function getResolver()
     {
-        if (! method_exists($this, 'resolve')) {
+        if ( ! method_exists($this, 'resolve')) {
             return null;
         }
 
@@ -188,11 +191,29 @@ abstract class RootField
      */
     public function abstractResolver($root, array $args, $context, ResolveInfo $info)
     {
-        if (! method_exists($this, 'resolve')) {
+        if ( ! method_exists($this, 'resolve')) {
             return null;
         }
 
         $args = new Arguments($args);
+
+        if (method_exists($this, 'rules')) {
+            $rules = $this->rules();
+            $messages = method_exists($this, 'messages') ? $this->messages() : [];
+            $attributes = method_exists($this, 'attributes') ? $this->attributes() : [];
+            $validator = Validator::make($args->toArray(), $rules, $messages, $attributes);
+
+            if ($validator->fails()) {
+                throw new ValidationException($validator->getMessageBag());
+            }
+        }
+
+        if (method_exists($this, 'authorize')) {
+            $authorized = $this->authorize($args);
+            if (!isset($authorized) && empty($authorized)) {
+                throw new UnauthorizedException();
+            }
+        }
 
         return $this->resolve($args, $root, $context, $info);
     }

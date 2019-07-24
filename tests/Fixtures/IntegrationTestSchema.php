@@ -33,6 +33,16 @@ class IntegrationTestSchema extends Schema
     {
         return [
             Types\TimestampType::class,
+            Types\InviteUserInputType::class,
         ];
     }
+
+    /**
+     * Define the custom mutations for the application schema.
+     *
+     * @var array
+     */
+    protected $mutations = [
+        Mutations\InviteUserMutation::class,
+    ];
 }
