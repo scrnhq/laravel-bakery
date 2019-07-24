@@ -189,7 +189,7 @@ abstract class RootField
      * @param ResolveInfo $info
      * @return null
      */
-    protected function abstractResolver($root, array $args, $context, ResolveInfo $info)
+    public function abstractResolver($root, array $args, $context, ResolveInfo $info)
     {
         if (! method_exists($this, 'resolve')) {
             return null;
