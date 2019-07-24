@@ -37,7 +37,10 @@
   "autoload-dev": {
     "psr-4": {
       "Bakery\\Tests\\": "tests/"
-    }
+    },
+    "files": [
+      "src/helpers.php"
+    ]
   },
   "scripts": {
     "test": "vendor/bin/phpunit"
