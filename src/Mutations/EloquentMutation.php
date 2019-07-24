@@ -5,7 +5,7 @@ namespace Bakery\Mutations;
 use Bakery\Utils\Utils;
 use Bakery\Eloquent\ModelSchema;
 use Bakery\Support\TypeRegistry;
-use Bakery\Types\Definitions\Type;
+use Bakery\Types\Definitions\RootType;
 
 abstract class EloquentMutation extends Mutation
 {
@@ -63,9 +63,9 @@ abstract class EloquentMutation extends Mutation
     /**
      * The type of the Mutation.
      *
-     * @return Type
+     * @return RootType
      */
-    public function type(): Type
+    public function type(): RootType
     {
         return $this->registry->type($this->modelSchema->typename())->nullable(false);
     }

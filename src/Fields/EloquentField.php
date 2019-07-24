@@ -4,7 +4,7 @@ namespace Bakery\Fields;
 
 use Bakery\Eloquent\ModelSchema;
 use Bakery\Support\TypeRegistry;
-use Bakery\Types\Definitions\Type;
+use Bakery\Types\Definitions\RootType;
 
 class EloquentField extends Field
 {
@@ -57,9 +57,9 @@ class EloquentField extends Field
     /**
      * Get the type of the Eloquent field.
      *
-     * @return \Bakery\Types\Definitions\Type
+     * @return \Bakery\Types\Definitions\RootType
      */
-    protected function type(): Type
+    protected function type(): RootType
     {
         return $this->registry->type($this->getName());
     }

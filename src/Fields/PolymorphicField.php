@@ -4,7 +4,7 @@ namespace Bakery\Fields;
 
 use Bakery\Utils\Utils;
 use Bakery\Support\TypeRegistry;
-use Bakery\Types\Definitions\Type;
+use Bakery\Types\Definitions\RootType;
 
 class PolymorphicField extends Field
 {
@@ -84,9 +84,9 @@ class PolymorphicField extends Field
     /**
      * Get the underlying (wrapped) type.
      *
-     * @return \Bakery\Types\Definitions\Type
+     * @return \Bakery\Types\Definitions\RootType
      */
-    public function type(): Type
+    public function type(): RootType
     {
         return $this->registry->type($this->name);
     }

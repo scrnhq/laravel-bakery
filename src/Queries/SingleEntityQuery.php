@@ -4,7 +4,7 @@ namespace Bakery\Queries;
 
 use Bakery\Utils\Utils;
 use Bakery\Support\Arguments;
-use Bakery\Types\Definitions\Type;
+use Bakery\Types\Definitions\RootType;
 use Illuminate\Database\Eloquent\Model;
 use GraphQL\Type\Definition\ResolveInfo;
 use Illuminate\Database\Eloquent\Builder;
@@ -29,9 +29,9 @@ class SingleEntityQuery extends EloquentQuery
     /**
      * The return type of the query.
      *
-     * @return \Bakery\Types\Definitions\Type
+     * @return \Bakery\Types\Definitions\RootType
      */
-    public function type(): Type
+    public function type(): RootType
     {
         return $this->registry->type($this->modelSchema->typename())->nullable();
     }

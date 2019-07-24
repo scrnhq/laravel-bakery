@@ -3,8 +3,11 @@
 namespace Bakery\Support;
 
 use Bakery\Utils\Utils;
-use Bakery\Types\Definitions\Type;
+use Bakery\Types\Definitions\RootType;
 use GraphQL\Type\Definition\ResolveInfo;
+use Illuminate\Support\Facades\Validator;
+use Bakery\Exceptions\ValidationException;
+use Bakery\Exceptions\UnauthorizedException;
 use GraphQL\Type\Definition\Type as GraphQLType;
 
 abstract class RootField
@@ -65,9 +68,9 @@ abstract class RootField
     /**
      * Define the type of the RootField.
      *
-     * @return Type
+     * @return RootType
      */
-    abstract public function type(): Type;
+    abstract public function type(): RootType;
 
     /**
      * Get the underlying field of the type and convert it to a type.
@@ -120,7 +123,7 @@ abstract class RootField
      */
     public function getArgs(): array
     {
-        return collect($this->args())->map(function (Type $type) {
+        return collect($this->args())->map(function (RootType $type) {
             return $type->toType();
         })->toArray();
     }
@@ -194,7 +197,43 @@ abstract class RootField
 
         $args = new Arguments($args);
 
+        $this->guard($args);
+        $this->validate($args);
+
         return $this->resolve($args, $root, $context, $info);
+    }
+
+    /**
+     * Check if the user is authorized to perform the query.
+     * @param Arguments $args
+     */
+    protected function guard(Arguments $args): void
+    {
+        if (method_exists($this, 'authorize')) {
+            $authorized = $this->authorize($args);
+
+            if (! isset($authorized) && empty($authorized)) {
+                throw new UnauthorizedException();
+            }
+        }
+    }
+
+    /**
+     * Validate the arguments of the query.
+     * @param Arguments $args
+     */
+    protected function validate(Arguments $args): void
+    {
+        if (method_exists($this, 'rules')) {
+            $rules = $this->rules();
+            $messages = method_exists($this, 'messages') ? $this->messages() : [];
+            $attributes = method_exists($this, 'attributes') ? $this->attributes() : [];
+            $validator = Validator::make($args->toArray(), $rules, $messages, $attributes);
+
+            if ($validator->fails()) {
+                throw new ValidationException($validator->getMessageBag());
+            }
+        }
     }
 
     /**

@@ -5,7 +5,7 @@ namespace Bakery\Types\Definitions;
 use Bakery\Support\TypeRegistry;
 use GraphQL\Type\Definition\NamedType as GraphQLNamedType;
 
-class ReferenceType extends Type
+class ReferenceType extends RootType
 {
     /**
      * Reference to the type.

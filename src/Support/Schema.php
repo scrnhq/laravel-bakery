@@ -6,7 +6,6 @@ use Bakery\Types;
 use Bakery\Utils\Utils;
 use GraphQL\Type\SchemaConfig;
 use Bakery\Eloquent\ModelSchema;
-use Bakery\Types\Definitions\Type;
 use Illuminate\Support\Collection;
 use Bakery\Fields\PolymorphicField;
 use Bakery\Mutations\CreateMutation;
@@ -14,6 +13,7 @@ use Bakery\Mutations\DeleteMutation;
 use Bakery\Mutations\UpdateMutation;
 use Symfony\Component\Finder\Finder;
 use Bakery\Queries\SingleEntityQuery;
+use Bakery\Types\Definitions\RootType;
 use GraphQL\Type\Definition\Directive;
 use GraphQL\Type\Definition\ObjectType;
 use Bakery\Mutations\AttachPivotMutation;
@@ -573,10 +573,10 @@ class Schema
     }
 
     /**
-     * @param \Bakery\Types\Definitions\Type $class
+     * @param \Bakery\Types\Definitions\RootType $class
      * @return \GraphQL\Type\Definition\Type
      */
-    protected function makeObjectTypeFromClass(Type $class): \GraphQL\Type\Definition\Type
+    protected function makeObjectTypeFromClass(RootType $class): \GraphQL\Type\Definition\Type
     {
         return $class->toType();
     }

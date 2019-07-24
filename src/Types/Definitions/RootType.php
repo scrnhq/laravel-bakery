@@ -8,7 +8,7 @@ use Illuminate\Contracts\Auth\Access\Gate;
 use GraphQL\Type\Definition\Type as GraphQLType;
 use GraphQL\Type\Definition\NamedType as GraphQLNamedType;
 
-class Type
+class RootType
 {
     /**
      * @var \Bakery\Support\TypeRegistry
@@ -96,7 +96,7 @@ class Type
      * Set the type registry.
      *
      * @param \Bakery\Support\TypeRegistry $registry
-     * @return \Bakery\Types\Definitions\Type
+     * @return \Bakery\Types\Definitions\RootType
      */
     public function setRegistry(TypeRegistry $registry): self
     {

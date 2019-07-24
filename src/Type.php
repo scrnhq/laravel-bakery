@@ -59,9 +59,9 @@ class Type
      * Create a new type by reference.
      *
      * @param string $name
-     * @return \Bakery\Types\Definitions\Type
+     * @return \Bakery\Types\Definitions\RootType
      */
-    public static function of(string $name): Types\Definitions\Type
+    public static function of(string $name): Types\Definitions\RootType
     {
         return self::getRegistry()->type($name);
     }
@@ -70,9 +70,9 @@ class Type
      * Create a new type for a model schema.
      *
      * @param string $class
-     * @return \Bakery\Types\Definitions\Type
+     * @return \Bakery\Types\Definitions\RootType
      */
-    public static function modelSchema(string $class): Types\Definitions\Type
+    public static function modelSchema(string $class): Types\Definitions\RootType
     {
         $modelSchema = self::getRegistry()->getModelSchema($class);
 

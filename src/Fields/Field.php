@@ -3,8 +3,8 @@
 namespace Bakery\Fields;
 
 use Bakery\Support\TypeRegistry;
-use Bakery\Types\Definitions\Type;
 use Illuminate\Support\Facades\Gate;
+use Bakery\Types\Definitions\RootType;
 use function Bakery\is_callable_tuple;
 use GraphQL\Type\Definition\ResolveInfo;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -85,9 +85,9 @@ class Field
      * Construct a new field.
      *
      * @param \Bakery\Support\TypeRegistry $registry
-     * @param \Bakery\Types\Definitions\Type|null $type
+     * @param \Bakery\Types\Definitions\RootType|null $type
      */
-    public function __construct(TypeRegistry $registry, Type $type = null)
+    public function __construct(TypeRegistry $registry, RootType $type = null)
     {
         $this->registry = $registry;
 
@@ -119,9 +119,9 @@ class Field
      * Define the type of the field.
      * This method can be overridden.
      *
-     * @return \Bakery\Types\Definitions\Type
+     * @return \Bakery\Types\Definitions\RootType
      */
-    protected function type(): Type
+    protected function type(): RootType
     {
         return $this->type;
     }
@@ -129,9 +129,9 @@ class Field
     /**
      * Return the type of the field.
      *
-     * @return \Bakery\Types\Definitions\Type
+     * @return \Bakery\Types\Definitions\RootType
      */
-    public function getType(): Type
+    public function getType(): RootType
     {
         $type = $this->type();
 
@@ -591,7 +591,7 @@ class Field
     {
         return [
             'type' => $this->getType()->toType(),
-            'args' => collect($this->getArgs())->map(function (Type $type) {
+            'args' => collect($this->getArgs())->map(function (RootType $type) {
                 return $type->toType();
             })->toArray(),
             'resolve' => [$this, 'resolveField'],

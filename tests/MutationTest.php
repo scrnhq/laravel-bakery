@@ -8,7 +8,7 @@ use Bakery\Mutations\Mutation;
 
 class CreateCustomMutation extends Mutation
 {
-    public function type(): \Bakery\Types\Definitions\Type
+    public function type(): \Bakery\Types\Definitions\RootType
     {
         return Type::boolean();
     }
