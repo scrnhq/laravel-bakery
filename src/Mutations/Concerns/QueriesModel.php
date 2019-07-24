@@ -2,8 +2,8 @@
 
 namespace Bakery\Mutations\Concerns;
 
+use Bakery\Support\Arguments;
 use Illuminate\Database\Eloquent\Model;
-use GraphQL\Type\Definition\ResolveInfo;
 use Bakery\Exceptions\TooManyResultsException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
@@ -22,13 +22,10 @@ trait QueriesModel
     /**
      * Get the model based on the arguments provided.
      *
-     * @param mixed $root
-     * @param array $args
-     * @param mixed $context
-     * @param \GraphQL\Type\Definition\ResolveInfo $info
+     * @param Arguments $args
      * @return mixed
      */
-    public function find($root, array $args, $context, ResolveInfo $info)
+    public function find(Arguments $args)
     {
         $primaryKey = $this->model->getKeyName();
 
@@ -38,7 +35,7 @@ trait QueriesModel
             return $query->find($args[$primaryKey]);
         }
 
-        $fields = array_except($args, ['input']);
+        $fields = array_except($args->toArray(), ['input']);
 
         foreach ($fields as $key => $value) {
             $query->where($key, $value);
@@ -47,7 +44,8 @@ trait QueriesModel
         $results = $query->get();
 
         if ($results->count() > 1) {
-            throw (new TooManyResultsException)->setModel(get_class($this->model), array_pluck($results, $this->model->getKeyName()));
+            throw (new TooManyResultsException)->setModel(get_class($this->model),
+                array_pluck($results, $this->model->getKeyName()));
         }
 
         return $results->first();
@@ -57,15 +55,12 @@ trait QueriesModel
      * Get the model based on the arguments provided.
      * Otherwise fail.
      *
-     * @param mixed $root
-     * @param array $args
-     * @param mixed $context
-     * @param \GraphQL\Type\Definition\ResolveInfo $info
+     * @param Arguments $args
      * @return Model
      */
-    public function findOrFail($root, array $args, $context, ResolveInfo $info): Model
+    public function findOrFail(Arguments $args): Model
     {
-        $result = $this->find($root, $args, $context, $info);
+        $result = $this->find($args);
 
         if (! $result) {
             throw (new ModelNotFoundException)->setModel(class_basename($this->model));

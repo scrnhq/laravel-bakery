@@ -4,9 +4,9 @@ namespace Bakery\Mutations;
 
 use Bakery\Fields\Field;
 use Illuminate\Support\Str;
+use Bakery\Support\Arguments;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
-use GraphQL\Type\Definition\ResolveInfo;
 use Bakery\Types\Concerns\InteractsWithPivot;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
@@ -68,17 +68,13 @@ class AttachPivotMutation extends EloquentMutation
     /**
      * Resolve the mutation.
      *
-     * @param  mixed $root
-     * @param  array $args
-     * @param  mixed $context
-     * @param \GraphQL\Type\Definition\ResolveInfo $info
+     * @param Arguments $args
      * @return Model
-     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
-    public function resolve($root, array $args, $context, ResolveInfo $info): Model
+    public function resolve(Arguments $args): Model
     {
-        $input = $args['input'];
-        $model = $this->findOrFail($root, $args, $context, $info);
+        $input = $args->input->toArray();
+        $model = $this->findOrFail($args);
 
         return DB::transaction(function () use ($input, $model) {
             $modelSchema = $this->registry->getSchemaForModel($model);

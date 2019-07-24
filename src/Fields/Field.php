@@ -4,8 +4,8 @@ namespace Bakery\Fields;
 
 use Bakery\Support\TypeRegistry;
 use Bakery\Types\Definitions\Type;
-use Illuminate\Foundation\Auth\User;
 use Illuminate\Support\Facades\Gate;
+use function Bakery\is_callable_tuple;
 use GraphQL\Type\Definition\ResolveInfo;
 use Illuminate\Auth\Access\AuthorizationException;
 

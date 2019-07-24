@@ -4,6 +4,7 @@ namespace Bakery\Support;
 
 use Bakery\Utils\Utils;
 use Bakery\Types\Definitions\Type;
+use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type as GraphQLType;
 
 abstract class RootField
@@ -175,7 +176,25 @@ abstract class RootField
             return null;
         }
 
-        return [$this, 'resolve'];
+        return [$this, 'abstractResolver'];
+    }
+
+    /**
+     * @param $root
+     * @param array $args
+     * @param $context
+     * @param ResolveInfo $info
+     * @return null
+     */
+    public function abstractResolver($root, array $args, $context, ResolveInfo $info)
+    {
+        if (! method_exists($this, 'resolve')) {
+            return null;
+        }
+
+        $args = new Arguments($args);
+
+        return $this->resolve($args, $root, $context, $info);
     }
 
     /**
@@ -210,7 +229,7 @@ abstract class RootField
      *
      * @return \Bakery\Support\TypeRegistry
      */
-    public function getRegistry(): \Bakery\Support\TypeRegistry
+    public function getRegistry(): TypeRegistry
     {
         return $this->registry;
     }

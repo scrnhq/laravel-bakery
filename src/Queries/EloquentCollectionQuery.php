@@ -3,6 +3,7 @@
 namespace Bakery\Queries;
 
 use Bakery\Utils\Utils;
+use Bakery\Support\Arguments;
 use Bakery\Traits\OrdersQueries;
 use Bakery\Traits\FiltersQueries;
 use Bakery\Traits\SearchesQueries;
@@ -75,15 +76,16 @@ class EloquentCollectionQuery extends EloquentQuery
     /**
      * Resolve the CollectionQuery.
      *
+     * @param Arguments $args
      * @param mixed $root
-     * @param array $args
      * @param mixed $context
      * @param \GraphQL\Type\Definition\ResolveInfo $info
      * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
-     * @throws \Bakery\Exceptions\PaginationMaxCountExceededException
+     * @throws PaginationMaxCountExceededException
      */
-    public function resolve($root, array $args, $context, ResolveInfo $info): LengthAwarePaginator
+    public function resolve(Arguments $args, $root, $context, ResolveInfo $info): LengthAwarePaginator
     {
+        $args = $args->toArray();
         $page = array_get($args, 'page', 1);
         $count = array_get($args, 'count', 15);
 
