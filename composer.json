@@ -32,15 +32,15 @@
   "autoload": {
     "psr-4": {
       "Bakery\\": "src"
-    }
-  },
-  "autoload-dev": {
-    "psr-4": {
-      "Bakery\\Tests\\": "tests/"
     },
     "files": [
       "src/helpers.php"
     ]
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Bakery\\Tests\\": "tests/"
+    }
   },
   "scripts": {
     "test": "vendor/bin/phpunit"
