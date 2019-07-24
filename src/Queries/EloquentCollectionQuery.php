@@ -2,7 +2,6 @@
 
 namespace Bakery\Queries;
 
-use Bakery\Foo;
 use Bakery\Utils\Utils;
 use Bakery\Support\Arguments;
 use Bakery\Traits\OrdersQueries;
@@ -67,7 +66,7 @@ class EloquentCollectionQuery extends EloquentQuery
             $args->put('search', $this->registry->type($this->modelSchema->typename().'RootSearch')->nullable());
         }
 
-        if ( ! empty($this->modelSchema->getFields())) {
+        if (! empty($this->modelSchema->getFields())) {
             $args->put('orderBy', $this->registry->type($this->modelSchema->typename().'OrderBy')->nullable());
         }
 

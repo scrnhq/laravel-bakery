@@ -9,7 +9,6 @@ use Illuminate\Database\Eloquent\Model;
 use GraphQL\Type\Definition\ResolveInfo;
 use Illuminate\Database\Eloquent\Builder;
 use Bakery\Exceptions\TooManyResultsException;
-use function Bakery\object_to_array;
 
 class SingleEntityQuery extends EloquentQuery
 {
