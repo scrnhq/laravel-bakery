@@ -7,7 +7,7 @@ use Illuminate\Support\Collection;
 use GraphQL\Type\Definition\Type as GraphQLType;
 use GraphQL\Type\Definition\ObjectType as GraphQLObjectType;
 
-class ObjectType extends Type implements NamedType
+class ObjectType extends RootType implements NamedType
 {
     /**
      * The fields of the object type.

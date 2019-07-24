@@ -6,7 +6,7 @@ use GraphQL\Error\Error;
 use GraphQL\Type\Definition\CustomScalarType;
 use GraphQL\Type\Definition\Type as GraphQLType;
 
-abstract class ScalarType extends Type implements NamedType
+abstract class ScalarType extends RootType implements NamedType
 {
     /**
      * Serializes an internal value to include in a response.

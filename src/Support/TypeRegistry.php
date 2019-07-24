@@ -6,7 +6,7 @@ use Bakery\Utils\Utils;
 use Bakery\Fields\Field;
 use Bakery\Eloquent\ModelSchema;
 use Bakery\Fields\EloquentField;
-use Bakery\Types\Definitions\Type;
+use Bakery\Types\Definitions\RootType;
 use Bakery\Exceptions\TypeNotFound;
 use Bakery\Fields\PolymorphicField;
 use Illuminate\Database\Eloquent\Model;
@@ -90,10 +90,10 @@ class TypeRegistry
     /**
      * Add a type to the registry.
      *
-     * @param \Bakery\Types\Definitions\Type $type
+     * @param \Bakery\Types\Definitions\RootType $type
      * @param string|null $name
      */
-    public function addType(Type $type, string $name = null)
+    public function addType(RootType $type, string $name = null)
     {
         $type->setRegistry($this);
         $name = $name ?: $type->getName();
@@ -214,9 +214,9 @@ class TypeRegistry
      * This can be a string or a class path of a Type that has that name.
      *
      * @param string $name
-     * @return \Bakery\Types\Definitions\Type|null
+     * @return \Bakery\Types\Definitions\RootType|null
      */
-    public function getType(string $name): ?Type
+    public function getType(string $name): ?RootType
     {
         // If the string is the name of the type we return it straight away.
         if ($this->hasType($name)) {
@@ -228,7 +228,7 @@ class TypeRegistry
         if (class_exists($name)) {
             $instance = resolve($name);
 
-            if ($instance instanceof Type) {
+            if ($instance instanceof RootType) {
                 $name = $instance->getName();
 
                 return $this->getType($name);
@@ -328,15 +328,15 @@ class TypeRegistry
      * Construct a new type.
      *
      * @param $type
-     * @return \Bakery\Types\Definitions\Type
+     * @return \Bakery\Types\Definitions\RootType
      */
-    public function type($type): Type
+    public function type($type): RootType
     {
         if (is_string($type)) {
             return (new ReferenceType($this, $type))->setRegistry($this);
         }
 
-        return (new Type($this))->setRegistry($this);
+        return (new RootType($this))->setRegistry($this);
     }
 
     /**

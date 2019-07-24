@@ -2,7 +2,7 @@
 
 namespace Bakery\Types;
 
-use Bakery\Types\Definitions\Type;
+use Bakery\Types\Definitions\RootType;
 use Bakery\Types\Definitions\UnionType;
 use GraphQL\Type\Definition\ResolveInfo;
 use Bakery\Types\Concerns\InteractsWithPolymorphism;
@@ -19,7 +19,7 @@ class UnionEntityType extends UnionType
     public function types(): array
     {
         return collect($this->modelSchemas)->map(function ($modelSchema) {
-            return $modelSchema instanceof Type
+            return $modelSchema instanceof RootType
                 ? $modelSchema
                 : $this->registry->type($this->registry->getModelSchema($modelSchema)->typename());
         })->toArray();

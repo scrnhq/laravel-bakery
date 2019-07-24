@@ -6,7 +6,7 @@ use Bakery\Types;
 use Bakery\Utils\Utils;
 use GraphQL\Type\SchemaConfig;
 use Bakery\Eloquent\ModelSchema;
-use Bakery\Types\Definitions\Type;
+use Bakery\Types\Definitions\RootType;
 use Illuminate\Support\Collection;
 use Bakery\Fields\PolymorphicField;
 use Bakery\Mutations\CreateMutation;
@@ -573,10 +573,10 @@ class Schema
     }
 
     /**
-     * @param \Bakery\Types\Definitions\Type $class
+     * @param \Bakery\Types\Definitions\RootType $class
      * @return \GraphQL\Type\Definition\Type
      */
-    protected function makeObjectTypeFromClass(Type $class): \GraphQL\Type\Definition\Type
+    protected function makeObjectTypeFromClass(RootType $class): \GraphQL\Type\Definition\Type
     {
         return $class->toType();
     }

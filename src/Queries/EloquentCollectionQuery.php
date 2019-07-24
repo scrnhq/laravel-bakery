@@ -7,7 +7,7 @@ use Bakery\Support\Arguments;
 use Bakery\Traits\OrdersQueries;
 use Bakery\Traits\FiltersQueries;
 use Bakery\Traits\SearchesQueries;
-use Bakery\Types\Definitions\Type;
+use Bakery\Types\Definitions\RootType;
 use GraphQL\Type\Definition\ResolveInfo;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Bakery\Exceptions\PaginationMaxCountExceededException;
@@ -42,9 +42,9 @@ class EloquentCollectionQuery extends EloquentQuery
     /**
      * The type of the CollectionQuery.
      *
-     * @return Type
+     * @return RootType
      */
-    public function type(): Type
+    public function type(): RootType
     {
         return $this->registry->type($this->modelSchema->typename().'Collection');
     }

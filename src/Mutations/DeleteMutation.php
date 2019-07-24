@@ -4,7 +4,7 @@ namespace Bakery\Mutations;
 
 use Bakery\Fields\Field;
 use Bakery\Support\Arguments;
-use Bakery\Types\Definitions\Type;
+use Bakery\Types\Definitions\RootType;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Auth\Access\AuthorizationException;
 
@@ -27,9 +27,9 @@ class DeleteMutation extends EloquentMutation
     /**
      * Get the return type of the mutation.
      *
-     * @return Type
+     * @return RootType
      */
-    public function type(): Type
+    public function type(): RootType
     {
         return $this->registry->boolean();
     }

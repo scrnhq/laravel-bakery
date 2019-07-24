@@ -2,10 +2,11 @@
 
 namespace Bakery\Tests\Fixtures\Mutations;
 
+use Bakery\Type;
 use Illuminate\Support\Str;
 use Bakery\Support\Arguments;
 use Bakery\Mutations\Mutation;
-use Bakery\Types\Definitions\Type;
+use Bakery\Types\Definitions\RootType;
 use Bakery\Tests\Fixtures\Models\User;
 
 class InviteUserMutation extends Mutation
@@ -13,11 +14,11 @@ class InviteUserMutation extends Mutation
     /**
      * Define the type of the RootField.
      *
-     * @return Type
+     * @return RootType
      */
-    public function type(): Type
+    public function type(): RootType
     {
-        return \Bakery\Type::boolean();
+        return Type::boolean();
     }
 
     /**
@@ -26,7 +27,7 @@ class InviteUserMutation extends Mutation
     public function args(): array
     {
         return [
-            'input' => \Bakery\Type::of('InviteUserInput'),
+            'input' => Type::of('InviteUserInput'),
         ];
     }
 

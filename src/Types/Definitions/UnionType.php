@@ -6,7 +6,7 @@ use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type as GraphQLType;
 use GraphQL\Type\Definition\UnionType as GraphQLUnionType;
 
-abstract class UnionType extends Type implements NamedType
+abstract class UnionType extends RootType implements NamedType
 {
     protected $types;
 
@@ -75,7 +75,7 @@ abstract class UnionType extends Type implements NamedType
     {
         return [
             'name' => $this->name(),
-            'types' => collect($this->types())->map(function (Type $type) {
+            'types' => collect($this->types())->map(function (RootType $type) {
                 return $type->toNamedType();
             })->toArray(),
             'resolveType' => [$this, 'getTypeResolver'],

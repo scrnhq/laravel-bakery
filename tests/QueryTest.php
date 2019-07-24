@@ -8,7 +8,7 @@ use Bakery\Support\DefaultSchema;
 
 class CustomQuery extends Query
 {
-    public function type(): \Bakery\Types\Definitions\Type
+    public function type(): \Bakery\Types\Definitions\RootType
     {
         return Type::boolean();
     }

@@ -5,7 +5,7 @@ namespace Bakery\Types\Definitions;
 use Bakery\Support\TypeRegistry;
 use GraphQL\Type\Definition\ScalarType;
 
-class InternalType extends Type
+class InternalType extends RootType
 {
     /**
      * BaseType constructor.
