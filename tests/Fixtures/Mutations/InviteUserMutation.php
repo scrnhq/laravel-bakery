@@ -6,8 +6,8 @@ use Bakery\Type;
 use Illuminate\Support\Str;
 use Bakery\Support\Arguments;
 use Bakery\Mutations\Mutation;
-use Bakery\Types\Definitions\RootType;
 use Bakery\Tests\Fixtures\Models\User;
+use Bakery\Types\Definitions\RootType;
 
 class InviteUserMutation extends Mutation
 {
