@@ -197,8 +197,8 @@ abstract class RootField
 
         $args = new Arguments($args);
 
-        $this->guard($args);
         $this->validate($args);
+        $this->guard($args);
 
         return $this->resolve($args, $root, $context, $info);
     }
