@@ -15,7 +15,7 @@ use Illuminate\Auth\Access\AuthorizationException;
 abstract class RootField
 {
     use HandlesAuthorization;
-    
+
     /**
      * @var \Bakery\Support\TypeRegistry
      */
@@ -179,7 +179,7 @@ abstract class RootField
      */
     private function getResolver()
     {
-        if ( ! method_exists($this, 'resolve')) {
+        if (! method_exists($this, 'resolve')) {
             return null;
         }
 
@@ -195,7 +195,7 @@ abstract class RootField
      */
     public function abstractResolver($root, array $args, $context, ResolveInfo $info)
     {
-        if ( ! method_exists($this, 'resolve')) {
+        if (! method_exists($this, 'resolve')) {
             return null;
         }
 
@@ -214,7 +214,6 @@ abstract class RootField
     protected function guard(Arguments $args): void
     {
         if (method_exists($this, 'authorize')) {
-
             try {
                 $authorized = $this->authorize($args);
             } catch (AuthorizationException $exception) {
