@@ -60,7 +60,9 @@ class InviteUserMutation extends Mutation
      */
     public function authorize()
     {
-        return auth()->user();
+        if (! auth()->user()) {
+            $this->deny('You need to be logged in to do this!');
+        }
     }
 
     public function resolve(Arguments $arguments)

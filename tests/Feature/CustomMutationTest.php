@@ -50,7 +50,7 @@ class CustomMutationTest extends IntegrationTest
             'input' => [
                 'email' => 'john@example.com',
             ],
-        ])->assertJsonFragment(['message' => 'You are not authorized to perform this action.']);
+        ])->assertJsonFragment(['message' => 'You need to be logged in to do this!']);
 
         $this->assertDatabaseMissing('users', [
             'email' => 'invalid-email',

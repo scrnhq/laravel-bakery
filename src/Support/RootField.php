@@ -9,9 +9,13 @@ use Illuminate\Support\Facades\Validator;
 use Bakery\Exceptions\ValidationException;
 use Bakery\Exceptions\UnauthorizedException;
 use GraphQL\Type\Definition\Type as GraphQLType;
+use Illuminate\Auth\Access\HandlesAuthorization;
+use Illuminate\Auth\Access\AuthorizationException;
 
 abstract class RootField
 {
+    use HandlesAuthorization;
+    
     /**
      * @var \Bakery\Support\TypeRegistry
      */
@@ -175,7 +179,7 @@ abstract class RootField
      */
     private function getResolver()
     {
-        if (! method_exists($this, 'resolve')) {
+        if ( ! method_exists($this, 'resolve')) {
             return null;
         }
 
@@ -191,7 +195,7 @@ abstract class RootField
      */
     public function abstractResolver($root, array $args, $context, ResolveInfo $info)
     {
-        if (! method_exists($this, 'resolve')) {
+        if ( ! method_exists($this, 'resolve')) {
             return null;
         }
 
@@ -210,7 +214,12 @@ abstract class RootField
     protected function guard(Arguments $args): void
     {
         if (method_exists($this, 'authorize')) {
-            $authorized = $this->authorize($args);
+
+            try {
+                $authorized = $this->authorize($args);
+            } catch (AuthorizationException $exception) {
+                throw new UnauthorizedException($exception->getMessage(), $exception->getCode(), $exception);
+            }
 
             if (empty($authorized)) {
                 throw new UnauthorizedException();

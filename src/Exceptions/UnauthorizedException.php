@@ -2,9 +2,13 @@
 
 namespace Bakery\Exceptions;
 
+use Throwable;
 use GraphQL\Error\UserError;
 
 class UnauthorizedException extends UserError
 {
-    protected $message = 'You are not authorized to perform this action.';
+    public function __construct($message = "This action is unauthorized.", $code = 0, Throwable $previous = null)
+    {
+        parent::__construct($message, $code, $previous);
+    }
 }
