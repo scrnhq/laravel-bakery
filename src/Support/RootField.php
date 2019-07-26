@@ -212,7 +212,7 @@ abstract class RootField
         if (method_exists($this, 'authorize')) {
             $authorized = $this->authorize($args);
 
-            if (! isset($authorized) && empty($authorized)) {
+            if (empty($authorized)) {
                 throw new UnauthorizedException();
             }
         }
