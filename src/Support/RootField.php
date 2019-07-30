@@ -233,7 +233,7 @@ abstract class RootField
     protected function validate(Arguments $args): void
     {
         if (method_exists($this, 'rules')) {
-            $rules = $this->rules();
+            $rules = $this->rules($args);
             $messages = method_exists($this, 'messages') ? $this->messages() : [];
             $attributes = method_exists($this, 'attributes') ? $this->attributes() : [];
             $validator = Validator::make($args->toArray(), $rules, $messages, $attributes);
