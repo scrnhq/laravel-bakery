@@ -17,10 +17,10 @@
     }
   ],
   "require": {
-    "php": ">=7.1.0",
+    "php": "^7.1.3",
+    "ext-json": "*",
     "illuminate/support": "~5.8.0|^6.0",
-    "webonyx/graphql-php": "^0.13.0",
-    "ext-json": "*"
+    "webonyx/graphql-php": "^0.13.0"
   },
   "require-dev": {
     "orchestra/testbench": "~3.0",
