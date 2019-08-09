@@ -1,0 +1,14 @@
+name: "CI"
+on: [pull_request, push]
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+
+      - name: "composer install"
+        run: composer install
+
+      - name: "composer test"
+        run: composer test
