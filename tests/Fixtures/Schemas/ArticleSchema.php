@@ -16,6 +16,7 @@ class ArticleSchema extends ModelSchema
             'slug' => Field::string()->unique(),
             'title' => Field::string()->searchable(),
             'created_at' => Field::type('Timestamp')->readOnly(),
+            'createdAt' => Field::type('Timestamp')->readOnly(),
         ];
     }
 

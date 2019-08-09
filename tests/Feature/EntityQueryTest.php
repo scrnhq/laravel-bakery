@@ -316,4 +316,28 @@ class EntityQueryTest extends IntegrationTest
             ],
         ]);
     }
+
+    /** @test */
+    public function it_returns_data_for_camel_case_fields()
+    {
+        $article = factory(Article::class)->create();
+
+        $response = $this->graphql('query($id: ID!) {
+            article(id: $id) { createdAt }
+        }', ['id' => $article->id]);
+
+        $response->assertJsonFragment(['article' => ['createdAt' => $article->created_at->toAtomString()]]);
+    }
+
+    /** @test */
+    public function it_returns_data_for_snake_case_fields()
+    {
+        $article = factory(Article::class)->create();
+
+        $response = $this->graphql('query($id: ID!) {
+            article(id: $id) { created_at }
+        }', ['id' => $article->id]);
+
+        $response->assertJsonFragment(['article' => ['created_at' => $article->created_at->toAtomString()]]);
+    }
 }

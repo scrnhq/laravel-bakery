@@ -2,6 +2,8 @@
 
 namespace Bakery\Fields;
 
+use Illuminate\Support\Str;
+use Illuminate\Support\Arr;
 use Bakery\Support\TypeRegistry;
 use Illuminate\Support\Facades\Gate;
 use Bakery\Types\Definitions\RootType;
@@ -613,14 +615,11 @@ class Field
     {
         $fieldName = $info->fieldName;
         $property = null;
-        if (is_array($source) || $source instanceof \ArrayAccess) {
-            if (isset($source[$fieldName])) {
-                $property = $source[$fieldName];
-            }
+
+        if (Arr::accessible($source)) {
+            $property = $source[$fieldName] ?? $source[Str::snake($fieldName)] ?? null;
         } elseif (is_object($source)) {
-            if (isset($source->{$fieldName})) {
-                $property = $source->{$fieldName};
-            }
+            $property = $source->{$fieldName} ?? $source->{Str::snake($fieldName)} ?? null;
         }
 
         return $property instanceof \Closure ? $property($source, $args, $context, $info) : $property;
