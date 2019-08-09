@@ -2,8 +2,8 @@
 
 namespace Bakery\Fields;
 
-use Illuminate\Support\Str;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
 use Bakery\Support\TypeRegistry;
 use Illuminate\Support\Facades\Gate;
 use Bakery\Types\Definitions\RootType;
