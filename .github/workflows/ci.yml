@@ -11,5 +11,5 @@ jobs:
     - uses: actions/checkout@master
     - name: Install dependencies
       run: composer install
-    - name: Test with PHPUnit
+    - name: Run tests
       run: composer test
