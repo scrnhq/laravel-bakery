@@ -13,6 +13,6 @@ jobs:
         env:
           PHP_VERSION: ${{ matrix.php }}
         run: sudo ln -sf "/usr/bin/php$PHP_VERSION" /etc/alternatives/php
-      - run: php -v
+      - run: php -m | grep xdebug
       - run: composer install
       - run: composer test
