@@ -2,13 +2,16 @@ name: "CI"
 on: [pull_request, push]
 
 jobs:
-  ci:
+  test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php: ['7.1', '7.2', '7.3']
     steps:
       - uses: actions/checkout@v1
-
-      - name: "composer install"
-        run: composer install
-
-      - name: "composer test"
-        run: composer test
+      - name: Dump PHP version
+        env:
+          PHP_VERSION: ${{ matrix.php }}
+        run: echo "$PHP_VERSION"
+      - run: composer install
+      - run: composer test
