@@ -7,6 +7,9 @@ jobs:
     strategy:
       matrix:
         php: ['7.1', '7.2', '7.3']
+        include:
+          - php: '7.3'
+            coverage: true
     steps:
       - uses: actions/checkout@v1
       - name: Switch PHP version
@@ -16,8 +19,13 @@ jobs:
       - name: Install dependencies
         run: composer install
       - name: Run tests
+        run: composer test
+        if: matrix.coverage != true
+      - name: Run tests with coverage
         run: composer test -- --coverage-clover=coverage.xml
+        if: matrix.coverage
       - name: Upload coverage
         run: bash <(curl -s https://codecov.io/bash)
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        if: matrix.coverage
