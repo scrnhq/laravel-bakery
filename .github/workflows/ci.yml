@@ -13,9 +13,11 @@ jobs:
         env:
           PHP_VERSION: ${{ matrix.php }}
         run: sudo ln -sf "/usr/bin/php$PHP_VERSION" /etc/alternatives/php
-      - run: php -m | grep xdebug
-      - run: composer install
-      - run: composer test -- --coverage-clover=coverage.xml
-      - run: bash <(curl -s https://codecov.io/bash)
+      - name: Install dependencies
+        run: composer install
+      - name: Run tests
+        run: composer test -- --coverage-clover=coverage.xml
+      - name: Upload coverage
+        run: bash <(curl -s https://codecov.io/bash)
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
