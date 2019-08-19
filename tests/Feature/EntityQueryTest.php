@@ -142,13 +142,13 @@ class EntityQueryTest extends IntegrationTest
             query {
                 user(id: "'.$user->id.'") {
                     id
-                    articles_count
+                    articlesCount
                 }
             }
         ';
 
         $response = $this->graphql($query);
-        $response->assertJsonFragment(['articles_count' => 3]);
+        $response->assertJsonFragment(['articlesCount' => 3]);
     }
 
     /** @test */
@@ -318,7 +318,7 @@ class EntityQueryTest extends IntegrationTest
     }
 
     /** @test */
-    public function it_returns_data_for_camel_case_fields()
+    public function it_returns_data_for_field_with_configured_column_name()
     {
         $article = factory(Article::class)->create();
 
@@ -330,14 +330,21 @@ class EntityQueryTest extends IntegrationTest
     }
 
     /** @test */
-    public function it_returns_data_for_snake_case_fields()
+    public function it_returns_data_for_relations_with_configured_column_name()
     {
         $article = factory(Article::class)->create();
+        $comments = factory(Comment::class, 2)->create(['commentable_id' => $article->id]);
 
         $response = $this->graphql('query($id: ID!) {
-            article(id: $id) { created_at }
+            article(id: $id) { author { id } authorId remarks { id } remarkIds remarksCount }
         }', ['id' => $article->id]);
 
-        $response->assertJsonFragment(['article' => ['created_at' => $article->created_at->toAtomString()]]);
+        $response->assertJsonFragment(['article' => [
+            'author' => ['id' => $article->user->id],
+            'authorId' => $article->user->id,
+            'remarks' => [['id' => $comments[0]->id], ['id' => $comments[1]->id]],
+            'remarkIds' => [$comments[0]->id, $comments[1]->id],
+            'remarksCount' => count($comments),
+        ]]);
     }
 }

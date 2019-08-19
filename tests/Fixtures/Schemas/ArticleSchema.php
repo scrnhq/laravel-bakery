@@ -15,8 +15,9 @@ class ArticleSchema extends ModelSchema
         return [
             'slug' => Field::string()->unique(),
             'title' => Field::string()->searchable(),
+            'name' => Field::string()->accessor('title')->searchable()->readOnly(),
             'created_at' => Field::type('Timestamp')->readOnly(),
-            'createdAt' => Field::type('Timestamp')->readOnly(),
+            'createdAt' => Field::type('Timestamp')->accessor('created_at')->readOnly(),
         ];
     }
 
@@ -24,8 +25,10 @@ class ArticleSchema extends ModelSchema
     {
         return [
             'user' => Field::model(UserSchema::class)->nullable()->searchable(),
+            'author' => Field::model(UserSchema::class)->nullable()->searchable()->accessor('user'),
             'tags' => Field::collection(TagSchema::class),
             'comments' => Field::collection(CommentSchema::class),
+            'remarks' => Field::collection(CommentSchema::class)->accessor('comments'),
         ];
     }
 }

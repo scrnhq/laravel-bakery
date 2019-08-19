@@ -193,11 +193,17 @@ abstract class ModelSchema
     {
         $key = $this->instance->getKeyName();
 
-        if (! $key) {
+        if ( ! $key) {
             return [];
         }
 
-        return [$key => $this->registry->field($this->registry->ID())->fillable(false)->unique()];
+        $field = $this->registry->field($this->registry->ID())
+            ->setName($key)
+            ->accessor($key)
+            ->fillable(false)
+            ->unique();
+
+        return [$key => $field];
     }
 
     /**
@@ -207,7 +213,13 @@ abstract class ModelSchema
      */
     public function getFields(): Collection
     {
-        return collect($this->getKeyField())->merge($this->fields());
+        return collect($this->getKeyField())->merge($this->fields())->map(function (Field $field, string $key) {
+            if ( ! $field->getAccessor()) {
+                $field->accessor($key);
+            }
+
+            return $field;
+        });
     }
 
     /**
@@ -274,7 +286,7 @@ abstract class ModelSchema
         return collect()
             ->merge($fields)
             ->merge($relations)
-            ->map(function (Field $field, $key) {
+            ->map(function (Field $field) {
                 return $field->nullable();
             });
     }
@@ -298,7 +310,13 @@ abstract class ModelSchema
      */
     public function getRelationFields(): Collection
     {
-        return collect($this->relations());
+        return collect($this->relations())->map(function (Field $field, string $key) {
+            if ( ! $field->getAccessor()) {
+                $field->accessor($key);
+            }
+
+            return $field;
+        });
     }
 
     /**
@@ -321,9 +339,15 @@ abstract class ModelSchema
      */
     public function getRelations(): Collection
     {
-        $relations = collect($this->relations());
+        return collect($this->relations())->map(function (Field $field, string $key) {
+            if ( ! $field->getAccessor()) {
+                $field->accessor($key);
+            }
 
-        return $relations->map(function ($field, $key) {
+            return $field;
+        })->map(function (Field $field) {
+            $key = $field->getAccessor();
+
             Utils::invariant(
                 method_exists($this->getModel(), $key),
                 'Relation "'.$key.'" is not defined on "'.get_class($this->getModel()).'".'

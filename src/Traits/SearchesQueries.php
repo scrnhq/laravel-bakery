@@ -2,15 +2,18 @@
 
 namespace Bakery\Traits;
 
-use Bakery\Support\Facades\Bakery;
+use Bakery\Support\Arguments;
+use Bakery\Eloquent\ModelSchema;
+use Bakery\Support\TypeRegistry;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Connection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\Grammars;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
- * @property \Bakery\Eloquent\ModelSchema $modelSchema
- * @property \Bakery\Support\TypeRegistry $registry
+ * @property ModelSchema $modelSchema
+ * @property TypeRegistry $registry
  */
 trait SearchesQueries
 {
@@ -18,17 +21,17 @@ trait SearchesQueries
      * Apply search on the query.
      *
      * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param array $args
+     * @param Arguments $args
      * @return Builder
      */
-    protected function applySearch(Builder $query, array $args)
+    protected function applySearch(Builder $query, Arguments $args)
     {
         // If the query is empty, we don't need to perform any search.
         if (empty($args['query'])) {
             return $query;
         }
 
-        /** @var \Illuminate\Database\Connection $connection */
+        /** @var Connection $connection */
         $connection = DB::connection();
 
         $this->tsFields = [];
@@ -56,7 +59,8 @@ trait SearchesQueries
         if ($grammar instanceof Grammars\PostgresGrammar) {
             $dictionary = config('bakery.postgresDictionary');
             $fields = implode(', ', $this->tsFields);
-            $query->whereRaw("to_tsvector('${dictionary}', concat_ws(' ', ".$fields.")) @@ to_tsquery('${dictionary}', ?)", ["'{$qualifiedNeedle}':*"]);
+            $query->whereRaw("to_tsvector('${dictionary}', concat_ws(' ', ".$fields.")) @@ to_tsquery('${dictionary}', ?)",
+                ["'{$qualifiedNeedle}':*"]);
         }
 
         return $query;
@@ -71,8 +75,13 @@ trait SearchesQueries
      * @param string $needle
      * @param array $fields
      */
-    protected function applyRelationalSearch(Builder $query, Model $model, string $relation, string $needle, array $fields)
-    {
+    protected function applyRelationalSearch(
+        Builder $query,
+        Model $model,
+        string $relation,
+        string $needle,
+        array $fields
+    ) {
         /** @var \Illuminate\Database\Eloquent\Relations\Relation $relation */
         $relation = $model->$relation();
         $related = $relation->getRelated();
