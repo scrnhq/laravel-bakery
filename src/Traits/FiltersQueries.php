@@ -47,7 +47,7 @@ trait FiltersQueries
             if ($key === 'AND' || $key === 'OR') {
                 $query->where(function ($query) use ($value, $key) {
                     foreach ($value as $set) {
-                        if ( ! empty($set)) {
+                        if (! empty($set)) {
                             $this->applyFiltersRecursively($query, $set, $key);
                         }
                     }

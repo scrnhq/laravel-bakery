@@ -7,9 +7,9 @@ use Bakery\Support\Arguments;
 use Bakery\Support\TypeRegistry;
 use Illuminate\Support\Facades\Gate;
 use Bakery\Types\Definitions\RootType;
+use function Bakery\is_callable_tuple;
 use GraphQL\Type\Definition\ResolveInfo;
 use Illuminate\Auth\Access\AuthorizationException;
-use function Bakery\is_callable_tuple;
 
 class Field
 {
@@ -506,7 +506,7 @@ class Field
         $args = new Arguments($args);
 
         if (isset($this->viewPolicy)) {
-            if ( ! $this->authorizeToRead($root, $info->fieldName)) {
+            if (! $this->authorizeToRead($root, $info->fieldName)) {
                 return null;
             }
         }
@@ -547,7 +547,7 @@ class Field
         $policy = $this->viewPolicy;
 
         // Check if there is a policy.
-        if ( ! $policy) {
+        if (! $policy) {
             return true;
         }
 
@@ -598,7 +598,7 @@ class Field
         $policy = $this->storePolicy;
 
         // Check if there is a policy.
-        if ( ! $policy) {
+        if (! $policy) {
             return true;
         }
 

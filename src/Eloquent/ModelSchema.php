@@ -193,7 +193,7 @@ abstract class ModelSchema
     {
         $key = $this->instance->getKeyName();
 
-        if ( ! $key) {
+        if (! $key) {
             return [];
         }
 
@@ -214,7 +214,7 @@ abstract class ModelSchema
     public function getFields(): Collection
     {
         return collect($this->getKeyField())->merge($this->fields())->map(function (Field $field, string $key) {
-            if ( ! $field->getAccessor()) {
+            if (! $field->getAccessor()) {
                 $field->accessor($key);
             }
 
@@ -311,7 +311,7 @@ abstract class ModelSchema
     public function getRelationFields(): Collection
     {
         return collect($this->relations())->map(function (Field $field, string $key) {
-            if ( ! $field->getAccessor()) {
+            if (! $field->getAccessor()) {
                 $field->accessor($key);
             }
 
@@ -340,7 +340,7 @@ abstract class ModelSchema
     public function getRelations(): Collection
     {
         return collect($this->relations())->map(function (Field $field, string $key) {
-            if ( ! $field->getAccessor()) {
+            if (! $field->getAccessor()) {
                 $field->accessor($key);
             }
 
