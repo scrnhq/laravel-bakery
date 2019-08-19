@@ -502,7 +502,7 @@ class Field
      */
     public function resolveField($root, array $args, $context, ResolveInfo $info)
     {
-        $key = $this->getAccessor() ?: $info->fieldName;
+        $accessor = $this->getAccessor() ?: $info->fieldName;
         $args = new Arguments($args);
 
         if (isset($this->viewPolicy)) {
@@ -512,10 +512,10 @@ class Field
         }
 
         if (isset($this->resolver)) {
-            return call_user_func_array($this->resolver, [$root, $key, $args, $context, $info]);
+            return call_user_func_array($this->resolver, [$root, $accessor, $args, $context, $info]);
         }
 
-        return self::defaultResolver($root, $key, $args, $context, $info);
+        return self::defaultResolver($root, $accessor, $args, $context, $info);
     }
 
     /**
@@ -636,21 +636,21 @@ class Field
      * The default resolver for resolving the value of the type.
      * This gets called when there is no custom resolver defined.
      *
-     * @param string $key
+     * @param string $accessor
      * @param Arguments $args
      * @param $root
      * @param $context
      * @param \GraphQL\Type\Definition\ResolveInfo $info
      * @return mixed|null
      */
-    public static function defaultResolver($root, string $key, Arguments $args, $context, ResolveInfo $info)
+    public static function defaultResolver($root, string $accessor, Arguments $args, $context, ResolveInfo $info)
     {
         $property = null;
 
         if (Arr::accessible($root)) {
-            $property = $root[$key];
+            $property = $root[$accessor];
         } elseif (is_object($root)) {
-            $property = $root->{$key};
+            $property = $root->{$accessor};
         }
 
         return $property instanceof \Closure ? $property($args, $root, $context, $info) : $property;

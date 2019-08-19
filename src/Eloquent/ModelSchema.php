@@ -198,7 +198,6 @@ abstract class ModelSchema
         }
 
         $field = $this->registry->field($this->registry->ID())
-            ->setName($key)
             ->accessor($key)
             ->fillable(false)
             ->unique();
@@ -346,14 +345,14 @@ abstract class ModelSchema
 
             return $field;
         })->map(function (Field $field) {
-            $key = $field->getAccessor();
+            $accessor = $field->getAccessor();
 
             Utils::invariant(
-                method_exists($this->getModel(), $key),
-                'Relation "'.$key.'" is not defined on "'.get_class($this->getModel()).'".'
+                method_exists($this->getModel(), $accessor),
+                'Relation "'.$accessor.'" is not defined on "'.get_class($this->getModel()).'".'
             );
 
-            return $this->getModel()->{$key}();
+            return $this->getModel()->{$accessor}();
         });
     }
 
