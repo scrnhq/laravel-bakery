@@ -45,6 +45,10 @@
   "scripts": {
     "test": "vendor/bin/phpunit"
   },
+  "config": {
+    "process-timeout": 0,
+    "sort-packages": true
+  },
   "extra": {
     "laravel": {
       "providers": [

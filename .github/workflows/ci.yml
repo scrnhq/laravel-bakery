@@ -1,15 +1,34 @@
-name: CI
-
-on: [push]
+name: "CI"
+on:
+  push:
+    branches: master
+  pull_request:
 
 jobs:
-  build:
-
+  test:
     runs-on: ubuntu-latest
-    
+    strategy:
+      matrix:
+        php: ['7.1', '7.2', '7.3']
+        include:
+          - php: '7.3'
+            coverage: true
     steps:
-    - uses: actions/checkout@master
-    - name: Install dependencies
-      run: composer install
-    - name: Test with PHPUnit
-      run: composer test
+      - uses: actions/checkout@v1
+      - name: Switch PHP version
+        env:
+          PHP_VERSION: ${{ matrix.php }}
+        run: sudo ln -sf "/usr/bin/php$PHP_VERSION" /etc/alternatives/php
+      - name: Install dependencies
+        run: composer install
+      - name: Run tests
+        run: composer test
+        if: matrix.coverage != true
+      - name: Run tests with coverage
+        run: composer test -- --coverage-clover=coverage.xml
+        if: matrix.coverage
+      - name: Upload coverage
+        run: bash <(curl -s https://codecov.io/bash) -C $GITHUB_SHA -B ${GITHUB_REF#refs/heads/} -Z
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        if: matrix.coverage
