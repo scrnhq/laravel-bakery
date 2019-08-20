@@ -121,6 +121,37 @@ class CollectionQueryTest extends IntegrationTest
     }
 
     /** @test */
+    public function it_can_filter_by_null()
+    {
+        factory(Article::class)->create([
+            'title' => 'foo',
+        ]);
+        factory(Article::class)->create([
+            'title' => 'bar',
+        ]);
+
+        $query = '
+            query {
+                articles(filter: {
+                    title: null,
+                }) {
+                    items {
+                        id
+                        title
+                    }
+                    pagination {
+                        total
+                    }
+                }
+            }
+        ';
+
+        $response = $this->graphql($query);
+
+        $response->assertJsonFragment(['total' => 0]);
+    }
+
+    /** @test */
     public function it_can_filter_by_aliased_fields()
     {
         factory(Article::class)->create([
@@ -154,7 +185,7 @@ class CollectionQueryTest extends IntegrationTest
     }
 
     /** @test */
-    public function it_can_filter_with_dyanmic_field_filters()
+    public function it_can_filter_with_dynamic_field_filters()
     {
         factory(Article::class)->create(['title' => 'Hello world']);
         factory(Article::class)->create(['title' => 'Hello mars']);
@@ -182,6 +213,37 @@ class CollectionQueryTest extends IntegrationTest
         $response->assertJsonFragment(['title' => 'Hello mars']);
         $response->assertJsonMissing(['title' => 'Goodbye world']);
     }
+
+    /** @test */
+    public function it_can_filter_with_dynamic_array_filters()
+    {
+        factory(Article::class)->create(['title' => 'Hello world']);
+        factory(Article::class)->create(['title' => 'Hello mars']);
+        factory(Article::class)->create(['title' => 'Goodbye world']);
+
+        $query = '
+            query {
+                articles(filter: {
+                    titleIn: ["Hello world", "Hello mars"],
+                }) {
+                    items {
+                        id
+                        title
+                    }
+                    pagination {
+                        total
+                    }
+                }
+            }
+        ';
+
+        $response = $this->graphql($query);
+        $response->assertJsonFragment(['total' => 2]);
+        $response->assertJsonFragment(['title' => 'Hello world']);
+        $response->assertJsonFragment(['title' => 'Hello mars']);
+        $response->assertJsonMissing(['title' => 'Goodbye world']);
+    }
+
 
     /** @test */
     public function it_can_filter_with_AND_filters()
@@ -574,6 +636,43 @@ class CollectionQueryTest extends IntegrationTest
         $response->assertJsonFragment(['id' => '1']);
         $response->assertJsonFragment(['id' => '2']);
         $response->assertJsonMissing(['id' => '3']);
+    }
+
+    /** @test */
+    public function it_can_filter_by_relation_with_null()
+    {
+        $firstUser = factory(User::class)->create();
+        $secondUser = factory(User::class)->create();
+
+        factory(Phone::class)->create([
+            'user_id' => $firstUser->id,
+        ]);
+
+        factory(Article::class, 2)->create(['user_id' => $firstUser->id]);
+        factory(Article::class)->create(['user_id' => $secondUser->id]);
+
+        $query = '
+            query {
+                articles(filter: {
+                    author: {
+                        phone: null
+                    }
+                }) {
+                    items {
+                        id
+                    }
+                    pagination {
+                        total
+                    }
+                }
+            }
+        ';
+
+        $response = $this->graphql($query);
+        $response->assertJsonFragment(['total' => 1]);
+        $response->assertJsonMissing(['id' => '1']);
+        $response->assertJsonMissing(['id' => '2']);
+        $response->assertJsonFragment(['id' => '3']);
     }
 
     /** @test */
