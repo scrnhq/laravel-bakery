@@ -111,36 +111,37 @@ trait FiltersQueries
 
         $likeOperator = $this->getCaseInsensitiveLikeOperator();
 
-        $table = $query->getModel()->getTable().'.';
+        $table = $query->getModel()->getTable();
+        $qualifiedColumn = $table.'.'.$column;
 
         if (ends_with($key, 'NotContains')) {
-            $query->where($column, 'NOT '.$likeOperator, '%'.$value.'%', $type);
+            $query->where($qualifiedColumn, 'NOT '.$likeOperator, '%'.$value.'%', $type);
         } elseif (ends_with($key, 'Contains')) {
-            $query->where($table.$column, $likeOperator, '%'.$value.'%', $type);
+            $query->where($qualifiedColumn, $likeOperator, '%'.$value.'%', $type);
         } elseif (ends_with($key, 'NotStartsWith')) {
-            $query->where($table.$column, 'NOT '.$likeOperator, $value.'%', $type);
+            $query->where($qualifiedColumn, 'NOT '.$likeOperator, $value.'%', $type);
         } elseif (ends_with($key, 'StartsWith')) {
-            $query->where($table.$column, $likeOperator, $value.'%', $type);
+            $query->where($qualifiedColumn, $likeOperator, $value.'%', $type);
         } elseif (ends_with($key, 'NotEndsWith')) {
-            $query->where($table.$column, 'NOT '.$likeOperator, '%'.$value, $type);
+            $query->where($qualifiedColumn, 'NOT '.$likeOperator, '%'.$value, $type);
         } elseif (ends_with($key, 'EndsWith')) {
-            $query->where($table.$column, $likeOperator, '%'.$value, $type);
+            $query->where($qualifiedColumn, $likeOperator, '%'.$value, $type);
         } elseif (ends_with($key, 'Not')) {
-            $query->where($table.$column, '!=', $value, $type);
+            $query->where($qualifiedColumn, '!=', $value, $type);
         } elseif (ends_with($key, 'NotIn')) {
-            $query->whereNotIn($table.$column, $value, $type);
+            $query->whereNotIn($qualifiedColumn, $value, $type);
         } elseif (ends_with($key, 'In')) {
-            $query->whereIn($table.$column, $value, $type);
+            $query->whereIn($qualifiedColumn, $value, $type);
         } elseif (ends_with($key, 'LessThan')) {
-            $query->where($table.$column, '<', $value, $type);
+            $query->where($qualifiedColumn, '<', $value, $type);
         } elseif (ends_with($key, 'LessThanOrEquals')) {
-            $query->where($table.$column, '<=', $value, $type);
+            $query->where($qualifiedColumn, '<=', $value, $type);
         } elseif (ends_with($key, 'GreaterThan')) {
-            $query->where($table.$column, '>', $value, $type);
+            $query->where($qualifiedColumn, '>', $value, $type);
         } elseif (ends_with($key, 'GreaterThanOrEquals')) {
-            $query->where($table.$column, '>=', $value, $type);
+            $query->where($qualifiedColumn, '>=', $value, $type);
         } else {
-            $query->where($table.$column, '=', $value, $type);
+            $query->where($qualifiedColumn, '=', $value, $type);
         }
 
         return $query;
