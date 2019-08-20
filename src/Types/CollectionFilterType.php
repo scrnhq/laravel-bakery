@@ -13,7 +13,7 @@ class CollectionFilterType extends EloquentInputType
     /**
      * @var array
      */
-    static $filters = [
+    public static $filters = [
         'Contains',
         'NotContains',
         'StartsWith',

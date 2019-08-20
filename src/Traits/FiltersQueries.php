@@ -2,7 +2,6 @@
 
 namespace Bakery\Traits;
 
-use Bakery\Fields\Field;
 use Illuminate\Support\Str;
 use Bakery\Support\Arguments;
 use Bakery\Eloquent\ModelSchema;
@@ -162,15 +161,14 @@ trait FiltersQueries
 
     /**
      * Get the key for a certain filter.
-     * E.g. TitleStartsWith => Title
+     * E.g. TitleStartsWith => Title.
      *
      * @param string $subject
      * @return string
      */
     protected function getKeyForFilter(string $subject): string
     {
-        foreach (CollectionFilterType::$filters as $filter)
-        {
+        foreach (CollectionFilterType::$filters as $filter) {
             if (Str::endsWith($subject, $filter)) {
                 return Str::before($subject, $filter);
             }

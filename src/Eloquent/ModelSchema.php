@@ -357,7 +357,7 @@ abstract class ModelSchema
     }
 
     /**
-     * Return a field with a defined
+     * Return a field with a defined.
      *
      * @param string $key
      * @return Field|null
@@ -365,7 +365,7 @@ abstract class ModelSchema
     public function getFieldByKey(string $key): ?Field
     {
         return $this->getFields()->merge($this->getRelationFields())
-            ->first(function(Field $field, $fieldKey) use ($key) {
+            ->first(function (Field $field, $fieldKey) use ($key) {
                 return $fieldKey === $key;
             });
     }
