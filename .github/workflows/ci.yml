@@ -28,7 +28,7 @@ jobs:
         run: composer test -- --coverage-clover=coverage.xml
         if: matrix.coverage
       - name: Upload coverage
-        run: bash <(curl -s https://codecov.io/bash) --commit=$GITHUB_SHA --branch=${GITHUB_REF#refs/heads/}
+        run: bash <(curl -s https://codecov.io/bash) -C $GITHUB_SHA -B ${GITHUB_REF#refs/heads/}
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         if: matrix.coverage
