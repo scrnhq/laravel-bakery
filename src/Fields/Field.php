@@ -150,7 +150,7 @@ class Field
     }
 
     /**
-     * Return if the field represents an relationship.
+     * Return if the field represents a relationship.
      */
     public function isRelationship(): bool
     {
