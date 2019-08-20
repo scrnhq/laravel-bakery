@@ -163,7 +163,7 @@ class CollectionQueryTest extends IntegrationTest
         $query = '
             query {
                 articles(filter: {
-                    title_contains: "hello",
+                    titleContains: "hello",
                 }) {
                     items {
                         id
@@ -193,7 +193,7 @@ class CollectionQueryTest extends IntegrationTest
         $query = '
             query {
                 articles(filter: {
-                    AND: [{title_contains: "hello"}, {slug: "hello-world"}]
+                    AND: [{titleContains: "hello"}, {slug: "hello-world"}]
                 }) {
                     items {
                         id
@@ -224,7 +224,7 @@ class CollectionQueryTest extends IntegrationTest
         $query = '
             query {
                 articles(filter: {
-                    OR: [{title_contains: "world"}, {title_contains: "goodbye"}]
+                    OR: [{titleContains: "world"}, {titleContains: "goodbye"}]
                 }) {
                     items {
                         id
@@ -363,6 +363,30 @@ class CollectionQueryTest extends IntegrationTest
     }
 
     /** @test */
+    public function it_can_order_by_alias()
+    {
+        $first = factory(Article::class)->create(['title' => 'Hello world']);
+        $second = factory(Article::class)->create(['title' => 'Hello mars']);
+        $third = factory(Article::class)->create(['title' => 'Goodbye world']);
+
+        $query = '
+            query {
+                articles(orderBy: { name: ASC }) {
+                    items {
+                        id
+                    }
+                }
+            }
+        ';
+
+        $response = $this->graphql($query);
+        $result = json_decode($response->getContent())->data->articles;
+        $this->assertEquals($result->items[0]->id, $third->id);
+        $this->assertEquals($result->items[1]->id, $second->id);
+        $this->assertEquals($result->items[2]->id, $first->id);
+    }
+
+    /** @test */
     public function it_can_order_by_combination_of_nested_relations()
     {
         $john = factory(User::class)->create(['email' => 'john.doe@example.com']);
@@ -386,6 +410,40 @@ class CollectionQueryTest extends IntegrationTest
                         phone: {
                             number: DESC
                         }
+                    }
+                }) {
+                    items {
+                        id
+                        title
+                    }
+                }
+            }
+        ';
+
+        $response = $this->graphql($query);
+        $result = json_decode($response->getContent())->data->articles;
+        $this->assertEquals($result->items[0]->id, $articleByJoe->id);
+        $this->assertEquals($result->items[1]->id, $articleByJane->id);
+        $this->assertEquals($result->items[2]->id, $articleByJohn->id);
+    }
+
+    /** @test */
+    public function it_can_order_by_relationship_alias()
+    {
+        $john = factory(User::class)->create(['email' => 'john.doe@example.com']);
+        $jane = factory(User::class)->create(['email' => 'jane.doe@example.com']);
+        $joe = factory(User::class)->create(['email' => 'joe.doe@example.com']);
+
+        $articleByJohn = factory(Article::class)->create(['title' => 'Hello world', 'user_id' => $john->id]);
+        $articleByJane = factory(Article::class)->create(['title' => 'Hello world', 'user_id' => $jane->id]);
+        $articleByJoe = factory(Article::class)->create(['title' => 'Hello mars', 'user_id' => $joe->id]);
+
+        $query = '
+            query {
+                articles(orderBy: { 
+                    title: ASC,
+                    author: {
+                        email: ASC
                     }
                 }) {
                     items {

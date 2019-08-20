@@ -3,11 +3,13 @@
 namespace Bakery\Traits;
 
 use Bakery\Fields\Field;
+use Illuminate\Support\Str;
 use Bakery\Support\Arguments;
 use Bakery\Eloquent\ModelSchema;
 use Bakery\Support\TypeRegistry;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Connection;
+use Bakery\Types\CollectionFilterType;
 use Illuminate\Database\Query\Grammars;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -43,32 +45,26 @@ trait FiltersQueries
      */
     protected function applyFiltersRecursively(Builder $query, Arguments $args = null, $type = null): Builder
     {
-        foreach ($args as $key => $value) {
-            if ($key === 'AND' || $key === 'OR') {
-                $query->where(function ($query) use ($value, $key) {
+        foreach ($args as $filter => $value) {
+            if ($filter === 'AND' || $filter === 'OR') {
+                $query->where(function ($query) use ($value, $filter) {
                     foreach ($value as $set) {
                         if (! empty($set)) {
-                            $this->applyFiltersRecursively($query, $set, $key);
+                            $this->applyFiltersRecursively($query, $set, $filter);
                         }
                     }
                 });
             } else {
+                $key = $this->getKeyForFilter($filter);
                 $schema = $this->registry->resolveSchemaForModel(get_class($query->getModel()));
+                $field = $schema->getFieldByKey($key);
 
-                if ($schema->getRelationFields()->has($key)) {
-                    // TODO: Extract this.
-                    $relation = $schema->getRelationFields()->first(function (Field $field, string $fieldKey) use ($key) {
-                        return $key === $fieldKey;
-                    })->getAccessor();
-
+                if ($field->isRelationship()) {
+                    $relation = $field->getAccessor();
                     $this->applyRelationFilter($query, $relation, $value, $type);
                 } else {
-                    // TODO: Extract this.
-                    $column = $schema->getFields()->first(function (Field $field, string $fieldKey) use ($key) {
-                        return $key === $fieldKey;
-                    })->getAccessor();
-
-                    $this->filter($query, $key, $column, $value, $type);
+                    $column = $field->getAccessor();
+                    $this->filter($query, $filter, $column, $value, $type);
                 }
             }
         }
@@ -118,31 +114,31 @@ trait FiltersQueries
 
         $table = $query->getModel()->getTable().'.';
 
-        if (ends_with($key, '_not_contains')) {
+        if (ends_with($key, 'NotContains')) {
             $query->where($column, 'NOT '.$likeOperator, '%'.$value.'%', $type);
-        } elseif (ends_with($key, '_contains')) {
+        } elseif (ends_with($key, 'Contains')) {
             $query->where($table.$column, $likeOperator, '%'.$value.'%', $type);
-        } elseif (ends_with($key, '_not_starts_with')) {
+        } elseif (ends_with($key, 'NotStartsWith')) {
             $query->where($table.$column, 'NOT '.$likeOperator, $value.'%', $type);
-        } elseif (ends_with($key, '_starts_with')) {
+        } elseif (ends_with($key, 'StartsWith')) {
             $query->where($table.$column, $likeOperator, $value.'%', $type);
-        } elseif (ends_with($key, '_not_ends_with')) {
+        } elseif (ends_with($key, 'NotEndsWith')) {
             $query->where($table.$column, 'NOT '.$likeOperator, '%'.$value, $type);
-        } elseif (ends_with($key, '_ends_with')) {
+        } elseif (ends_with($key, 'EndsWith')) {
             $query->where($table.$column, $likeOperator, '%'.$value, $type);
-        } elseif (ends_with($key, '_not')) {
+        } elseif (ends_with($key, 'Not')) {
             $query->where($table.$column, '!=', $value, $type);
-        } elseif (ends_with($key, '_not_in')) {
+        } elseif (ends_with($key, 'NotIn')) {
             $query->whereNotIn($table.$column, $value, $type);
-        } elseif (ends_with($key, '_in')) {
+        } elseif (ends_with($key, 'In')) {
             $query->whereIn($table.$column, $value, $type);
-        } elseif (ends_with($key, '_lt')) {
+        } elseif (ends_with($key, 'LessThan')) {
             $query->where($table.$column, '<', $value, $type);
-        } elseif (ends_with($key, '_lte')) {
+        } elseif (ends_with($key, 'LessThanOrEquals')) {
             $query->where($table.$column, '<=', $value, $type);
-        } elseif (ends_with($key, '_gt')) {
+        } elseif (ends_with($key, 'GreaterThan')) {
             $query->where($table.$column, '>', $value, $type);
-        } elseif (ends_with($key, '_gte')) {
+        } elseif (ends_with($key, 'GreaterThanOrEquals')) {
             $query->where($table.$column, '>=', $value, $type);
         } else {
             $query->where($table.$column, '=', $value, $type);
@@ -162,5 +158,24 @@ trait FiltersQueries
         $connection = DB::connection();
 
         return $connection->getQueryGrammar() instanceof Grammars\PostgresGrammar ? 'ILIKE' : 'LIKE';
+    }
+
+    /**
+     * Get the key for a certain filter.
+     * E.g. TitleStartsWith => Title
+     *
+     * @param string $subject
+     * @return string
+     */
+    protected function getKeyForFilter(string $subject): string
+    {
+        foreach (CollectionFilterType::$filters as $filter)
+        {
+            if (Str::endsWith($subject, $filter)) {
+                return Str::before($subject, $filter);
+            }
+        }
+
+        return $subject;
     }
 }

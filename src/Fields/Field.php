@@ -150,6 +150,14 @@ class Field
     }
 
     /**
+     * Return if the field represents an relationship.
+     */
+    public function isRelationship(): bool
+    {
+        return $this instanceof EloquentField || $this instanceof PolymorphicField;
+    }
+
+    /**
      * Define the name of the field.
      *
      * This method can be overridden when extending the Field.

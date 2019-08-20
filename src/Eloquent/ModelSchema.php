@@ -357,6 +357,20 @@ abstract class ModelSchema
     }
 
     /**
+     * Return a field with a defined
+     *
+     * @param string $key
+     * @return Field|null
+     */
+    public function getFieldByKey(string $key): ?Field
+    {
+        return $this->getFields()->merge($this->getRelationFields())
+            ->first(function(Field $field, $fieldKey) use ($key) {
+                return $fieldKey === $key;
+            });
+    }
+
+    /**
      * Get the connections of the resource.
      *
      * @return \Illuminate\Support\Collection

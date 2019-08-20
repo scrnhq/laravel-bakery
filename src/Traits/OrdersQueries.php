@@ -24,12 +24,15 @@ trait OrdersQueries
      */
     protected function applyOrderBy(Builder $query, Arguments $args): Builder
     {
-        $relations = $this->modelSchema->getRelationFields();
         foreach ($args as $key => $value) {
-            if ($relations->keys()->contains($key)) {
-                $this->applyRelationalOrderBy($query, $this->model, $key, $value);
+            $field = $this->modelSchema->getFieldByKey($key);
+
+            if ($field->isRelationship()) {
+                $relation = $field->getAccessor();
+                $this->applyRelationalOrderBy($query, $this->model, $relation, $value);
             } else {
-                $this->orderBy($query, $query->getModel()->getTable().'.'.$key, $value);
+                $column = $field->getAccessor();
+                $this->orderBy($query, $query->getModel()->getTable().'.'.$column, $value);
             }
         }
 
