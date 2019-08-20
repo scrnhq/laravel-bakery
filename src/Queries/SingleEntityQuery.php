@@ -57,8 +57,6 @@ class SingleEntityQuery extends EloquentQuery
      */
     public function resolve(Arguments $args, $root, $context, ResolveInfo $info): ?Model
     {
-        $primaryKey = $this->model->getKeyName();
-
         $query = $this->scopeQuery($this->modelSchema->getQuery());
 
         $fields = $info->getFieldSelection(config('bakery.security.eagerLoadingMaxDepth'));
@@ -68,7 +66,7 @@ class SingleEntityQuery extends EloquentQuery
             return $query->find($args->primaryKey);
         }
 
-        $results = $this->queryByArgs($query, $args->toArray())->get();
+        $results = $this->queryByArgs($query, $args)->get();
 
         if ($results->count() < 1) {
             return null;
@@ -86,13 +84,13 @@ class SingleEntityQuery extends EloquentQuery
      * Query by the arguments supplied to the query.
      *
      * @param Builder $query
-     * @param array $args
+     * @param Arguments $args
      * @return Builder
      */
-    protected function queryByArgs(Builder $query, array $args): Builder
+    protected function queryByArgs(Builder $query, Arguments $args): Builder
     {
         foreach ($args as $key => $value) {
-            if (is_array($value)) {
+            if ($value instanceof Arguments) {
                 $query->whereHas($key, function (Builder $query) use ($value) {
                     $this->queryByArgs($query, $value);
                 });

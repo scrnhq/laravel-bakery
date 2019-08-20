@@ -11,6 +11,25 @@ use Bakery\Types\Definitions\EloquentInputType;
 class CollectionFilterType extends EloquentInputType
 {
     /**
+     * @var array
+     */
+    public static $filters = [
+        'Contains',
+        'NotContains',
+        'StartsWith',
+        'NotStartsWith',
+        'EndsWith',
+        'NotEndsWith',
+        'Not',
+        'NotIn',
+        'In',
+        'LessThan',
+        'LessThanOrEquals',
+        'GreaterThan',
+        'GreaterThanOrEquals',
+    ];
+
+    /**
      * Get the name of the Collection Filter BakeField.
      *
      * @return string
@@ -88,19 +107,10 @@ class CollectionFilterType extends EloquentInputType
         $type = $field->getType();
 
         $fields->put($name, $this->registry->field($type));
-        $fields->put($name.'_contains', $this->registry->field($type));
-        $fields->put($name.'_not_contains', $this->registry->field($type));
-        $fields->put($name.'_starts_with', $this->registry->field($type));
-        $fields->put($name.'_not_starts_with', $this->registry->field($type));
-        $fields->put($name.'_ends_with', $this->registry->field($type));
-        $fields->put($name.'_not_ends_with', $this->registry->field($type));
-        $fields->put($name.'_not', $this->registry->field($type));
-        $fields->put($name.'_not_in', $this->registry->field($type)->list());
-        $fields->put($name.'_in', $this->registry->field($type)->list());
-        $fields->put($name.'_lt', $this->registry->field($type));
-        $fields->put($name.'_lte', $this->registry->field($type));
-        $fields->put($name.'_gt', $this->registry->field($type));
-        $fields->put($name.'_gte', $this->registry->field($type));
+
+        foreach (self::$filters as $filter) {
+            $fields->put($name.$filter, $this->registry->field($type));
+        }
 
         return $fields;
     }

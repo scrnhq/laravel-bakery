@@ -3,7 +3,7 @@
 namespace Bakery\Fields;
 
 use Illuminate\Support\Arr;
-use Illuminate\Support\Str;
+use Bakery\Support\Arguments;
 use Bakery\Support\TypeRegistry;
 use Illuminate\Support\Facades\Gate;
 use Bakery\Types\Definitions\RootType;
@@ -37,6 +37,11 @@ class Field
      * @var string
      */
     protected $description;
+
+    /**
+     * @var string
+     */
+    protected $accessor;
 
     /**
      * @var bool
@@ -145,6 +150,14 @@ class Field
     }
 
     /**
+     * Return if the field represents a relationship.
+     */
+    public function isRelationship(): bool
+    {
+        return $this instanceof EloquentField || $this instanceof PolymorphicField;
+    }
+
+    /**
      * Define the name of the field.
      *
      * This method can be overridden when extending the Field.
@@ -198,6 +211,29 @@ class Field
     public function description(string $description): self
     {
         $this->description = $description;
+
+        return $this;
+    }
+
+    /**
+     * Return the name of the database column associated with this field.
+     *
+     * @return string|null
+     */
+    public function getAccessor(): ?string
+    {
+        return $this->accessor;
+    }
+
+    /**
+     * Define the name of the database column associated with this field.
+     *
+     * @param string $accessor
+     * @return Field
+     */
+    public function accessor(string $accessor): self
+    {
+        $this->accessor = $accessor;
 
         return $this;
     }
@@ -465,26 +501,29 @@ class Field
     /**
      * Resolve the field.
      *
-     * @param $source
+     * @param $root
      * @param array $args
      * @param $context
      * @param \GraphQL\Type\Definition\ResolveInfo $info
      * @return mixed|null
-     * @throws \Illuminate\Auth\Access\AuthorizationException
+     * @throws AuthorizationException
      */
-    public function resolveField($source, array $args, $context, ResolveInfo $info)
+    public function resolveField($root, array $args, $context, ResolveInfo $info)
     {
+        $accessor = $this->getAccessor() ?: $info->fieldName;
+        $args = new Arguments($args);
+
         if (isset($this->viewPolicy)) {
-            if (! $this->authorizeToRead($source, $info->fieldName)) {
+            if (! $this->authorizeToRead($root, $info->fieldName)) {
                 return null;
             }
         }
 
         if (isset($this->resolver)) {
-            return call_user_func_array($this->resolver, [$source, $args, $context, $info]);
+            return call_user_func_array($this->resolver, [$root, $accessor, $args, $context, $info]);
         }
 
-        return self::defaultResolver($source, $args, $context, $info);
+        return self::defaultResolver($root, $accessor, $args, $context, $info);
     }
 
     /**
@@ -605,24 +644,24 @@ class Field
      * The default resolver for resolving the value of the type.
      * This gets called when there is no custom resolver defined.
      *
-     * @param $source
-     * @param array $args
+     * @param string $accessor
+     * @param Arguments $args
+     * @param $root
      * @param $context
      * @param \GraphQL\Type\Definition\ResolveInfo $info
      * @return mixed|null
      */
-    public static function defaultResolver($source, array $args, $context, ResolveInfo $info)
+    public static function defaultResolver($root, string $accessor, Arguments $args, $context, ResolveInfo $info)
     {
-        $fieldName = $info->fieldName;
         $property = null;
 
-        if (Arr::accessible($source)) {
-            $property = $source[$fieldName] ?? $source[Str::snake($fieldName)] ?? null;
-        } elseif (is_object($source)) {
-            $property = $source->{$fieldName} ?? $source->{Str::snake($fieldName)} ?? null;
+        if (Arr::accessible($root)) {
+            $property = $root[$accessor];
+        } elseif (is_object($root)) {
+            $property = $root->{$accessor};
         }
 
-        return $property instanceof \Closure ? $property($source, $args, $context, $info) : $property;
+        return $property instanceof \Closure ? $property($args, $root, $context, $info) : $property;
     }
 
     /**

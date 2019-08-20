@@ -64,4 +64,14 @@ class Arguments extends ArrayObject
 
         return $array;
     }
+
+    /**
+     * Return if the arguments are empty.
+     *
+     * @return bool
+     */
+    public function isEmpty()
+    {
+        return empty($this->toArray());
+    }
 }

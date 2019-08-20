@@ -85,9 +85,8 @@ class EloquentCollectionQuery extends EloquentQuery
      */
     public function resolve(Arguments $args, $root, $context, ResolveInfo $info): LengthAwarePaginator
     {
-        $args = $args->toArray();
-        $page = array_get($args, 'page', 1);
-        $count = array_get($args, 'count', 15);
+        $page = $args->page ?? 1;
+        $count = $args->count ?? 15;
 
         $maxCount = config('bakery.security.paginationMaxCount');
 
@@ -103,16 +102,16 @@ class EloquentCollectionQuery extends EloquentQuery
         // Select all columns from the table.
         $query->addSelect($this->model->getTable().'.*');
 
-        if (array_key_exists('filter', $args) && ! empty($args['filter'])) {
-            $query = $this->applyFilters($query, $args['filter']);
+        if ($args->filter) {
+            $query = $this->applyFilters($query, $args->filter);
         }
 
-        if (array_key_exists('search', $args) && ! empty($args['search'])) {
-            $query = $this->applySearch($query, $args['search']);
+        if ($args->search) {
+            $query = $this->applySearch($query, $args->search);
         }
 
-        if (array_key_exists('orderBy', $args) && ! empty($args['orderBy'])) {
-            $query = $this->applyOrderBy($query, $args['orderBy']);
+        if ($args->orderBy) {
+            $query = $this->applyOrderBy($query, $args->orderBy);
         }
 
         return $query->distinct()->bakeryPaginate($count, ['*'], 'page', $page);

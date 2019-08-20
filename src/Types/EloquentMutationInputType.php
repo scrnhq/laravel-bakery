@@ -57,34 +57,38 @@ abstract class EloquentMutationInputType extends EloquentInputType
      * Set the relation fields.
      *
      * @param string $relation
-     * @param \Bakery\Fields\EloquentField $field
+     * @param EloquentField $root
      * @return Collection
      */
-    protected function getFieldsForRelation(string $relation, EloquentField $field): Collection
+    protected function getFieldsForRelation(string $relation, EloquentField $root): Collection
     {
         $fields = collect();
-        $field->setRegistry($this->registry);
-        $inputType = 'Create'.$field->getName().'Input';
-        $relationship = $this->model->{$relation}();
+        $root->setRegistry($this->registry);
+        $inputType = 'Create'.$root->getName().'Input';
+        $relationship = $this->model->{$root->getAccessor()}();
 
-        if ($field->isList()) {
+        if ($root->isList()) {
             $name = str_singular($relation).'Ids';
-            $fields->put($name, $this->registry->field($this->registry->ID())->list()->nullable());
+            $field = $this->registry->field($this->registry->ID())->list()->nullable()->accessor($relation);
+            $fields->put($name, $field);
 
             if ($this->registry->hasType($inputType)) {
-                $fields->put($relation, $this->registry->field($inputType)->list()->nullable());
+                $field = $this->registry->field($inputType)->list()->nullable()->accessor($relation);
+                $fields->put($relation, $field);
             }
         } else {
             $name = str_singular($relation).'Id';
-            $fields->put($name, $this->registry->field($this->registry->ID())->nullable());
+            $field = $this->registry->field($this->registry->ID())->nullable()->accessor($relation);
+            $fields->put($name, $field);
 
             if ($this->registry->hasType($inputType)) {
-                $fields->put($relation, $this->registry->field($inputType)->nullable());
+                $field = $this->registry->field($inputType)->nullable()->accessor($relation);
+                $fields->put($relation, $field);
             }
         }
 
         if ($relationship instanceof BelongsToMany) {
-            $fields = $fields->merge($this->getFieldsForPivot($field, $relationship));
+            $fields = $fields->merge($this->getFieldsForPivot($root, $relationship));
         }
 
         return $fields;

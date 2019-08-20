@@ -197,7 +197,12 @@ abstract class ModelSchema
             return [];
         }
 
-        return [$key => $this->registry->field($this->registry->ID())->fillable(false)->unique()];
+        $field = $this->registry->field($this->registry->ID())
+            ->accessor($key)
+            ->fillable(false)
+            ->unique();
+
+        return [$key => $field];
     }
 
     /**
@@ -207,7 +212,13 @@ abstract class ModelSchema
      */
     public function getFields(): Collection
     {
-        return collect($this->getKeyField())->merge($this->fields());
+        return collect($this->getKeyField())->merge($this->fields())->map(function (Field $field, string $key) {
+            if (! $field->getAccessor()) {
+                $field->accessor($key);
+            }
+
+            return $field;
+        });
     }
 
     /**
@@ -274,7 +285,7 @@ abstract class ModelSchema
         return collect()
             ->merge($fields)
             ->merge($relations)
-            ->map(function (Field $field, $key) {
+            ->map(function (Field $field) {
                 return $field->nullable();
             });
     }
@@ -298,7 +309,13 @@ abstract class ModelSchema
      */
     public function getRelationFields(): Collection
     {
-        return collect($this->relations());
+        return collect($this->relations())->map(function (Field $field, string $key) {
+            if (! $field->getAccessor()) {
+                $field->accessor($key);
+            }
+
+            return $field;
+        });
     }
 
     /**
@@ -321,16 +338,36 @@ abstract class ModelSchema
      */
     public function getRelations(): Collection
     {
-        $relations = collect($this->relations());
+        return collect($this->relations())->map(function (Field $field, string $key) {
+            if (! $field->getAccessor()) {
+                $field->accessor($key);
+            }
 
-        return $relations->map(function ($field, $key) {
+            return $field;
+        })->map(function (Field $field) {
+            $accessor = $field->getAccessor();
+
             Utils::invariant(
-                method_exists($this->getModel(), $key),
-                'Relation "'.$key.'" is not defined on "'.get_class($this->getModel()).'".'
+                method_exists($this->getModel(), $accessor),
+                'Relation "'.$accessor.'" is not defined on "'.get_class($this->getModel()).'".'
             );
 
-            return $this->getModel()->{$key}();
+            return $this->getModel()->{$accessor}();
         });
+    }
+
+    /**
+     * Return a field with a defined.
+     *
+     * @param string $key
+     * @return Field|null
+     */
+    public function getFieldByKey(string $key): ?Field
+    {
+        return $this->getFields()->merge($this->getRelationFields())
+            ->first(function (Field $field, $fieldKey) use ($key) {
+                return $fieldKey === $key;
+            });
     }
 
     /**

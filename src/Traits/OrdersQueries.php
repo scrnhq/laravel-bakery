@@ -2,12 +2,16 @@
 
 namespace Bakery\Traits;
 
+use Bakery\Support\Arguments;
+use Bakery\Eloquent\ModelSchema;
+use Bakery\Support\TypeRegistry;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\Relation;
 
 /**
- * @property \Bakery\Eloquent\ModelSchema $modelSchema
- * @property \Bakery\Support\TypeRegistry $registry
+ * @property ModelSchema $modelSchema
+ * @property TypeRegistry $registry
  */
 trait OrdersQueries
 {
@@ -15,17 +19,20 @@ trait OrdersQueries
      * Apply ordering on the query.
      *
      * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param array $args
+     * @param Arguments $args
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    protected function applyOrderBy(Builder $query, array $args): Builder
+    protected function applyOrderBy(Builder $query, Arguments $args): Builder
     {
-        $relations = $this->modelSchema->getRelationFields();
         foreach ($args as $key => $value) {
-            if ($relations->keys()->contains($key)) {
-                $this->applyRelationalOrderBy($query, $this->model, $key, $value);
+            $field = $this->modelSchema->getFieldByKey($key);
+
+            if ($field->isRelationship()) {
+                $relation = $field->getAccessor();
+                $this->applyRelationalOrderBy($query, $this->model, $relation, $value);
             } else {
-                $this->orderBy($query, $query->getModel()->getTable().'.'.$key, $value);
+                $column = $field->getAccessor();
+                $this->orderBy($query, $query->getModel()->getTable().'.'.$column, $value);
             }
         }
 
@@ -41,9 +48,9 @@ trait OrdersQueries
      * @param array $args
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    protected function applyRelationalOrderBy(Builder $query, Model $model, string $relation, array $args): Builder
+    protected function applyRelationalOrderBy(Builder $query, Model $model, string $relation, Arguments $args): Builder
     {
-        /** @var \Illuminate\Database\Eloquent\Relations\Relation $relation */
+        /** @var Relation $relation */
         $relation = $model->$relation();
         $related = $relation->getRelated();
         $query = $this->joinRelation($query, $relation, 'left');

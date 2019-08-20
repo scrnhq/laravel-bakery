@@ -3,12 +3,17 @@
 namespace Bakery\Types;
 
 use Bakery\Utils\Utils;
+use Bakery\Fields\Field;
+use Bakery\Support\Arguments;
 use Bakery\Fields\EloquentField;
 use Bakery\Traits\FiltersQueries;
 use Illuminate\Support\Collection;
 use Bakery\Fields\PolymorphicField;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
 use Bakery\Types\Definitions\EloquentType;
 use Illuminate\Database\Eloquent\Relations;
+use Illuminate\Database\Eloquent\Relations\Relation;
 
 class EntityType extends EloquentType
 {
@@ -46,13 +51,13 @@ class EntityType extends EloquentType
     {
         $fields = collect();
 
-        foreach ($this->modelSchema->getFields() as $key => $field) {
+        $this->modelSchema->getFields()->each(function (Field $field, string $key) use ($fields) {
             if ($field instanceof PolymorphicField) {
-                $fields = $fields->merge($this->getFieldsForPolymorphicField($key, $field));
+                $fields = $fields->merge($this->getFieldsForPolymorphicField($field));
             } else {
                 $fields->put($key, $field);
             }
-        }
+        });
 
         return $fields;
     }
@@ -89,7 +94,7 @@ class EntityType extends EloquentType
     protected function getFieldsForRelation(string $key, EloquentField $field): Collection
     {
         $fields = collect();
-        $relationship = $this->model->{$key}();
+        $relationship = $this->model->{$field->getAccessor()}();
 
         if ($field->isList()) {
             $fields = $fields->merge($this->getPluralRelationFields($key, $field));
@@ -120,10 +125,10 @@ class EntityType extends EloquentType
 
         $field = $field->args([
             'filter' => $this->registry->type($field->getName().'Filter')->nullable(),
-        ])->resolve(function ($model, $args) use ($key) {
-            $relation = $model->{$key}();
+        ])->resolve(function (Model $model, string $accessor, Arguments $args) {
+            $relation = $model->{$accessor}();
 
-            $result = $args ? $this->getRelationQuery($relation, $args)->get() : $model->{$key};
+            $result = $args->isEmpty() ? $model->{$accessor} : $this->getRelationQuery($relation, $args)->get();
 
             return $result;
         });
@@ -132,25 +137,27 @@ class EntityType extends EloquentType
 
         $fields->put($singularKey.'Ids', $this->registry->field($this->registry->ID())
             ->list()
+            ->accessor($field->getAccessor())
             ->args($field->getArgs())
             ->nullable($field->isNullable())
             ->viewPolicy($field->getViewPolicy())
-            ->resolve(function ($model, $args) use ($key) {
-                $relation = $model->{$key}();
+            ->resolve(function (Model $model, string $accessor, Arguments $args) {
+                $relation = $model->{$accessor}();
 
-                $result = $args ? $this->getRelationQuery($relation, $args)->get() : $model->{$key};
+                $result = $args->isEmpty() ? $model->{$accessor} : $this->getRelationQuery($relation, $args)->get();
 
                 return $result->pluck($relation->getRelated()->getKeyName());
             })
         );
 
-        $fields->put($key.'_count', $this->registry->field($this->registry->int())
+        $fields->put($key.'Count', $this->registry->field($this->registry->int())
+            ->accessor($field->getAccessor())
             ->nullable($field->isNullable())
             ->viewPolicy($field->getViewPolicy())
-            ->resolve(function ($model, $args) use ($key) {
-                $relation = $model->{$key};
+            ->resolve(function (Model $model, string $accessor, Arguments $args) {
+                $relation = $model->{$accessor};
 
-                $result = $args ? $this->getRelationQuery($relation, $args) : $model->{$key};
+                $result = $args->isEmpty() ? $model->{$accessor} : $this->getRelationQuery($relation, $args);
 
                 return $result->count();
             })
@@ -173,10 +180,11 @@ class EntityType extends EloquentType
         $fields->put($key, $field);
 
         return $fields->put($key.'Id', $this->registry->field($this->registry->ID())
+            ->accessor($field->getAccessor())
             ->nullable($field->isNullable())
             ->viewPolicy($field->getViewPolicy())
-            ->resolve(function ($model) use ($key) {
-                $relation = $model->{$key};
+            ->resolve(function (Model $model, string $accessor) {
+                $relation = $model->{$accessor};
 
                 return $relation ? $relation->getKey() : null;
             })
@@ -251,16 +259,16 @@ class EntityType extends EloquentType
     /**
      * Get the query for the given relationship.
      *
-     * @param \Illuminate\Database\Eloquent\Relations\Relation $relation
-     * @param array $args
-     * @return \Illuminate\Database\Eloquent\Builder
+     * @param Relation $relation
+     * @param Arguments $args
+     * @return Builder
      */
-    protected function getRelationQuery(Relations\Relation $relation, array $args)
+    protected function getRelationQuery(Relation $relation, Arguments $args)
     {
         $query = $relation->getQuery();
 
-        if (array_key_exists('filter', $args)) {
-            $query = $this->applyFilters($query, $args['filter']);
+        if ($args->filter) {
+            $query = $this->applyFilters($query, $args->filter);
         }
 
         return $query;
