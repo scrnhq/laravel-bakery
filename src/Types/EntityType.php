@@ -53,7 +53,7 @@ class EntityType extends EloquentType
 
         $this->modelSchema->getFields()->each(function (Field $field, string $key) use ($fields) {
             if ($field instanceof PolymorphicField) {
-                $fields = $fields->merge($this->getFieldsForPolymorphicField($field));
+                $fields = $fields->merge($this->getFieldsForPolymorphicField($key, $field));
             } else {
                 $fields->put($key, $field);
             }

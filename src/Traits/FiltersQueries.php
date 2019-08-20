@@ -80,13 +80,13 @@ trait FiltersQueries
      * @param string $type
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    protected function applyRelationFilter(Builder $query, string $relation, Arguments $args, $type): Builder
+    protected function applyRelationFilter(Builder $query, string $relation, Arguments $args = null, $type = null): Builder
     {
         $count = 1;
         $operator = '>=';
         $type = $type ?: 'and';
 
-        if ($args->isEmpty()) {
+        if (! $args || $args->isEmpty()) {
             return $query->doesntHave($relation, $type);
         }
 
@@ -113,6 +113,8 @@ trait FiltersQueries
 
         $table = $query->getModel()->getTable();
         $qualifiedColumn = $table.'.'.$column;
+
+        $value = $value instanceof Arguments ? $value->toArray() : $value;
 
         if (ends_with($key, 'NotContains')) {
             $query->where($qualifiedColumn, 'NOT '.$likeOperator, '%'.$value.'%', $type);

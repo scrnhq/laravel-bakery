@@ -3,6 +3,7 @@
 namespace Bakery\Types;
 
 use Bakery\Fields\Field;
+use Illuminate\Support\Str;
 use Bakery\Fields\EloquentField;
 use Illuminate\Support\Collection;
 use Bakery\Fields\PolymorphicField;
@@ -109,7 +110,11 @@ class CollectionFilterType extends EloquentInputType
         $fields->put($name, $this->registry->field($type));
 
         foreach (self::$filters as $filter) {
-            $fields->put($name.$filter, $this->registry->field($type));
+            if (Str::endsWith($filter, 'In')) {
+                $fields->put($name.$filter, $this->registry->field($type)->list());
+            } else {
+                $fields->put($name.$filter, $this->registry->field($type));
+            }
         }
 
         return $fields;
