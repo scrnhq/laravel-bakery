@@ -86,7 +86,7 @@ trait FiltersQueries
         $operator = '>=';
         $type = $type ?: 'and';
 
-        if (!$args || $args->isEmpty()) {
+        if (! $args || $args->isEmpty()) {
             return $query->doesntHave($relation, $type);
         }
 

@@ -244,7 +244,6 @@ class CollectionQueryTest extends IntegrationTest
         $response->assertJsonMissing(['title' => 'Goodbye world']);
     }
 
-
     /** @test */
     public function it_can_filter_with_AND_filters()
     {
