@@ -4,6 +4,7 @@ namespace Bakery\Http\Controllers;
 
 use Bakery\Bakery;
 use GraphQL\Error\Debug;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller;
@@ -15,7 +16,7 @@ class BakeryController extends Controller
     {
         $handler = app(ExceptionHandler::class);
 
-        return str_contains(get_class($handler), 'InteractsWithExceptionHandling');
+        return Str::contains(get_class($handler), 'InteractsWithExceptionHandling');
     }
 
     protected function debug()

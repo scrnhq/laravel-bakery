@@ -3,6 +3,7 @@
 namespace Bakery\Queries;
 
 use Bakery\Utils\Utils;
+use Illuminate\Support\Arr;
 use Bakery\Support\Arguments;
 use Bakery\Types\Definitions\RootType;
 use Illuminate\Database\Eloquent\Model;
@@ -74,7 +75,7 @@ class SingleEntityQuery extends EloquentQuery
 
         if ($results->count() > 1) {
             throw (new TooManyResultsException)->setModel(get_class($this->model),
-                array_pluck($results, $this->model->getKeyName()));
+                Arr::pluck($results, $this->model->getKeyName()));
         }
 
         return $results->first();

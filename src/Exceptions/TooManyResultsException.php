@@ -2,6 +2,7 @@
 
 namespace Bakery\Exceptions;
 
+use Illuminate\Support\Arr;
 use GraphQL\Error\UserError;
 
 class TooManyResultsException extends UserError
@@ -30,7 +31,7 @@ class TooManyResultsException extends UserError
     public function setModel(string $model, array $ids = [])
     {
         $this->model = $model;
-        $this->ids = array_wrap($ids);
+        $this->ids = Arr::wrap($ids);
 
         $this->message = "Too many results for model [{$model}]";
 

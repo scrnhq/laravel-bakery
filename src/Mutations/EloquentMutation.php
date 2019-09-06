@@ -3,6 +3,7 @@
 namespace Bakery\Mutations;
 
 use Bakery\Utils\Utils;
+use Illuminate\Support\Str;
 use Bakery\Eloquent\ModelSchema;
 use Bakery\Support\TypeRegistry;
 use Bakery\Types\Definitions\RootType;
@@ -57,7 +58,7 @@ abstract class EloquentMutation extends Mutation
             return $this->name;
         }
 
-        return camel_case(str_before(class_basename($this), 'Mutation'));
+        return Str::camel(Str::before(class_basename($this), 'Mutation'));
     }
 
     /**
@@ -77,7 +78,7 @@ abstract class EloquentMutation extends Mutation
      */
     public function args(): array
     {
-        $inputTypeName = studly_case($this->name()).'Input';
+        $inputTypeName = Utils::typename($this->name()).'Input';
 
         return [
             'input' => $this->registry->type($inputTypeName)->nullable(false),

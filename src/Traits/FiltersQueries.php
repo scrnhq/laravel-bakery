@@ -116,31 +116,31 @@ trait FiltersQueries
 
         $value = $value instanceof Arguments ? $value->toArray() : $value;
 
-        if (ends_with($key, 'NotContains')) {
+        if (Str::endsWith($key, 'NotContains')) {
             $query->where($qualifiedColumn, 'NOT '.$likeOperator, '%'.$value.'%', $type);
-        } elseif (ends_with($key, 'Contains')) {
+        } elseif (Str::endsWith($key, 'Contains')) {
             $query->where($qualifiedColumn, $likeOperator, '%'.$value.'%', $type);
-        } elseif (ends_with($key, 'NotStartsWith')) {
+        } elseif (Str::endsWith($key, 'NotStartsWith')) {
             $query->where($qualifiedColumn, 'NOT '.$likeOperator, $value.'%', $type);
-        } elseif (ends_with($key, 'StartsWith')) {
+        } elseif (Str::endsWith($key, 'StartsWith')) {
             $query->where($qualifiedColumn, $likeOperator, $value.'%', $type);
-        } elseif (ends_with($key, 'NotEndsWith')) {
+        } elseif (Str::endsWith($key, 'NotEndsWith')) {
             $query->where($qualifiedColumn, 'NOT '.$likeOperator, '%'.$value, $type);
-        } elseif (ends_with($key, 'EndsWith')) {
+        } elseif (Str::endsWith($key, 'EndsWith')) {
             $query->where($qualifiedColumn, $likeOperator, '%'.$value, $type);
-        } elseif (ends_with($key, 'Not')) {
+        } elseif (Str::endsWith($key, 'Not')) {
             $query->where($qualifiedColumn, '!=', $value, $type);
-        } elseif (ends_with($key, 'NotIn')) {
+        } elseif (Str::endsWith($key, 'NotIn')) {
             $query->whereNotIn($qualifiedColumn, $value, $type);
-        } elseif (ends_with($key, 'In')) {
+        } elseif (Str::endsWith($key, 'In')) {
             $query->whereIn($qualifiedColumn, $value, $type);
-        } elseif (ends_with($key, 'LessThan')) {
+        } elseif (Str::endsWith($key, 'LessThan')) {
             $query->where($qualifiedColumn, '<', $value, $type);
-        } elseif (ends_with($key, 'LessThanOrEquals')) {
+        } elseif (Str::endsWith($key, 'LessThanOrEquals')) {
             $query->where($qualifiedColumn, '<=', $value, $type);
-        } elseif (ends_with($key, 'GreaterThan')) {
+        } elseif (Str::endsWith($key, 'GreaterThan')) {
             $query->where($qualifiedColumn, '>', $value, $type);
-        } elseif (ends_with($key, 'GreaterThanOrEquals')) {
+        } elseif (Str::endsWith($key, 'GreaterThanOrEquals')) {
             $query->where($qualifiedColumn, '>=', $value, $type);
         } else {
             $query->where($qualifiedColumn, '=', $value, $type);

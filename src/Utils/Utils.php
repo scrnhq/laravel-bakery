@@ -2,6 +2,7 @@
 
 namespace Bakery\Utils;
 
+use Illuminate\Support\Str;
 use Bakery\Exceptions\InvariantViolation;
 
 class Utils
@@ -24,21 +25,21 @@ class Utils
 
     public static function single($class)
     {
-        return camel_case(str_singular(class_basename($class)));
+        return Str::camel(Str::singular(class_basename($class)));
     }
 
     public static function plural($class)
     {
-        return camel_case(str_plural(class_basename($class)));
+        return Str::camel(Str::plural(class_basename($class)));
     }
 
     public static function typename($class)
     {
-        return studly_case(str_singular(class_basename($class)));
+        return Str::studly(Str::singular(class_basename($class)));
     }
 
     public static function pluralTypename($class)
     {
-        return studly_case(str_plural(class_basename($class)));
+        return Str::studly(Str::plural(class_basename($class)));
     }
 }

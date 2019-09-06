@@ -3,6 +3,7 @@
 namespace Bakery\Types;
 
 use Bakery\Utils\Utils;
+use Illuminate\Support\Str;
 
 abstract class CustomEntityType extends EntityType
 {
@@ -18,6 +19,6 @@ abstract class CustomEntityType extends EntityType
             return $this->name;
         }
 
-        return Utils::typename(str_before(class_basename($this), 'BakeField'));
+        return Utils::typename(Str::before(class_basename($this), 'BakeField'));
     }
 }

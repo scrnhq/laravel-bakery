@@ -2,6 +2,7 @@
 
 namespace Bakery\Mutations\Concerns;
 
+use Illuminate\Support\Arr;
 use Bakery\Support\Arguments;
 use Illuminate\Database\Eloquent\Model;
 use Bakery\Exceptions\TooManyResultsException;
@@ -35,7 +36,7 @@ trait QueriesModel
             return $query->find($args[$primaryKey]);
         }
 
-        $fields = array_except($args->toArray(), ['input']);
+        $fields = Arr::except($args->toArray(), ['input']);
 
         foreach ($fields as $key => $value) {
             $query->where($key, $value);
@@ -45,7 +46,7 @@ trait QueriesModel
 
         if ($results->count() > 1) {
             throw (new TooManyResultsException)->setModel(get_class($this->model),
-                array_pluck($results, $this->model->getKeyName()));
+                Arr::pluck($results, $this->model->getKeyName()));
         }
 
         return $results->first();

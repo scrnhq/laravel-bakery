@@ -4,6 +4,7 @@ namespace Bakery;
 
 use GraphQL\GraphQL;
 use GraphQL\Type\Schema;
+use Illuminate\Support\Arr;
 use GraphQL\Executor\ExecutionResult;
 use Bakery\Support\Schema as BakerySchema;
 
@@ -41,12 +42,12 @@ class Bakery
 
         $root = null;
         $context = [];
-        $query = array_get($input, 'query');
-        $variables = array_get($input, 'variables');
+        $query = Arr::get($input, 'query');
+        $variables = Arr::get($input, 'variables');
         if (is_string($variables)) {
             $variables = json_decode($variables, true);
         }
-        $operationName = array_get($input, 'operationName');
+        $operationName = Arr::get($input, 'operationName');
 
         return GraphQL::executeQuery($schema, $query, $root, $context, $variables, $operationName);
     }

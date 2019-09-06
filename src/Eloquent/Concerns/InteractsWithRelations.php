@@ -4,6 +4,8 @@ namespace Bakery\Eloquent\Concerns;
 
 use RuntimeException;
 use Bakery\Utils\Utils;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
 use GraphQL\Error\UserError;
 use Illuminate\Database\Eloquent\Model;
 use Bakery\Exceptions\InvariantViolation;
@@ -395,7 +397,7 @@ trait InteractsWithRelations
 
         if (is_array($data)) {
             if (count($data) !== 1) {
-                throw new UserError(sprintf('There must be only one key with polymorphic input. %s given for relation %s.', count($data), $relation->getRelation()));
+                throw new UserError(sprintf('There must be only one key with polymorphic input. %s given for relation %s.', count($data), $relation->getRelationName()));
             }
 
             $data = collect($data);
@@ -430,7 +432,7 @@ trait InteractsWithRelations
 
         if (is_array($data)) {
             if (count($data) !== 1) {
-                throw new UserError(sprintf('There must be only one key with polymorphic input. %s given for relation %s.', count($data), $relation->getRelation()));
+                throw new UserError(sprintf('There must be only one key with polymorphic input. %s given for relation %s.', count($data), $relation->getRelationName()));
             }
 
             $data = collect($data);
@@ -457,7 +459,7 @@ trait InteractsWithRelations
     protected function getPolymorphicModel(Relations\MorphTo $relation, string $key): Model
     {
         /** @var \Bakery\Fields\PolymorphicField $type */
-        $type = array_get($this->getRelationFields(), $relation->getRelation());
+        $type = Arr::get($this->getRelationFields(), $relation->getRelationName());
 
         return resolve($type->getModelSchemaByKey($key))->getModel();
     }
@@ -532,12 +534,12 @@ trait InteractsWithRelations
      */
     protected function getRelationOfConnection(string $connection): string
     {
-        if (ends_with($connection, 'Ids')) {
-            return str_plural(str_before($connection, 'Ids'));
+        if (Str::endsWith($connection, 'Ids')) {
+            return Str::plural(Str::before($connection, 'Ids'));
         }
 
-        if (ends_with($connection, 'Id')) {
-            return str_singular(str_before($connection, 'Id'));
+        if (Str::endsWith($connection, 'Id')) {
+            return Str::singular(Str::before($connection, 'Id'));
         }
 
         throw new InvariantViolation('Could not get relation of connection: '.$connection);
