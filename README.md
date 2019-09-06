@@ -8,37 +8,17 @@
 
 An on-the-fly GraphQL Schema generator from Eloquent models for Laravel.
 
-- [Version Compatibility](#version-compatibility)
 - [Installation](#installation)
 - [Quickstart](#quickstart)
 - [Model schemas](#model-schemas)
 
-## Version Compatibility
-
-| Laravel             | Bakery | Support |
-| :------------------ | :----- | :------ |
-| 5.4.x, 5.5.x        | 1.0.x  |         |
-| 5.6.x, 5.7.x, 5.8.x | 2.1.x  | ✅      |
-
 ## Installation
 
-Install via composer:
+This package requires PHP 7.2 and Laravel 6 or higher. To get started with Bakery, simply run:
 
 ```
 composer require scrnhq/laravel-bakery
 ```
-
-or require in `composer.json`:
-
-```json
-{
-    "require": {
-        "scrnhq/laravel-bakery": "^2.1"
-    }
-}
-```
-
-then run `composer update` in your terminal to install Bakery.
 
 ## Quickstart
 
