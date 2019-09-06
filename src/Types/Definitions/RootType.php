@@ -3,6 +3,7 @@
 namespace Bakery\Types\Definitions;
 
 use Bakery\Utils\Utils;
+use Illuminate\Support\Str;
 use Bakery\Support\TypeRegistry;
 use Illuminate\Contracts\Auth\Access\Gate;
 use GraphQL\Type\Definition\Type as GraphQLType;
@@ -232,7 +233,7 @@ class RootType
             return $this->name;
         }
 
-        return Utils::typename(str_before(class_basename($this), 'Type'));
+        return Utils::typename(Str::before(class_basename($this), 'Type'));
     }
 
     /**

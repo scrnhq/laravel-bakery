@@ -2,6 +2,7 @@
 
 namespace Bakery\Mutations;
 
+use Illuminate\Support\Str;
 use Bakery\Support\RootField;
 
 abstract class Mutation extends RootField
@@ -18,6 +19,6 @@ abstract class Mutation extends RootField
             return $this->name;
         }
 
-        return camel_case(str_before(class_basename($this), 'Mutation'));
+        return Str::camel(Str::before(class_basename($this), 'Mutation'));
     }
 }

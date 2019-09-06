@@ -3,6 +3,7 @@
 namespace Bakery\Support;
 
 use Bakery\Utils\Utils;
+use Illuminate\Auth\Access\Response;
 use Bakery\Types\Definitions\RootType;
 use GraphQL\Type\Definition\ResolveInfo;
 use Illuminate\Support\Facades\Validator;
@@ -215,13 +216,17 @@ abstract class RootField
     {
         if (method_exists($this, 'authorize')) {
             try {
-                $authorized = $this->authorize($args);
+                $result = $this->authorize($args);
+
+                if (! $result instanceof Response) {
+                    $result = $result ? Response::allow() : Response::deny();
+                }
             } catch (AuthorizationException $exception) {
-                throw new UnauthorizedException($exception->getMessage(), $exception->getCode(), $exception);
+                $result = $exception->toResponse();
             }
 
-            if (empty($authorized)) {
-                throw new UnauthorizedException();
+            if ($result->denied()) {
+                throw new UnauthorizedException($result->message(), $result->code());
             }
         }
     }

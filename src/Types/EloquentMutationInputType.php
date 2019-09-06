@@ -4,6 +4,7 @@ namespace Bakery\Types;
 
 use Bakery\Utils\Utils;
 use Bakery\Fields\Field;
+use Illuminate\Support\Str;
 use Bakery\Fields\EloquentField;
 use Bakery\Support\Facades\Bakery;
 use Illuminate\Support\Collection;
@@ -68,7 +69,7 @@ abstract class EloquentMutationInputType extends EloquentInputType
         $relationship = $this->model->{$root->getAccessor()}();
 
         if ($root->isList()) {
-            $name = str_singular($relation).'Ids';
+            $name = Str::singular($relation).'Ids';
             $field = $this->registry->field($this->registry->ID())->list()->nullable()->accessor($relation);
             $fields->put($name, $field);
 
@@ -77,7 +78,7 @@ abstract class EloquentMutationInputType extends EloquentInputType
                 $fields->put($relation, $field);
             }
         } else {
-            $name = str_singular($relation).'Id';
+            $name = Str::singular($relation).'Id';
             $field = $this->registry->field($this->registry->ID())->nullable()->accessor($relation);
             $fields->put($name, $field);
 
@@ -141,7 +142,7 @@ abstract class EloquentMutationInputType extends EloquentInputType
         $inputType = 'Create'.Utils::typename($relationName).'On'.$this->modelSchema->typename().'WithPivotInput';
         $fields->put($relationName, $this->registry->field($inputType)->list()->nullable());
 
-        $name = str_singular($relationName).'Ids';
+        $name = Str::singular($relationName).'Ids';
         $inputType = Utils::pluralTypename($relationName).'PivotInput';
         $fields->put($name, $this->registry->field($inputType)->list()->nullable());
 

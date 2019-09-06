@@ -2,6 +2,7 @@
 
 namespace Bakery\Eloquent\Concerns;
 
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -81,7 +82,7 @@ trait Authorizable
      */
     public function authorizeToAdd(Model $model): void
     {
-        $method = 'add'.str_singular(class_basename($model));
+        $method = 'add'.Str::singular(class_basename($model));
 
         $this->authorize($method, [$model]);
     }
@@ -94,7 +95,7 @@ trait Authorizable
      */
     public function authorizedToAdd(Model $model): bool
     {
-        $method = 'add'.str_singular(class_basename($model));
+        $method = 'add'.Str::singular(class_basename($model));
 
         return $this->authorized($method, [$model]);
     }
@@ -108,7 +109,7 @@ trait Authorizable
      */
     public function authorizeToAttach(Model $model, array $pivot = null): void
     {
-        $method = 'attach'.str_singular(class_basename($model));
+        $method = 'attach'.Str::singular(class_basename($model));
 
         $this->authorize($method, [$model, $pivot]);
     }
@@ -122,7 +123,7 @@ trait Authorizable
      */
     public function authorizedToAttach(Model $model, array $pivot = null): bool
     {
-        $method = 'attach'.str_singular(class_basename($model));
+        $method = 'attach'.Str::singular(class_basename($model));
 
         return $this->authorized($method, [$model, $pivot]);
     }
@@ -135,7 +136,7 @@ trait Authorizable
      */
     public function authorizeToDetach(Model $model): void
     {
-        $method = 'detach'.str_singular(class_basename($model));
+        $method = 'detach'.Str::singular(class_basename($model));
 
         $this->authorize($method, [$model]);
     }
@@ -148,7 +149,7 @@ trait Authorizable
      */
     public function authorizedToDetach(Model $model): bool
     {
-        $method = 'detach'.str_singular(class_basename($model));
+        $method = 'detach'.Str::singular(class_basename($model));
 
         return $this->authorized($method, [$model]);
     }

@@ -4,6 +4,7 @@ namespace Bakery\Types;
 
 use Bakery\Utils\Utils;
 use Bakery\Fields\Field;
+use Illuminate\Support\Str;
 use Bakery\Support\Arguments;
 use Bakery\Fields\EloquentField;
 use Bakery\Traits\FiltersQueries;
@@ -121,7 +122,7 @@ class EntityType extends EloquentType
     protected function getPluralRelationFields(string $key, EloquentField $field): Collection
     {
         $fields = collect();
-        $singularKey = str_singular($key);
+        $singularKey = Str::singular($key);
 
         $field = $field->args([
             'filter' => $this->registry->type($field->getName().'Filter')->nullable(),
@@ -208,7 +209,7 @@ class EntityType extends EloquentType
             return $fields;
         }
 
-        $pivotKey = camel_case(str_singular($key)).'Pivot';
+        $pivotKey = Utils::single($key).'Pivot';
         $modelSchema = $this->registry->resolveSchemaForModel($pivot);
 
         $related = $relation->getRelated();
@@ -216,7 +217,7 @@ class EntityType extends EloquentType
         if (! $field->getInverse()) {
             $modelClassName = class_basename($this->model);
             $relatedClassName = class_basename($related);
-            $guess = camel_case(str_plural($modelClassName));
+            $guess = Utils::plural($modelClassName);
 
             Utils::invariant(
                 method_exists($related, $guess),

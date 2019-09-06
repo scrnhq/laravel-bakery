@@ -2,6 +2,7 @@
 
 namespace Bakery\Queries;
 
+use Illuminate\Support\Str;
 use Bakery\Support\RootField;
 
 abstract class Query extends RootField
@@ -18,6 +19,6 @@ abstract class Query extends RootField
             return $this->name;
         }
 
-        return camel_case(str_before(class_basename($this), 'Query'));
+        return Str::camel(Str::before(class_basename($this), 'Query'));
     }
 }

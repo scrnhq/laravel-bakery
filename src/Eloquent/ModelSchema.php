@@ -4,6 +4,7 @@ namespace Bakery\Eloquent;
 
 use Bakery\Utils\Utils;
 use Bakery\Fields\Field;
+use Illuminate\Support\Str;
 use Bakery\Fields\EloquentField;
 use Bakery\Support\TypeRegistry;
 use Illuminate\Support\Collection;
@@ -378,7 +379,7 @@ abstract class ModelSchema
     public function getConnections(): Collection
     {
         return collect($this->getRelationFields())->map(function (Field $field, $key) {
-            return $field->isList() ? str_singular($key).'Ids' : $key.'Id';
+            return $field->isList() ? Str::singular($key).'Ids' : $key.'Id';
         });
     }
 
