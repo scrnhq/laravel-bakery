@@ -43,17 +43,32 @@ class CustomMutationTest extends IntegrationTest
     }
 
     /** @test */
-    public function it_checks_authorization_for_a_custom_mutation()
+    public function it_checks_authorization()
     {
-        $this->withExceptionHandling();
-        $this->graphql('mutation($input: InviteUserInput!) { inviteUser(input: $input) }', [
-            'input' => [
-                'email' => 'john@example.com',
-            ],
-        ])->assertJsonFragment(['message' => 'You need to be logged in to do this!']);
+        $this->withExceptionHandling()
+            ->graphql('mutation($input: InviteUserInput!) { inviteUser(input: $input) }', [
+                'input' => ['email' => 'john@example.com'],
+            ])->assertJsonFragment(['message' => 'This action is unauthorized.']);
 
         $this->assertDatabaseMissing('users', [
             'email' => 'invalid-email',
         ]);
+    }
+
+    /** @test */
+    public function it_checks_authorization_and_shows_custom_message()
+    {
+        $_SERVER['graphql.inviteUser.authorize'] = 'You need to be logged in to do this!';
+
+        $this->withExceptionHandling()
+            ->graphql('mutation($input: InviteUserInput!) { inviteUser(input: $input) }', [
+                'input' => ['email' => 'fail@example.com'],
+            ])->assertJsonFragment(['message' => 'You need to be logged in to do this!']);
+
+        $this->assertDatabaseMissing('users', [
+            'email' => 'invalid-email',
+        ]);
+
+        unset($_SERVER['graphql.inviteUser.authorize']);
     }
 }

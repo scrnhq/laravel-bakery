@@ -61,7 +61,7 @@ class InviteUserMutation extends Mutation
     public function authorize()
     {
         if (! auth()->user()) {
-            return $this->deny('You need to be logged in to do this!');
+            return $this->deny($_SERVER['graphql.inviteUser.authorize'] ?? null);
         }
 
         return true;
