@@ -809,7 +809,7 @@ class CollectionQueryTest extends IntegrationTest
         $response->assertJsonStructure(['data' => ['articles' => ['items' => [['comments' => [['author' => ['id'], 'commentable' => ['title']]]]]]]]);
         $this->assertCount(5, DB::getQueryLog());
     }
-    
+
     /** @test */
     public function it_eager_loads_fields_that_explicitly_declare_with()
     {
@@ -824,7 +824,6 @@ class CollectionQueryTest extends IntegrationTest
                 }
             }
         ';
-
 
         DB::enableQueryLog();
         $response = $this->graphql($query);
