@@ -16,7 +16,7 @@ class ArticleSchema extends ModelSchema
             'slug' => Field::string()->unique(),
             'title' => Field::string()->searchable(),
             'name' => Field::string()->accessor('title')->searchable()->readOnly(),
-            'authorName' => Field::string()->with('user')->resolve(function (Article $article) {
+            'authorName' => Field::string()->with('user')->readOnly()->resolve(function (Article $article) {
                 return $article->user->name;
             }),
             'created_at' => Field::type('Timestamp')->readOnly(),

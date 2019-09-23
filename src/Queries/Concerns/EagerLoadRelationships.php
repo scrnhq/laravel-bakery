@@ -27,6 +27,11 @@ trait EagerLoadRelationships
         foreach ($fields as $key => $subFields) {
             $field = $schema->getFieldByKey($key);
 
+            // Skip if this is not a defined field.
+            if (! $field) {
+                continue;
+            }
+
             $with = array_map(function ($with) use ($path) {
                 return $path ? "{$path}.{$with}" : $with;
             }, $field->getWith() ?? []);
