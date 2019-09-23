@@ -64,6 +64,11 @@ class Field
     protected $fillable = true;
 
     /**
+     * @var array
+     */
+    protected $with;
+
+    /**
      * @var bool
      */
     protected $searchable = false;
@@ -359,6 +364,27 @@ class Field
     public function isFillable(): bool
     {
         return $this->fillable;
+    }
+
+    /**
+     * Set the relations that should be eager loaded.
+     *
+     * @param  string[]|string  $relations
+     * @return Field
+     */
+    public function with($relations): self
+    {
+        $this->with = Arr::wrap($relations);
+
+        return $this;
+    }
+
+    /**
+     * Get the relations that should be eager loaded.
+     */
+    public function getWith(): ?array
+    {
+        return $this->with;
     }
 
     /**

@@ -315,6 +315,10 @@ abstract class ModelSchema
                 $field->accessor($key);
             }
 
+            if (! $field->getWith()) {
+                $field->with($field->getAccessor());
+            }
+
             return $field;
         });
     }

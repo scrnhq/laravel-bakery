@@ -811,6 +811,29 @@ class CollectionQueryTest extends IntegrationTest
     }
 
     /** @test */
+    public function it_eager_loads_fields_that_explicitly_declare_with()
+    {
+        factory(Article::class, 25)->create();
+
+        $query = '
+            query {
+                articles {
+                    items {
+                        authorName
+                    }
+                }
+            }
+        ';
+
+        DB::enableQueryLog();
+        $response = $this->graphql($query);
+        DB::disableQueryLog();
+
+        $response->assertJsonStructure(['data' => ['articles' => ['items' => [['authorName']]]]]);
+        $this->assertCount(3, DB::getQueryLog());
+    }
+
+    /** @test */
     public function it_cannot_query_models_that_are_not_indexable()
     {
         factory(Phone::class)->create();
