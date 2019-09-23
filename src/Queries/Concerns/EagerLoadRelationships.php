@@ -17,10 +17,10 @@ trait EagerLoadRelationships
     /**
      * Eager load the relations.
      *
-     * @param  \Illuminate\Database\Eloquent\Builder  $query
-     * @param  bool[]|array                           $fields
-     * @param  ModelSchema                            $schema
-     * @param  string                                 $path
+     * @param  Builder       $query
+     * @param  bool[]|array  $fields
+     * @param  ModelSchema   $schema
+     * @param  string        $path
      */
     protected function eagerLoadRelations(Builder $query, array $fields, ModelSchema $schema, $path = '')
     {
