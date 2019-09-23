@@ -311,8 +311,12 @@ abstract class ModelSchema
     public function getRelationFields(): Collection
     {
         return collect($this->relations())->map(function (Field $field, string $key) {
-            if (! $field->getAccessor()) {
+            if ( ! $field->getAccessor()) {
                 $field->accessor($key);
+            }
+
+            if ( ! $field->getWith()) {
+                $field->with($field->getAccessor());
             }
 
             return $field;

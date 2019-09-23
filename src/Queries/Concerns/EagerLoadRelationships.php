@@ -2,9 +2,9 @@
 
 namespace Bakery\Queries\Concerns;
 
-use Bakery\Fields\Field;
 use Bakery\Eloquent\ModelSchema;
 use Bakery\Support\TypeRegistry;
+use Bakery\Fields\PolymorphicField;
 use Illuminate\Database\Eloquent\Builder;
 
 trait EagerLoadRelationships
@@ -17,39 +17,28 @@ trait EagerLoadRelationships
     /**
      * Eager load the relations.
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param array $fields
-     * @param ModelSchema $schema
-     * @param string $path
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @param  bool[]|array                           $fields
+     * @param  ModelSchema                            $schema
+     * @param  string                                 $path
      */
     protected function eagerLoadRelations(Builder $query, array $fields, ModelSchema $schema, $path = '')
     {
-        $relations = $schema->getRelations()->keys()->toArray();
+        foreach ($fields as $key => $subFields) {
+            $field = $schema->getFieldByKey($key);
 
-        foreach ($fields as $key => $field) {
-            if (in_array($key, $relations)) {
-                $relationField = $this->getRelationFieldByKey($key, $schema);
-                $column = $relationField->getAccessor();
-                $eagerLoadPath = $path ? $path.'.'.$column : $column;
-                $query->with($eagerLoadPath);
-                $related = $schema->getModel()->{$column}()->getRelated();
+            $with = array_map(function ($with) use ($path) {
+                return $path ? "{$path}.{$with}" : $with;
+            }, $field->getWith() ?? []);
+
+            $query->with($with);
+
+            if ($field->isRelationship() && ! $field instanceof PolymorphicField) {
+                $accessor = $field->getAccessor();
+                $related = $schema->getModel()->{$accessor}()->getRelated();
                 $relatedSchema = $this->registry->getSchemaForModel($related);
-                $this->eagerLoadRelations($query, $field, $relatedSchema, $eagerLoadPath);
+                $this->eagerLoadRelations($query, $subFields, $relatedSchema, $path ? "{$path}.{$accessor}" : $accessor);
             }
         }
-    }
-
-    /**
-     * Get a relation field by it's key.
-     *
-     * @param string $key
-     * @param ModelSchema $schema
-     * @return Field
-     */
-    protected function getRelationFieldByKey(string $key, ModelSchema $schema): Field
-    {
-        return $schema->getRelationFields()->first(function (Field $field, $relation) use ($key) {
-            return $relation === $key;
-        });
     }
 }
