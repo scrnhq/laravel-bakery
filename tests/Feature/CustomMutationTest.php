@@ -35,7 +35,12 @@ class CustomMutationTest extends IntegrationTest
             'input' => [
                 'email' => 'invalid-email',
             ],
-        ])->assertJsonFragment(['message' => 'The email must be a valid email address.']);
+        ])->assertJsonFragment([
+            'message' => 'The email must be a valid email address.',
+            'validation' => [
+                'input.email' => ['The email must be a valid email address.'],
+            ],
+        ]);
 
         $this->assertDatabaseMissing('users', [
             'email' => 'invalid-email',

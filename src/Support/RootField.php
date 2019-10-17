@@ -3,11 +3,11 @@
 namespace Bakery\Support;
 
 use Bakery\Utils\Utils;
+use Bakery\Errors\ValidationError;
 use Illuminate\Auth\Access\Response;
 use Bakery\Types\Definitions\RootType;
 use GraphQL\Type\Definition\ResolveInfo;
 use Illuminate\Support\Facades\Validator;
-use Bakery\Exceptions\ValidationException;
 use Bakery\Exceptions\UnauthorizedException;
 use GraphQL\Type\Definition\Type as GraphQLType;
 use Illuminate\Auth\Access\HandlesAuthorization;
@@ -233,7 +233,9 @@ abstract class RootField
 
     /**
      * Validate the arguments of the query.
-     * @param Arguments $args
+     *
+     * @param  Arguments  $args
+     * @throws ValidationError
      */
     protected function validate(Arguments $args): void
     {
@@ -244,7 +246,7 @@ abstract class RootField
             $validator = Validator::make($args->toArray(), $rules, $messages, $attributes);
 
             if ($validator->fails()) {
-                throw new ValidationException($validator->getMessageBag());
+                throw new ValidationError($validator);
             }
         }
     }
