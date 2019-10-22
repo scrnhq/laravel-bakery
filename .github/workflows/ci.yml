@@ -11,16 +11,19 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php: ['7.2', '7.3']
+        php: ['7.2', '7.3', '7.4']
         include:
           - php: '7.3'
             coverage: pcov
+          - php: '7.4'
+            php-extensions: dom, mbstring, sqlite3
     steps:
       - uses: actions/checkout@v1
       - uses: shivammathur/setup-php@master
         with:
           php-version: ${{ matrix.php }}
           coverage: ${{ matrix.coverage }}
+          extension-csv: ${{ matrix.php-extensions }}
       - name: Install dependencies
         run: composer install
       - name: Run tests
