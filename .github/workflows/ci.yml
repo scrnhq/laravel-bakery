@@ -6,24 +6,25 @@ on:
 
 jobs:
   test:
+    name: PHP ${{ matrix.php }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
         php: ['7.2', '7.3']
         include:
           - php: '7.3'
-            coverage: true
+            coverage: xdebug
     steps:
       - uses: actions/checkout@v1
-      - name: Switch PHP version
-        env:
-          PHP_VERSION: ${{ matrix.php }}
-        run: sudo ln -sf "/usr/bin/php$PHP_VERSION" /etc/alternatives/php
+      - uses: shivammathur/setup-php@master
+        with:
+          php-version: ${{ matrix.php }}
+          coverage: ${{ matrix.coverage }}
       - name: Install dependencies
         run: composer install
       - name: Run tests
         run: composer test
-        if: matrix.coverage != true
+        if: matrix.coverage == null
       - name: Run tests with coverage
         run: composer test -- --coverage-clover=coverage.xml
         if: matrix.coverage
