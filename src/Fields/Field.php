@@ -2,14 +2,14 @@
 
 namespace Bakery\Fields;
 
-use function Bakery\is_callable_tuple;
+use Illuminate\Support\Arr;
 use Bakery\Support\Arguments;
 use Bakery\Support\TypeRegistry;
+use Illuminate\Support\Facades\Gate;
 use Bakery\Types\Definitions\RootType;
+use function Bakery\is_callable_tuple;
 use GraphQL\Type\Definition\ResolveInfo;
 use Illuminate\Auth\Access\AuthorizationException;
-use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Gate;
 
 class Field
 {

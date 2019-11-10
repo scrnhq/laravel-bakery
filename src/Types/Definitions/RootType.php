@@ -2,12 +2,12 @@
 
 namespace Bakery\Types\Definitions;
 
-use Bakery\Support\TypeRegistry;
 use Bakery\Utils\Utils;
-use GraphQL\Type\Definition\NamedType as GraphQLNamedType;
-use GraphQL\Type\Definition\Type as GraphQLType;
-use Illuminate\Contracts\Auth\Access\Gate;
 use Illuminate\Support\Str;
+use Bakery\Support\TypeRegistry;
+use Illuminate\Contracts\Auth\Access\Gate;
+use GraphQL\Type\Definition\Type as GraphQLType;
+use GraphQL\Type\Definition\NamedType as GraphQLNamedType;
 
 class RootType
 {

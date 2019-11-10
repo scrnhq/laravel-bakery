@@ -4,11 +4,11 @@ namespace Bakery\Http\Controllers;
 
 use Bakery\Bakery;
 use GraphQL\Error\Debug;
-use Illuminate\Contracts\Debug\ExceptionHandler;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
-use Illuminate\Routing\Controller;
 use Illuminate\Support\Str;
+use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Routing\Controller;
+use Illuminate\Contracts\Debug\ExceptionHandler;
 
 class BakeryController extends Controller
 {

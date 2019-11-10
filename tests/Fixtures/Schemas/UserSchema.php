@@ -2,8 +2,8 @@
 
 namespace Bakery\Tests\Fixtures\Schemas;
 
-use Bakery\Eloquent\ModelSchema;
 use Bakery\Field;
+use Bakery\Eloquent\ModelSchema;
 use Bakery\Tests\Fixtures\Models\User;
 
 class UserSchema extends ModelSchema

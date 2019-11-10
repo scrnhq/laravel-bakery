@@ -3,9 +3,9 @@
 namespace Bakery\Types\Definitions;
 
 use Bakery\Fields\Field;
-use GraphQL\Type\Definition\ObjectType as GraphQLObjectType;
-use GraphQL\Type\Definition\Type as GraphQLType;
 use Illuminate\Support\Collection;
+use GraphQL\Type\Definition\Type as GraphQLType;
+use GraphQL\Type\Definition\ObjectType as GraphQLObjectType;
 
 class ObjectType extends RootType implements NamedType
 {

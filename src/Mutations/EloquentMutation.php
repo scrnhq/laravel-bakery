@@ -2,11 +2,11 @@
 
 namespace Bakery\Mutations;
 
+use Bakery\Utils\Utils;
+use Illuminate\Support\Str;
 use Bakery\Eloquent\ModelSchema;
 use Bakery\Support\TypeRegistry;
 use Bakery\Types\Definitions\RootType;
-use Bakery\Utils\Utils;
-use Illuminate\Support\Str;
 
 abstract class EloquentMutation extends Mutation
 {

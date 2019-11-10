@@ -2,11 +2,11 @@
 
 namespace Bakery\Traits;
 
-use Bakery\Eloquent\ModelSchema;
 use Bakery\Support\Arguments;
+use Bakery\Eloquent\ModelSchema;
 use Bakery\Support\TypeRegistry;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 
 /**

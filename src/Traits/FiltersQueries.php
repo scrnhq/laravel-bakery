@@ -2,15 +2,15 @@
 
 namespace Bakery\Traits;
 
-use Bakery\Eloquent\ModelSchema;
-use Bakery\Support\Arguments;
-use Bakery\Support\TypeRegistry;
-use Bakery\Types\CollectionFilterType;
-use Illuminate\Database\Connection;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Query\Grammars;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Bakery\Support\Arguments;
+use Bakery\Eloquent\ModelSchema;
+use Bakery\Support\TypeRegistry;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Connection;
+use Bakery\Types\CollectionFilterType;
+use Illuminate\Database\Query\Grammars;
+use Illuminate\Database\Eloquent\Builder;
 
 /**
  * @property ModelSchema $modelSchema

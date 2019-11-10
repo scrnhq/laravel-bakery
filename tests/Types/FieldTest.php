@@ -4,8 +4,8 @@ namespace Bakery\Tests\Types;
 
 use Bakery\Fields\Field;
 use Bakery\Support\DefaultSchema;
-use Bakery\Tests\Fixtures\Models\User;
 use Bakery\Tests\IntegrationTest;
+use Bakery\Tests\Fixtures\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
 
 class FieldTest extends IntegrationTest

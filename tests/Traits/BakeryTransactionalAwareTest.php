@@ -2,10 +2,10 @@
 
 namespace Bakery\Tests;
 
-use Bakery\Tests\Fixtures\IntegrationTestSchema;
-use Bakery\Tests\Fixtures\Models\Article;
-use Bakery\Tests\Fixtures\Models\User;
 use Illuminate\Support\Facades\Event;
+use Bakery\Tests\Fixtures\Models\User;
+use Bakery\Tests\Fixtures\Models\Article;
+use Bakery\Tests\Fixtures\IntegrationTestSchema;
 
 class BakeryTransactionalAwareTest extends IntegrationTest
 {

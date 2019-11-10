@@ -4,8 +4,8 @@ namespace Bakery\Mutations;
 
 use Bakery\Fields\Field;
 use Bakery\Support\Arguments;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Eloquent\Model;
 
 class UpdateMutation extends EloquentMutation
 {

@@ -2,8 +2,8 @@
 
 namespace Bakery\Types;
 
-use Bakery\Fields\Field;
 use Bakery\Utils\Utils;
+use Bakery\Fields\Field;
 use Illuminate\Support\Collection;
 
 class CreateInputType extends EloquentMutationInputType

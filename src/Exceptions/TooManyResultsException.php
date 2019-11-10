@@ -2,8 +2,8 @@
 
 namespace Bakery\Exceptions;
 
-use GraphQL\Error\UserError;
 use Illuminate\Support\Arr;
+use GraphQL\Error\UserError;
 
 class TooManyResultsException extends UserError
 {

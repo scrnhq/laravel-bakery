@@ -5,8 +5,8 @@ namespace Bakery\Mutations;
 use Bakery\Fields\Field;
 use Bakery\Support\Arguments;
 use Bakery\Types\Definitions\RootType;
-use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Auth\Access\AuthorizationException;
 
 class DeleteMutation extends EloquentMutation
 {

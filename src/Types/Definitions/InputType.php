@@ -3,9 +3,9 @@
 namespace Bakery\Types\Definitions;
 
 use Bakery\Fields\Field;
+use Illuminate\Support\Collection;
 use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\Type as GraphQLType;
-use Illuminate\Support\Collection;
 
 class InputType extends ObjectType
 {

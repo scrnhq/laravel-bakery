@@ -2,10 +2,10 @@
 
 namespace Bakery\Types;
 
-use Bakery\Types\Concerns\InteractsWithPolymorphism;
 use Bakery\Types\Definitions\RootType;
 use Bakery\Types\Definitions\UnionType;
 use GraphQL\Type\Definition\ResolveInfo;
+use Bakery\Types\Concerns\InteractsWithPolymorphism;
 
 class UnionEntityType extends UnionType
 {
