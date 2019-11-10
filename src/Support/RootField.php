@@ -2,16 +2,16 @@
 
 namespace Bakery\Support;
 
-use Bakery\Utils\Utils;
 use Bakery\Errors\ValidationError;
-use Illuminate\Auth\Access\Response;
-use Bakery\Types\Definitions\RootType;
-use GraphQL\Type\Definition\ResolveInfo;
-use Illuminate\Support\Facades\Validator;
 use Bakery\Exceptions\UnauthorizedException;
+use Bakery\Types\Definitions\RootType;
+use Bakery\Utils\Utils;
+use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type as GraphQLType;
-use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Auth\Access\HandlesAuthorization;
+use Illuminate\Auth\Access\Response;
+use Illuminate\Support\Facades\Validator;
 
 abstract class RootField
 {

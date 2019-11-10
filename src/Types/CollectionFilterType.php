@@ -2,12 +2,12 @@
 
 namespace Bakery\Types;
 
-use Bakery\Fields\Field;
-use Illuminate\Support\Str;
 use Bakery\Fields\EloquentField;
-use Illuminate\Support\Collection;
+use Bakery\Fields\Field;
 use Bakery\Fields\PolymorphicField;
 use Bakery\Types\Definitions\EloquentInputType;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 
 class CollectionFilterType extends EloquentInputType
 {

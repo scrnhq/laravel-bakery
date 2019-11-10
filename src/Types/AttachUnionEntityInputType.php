@@ -2,10 +2,10 @@
 
 namespace Bakery\Types;
 
-use Bakery\Utils\Utils;
 use Bakery\Eloquent\ModelSchema;
-use Bakery\Types\Definitions\InputType;
 use Bakery\Types\Concerns\InteractsWithPolymorphism;
+use Bakery\Types\Definitions\InputType;
+use Bakery\Utils\Utils;
 
 class AttachUnionEntityInputType extends InputType
 {

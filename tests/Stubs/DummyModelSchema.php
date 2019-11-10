@@ -2,8 +2,8 @@
 
 namespace Bakery\Tests\Stubs;
 
-use Bakery\Field;
 use Bakery\Eloquent\ModelSchema;
+use Bakery\Field;
 
 class DummyModelSchema extends ModelSchema
 {

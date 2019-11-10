@@ -2,16 +2,16 @@
 
 namespace Bakery\Tests;
 
-use Mockery;
 use Bakery\BakeryServiceProvider;
+use Bakery\Tests\Fixtures\IntegrationTestSchema;
 use Bakery\Tests\Fixtures\Models;
 use Bakery\Tests\Fixtures\Policies;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Contracts\Auth\Access\Gate;
 use Illuminate\Contracts\Auth\Authenticatable;
-use Bakery\Tests\Fixtures\IntegrationTestSchema;
 use Illuminate\Foundation\Testing\Concerns\InteractsWithDatabase;
 use Illuminate\Foundation\Testing\Concerns\InteractsWithExceptionHandling;
+use Illuminate\Support\Facades\Hash;
+use Mockery;
 
 abstract class IntegrationTest extends TestCase
 {

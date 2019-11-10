@@ -2,16 +2,16 @@
 
 namespace Bakery\Eloquent;
 
-use Bakery\Utils\Utils;
-use Bakery\Fields\Field;
-use Illuminate\Support\Str;
-use Bakery\Fields\EloquentField;
-use Bakery\Support\TypeRegistry;
-use Illuminate\Support\Collection;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Builder;
 use Bakery\Eloquent\Concerns\Authorizable;
 use Bakery\Eloquent\Concerns\MutatesModel;
+use Bakery\Fields\EloquentField;
+use Bakery\Fields\Field;
+use Bakery\Support\TypeRegistry;
+use Bakery\Utils\Utils;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 
 abstract class ModelSchema
 {

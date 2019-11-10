@@ -2,8 +2,8 @@
 
 namespace Bakery\Mutations;
 
-use Illuminate\Support\Str;
 use Bakery\Support\RootField;
+use Illuminate\Support\Str;
 
 abstract class Mutation extends RootField
 {

@@ -2,8 +2,8 @@
 
 namespace Bakery\Types;
 
-use Bakery\Fields\Field;
 use Bakery\Fields\EloquentField;
+use Bakery\Fields\Field;
 use Bakery\Types\Definitions\EloquentInputType;
 
 class CollectionSearchType extends EloquentInputType

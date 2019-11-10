@@ -2,9 +2,9 @@
 
 namespace Bakery\Tests;
 
-use GraphQL\GraphQL;
 use Bakery\Support\DefaultSchema;
 use Bakery\Tests\Fixtures\Models\Article;
+use GraphQL\GraphQL;
 
 class CacheTest extends IntegrationTest
 {

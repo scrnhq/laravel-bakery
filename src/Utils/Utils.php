@@ -2,8 +2,8 @@
 
 namespace Bakery\Utils;
 
-use Illuminate\Support\Str;
 use Bakery\Exceptions\InvariantViolation;
+use Illuminate\Support\Str;
 
 class Utils
 {

@@ -3,8 +3,8 @@
 namespace Bakery\Mutations;
 
 use Bakery\Support\Arguments;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class CreateMutation extends EloquentMutation
 {

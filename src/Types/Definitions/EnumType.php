@@ -2,8 +2,8 @@
 
 namespace Bakery\Types\Definitions;
 
-use GraphQL\Type\Definition\Type as BaseType;
 use GraphQL\Type\Definition\EnumType as BaseEnumType;
+use GraphQL\Type\Definition\Type as BaseType;
 
 class EnumType extends RootType implements NamedType
 {

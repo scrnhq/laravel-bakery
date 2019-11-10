@@ -2,10 +2,10 @@
 
 namespace Bakery\Tests\Types;
 
-use Bakery\Tests\TestCase;
-use Bakery\Types\CollectionSearchType;
 use Bakery\Tests\Fixtures\IntegrationTestSchema;
 use Bakery\Tests\Fixtures\Schemas\ArticleSchema;
+use Bakery\Tests\TestCase;
+use Bakery\Types\CollectionSearchType;
 
 class CollectionSearchTypeTest extends TestCase
 {

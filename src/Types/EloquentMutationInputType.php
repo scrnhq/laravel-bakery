@@ -2,15 +2,15 @@
 
 namespace Bakery\Types;
 
-use Bakery\Utils\Utils;
-use Bakery\Fields\Field;
-use Illuminate\Support\Str;
 use Bakery\Fields\EloquentField;
-use Bakery\Support\Facades\Bakery;
-use Illuminate\Support\Collection;
+use Bakery\Fields\Field;
 use Bakery\Fields\PolymorphicField;
+use Bakery\Support\Facades\Bakery;
 use Bakery\Types\Definitions\EloquentInputType;
+use Bakery\Utils\Utils;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 
 abstract class EloquentMutationInputType extends EloquentInputType
 {

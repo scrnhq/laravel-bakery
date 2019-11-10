@@ -2,12 +2,12 @@
 
 namespace Bakery\Tests\Fixtures\Mutations;
 
-use Bakery\Type;
-use Illuminate\Support\Str;
-use Bakery\Support\Arguments;
 use Bakery\Mutations\Mutation;
+use Bakery\Support\Arguments;
 use Bakery\Tests\Fixtures\Models\User;
+use Bakery\Type;
 use Bakery\Types\Definitions\RootType;
+use Illuminate\Support\Str;
 
 class InviteUserMutation extends Mutation
 {

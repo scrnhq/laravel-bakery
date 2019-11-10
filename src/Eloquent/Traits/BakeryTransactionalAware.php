@@ -2,8 +2,8 @@
 
 namespace Bakery\Eloquent\Traits;
 
-use Illuminate\Support\Facades\Event;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Event;
 
 trait BakeryTransactionalAware
 {

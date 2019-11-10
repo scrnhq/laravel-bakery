@@ -1,7 +1,7 @@
 <?php
 
-use Illuminate\Pagination\Paginator;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Pagination\Paginator;
 
 /*
  * Paginate the given query.

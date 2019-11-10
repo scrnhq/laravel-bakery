@@ -2,17 +2,17 @@
 
 namespace Bakery\Support;
 
-use Bakery\Utils\Utils;
-use Bakery\Fields\Field;
 use Bakery\Eloquent\ModelSchema;
-use Bakery\Fields\EloquentField;
 use Bakery\Exceptions\TypeNotFound;
+use Bakery\Fields\EloquentField;
+use Bakery\Fields\Field;
 use Bakery\Fields\PolymorphicField;
-use Bakery\Types\Definitions\RootType;
-use Illuminate\Database\Eloquent\Model;
 use Bakery\Types\Definitions\InternalType;
 use Bakery\Types\Definitions\ReferenceType;
+use Bakery\Types\Definitions\RootType;
+use Bakery\Utils\Utils;
 use GraphQL\Type\Definition\Type as GraphQLType;
+use Illuminate\Database\Eloquent\Model;
 
 class TypeRegistry
 {

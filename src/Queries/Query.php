@@ -2,8 +2,8 @@
 
 namespace Bakery\Queries;
 
-use Illuminate\Support\Str;
 use Bakery\Support\RootField;
+use Illuminate\Support\Str;
 
 abstract class Query extends RootField
 {

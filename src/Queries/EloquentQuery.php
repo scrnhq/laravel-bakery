@@ -2,12 +2,12 @@
 
 namespace Bakery\Queries;
 
-use Bakery\Utils\Utils;
 use Bakery\Eloquent\ModelSchema;
+use Bakery\Queries\Concerns\EagerLoadRelationships;
 use Bakery\Support\TypeRegistry;
 use Bakery\Traits\JoinsRelationships;
+use Bakery\Utils\Utils;
 use Illuminate\Database\Eloquent\Builder;
-use Bakery\Queries\Concerns\EagerLoadRelationships;
 
 abstract class EloquentQuery extends Query
 {

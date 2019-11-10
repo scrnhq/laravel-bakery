@@ -2,15 +2,15 @@
 
 namespace Bakery\Queries;
 
-use Bakery\Utils\Utils;
+use Bakery\Exceptions\PaginationMaxCountExceededException;
 use Bakery\Support\Arguments;
-use Bakery\Traits\OrdersQueries;
 use Bakery\Traits\FiltersQueries;
+use Bakery\Traits\OrdersQueries;
 use Bakery\Traits\SearchesQueries;
 use Bakery\Types\Definitions\RootType;
+use Bakery\Utils\Utils;
 use GraphQL\Type\Definition\ResolveInfo;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use Bakery\Exceptions\PaginationMaxCountExceededException;
 
 class EloquentCollectionQuery extends EloquentQuery
 {
