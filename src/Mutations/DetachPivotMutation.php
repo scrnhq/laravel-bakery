@@ -95,13 +95,13 @@ class DetachPivotMutation extends EloquentMutation
             $query->wherePivot($relation->getRelatedPivotKeyName(), $key);
 
             return $query;
-        })->map(function (Relations\BelongsToMany $query) use ($relation, $modelSchema) {
+        })->map(function (Relations\BelongsToMany $query) use ($modelSchema) {
             $query->each(function (Model $related) use ($modelSchema) {
                 $modelSchema->authorizeToDetach($related);
             });
 
             return $query;
-        })->each(function (Relations\BelongsToMany $query) use ($relation) {
+        })->each(function (Relations\BelongsToMany $query) {
             $query->detach();
         });
 
