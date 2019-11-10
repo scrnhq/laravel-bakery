@@ -22,9 +22,8 @@ trait InteractsWithPolymorphism
      * Set the model schemas.
      *
      * @param array $modelSchemas
-     * @return \Bakery\Types\Concerns\InteractsWithPolymorphism
      */
-    public function setModelSchemas(array $modelSchemas)
+    public function setModelSchemas(array $modelSchemas): self
     {
         $this->modelSchemas = $modelSchemas;
 

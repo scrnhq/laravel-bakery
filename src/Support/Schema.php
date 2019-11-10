@@ -229,7 +229,7 @@ class Schema
             // for that relation.
             $schema->getRelations()->filter(function ($relation) {
                 return $relation instanceof BelongsToMany;
-            })->each(function ($relation) use ($schema, &$types) {
+            })->each(function ($relation) use (&$types) {
                 $types = $types->merge($this->getPivotInputTypes($relation));
             });
 

@@ -23,9 +23,10 @@
     "webonyx/graphql-php": "^0.13.0"
   },
   "require-dev": {
+    "mockery/mockery": "^1.2",
+    "nunomaduro/larastan": "^0.4.3",
     "orchestra/testbench": "^4.0",
-    "phpunit/phpunit": "^8.0",
-    "mockery/mockery": "^1.2"
+    "phpunit/phpunit": "^8.0"
   },
   "minimum-stability": "dev",
   "prefer-stable": true,
