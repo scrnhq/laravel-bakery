@@ -3,8 +3,8 @@
 namespace Bakery\Tests\Types;
 
 use Bakery\Support\Schema;
-use Bakery\Tests\Stubs\EnumTypeStub;
 use Bakery\Tests\TestCase;
+use Bakery\Tests\Stubs\EnumTypeStub;
 use GraphQL\Type\Definition\EnumType as GraphQLEnumType;
 
 class EnumTypeTest extends TestCase

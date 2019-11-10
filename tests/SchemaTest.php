@@ -2,15 +2,15 @@
 
 namespace Bakery\Tests;
 
-use Bakery\Exceptions\InvariantViolation;
 use Bakery\Support\Schema;
-use Bakery\Tests\Stubs\DummyModel;
-use Bakery\Tests\Stubs\DummyModelSchema;
-use Bakery\Tests\Stubs\DummyMutation;
-use Bakery\Tests\Stubs\DummyQuery;
-use Bakery\Tests\Stubs\DummyReadOnlySchema;
 use Bakery\Tests\Stubs\DummyType;
+use Bakery\Tests\Stubs\DummyModel;
+use Bakery\Tests\Stubs\DummyQuery;
+use Bakery\Tests\Stubs\DummyMutation;
+use Bakery\Tests\Stubs\DummyModelSchema;
+use Bakery\Exceptions\InvariantViolation;
 use GraphQL\Type\Schema as GraphQLSchema;
+use Bakery\Tests\Stubs\DummyReadOnlySchema;
 
 class NotResourceSchema extends Schema
 {

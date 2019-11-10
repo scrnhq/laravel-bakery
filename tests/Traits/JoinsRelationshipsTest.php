@@ -2,11 +2,11 @@
 
 namespace Bakery\Tests\Traits;
 
-use Bakery\Tests\Fixtures\Models\Article;
-use Bakery\Tests\Fixtures\Models\Role;
-use Bakery\Tests\Fixtures\Models\User;
 use Bakery\Tests\TestCase;
 use Bakery\Traits\JoinsRelationships;
+use Bakery\Tests\Fixtures\Models\Role;
+use Bakery\Tests\Fixtures\Models\User;
+use Bakery\Tests\Fixtures\Models\Article;
 
 class JoinsRelationshipsTest extends TestCase
 {

@@ -2,11 +2,11 @@
 
 namespace Bakery\Tests\Feature;
 
-use Bakery\Tests\Fixtures\Models\Article;
-use Bakery\Tests\Fixtures\Models\Phone;
+use Bakery\Tests\IntegrationTest;
 use Bakery\Tests\Fixtures\Models\Role;
 use Bakery\Tests\Fixtures\Models\User;
-use Bakery\Tests\IntegrationTest;
+use Bakery\Tests\Fixtures\Models\Phone;
+use Bakery\Tests\Fixtures\Models\Article;
 
 class AuthorizationTest extends IntegrationTest
 {

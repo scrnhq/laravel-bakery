@@ -2,26 +2,26 @@
 
 namespace Bakery\Support;
 
+use Bakery\Types;
+use Bakery\Utils\Utils;
+use GraphQL\Type\SchemaConfig;
 use Bakery\Eloquent\ModelSchema;
+use Illuminate\Support\Collection;
 use Bakery\Fields\PolymorphicField;
-use Bakery\Mutations\AttachPivotMutation;
 use Bakery\Mutations\CreateMutation;
 use Bakery\Mutations\DeleteMutation;
-use Bakery\Mutations\DetachPivotMutation;
 use Bakery\Mutations\UpdateMutation;
-use Bakery\Queries\EloquentCollectionQuery;
+use Symfony\Component\Finder\Finder;
 use Bakery\Queries\SingleEntityQuery;
-use Bakery\Types;
 use Bakery\Types\Definitions\RootType;
-use Bakery\Utils\Utils;
 use GraphQL\Type\Definition\Directive;
 use GraphQL\Type\Definition\ObjectType;
+use Bakery\Mutations\AttachPivotMutation;
+use Bakery\Mutations\DetachPivotMutation;
 use GraphQL\Type\Schema as GraphQLSchema;
-use GraphQL\Type\SchemaConfig;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Bakery\Queries\EloquentCollectionQuery;
 use Illuminate\Database\Eloquent\Relations\Pivot;
-use Illuminate\Support\Collection;
-use Symfony\Component\Finder\Finder;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Schema
 {

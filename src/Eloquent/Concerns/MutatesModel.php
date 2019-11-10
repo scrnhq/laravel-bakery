@@ -2,8 +2,8 @@
 
 namespace Bakery\Eloquent\Concerns;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Eloquent\Model;
 
 trait MutatesModel
 {

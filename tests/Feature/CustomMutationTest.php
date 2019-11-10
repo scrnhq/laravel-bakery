@@ -2,8 +2,8 @@
 
 namespace Bakery\Tests\Feature;
 
-use Bakery\Tests\Fixtures\Models\User;
 use Bakery\Tests\IntegrationTest;
+use Bakery\Tests\Fixtures\Models\User;
 
 class CustomMutationTest extends IntegrationTest
 {

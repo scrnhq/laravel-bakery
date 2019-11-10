@@ -3,12 +3,12 @@
 namespace Bakery\Mutations;
 
 use Bakery\Fields\Field;
-use Bakery\Support\Arguments;
-use Bakery\Types\Concerns\InteractsWithPivot;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Bakery\Support\Arguments;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Eloquent\Model;
+use Bakery\Types\Concerns\InteractsWithPivot;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class AttachPivotMutation extends EloquentMutation
 {

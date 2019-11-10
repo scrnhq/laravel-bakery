@@ -2,9 +2,9 @@
 
 namespace Bakery\Fields;
 
+use Bakery\Utils\Utils;
 use Bakery\Support\TypeRegistry;
 use Bakery\Types\Definitions\RootType;
-use Bakery\Utils\Utils;
 
 class PolymorphicField extends Field
 {

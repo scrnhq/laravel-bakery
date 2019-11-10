@@ -3,11 +3,11 @@
 namespace Bakery\Mutations;
 
 use Bakery\Fields\Field;
+use Illuminate\Support\Str;
 use Bakery\Support\Arguments;
-use Bakery\Types\Concerns\InteractsWithPivot;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations;
-use Illuminate\Support\Str;
+use Bakery\Types\Concerns\InteractsWithPivot;
 
 class DetachPivotMutation extends EloquentMutation
 {

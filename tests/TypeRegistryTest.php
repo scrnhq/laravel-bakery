@@ -2,11 +2,11 @@
 
 namespace Bakery\Tests;
 
-use Bakery\Exceptions\TypeNotFound;
 use Bakery\Support\TypeRegistry;
-use Bakery\Tests\Fixtures\IntegrationTestSchema;
+use Bakery\Exceptions\TypeNotFound;
 use Bakery\Tests\Fixtures\Models\User;
 use Bakery\Tests\Fixtures\Schemas\UserSchema;
+use Bakery\Tests\Fixtures\IntegrationTestSchema;
 
 class TypeRegistryTest extends IntegrationTest
 {

@@ -2,11 +2,11 @@
 
 namespace Bakery\Tests;
 
-use Illuminate\Foundation\Testing\TestResponse;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
-use Orchestra\Testbench\TestCase as OrchestraTestCase;
 use PHPUnit\Framework\Assert as PHPUnit;
+use Illuminate\Foundation\Testing\TestResponse;
+use Orchestra\Testbench\TestCase as OrchestraTestCase;
 
 class TestCase extends OrchestraTestCase
 {

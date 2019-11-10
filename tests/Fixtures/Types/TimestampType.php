@@ -2,11 +2,11 @@
 
 namespace Bakery\Tests\Fixtures\Types;
 
-use Bakery\Types\Definitions\ScalarType;
 use Carbon\Carbon;
-use GraphQL\Error\UserError;
-use GraphQL\Language\AST\StringValueNode;
 use GraphQL\Utils\Utils;
+use GraphQL\Error\UserError;
+use Bakery\Types\Definitions\ScalarType;
+use GraphQL\Language\AST\StringValueNode;
 
 class TimestampType extends ScalarType
 {
