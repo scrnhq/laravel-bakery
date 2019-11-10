@@ -3,8 +3,8 @@
 namespace Bakery\Queries\Concerns;
 
 use Bakery\Eloquent\ModelSchema;
-use Bakery\Support\TypeRegistry;
 use Bakery\Fields\PolymorphicField;
+use Bakery\Support\TypeRegistry;
 use Illuminate\Database\Eloquent\Builder;
 
 trait EagerLoadRelationships

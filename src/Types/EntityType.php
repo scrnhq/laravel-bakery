@@ -2,19 +2,19 @@
 
 namespace Bakery\Types;
 
-use Bakery\Utils\Utils;
-use Bakery\Fields\Field;
-use Illuminate\Support\Str;
-use Bakery\Support\Arguments;
 use Bakery\Fields\EloquentField;
-use Bakery\Traits\FiltersQueries;
-use Illuminate\Support\Collection;
+use Bakery\Fields\Field;
 use Bakery\Fields\PolymorphicField;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Builder;
+use Bakery\Support\Arguments;
+use Bakery\Traits\FiltersQueries;
 use Bakery\Types\Definitions\EloquentType;
+use Bakery\Utils\Utils;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 
 class EntityType extends EloquentType
 {

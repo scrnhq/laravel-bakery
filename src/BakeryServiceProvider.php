@@ -2,9 +2,9 @@
 
 namespace Bakery;
 
-use Illuminate\Support\ServiceProvider;
 use GraphQL\Validator\DocumentValidator;
 use GraphQL\Validator\Rules\DisableIntrospection;
+use Illuminate\Support\ServiceProvider;
 
 class BakeryServiceProvider extends ServiceProvider
 {

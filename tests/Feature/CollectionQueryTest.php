@@ -2,12 +2,12 @@
 
 namespace Bakery\Tests\Feature;
 
-use Bakery\Tests\IntegrationTest;
-use Illuminate\Support\Facades\DB;
-use Bakery\Tests\Fixtures\Models\User;
-use Bakery\Tests\Fixtures\Models\Phone;
 use Bakery\Tests\Fixtures\Models\Article;
 use Bakery\Tests\Fixtures\Models\Comment;
+use Bakery\Tests\Fixtures\Models\Phone;
+use Bakery\Tests\Fixtures\Models\User;
+use Bakery\Tests\IntegrationTest;
+use Illuminate\Support\Facades\DB;
 
 class CollectionQueryTest extends IntegrationTest
 {

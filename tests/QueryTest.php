@@ -2,9 +2,9 @@
 
 namespace Bakery\Tests;
 
-use Bakery\Type;
 use Bakery\Queries\Query;
 use Bakery\Support\DefaultSchema;
+use Bakery\Type;
 
 class CustomQuery extends Query
 {

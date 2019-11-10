@@ -2,8 +2,8 @@
 
 namespace Bakery\Support;
 
-use Illuminate\Support\Collection;
 use Bakery\Types\Definitions\ObjectType;
+use Illuminate\Support\Collection;
 
 class RootMutation extends ObjectType
 {

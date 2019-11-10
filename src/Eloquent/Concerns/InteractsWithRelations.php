@@ -2,14 +2,14 @@
 
 namespace Bakery\Eloquent\Concerns;
 
-use RuntimeException;
+use Bakery\Exceptions\InvariantViolation;
 use Bakery\Utils\Utils;
-use Illuminate\Support\Arr;
-use Illuminate\Support\Str;
 use GraphQL\Error\UserError;
 use Illuminate\Database\Eloquent\Model;
-use Bakery\Exceptions\InvariantViolation;
 use Illuminate\Database\Eloquent\Relations;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
+use RuntimeException;
 
 trait InteractsWithRelations
 {

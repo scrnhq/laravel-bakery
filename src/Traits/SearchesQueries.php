@@ -2,14 +2,14 @@
 
 namespace Bakery\Traits;
 
-use Bakery\Support\Arguments;
 use Bakery\Eloquent\ModelSchema;
+use Bakery\Support\Arguments;
 use Bakery\Support\TypeRegistry;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Connection;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\Grammars;
-use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
 
 /**
  * @property ModelSchema $modelSchema

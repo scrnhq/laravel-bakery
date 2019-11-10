@@ -2,11 +2,11 @@
 
 namespace Bakery;
 
+use Bakery\Support\Schema as BakerySchema;
+use GraphQL\Executor\ExecutionResult;
 use GraphQL\GraphQL;
 use GraphQL\Type\Schema;
 use Illuminate\Support\Arr;
-use GraphQL\Executor\ExecutionResult;
-use Bakery\Support\Schema as BakerySchema;
 
 class Bakery
 {

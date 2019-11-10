@@ -2,8 +2,8 @@
 
 namespace Bakery\Tests\Fixtures\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Bakery\Eloquent\Traits\BakeryTransactionalAware;
+use Illuminate\Database\Eloquent\Model;
 
 class Article extends Model
 {

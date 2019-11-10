@@ -2,9 +2,9 @@
 
 namespace Bakery\Tests;
 
-use Bakery\Type;
-use Bakery\Support\Schema;
 use Bakery\Mutations\Mutation;
+use Bakery\Support\Schema;
+use Bakery\Type;
 
 class CreateCustomMutation extends Mutation
 {

@@ -2,8 +2,8 @@
 
 namespace Bakery\Errors;
 
-use GraphQL\Error\Error;
 use GraphQL\Error\ClientAware;
+use GraphQL\Error\Error;
 
 class ValidationError extends Error implements ClientAware
 {

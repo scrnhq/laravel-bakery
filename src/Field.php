@@ -2,8 +2,8 @@
 
 namespace Bakery;
 
-use Bakery\Support\TypeRegistry;
 use Bakery\Fields\PolymorphicField;
+use Bakery\Support\TypeRegistry;
 use Illuminate\Support\Traits\Macroable;
 
 class Field

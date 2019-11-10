@@ -2,11 +2,11 @@
 
 namespace Bakery\Mutations\Concerns;
 
-use Illuminate\Support\Arr;
+use Bakery\Exceptions\TooManyResultsException;
 use Bakery\Support\Arguments;
 use Illuminate\Database\Eloquent\Model;
-use Bakery\Exceptions\TooManyResultsException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Arr;
 
 trait QueriesModel
 {

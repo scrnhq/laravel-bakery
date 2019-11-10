@@ -2,8 +2,8 @@
 
 namespace Bakery\Exceptions;
 
-use Throwable;
 use GraphQL\Error\UserError;
+use Throwable;
 
 class UnauthorizedException extends UserError
 {

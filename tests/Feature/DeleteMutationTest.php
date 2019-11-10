@@ -2,10 +2,10 @@
 
 namespace Bakery\Tests\Feature;
 
+use Bakery\Tests\Fixtures\Models\Article;
+use Bakery\Tests\Fixtures\Models\User;
 use Bakery\Tests\IntegrationTest;
 use Illuminate\Support\Facades\Gate;
-use Bakery\Tests\Fixtures\Models\User;
-use Bakery\Tests\Fixtures\Models\Article;
 
 class DeleteMutationTest extends IntegrationTest
 {

@@ -2,14 +2,14 @@
 
 namespace Bakery\Queries;
 
-use Bakery\Utils\Utils;
-use Illuminate\Support\Arr;
+use Bakery\Exceptions\TooManyResultsException;
 use Bakery\Support\Arguments;
 use Bakery\Types\Definitions\RootType;
-use Illuminate\Database\Eloquent\Model;
+use Bakery\Utils\Utils;
 use GraphQL\Type\Definition\ResolveInfo;
 use Illuminate\Database\Eloquent\Builder;
-use Bakery\Exceptions\TooManyResultsException;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Arr;
 
 class SingleEntityQuery extends EloquentQuery
 {
