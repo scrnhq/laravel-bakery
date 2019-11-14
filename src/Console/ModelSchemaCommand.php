@@ -2,6 +2,7 @@
 
 namespace Bakery\Console;
 
+use Illuminate\Support\Str;
 use Illuminate\Console\GeneratorCommand;
 use Symfony\Component\Console\Input\InputOption;
 
@@ -40,7 +41,7 @@ class ModelSchemaCommand extends GeneratorCommand
 
         if (is_null($model)) {
             $model = $this->rootNamespace().$this->argument('name');
-        } elseif (! starts_with($model, [$this->rootNamespace(), '\\'])) {
+        } elseif (! Str::startsWith($model, [$this->rootNamespace(), '\\'])) {
             $model = $this->rootNamespace().$model;
         }
 

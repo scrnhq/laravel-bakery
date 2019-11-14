@@ -35,9 +35,8 @@ trait InteractsWithPivot
      * Set the pivot relationship.
      *
      * @param BelongsToMany $relation
-     * @return \Bakery\Types\Concerns\InteractsWithPivot
      */
-    public function setPivotRelation(BelongsToMany $relation)
+    public function setPivotRelation(BelongsToMany $relation): self
     {
         $this->relation = $relation;
         $this->pivotParent = $relation->getParent();
@@ -76,17 +75,5 @@ trait InteractsWithPivot
         }
 
         return null;
-    }
-
-    /**
-     * Invoked when the object is serialized.
-     *
-     * @return array
-     */
-    public function __sleep()
-    {
-        $fields = ['pivotParent', 'pivotRelationName'];
-
-        return array_merge($fields, parent::__sleep());
     }
 }

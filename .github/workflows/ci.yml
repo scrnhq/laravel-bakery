@@ -26,6 +26,8 @@ jobs:
           extension-csv: ${{ matrix.php-extensions }}
       - name: Install dependencies
         run: composer install
+      - name: Run static analysis
+        run: vendor/bin/phpstan analyse
       - name: Run tests
         run: vendor/bin/phpunit
         if: matrix.coverage == null
