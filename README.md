@@ -1,5 +1,5 @@
 <p align="center">
-    <img src="https://raw.githubusercontent.com/scrnhq/laravel-bakery/master/artwork.svg" alt="Laravel Bakery logo">
+    <img src="./artwork.svg" alt="Laravel Bakery logo">
 </p>
 
 <p align="center">
