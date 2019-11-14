@@ -1,10 +1,16 @@
-![Bakery](artwork.png)
+<p align="center">
+    <img src="https://raw.githubusercontent.com/scrnhq/laravel-bakery/master/artwork.svg" alt="Laravel Bakery logo">
+</p>
 
-[![Build Status](https://travis-ci.org/scrnhq/laravel-bakery.svg?branch=master)](https://travis-ci.org/scrnhq/laravel-bakery)
-[![Latest Stable Version](https://poser.pugx.org/scrnhq/laravel-bakery/version)](https://packagist.org/packages/scrnhq/laravel-bakery)
-[![Total Downloads](https://poser.pugx.org/scrnhq/laravel-bakery/downloads)](https://packagist.org/packages/scrnhq/laravel-bakery)
-[![codecov](https://codecov.io/gh/scrnhq/laravel-bakery/branch/master/graph/badge.svg)](https://codecov.io/gh/scrnhq/laravel-bakery)
-[![StyleCI](https://github.styleci.io/repos/109427894/shield?style=flat)](https://github.styleci.io/repos/109427894)
+<p align="center">
+    <a href="https://github.com/scrnhq/laravel-bakery/actions"><img src="https://github.com/scrnhq/laravel-bakery/workflows/CI/badge.svg" alt="Build Status status"></a>
+    <a href="https://packagist.org/packages/scrnhq/laravel-bakery"><img src="https://poser.pugx.org/scrnhq/laravel-bakery/version" alt="Latest Version"></a>
+    <a href="https://scrutinizer-ci.com/g/scrnhq/laravel-bakery"><img src="https://img.shields.io/scrutinizer/g/scrnhq/laravel-bakery.svg" alt="Code Quality"></a>
+    <a href="https://packagist.org/packages/scrnhq/laravel-bakery"><img src="https://poser.pugx.org/scrnhq/laravel-bakery/downloads" alt="Total Downloads"></a>
+    <a href="https://packagist.org/packages/scrnhq/laravel-bakery"><img src="https://poser.pugx.org/scrnhq/laravel-bakery/license.svg" alt="License"></a>
+</p>
+
+-----
 
 An on-the-fly GraphQL Schema generator from Eloquent models for Laravel.
 
