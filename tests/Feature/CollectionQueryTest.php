@@ -849,6 +849,6 @@ class CollectionQueryTest extends IntegrationTest
         ';
 
         $response = $this->graphql($query);
-        $this->assertContains('Cannot query field "phones"', $response->json('errors.0.message'));
+        $this->assertStringContainsString('Cannot query field "phones"', $response->json('errors.0.message'));
     }
 }
