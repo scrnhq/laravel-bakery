@@ -23,6 +23,7 @@
     "webonyx/graphql-php": "^0.13.0"
   },
   "require-dev": {
+    "fzaninotto/faker": "^1.9",
     "mockery/mockery": "^1.2",
     "nunomaduro/larastan": "^0.4.3",
     "orchestra/testbench": "^4.0",
