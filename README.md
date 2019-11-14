@@ -1,5 +1,5 @@
 <p align="center">
-    <img src="./artwork.svg" alt="Laravel Bakery logo">
+    <img src="./artwork.svg" alt="Laravel Bakery logo" width="300">
 </p>
 
 <p align="center">
