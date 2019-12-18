@@ -708,5 +708,4 @@ class Field
     {
         return ['registry'];
     }
-
 }

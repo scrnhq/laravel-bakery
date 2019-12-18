@@ -3,13 +3,11 @@
 namespace Bakery\Fields;
 
 use Bakery\Utils\Utils;
-use Bakery\Support\Arguments;
 use Bakery\Eloquent\ModelSchema;
 use Bakery\Support\TypeRegistry;
 use Illuminate\Support\Collection;
 use Bakery\Types\Definitions\RootType;
 use Illuminate\Database\Eloquent\Model;
-use GraphQL\Type\Definition\ResolveInfo;
 use Illuminate\Database\Eloquent\Relations\Relation;
 
 class EloquentField extends Field
