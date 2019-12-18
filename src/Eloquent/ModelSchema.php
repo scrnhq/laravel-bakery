@@ -350,6 +350,10 @@ abstract class ModelSchema
 
             return $field;
         })->map(function (Field $field) {
+            if ($field instanceof EloquentField) {
+                return $field->getRelation($this->getModel());
+            }
+
             $accessor = $field->getAccessor();
 
             Utils::invariant(

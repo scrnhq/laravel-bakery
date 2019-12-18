@@ -221,7 +221,7 @@ class Field
     }
 
     /**
-     * Return the name of the database column associated with this field.
+     * Return the name of the database column or method associated with this field.
      *
      * @return string|null
      */
@@ -525,6 +525,14 @@ class Field
     }
 
     /**
+     * Get the resolver.
+     */
+    public function getResolver(): ?callable
+    {
+        return $this->resolver;
+    }
+
+    /**
      * Resolve the field.
      *
      * @param $root
@@ -700,4 +708,5 @@ class Field
     {
         return ['registry'];
     }
+
 }

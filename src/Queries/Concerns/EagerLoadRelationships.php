@@ -4,6 +4,7 @@ namespace Bakery\Queries\Concerns;
 
 use Bakery\Eloquent\ModelSchema;
 use Bakery\Support\TypeRegistry;
+use Bakery\Fields\EloquentField;
 use Bakery\Fields\PolymorphicField;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -38,9 +39,9 @@ trait EagerLoadRelationships
 
             $query->with($with);
 
-            if ($field->isRelationship() && ! $field instanceof PolymorphicField) {
+            if ($field instanceof EloquentField) {
                 $accessor = $field->getAccessor();
-                $related = $schema->getModel()->{$accessor}()->getRelated();
+                $related = $field->getRelation($schema->getModel())->getRelated();
                 $relatedSchema = $this->registry->getSchemaForModel($related);
                 $this->eagerLoadRelations($query, $subFields, $relatedSchema, $path ? "{$path}.{$accessor}" : $accessor);
             }

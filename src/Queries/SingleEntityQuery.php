@@ -15,8 +15,6 @@ class SingleEntityQuery extends EloquentQuery
 {
     /**
      * Get the name of the query.
-     *
-     * @return string
      */
     public function name(): string
     {
@@ -29,8 +27,6 @@ class SingleEntityQuery extends EloquentQuery
 
     /**
      * The return type of the query.
-     *
-     * @return \Bakery\Types\Definitions\RootType
      */
     public function type(): RootType
     {
@@ -39,8 +35,6 @@ class SingleEntityQuery extends EloquentQuery
 
     /**
      * The arguments for the Query.
-     *
-     * @return array
      */
     public function args(): array
     {
@@ -49,12 +43,6 @@ class SingleEntityQuery extends EloquentQuery
 
     /**
      * Resolve the EloquentQuery.
-     *
-     * @param Arguments $args
-     * @param mixed $root
-     * @param mixed $context
-     * @param \GraphQL\Type\Definition\ResolveInfo $info
-     * @return \Illuminate\Database\Eloquent\Model|null ?Model
      */
     public function resolve(Arguments $args, $root, $context, ResolveInfo $info): ?Model
     {
@@ -83,10 +71,6 @@ class SingleEntityQuery extends EloquentQuery
 
     /**
      * Query by the arguments supplied to the query.
-     *
-     * @param Builder $query
-     * @param Arguments $args
-     * @return Builder
      */
     protected function queryByArgs(Builder $query, Arguments $args): Builder
     {
