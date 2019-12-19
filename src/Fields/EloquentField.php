@@ -97,19 +97,9 @@ class EloquentField extends Field
     /**
      * Set a custom relation resolver.
      */
-    public function resolve(callable $resolver): self
+    public function relation(callable $resolver): self
     {
         $this->relationResolver = $resolver;
-
-        return $this;
-    }
-
-    /**
-     * Set a resolver to resolve the collection from the field.
-     */
-    public function setCollectionResolver(callable $resolver): self
-    {
-        $this->resolver = $resolver;
 
         return $this;
     }
@@ -134,12 +124,20 @@ class EloquentField extends Field
     }
 
     /**
+     * Determine if the field has a relation resolver.
+     */
+    public function hasRelationResolver(): bool
+    {
+        return isset($this->relationResolver);
+    }
+
+    /**
      * Get the result of the field.
      */
     public function getResult(Model $model)
     {
         if ($resolver = $this->relationResolver) {
-            return $resolver($model)();
+            return $resolver($model)->get();
         }
 
         return $model->{$this->getAccessor()};

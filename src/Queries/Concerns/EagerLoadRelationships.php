@@ -5,6 +5,7 @@ namespace Bakery\Queries\Concerns;
 use Bakery\Eloquent\ModelSchema;
 use Bakery\Fields\EloquentField;
 use Bakery\Support\TypeRegistry;
+use Bakery\Queries\EloquentQuery;
 use Illuminate\Database\Eloquent\Builder;
 
 trait EagerLoadRelationships
@@ -29,6 +30,11 @@ trait EagerLoadRelationships
 
             // Skip if this is not a defined field.
             if (! $field) {
+                continue;
+            }
+
+            // If a custom relation resolver is provided we cannot eager load.
+            if ($field instanceof EloquentField && $field->hasRelationResolver()) {
                 continue;
             }
 

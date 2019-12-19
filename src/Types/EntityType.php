@@ -126,9 +126,7 @@ class EntityType extends EloquentType
 
         $field = $field->args([
             'filter' => $this->registry->type($field->getName().'Filter')->nullable(),
-        ]);
-
-        $field->setCollectionResolver(function (Model $model, string $accessor, Arguments $args) use ($field) {
+        ])->resolve(function (Model $model, string $accessor, Arguments $args) use ($field) {
             $relation = $field->getRelation($model);
 
             return $args->isEmpty() ? $field->getResult($model) : $this->getRelationQuery($relation, $args)->get();

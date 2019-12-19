@@ -32,7 +32,7 @@ trait QueriesModel
 
         $query = $this->modelSchema->getQuery();
 
-        if (array_key_exists($primaryKey, $args)) {
+        if (isset($args->{$primaryKey})) {
             return $query->find($args[$primaryKey]);
         }
 

@@ -32,8 +32,8 @@ class ArticleSchema extends ModelSchema
             'tags' => Field::collection(TagSchema::class),
             'comments' => Field::collection(CommentSchema::class),
             'remarks' => Field::collection(CommentSchema::class)->accessor('comments'),
-            'myComments' => Field::collection(CommentSchema::class)->resolve(function (Article $article) {
-                return $article->comments()->where('author_id', auth()->user()->getAuthIdentifier());
+            'myComments' => Field::collection(CommentSchema::class)->relation(function (Article $article) {
+                return $article->comments()->where('author_id', optional(auth()->user())->getAuthIdentifier());
             }),
         ];
     }
