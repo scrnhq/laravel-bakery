@@ -5,7 +5,6 @@ namespace Bakery\Queries\Concerns;
 use Bakery\Eloquent\ModelSchema;
 use Bakery\Fields\EloquentField;
 use Bakery\Support\TypeRegistry;
-use Bakery\Queries\EloquentQuery;
 use Illuminate\Database\Eloquent\Builder;
 
 trait EagerLoadRelationships
