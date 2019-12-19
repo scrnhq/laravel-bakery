@@ -3,8 +3,8 @@
 namespace Bakery\Queries\Concerns;
 
 use Bakery\Eloquent\ModelSchema;
+use Bakery\Fields\EloquentField;
 use Bakery\Support\TypeRegistry;
-use Bakery\Fields\PolymorphicField;
 use Illuminate\Database\Eloquent\Builder;
 
 trait EagerLoadRelationships
@@ -32,15 +32,20 @@ trait EagerLoadRelationships
                 continue;
             }
 
+            // If a custom relation resolver is provided we cannot eager load.
+            if ($field instanceof EloquentField && $field->hasRelationResolver()) {
+                continue;
+            }
+
             $with = array_map(function ($with) use ($path) {
                 return $path ? "{$path}.{$with}" : $with;
             }, $field->getWith() ?? []);
 
             $query->with($with);
 
-            if ($field->isRelationship() && ! $field instanceof PolymorphicField) {
+            if ($field instanceof EloquentField) {
                 $accessor = $field->getAccessor();
-                $related = $schema->getModel()->{$accessor}()->getRelated();
+                $related = $field->getRelation($schema->getModel())->getRelated();
                 $relatedSchema = $this->registry->getSchemaForModel($related);
                 $this->eagerLoadRelations($query, $subFields, $relatedSchema, $path ? "{$path}.{$accessor}" : $accessor);
             }

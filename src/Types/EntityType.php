@@ -95,7 +95,7 @@ class EntityType extends EloquentType
     protected function getFieldsForRelation(string $key, EloquentField $field): Collection
     {
         $fields = collect();
-        $relationship = $this->model->{$field->getAccessor()}();
+        $relationship = $field->getRelation($this->model);
 
         if ($field->isList()) {
             $fields = $fields->merge($this->getPluralRelationFields($key, $field));
@@ -126,12 +126,10 @@ class EntityType extends EloquentType
 
         $field = $field->args([
             'filter' => $this->registry->type($field->getName().'Filter')->nullable(),
-        ])->resolve(function (Model $model, string $accessor, Arguments $args) {
-            $relation = $model->{$accessor}();
+        ])->resolve(function (Model $model, string $accessor, Arguments $args) use ($field) {
+            $relation = $field->getRelation($model);
 
-            $result = $args->isEmpty() ? $model->{$accessor} : $this->getRelationQuery($relation, $args)->get();
-
-            return $result;
+            return $args->isEmpty() ? $field->getResult($model) : $this->getRelationQuery($relation, $args)->get();
         });
 
         $fields->put($key, $field);
@@ -142,10 +140,10 @@ class EntityType extends EloquentType
             ->args($field->getArgs())
             ->nullable($field->isNullable())
             ->viewPolicy($field->getViewPolicy())
-            ->resolve(function (Model $model, string $accessor, Arguments $args) {
-                $relation = $model->{$accessor}();
+            ->resolve(function (Model $model, string $accessor, Arguments $args) use ($field) {
+                $relation = $field->getRelation($model);
 
-                $result = $args->isEmpty() ? $model->{$accessor} : $this->getRelationQuery($relation, $args)->get();
+                $result = $args->isEmpty() ? $field->getResult($model) : $this->getRelationQuery($relation, $args)->get();
 
                 return $result->pluck($relation->getRelated()->getKeyName());
             })
@@ -155,10 +153,10 @@ class EntityType extends EloquentType
             ->accessor($field->getAccessor())
             ->nullable($field->isNullable())
             ->viewPolicy($field->getViewPolicy())
-            ->resolve(function (Model $model, string $accessor, Arguments $args) {
-                $relation = $model->{$accessor};
+            ->resolve(function (Model $model, string $accessor, Arguments $args) use ($field) {
+                $relation = $field->getRelation($model);
 
-                $result = $args->isEmpty() ? $model->{$accessor} : $this->getRelationQuery($relation, $args);
+                $result = $args->isEmpty() ? $field->getResult($model) : $this->getRelationQuery($relation, $args)->get();
 
                 return $result->count();
             })
