@@ -32,8 +32,8 @@ trait QueriesModel
 
         $query = $this->modelSchema->getQuery();
 
-        if (isset($args->{$primaryKey})) {
-            return $query->find($args[$primaryKey]);
+        if (property_exists($args, $primaryKey)) {
+            return $query->find($args->$primaryKey);
         }
 
         $fields = Arr::except($args->toArray(), ['input']);
