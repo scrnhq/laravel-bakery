@@ -60,6 +60,8 @@ class BakeryServiceProvider extends ServiceProvider
 
         $this->registerBakery();
 
+        $this->registerMacros();
+
         $this->commands([
             Console\InstallCommand::class,
             Console\ModelSchemaCommand::class,
@@ -92,5 +94,15 @@ class BakeryServiceProvider extends ServiceProvider
         if (config('bakery.security.disableIntrospection') === true) {
             DocumentValidator::addRule(new DisableIntrospection());
         }
+    }
+
+    /**
+     * Register the macros used by Bakery.
+     *
+     * @return void
+     */
+    protected function registerMacros()
+    {
+        require_once __DIR__.'/macros/bakeryPaginate.php'; // TODO: Remove this once fixed upstream.
     }
 }
