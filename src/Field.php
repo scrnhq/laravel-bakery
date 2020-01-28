@@ -43,12 +43,12 @@ class Field
         return self::getRegistry()->field(self::getRegistry()->float());
     }
 
-    public static function model(string $class): Fields\Field
+    public static function model(string $class): Fields\EloquentField
     {
         return self::getRegistry()->eloquent($class);
     }
 
-    public static function collection(string $class): Fields\Field
+    public static function collection(string $class): Fields\EloquentField
     {
         return self::model($class)->list();
     }

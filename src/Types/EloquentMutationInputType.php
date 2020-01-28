@@ -66,7 +66,7 @@ abstract class EloquentMutationInputType extends EloquentInputType
         $fields = collect();
         $root->setRegistry($this->registry);
         $inputType = 'Create'.$root->getName().'Input';
-        $relationship = $this->model->{$root->getAccessor()}();
+        $relationship = $root->getRelation($this->model);
 
         if ($root->isList()) {
             $name = Str::singular($relation).'Ids';

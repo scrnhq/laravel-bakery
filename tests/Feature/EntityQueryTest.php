@@ -131,6 +131,34 @@ class EntityQueryTest extends IntegrationTest
     }
 
     /** @test */
+    public function it_uses_custom_resolver_for_relationships()
+    {
+        $user = factory(User::class)->create();
+        $article = factory(Article::class)->create(['user_id' => $user->id]);
+
+        factory(Comment::class)->create(['commentable_id' => $article->id, 'author_id' => $user->id, 'body' => 'This is my comment.']);
+        factory(Comment::class)->create(['commentable_id' => $article->id, 'body' => 'This is a comment from someone else.']);
+
+        $query = '
+            query {
+                article {
+                    id
+                    myComments {
+                        id
+                        body
+                    }
+                    myCommentsCount
+                    myCommentIds
+                }
+            }
+        ';
+
+        $this->graphql($query)
+            ->assertJsonFragment(['body' => 'This is my comment.'])
+            ->assertJsonMissing(['body' => 'This is a comment from someone else.']);
+    }
+
+    /** @test */
     public function it_shows_the_count_for_many_relationships()
     {
         $user = factory(User::class)->create();
