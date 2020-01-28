@@ -44,7 +44,7 @@ trait SearchesQueries
 
         foreach ($fields as $key => $value) {
             if ($relations->keys()->contains($key)) {
-                $this->applyRelationalSearch($query, $this->model, $key, $needle, $value);
+                $this->applyRelationalSearch($query, $this->model, $key, $needle, $value->toArray());
             } else {
                 $this->tsFields[] = $this->model->getTable().'.'.$key;
             }
