@@ -43,10 +43,12 @@ trait SearchesQueries
         $qualifiedNeedle = preg_quote($needle);
 
         foreach ($fields as $key => $value) {
+            $field = $this->modelSchema->getFieldByKey($key);
+            $accessor = $field->getAccessor();
             if ($relations->keys()->contains($key)) {
-                $this->applyRelationalSearch($query, $this->model, $key, $needle, $value->toArray());
+                $this->applyRelationalSearch($query, $this->model, $accessor, $needle, $value->toArray());
             } else {
-                $this->tsFields[] = $this->model->getTable().'.'.$key;
+                $this->tsFields[] = $this->model->getTable().'.'.$accessor;
             }
         }
 
