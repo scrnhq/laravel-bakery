@@ -33,7 +33,7 @@ class DetachPivotMutationTest extends IntegrationTest
         ';
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $response->assertJsonKey('id');
+        $response->assertJsonFragment(['id' => $article->id]);
         $this->assertDatabaseMissing('taggables', ['taggable_id' => '1', 'tag_id' => '1']);
         $this->assertDatabaseMissing('taggables', ['taggable_id' => '1', 'tag_id' => '2']);
         $this->assertDatabaseHas('taggables', ['taggable_id' => '1', 'tag_id' => '3']);
@@ -59,7 +59,7 @@ class DetachPivotMutationTest extends IntegrationTest
         ';
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $response->assertJsonKey('id');
+        $response->assertJsonFragment(['id' => $user->id]);
         $this->assertDatabaseHas('role_user', [
             'user_id' => '1',
             'role_id' => '1',
@@ -92,7 +92,7 @@ class DetachPivotMutationTest extends IntegrationTest
         ';
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $response->assertJsonKey('id');
+        $response->assertJsonFragment(['id' => $user->id]);
         $this->assertDatabaseMissing('role_user', [
             'user_id' => '1',
             'role_id' => '1',
@@ -120,7 +120,7 @@ class DetachPivotMutationTest extends IntegrationTest
         ';
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $response->assertJsonKey('id');
+        $response->assertJsonFragment(['id' => $user->id]);
         $this->assertDatabaseHas('role_user', [
             'user_id' => '1',
             'role_id' => '1',
@@ -153,7 +153,7 @@ class DetachPivotMutationTest extends IntegrationTest
         ';
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $response->assertJsonKey('id');
+        $response->assertJsonFragment(['id' => $user->id]);
         $this->assertDatabaseHas('role_user', [
             'user_id' => '1',
             'role_id' => '1',

@@ -31,7 +31,7 @@ class AttachPivotMutationTest extends IntegrationTest
         ';
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $response->assertJsonKey('id');
+        $response->assertJsonFragment(['id' => $article->id]);
         $this->assertDatabaseHas('taggables', ['taggable_id' => '1', 'tag_id' => '1']);
         $this->assertDatabaseHas('taggables', ['taggable_id' => '1', 'tag_id' => '2']);
     }
@@ -54,7 +54,7 @@ class AttachPivotMutationTest extends IntegrationTest
         ';
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $response->assertJsonKey('id');
+        $response->assertJsonFragment(['id' => $user->id]);
         $this->assertDatabaseHas('role_user', [
             'user_id' => '1',
             'role_id' => '1',
@@ -79,7 +79,7 @@ class AttachPivotMutationTest extends IntegrationTest
         ';
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $response->assertJsonKey('id');
+        $response->assertJsonFragment(['id' => $user->id]);
         $this->assertDatabaseHas('role_user', [
             'user_id' => '1',
             'role_id' => '1',
@@ -106,7 +106,7 @@ class AttachPivotMutationTest extends IntegrationTest
         ';
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $response->assertJsonKey('id');
+        $response->assertJsonFragment(['id' => $user->id]);
         $this->assertDatabaseHas('role_user', [
             'user_id' => '1',
             'role_id' => '1',
@@ -132,7 +132,7 @@ class AttachPivotMutationTest extends IntegrationTest
         ';
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $response->assertJsonKey('id');
+        $response->assertJsonFragment(['id' => $user->id]);
         $this->assertDatabaseHas('role_user', [
             'user_id' => '1',
             'role_id' => '1',
@@ -162,7 +162,7 @@ class AttachPivotMutationTest extends IntegrationTest
         ';
 
         $response = $this->json('GET', '/graphql', ['query' => $query]);
-        $response->assertJsonKey('id');
+        $response->assertJsonFragment(['id' => $user->id]);
         $this->assertDatabaseHas('role_user', [
             'user_id' => '1',
             'role_id' => '1',
