@@ -3,12 +3,9 @@
 namespace Bakery\Console;
 
 use Illuminate\Console\Command;
-use Illuminate\Console\DetectsApplicationNamespace;
 
 class InstallCommand extends Command
 {
-    use DetectsApplicationNamespace;
-
     /**
      * The name and signature of the console command.
      *
@@ -37,7 +34,7 @@ class InstallCommand extends Command
         $this->callSilent('bakery:modelschema', ['name' => 'User']);
         copy(__DIR__.'/stubs/user-schema.stub', app_path('Bakery/User.php'));
 
-        $this->setAppNamespace(app_path('Bakery/User.php'), $this->getAppNamespace());
+        $this->setAppNamespace(app_path('Bakery/User.php'), $this->laravel->getNamespace());
     }
 
     /**
