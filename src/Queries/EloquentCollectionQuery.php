@@ -114,6 +114,7 @@ class EloquentCollectionQuery extends EloquentQuery
             $query = $this->applyOrderBy($query, $args->orderBy);
         }
 
-        return $query->distinct()->bakeryPaginate($count, ['*'], 'page', $page);
+        return $query->distinct($this->model->getQualifiedKeyName())
+            ->bakeryPaginate($count, ['*'], 'page', $page);
     }
 }
