@@ -14,8 +14,8 @@ class ArticleSchema extends ModelSchema
     {
         return [
             'slug' => Field::string()->unique(),
-            'title' => Field::string()->searchable(),
-            'name' => Field::string()->accessor('title')->searchable()->readOnly(),
+            'title' => Field::string()->searchable()->sortable(),
+            'name' => Field::string()->accessor('title')->searchable()->sortable()->readOnly(),
             'authorName' => Field::string()->with('user')->readOnly()->resolve(function (Article $article) {
                 return $article->user->name;
             }),
