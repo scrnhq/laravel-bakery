@@ -2,7 +2,6 @@
 
 namespace Bakery\Types;
 
-use Bakery\Fields\Field;
 use Illuminate\Support\Collection;
 use Bakery\Types\Definitions\EloquentInputType;
 
