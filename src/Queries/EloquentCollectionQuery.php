@@ -66,7 +66,7 @@ class EloquentCollectionQuery extends EloquentQuery
             $args->put('search', $this->registry->type($this->modelSchema->typename().'RootSearch')->nullable());
         }
 
-        if (! empty($this->modelSchema->getFields())) {
+        if ($this->modelSchema->isSortable()) {
             $args->put('orderBy', $this->registry->type($this->modelSchema->typename().'OrderBy')->nullable());
         }
 
@@ -114,7 +114,6 @@ class EloquentCollectionQuery extends EloquentQuery
             $query = $this->applyOrderBy($query, $args->orderBy);
         }
 
-        return $query->distinct($this->model->getQualifiedKeyName())
-            ->bakeryPaginate($count, ['*'], 'page', $page);
+        return $query->paginate($count, ['*'], 'page', $page);
     }
 }

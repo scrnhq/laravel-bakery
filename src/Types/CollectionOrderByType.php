@@ -27,22 +27,10 @@ class CollectionOrderByType extends EloquentInputType
     {
         $fields = collect();
 
-        foreach ($this->getSortableFields() as $name => $field) {
+        foreach ($this->modelSchema->getSortableFields() as $name => $field) {
             $fields->put($name, $this->registry->field('Order')->nullable());
         }
 
         return $fields->toArray();
-    }
-
-    /**
-     * Get the fields that are sortable.
-     *
-     * @return Collection
-     */
-    protected function getSortableFields(): Collection
-    {
-        return $this->modelSchema->getFields()->filter(function (Field $field) {
-            return $field->isSortable();
-        });
     }
 }

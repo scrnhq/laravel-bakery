@@ -199,8 +199,11 @@ class Schema
             } else {
                 $types->push(new Types\EntityType($this->registry, $schema))
                       ->push(new Types\EntityLookupType($this->registry, $schema))
-                      ->push(new Types\CollectionFilterType($this->registry, $schema))
-                      ->push(new Types\CollectionOrderByType($this->registry, $schema));
+                      ->push(new Types\CollectionFilterType($this->registry, $schema));
+
+                if ($schema->isSortable()) {
+                    $types->push(new types\CollectionOrderByType($this->registry, $schema));
+                }
 
                 if ($schema->isSearchable()) {
                     $types->push(new Types\CollectionSearchType($this->registry, $schema));
