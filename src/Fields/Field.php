@@ -79,6 +79,11 @@ class Field
     protected $unique = false;
 
     /**
+     * @var bool
+     */
+    protected $sortable = false;
+
+    /**
      * @var mixed
      */
     protected $storePolicy;
@@ -385,6 +390,29 @@ class Field
     public function getWith(): ?array
     {
         return $this->with;
+    }
+
+    /**
+     * Set if the field is sortable.
+     *
+     * @param bool $sortable
+     * @return \Bakery\Fields\Field
+     */
+    public function sortable(bool $sortable = true): self
+    {
+        $this->sortable = $sortable;
+
+        return $this;
+    }
+
+    /**
+     * Return if the field is sortable.
+     *
+     * @return bool
+     */
+    public function isSortable(): bool
+    {
+        return $this->sortable;
     }
 
     /**

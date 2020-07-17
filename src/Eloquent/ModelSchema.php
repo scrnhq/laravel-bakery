@@ -157,6 +157,14 @@ abstract class ModelSchema
     }
 
     /**
+     * Returns if the schema is sortable.
+     */
+    public function isSortable(): bool
+    {
+        return $this->getSortableFields()->isNotEmpty();
+    }
+
+    /**
      * Returns if the schema is searchable.
      *
      * @return bool
@@ -234,6 +242,16 @@ abstract class ModelSchema
     {
         return $this->getFields()->filter(function (Field $field) {
             return $field->isFillable();
+        });
+    }
+
+    /**
+     * Get the fields than can be sorted.
+     */
+    public function getSortableFields(): Collection
+    {
+        return $this->getFields()->filter(function (Field $field) {
+            return $field->isSortable();
         });
     }
 

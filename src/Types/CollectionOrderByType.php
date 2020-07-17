@@ -2,8 +2,7 @@
 
 namespace Bakery\Types;
 
-use Bakery\Fields\Field;
-use Bakery\Fields\EloquentField;
+use Illuminate\Support\Collection;
 use Bakery\Types\Definitions\EloquentInputType;
 
 class CollectionOrderByType extends EloquentInputType
@@ -27,15 +26,9 @@ class CollectionOrderByType extends EloquentInputType
     {
         $fields = collect();
 
-        foreach ($this->modelSchema->getFields() as $name => $field) {
+        foreach ($this->modelSchema->getSortableFields() as $name => $field) {
             $fields->put($name, $this->registry->field('Order')->nullable());
         }
-
-        $this->modelSchema->getRelationFields()->filter(function (Field $field) {
-            return $field instanceof EloquentField;
-        })->each(function (EloquentField $field, $relation) use ($fields) {
-            $fields->put($relation, $this->registry->field($field->name().'OrderBy')->nullable());
-        });
 
         return $fields->toArray();
     }
