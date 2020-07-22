@@ -21,7 +21,7 @@ class DeleteMutation extends EloquentMutation
             return $this->name;
         }
 
-        return 'delete'.$this->modelSchema->typename();
+        return 'delete'.$this->modelSchema->getTypename();
     }
 
     /**

@@ -20,7 +20,7 @@ class UpdateMutation extends EloquentMutation
             return $this->name;
         }
 
-        return 'update'.$this->modelSchema->typename();
+        return 'update'.$this->modelSchema->getTypename();
     }
 
     /**

@@ -22,7 +22,7 @@ class SingleEntityQuery extends EloquentQuery
             return $this->name;
         }
 
-        return Utils::single($this->model);
+        return Utils::single($this->modelSchema->getTypename());
     }
 
     /**
