@@ -27,7 +27,7 @@ class AttachPivotMutation extends EloquentMutation
 
         $relation = Str::studly($this->pivotRelationName);
 
-        return 'attach'.$relation.'On'.$this->modelSchema->typename();
+        return 'attach'.$relation.'On'.$this->modelSchema->getTypename();
     }
 
     /**
