@@ -19,7 +19,7 @@ class CreateMutation extends EloquentMutation
             return $this->name;
         }
 
-        return 'create'.$this->modelSchema->typename();
+        return 'create'.$this->modelSchema->getTypename();
     }
 
     /**

@@ -26,7 +26,7 @@ class DetachPivotMutation extends EloquentMutation
 
         $relation = Str::studly($this->pivotRelationName);
 
-        return 'detach'.$relation.'On'.$this->modelSchema->typename();
+        return 'detach'.$relation.'On'.$this->modelSchema->getTypename();
     }
 
     /**

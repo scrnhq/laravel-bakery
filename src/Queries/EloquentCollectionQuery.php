@@ -36,7 +36,7 @@ class EloquentCollectionQuery extends EloquentQuery
             return $this->name;
         }
 
-        return Utils::plural($this->modelSchema->getModel());
+        return Utils::plural($this->modelSchema->getTypename());
     }
 
     /**
