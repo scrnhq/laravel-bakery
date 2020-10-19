@@ -16,6 +16,8 @@ use Bakery\Queries\SingleEntityQuery;
 use Bakery\Types\Definitions\RootType;
 use GraphQL\Type\Definition\Directive;
 use GraphQL\Type\Definition\ObjectType;
+use Bakery\Mutations\DeleteManyMutation;
+use Bakery\Mutations\UpdateManyMutation;
 use Bakery\Mutations\AttachPivotMutation;
 use Bakery\Mutations\DetachPivotMutation;
 use GraphQL\Type\Schema as GraphQLSchema;
@@ -424,8 +426,14 @@ class Schema
                 $updateMutation = new UpdateMutation($this->registry, $modelSchema);
                 $mutations->put($updateMutation->getName(), $updateMutation);
 
+                $updateManyMutation = new UpdateManyMutation($this->registry, $modelSchema);
+                $mutations->put($updateManyMutation->getName(), $updateManyMutation);
+
                 $deleteMutation = new DeleteMutation($this->registry, $modelSchema);
                 $mutations->put($deleteMutation->getName(), $deleteMutation);
+
+                $deleteManyMutation = new DeleteManyMutation($this->registry, $modelSchema);
+                $mutations->put($deleteManyMutation->getName(), $deleteManyMutation);
             }
 
             foreach ($pivotRelations as $relation) {

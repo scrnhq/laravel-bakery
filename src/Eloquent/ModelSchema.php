@@ -194,6 +194,16 @@ abstract class ModelSchema
     }
 
     /**
+     * Get the plural typename for the model.
+     *
+     * @return string
+     */
+    public function pluralTypename(): string
+    {
+        return Utils::pluralTypename($this->getModel());
+    }
+
+    /**
      * Get the key (ID) field.
      *
      * @return array
