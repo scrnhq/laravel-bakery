@@ -101,6 +101,32 @@ trait Authorizable
     }
 
     /**
+     * Determine if the current user can add the given model to the model or throw an exception.
+     *
+     * @param \Illuminate\Database\Eloquent\Model $model
+     * @throws \Illuminate\Auth\Access\AuthorizationException
+     */
+    public function authorizeToRemove(Model $model): void
+    {
+        $method = 'remove'.str_singular(class_basename($model));
+
+        $this->authorize($method, [$model]);
+    }
+
+    /**
+     * Determine if the current user can add the given model to the model.
+     *
+     * @param \Illuminate\Database\Eloquent\Model $model
+     * @return bool
+     */
+    public function authorizedToRemove(Model $model): bool
+    {
+        $method = 'remove'.str_singular(class_basename($model));
+
+        return $this->authorized($method, [$model]);
+    }
+
+    /**
      * Determine if the current user can attach the given model to the model.
      *
      * @param \Illuminate\Database\Eloquent\Model $model
