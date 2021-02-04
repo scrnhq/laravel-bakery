@@ -11,6 +11,9 @@ jobs:
         php: [7.2, 7.3, 7.4]
         laravel: [^6.0, ^7.0, ^8.0]
         stability: [prefer-lowest, prefer-stable]
+        exclude:
+          - laravel: ^8.0
+            php: 7.2
 
     name: P${{ matrix.php }} - L${{ matrix.laravel }} - ${{ matrix.stability }}
 
@@ -30,6 +33,10 @@ jobs:
           php-version: ${{ matrix.php }}
           extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, gd
           coverage: none
+
+      - name: Remove laravel/legacy-factories
+        if: ${{ matrix.laravel != '^8.0' }}
+        run: composer remove --dev "laravel/legacy-factories" --no-interaction --no-update
 
       - name: Install dependencies
         run: |
