@@ -4,5 +4,5 @@ parameters:
     level: 0
     paths:
         - %currentWorkingDirectory%/src/
-    excludes_analyse:
-        - %currentWorkingDirectory%/src/macros/*
+    excludePaths:
+        - src/macros/*
