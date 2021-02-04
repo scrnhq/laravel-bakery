@@ -1,4 +1,4 @@
-name: run-tests
+name: Tests
 
 on: [push, pull_request]
 
@@ -9,10 +9,13 @@ jobs:
       fail-fast: false
       matrix:
         php: [7.2, 7.3, 7.4]
-        laravel: [^6.0, ^7.0]
+        laravel: [^6.0, ^7.0, ^8.0]
         stability: [prefer-lowest, prefer-stable]
+        exclude:
+          - laravel: ^8.0
+            php: 7.2
 
-    name: P${{ matrix.php }} - L${{ matrix.laravel }} - ${{ matrix.stability }}
+    name: PHP ${{ matrix.php }} on L${{ matrix.laravel }} - ${{ matrix.stability }}
 
     steps:
       - name: Checkout code
@@ -31,13 +34,15 @@ jobs:
           extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, gd
           coverage: none
 
-      - name: Install dependencies
-        run: |
-          composer require "laravel/framework:${{ matrix.laravel }}" --no-interaction --no-update
-          composer update --${{ matrix.dependency-version }} --prefix-dist --no-interaction --no-suggest
+      - name: Remove laravel/legacy-factories
+        if: ${{ matrix.laravel != '^8.0' }}
+        run: composer remove --dev "laravel/legacy-factories" --no-interaction --no-update
 
-      - name: Run static analysis
-        run: vendor/bin/phpstan analyse
+      - name: Set Laravel version
+        run: composer require "laravel/framework:${{ matrix.laravel }}" --no-interaction --no-update
+
+      - name: Install dependencies
+        run: composer update --${{ matrix.stability }} --prefer-dist --no-interaction --no-suggest
 
       - name: Run tests
         run: vendor/bin/phpunit
