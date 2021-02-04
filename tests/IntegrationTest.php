@@ -58,7 +58,9 @@ abstract class IntegrationTest extends TestCase
         $this->gate->policy(Models\Tag::class, Policies\TagPolicy::class);
 
         // Disable policy name guessing for testing purposes.
-        $this->gate->guessPolicyNamesUsing(function () { return null; });
+        $this->gate->guessPolicyNamesUsing(function () {
+            return null;
+        });
     }
 
     /**
