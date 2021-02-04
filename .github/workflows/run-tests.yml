@@ -15,7 +15,7 @@ jobs:
           - laravel: ^8.0
             php: 7.2
 
-    name: P${{ matrix.php }} - L${{ matrix.laravel }} - ${{ matrix.stability }}
+    name: PHP ${{ matrix.php }} on L${{ matrix.laravel }} - ${{ matrix.stability }}
 
     steps:
       - name: Checkout code
@@ -38,13 +38,11 @@ jobs:
         if: ${{ matrix.laravel != '^8.0' }}
         run: composer remove --dev "laravel/legacy-factories" --no-interaction --no-update
 
-      - name: Install dependencies
-        run: |
-          composer require "laravel/framework:${{ matrix.laravel }}" --no-interaction --no-update
-          composer update --${{ matrix.stability }} --prefer-dist --no-interaction --no-suggest
+      - name: Set Laravel version
+        run: composer require "laravel/framework:${{ matrix.laravel }}" --no-interaction --no-update
 
-      - name: Run static analysis
-        run: vendor/bin/phpstan analyse
+      - name: Install dependencies
+        run: composer update --${{ matrix.stability }} --prefer-dist --no-interaction --no-suggest
 
       - name: Run tests
         run: vendor/bin/phpunit
