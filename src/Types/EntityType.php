@@ -143,9 +143,9 @@ class EntityType extends EloquentType
             ->resolve(function (Model $model, string $accessor, Arguments $args) use ($field) {
                 $relation = $field->getRelation($model);
 
-                $result = $args->isEmpty() ? $field->getResult($model) : $this->getRelationQuery($relation, $args)->get();
+                $query = $args->isEmpty() ? $relation : $this->getRelationQuery($relation, $args);
 
-                return $result->pluck($relation->getRelated()->getKeyName());
+                return $query->pluck($relation->getRelated()->getKeyName());
             })
         );
 
@@ -156,9 +156,9 @@ class EntityType extends EloquentType
             ->resolve(function (Model $model, string $accessor, Arguments $args) use ($field) {
                 $relation = $field->getRelation($model);
 
-                $result = $args->isEmpty() ? $field->getResult($model) : $this->getRelationQuery($relation, $args)->get();
+                $query = $args->isEmpty() ? $relation : $this->getRelationQuery($relation, $args);
 
-                return $result->count();
+                return $query->count();
             })
         );
 
