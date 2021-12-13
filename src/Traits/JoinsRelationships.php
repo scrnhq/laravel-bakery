@@ -8,10 +8,10 @@ use Illuminate\Database\Eloquent\Relations;
 trait JoinsRelationships
 {
     /**
-     * @param Builder $query
-     * @param \Illuminate\Database\Eloquent\Relations\Relation $relation
-     * @param string $type
-     * @param bool $where
+     * @param  Builder  $query
+     * @param  \Illuminate\Database\Eloquent\Relations\Relation  $relation
+     * @param  string  $type
+     * @param  bool  $where
      * @return Builder
      */
     public function joinRelation(Builder $query, Relations\Relation $relation, string $type = 'inner', $where = false): Builder

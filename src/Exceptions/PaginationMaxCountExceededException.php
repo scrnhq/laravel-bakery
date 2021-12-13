@@ -7,7 +7,7 @@ use Exception;
 class PaginationMaxCountExceededException extends Exception
 {
     /**
-     * @param int $maxCount
+     * @param  int  $maxCount
      */
     public function __construct(int $maxCount)
     {

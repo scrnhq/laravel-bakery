@@ -14,6 +14,7 @@ class Bakery
      * Get the default GraphQL schema.
      *
      * @return \GraphQL\Type\Schema
+     *
      * @throws \Exception
      */
     public function schema(): Schema
@@ -27,9 +28,10 @@ class Bakery
     /**
      * Execute the GraphQL query.
      *
-     * @param array $input
-     * @param \GraphQL\Type\Schema|\Bakery\Support\Schema $schema
+     * @param  array  $input
+     * @param  \GraphQL\Type\Schema|\Bakery\Support\Schema  $schema
      * @return \GraphQL\Executor\ExecutionResult
+     *
      * @throws \Exception
      */
     public function executeQuery($input, $schema = null): ExecutionResult
@@ -56,7 +58,7 @@ class Bakery
      * Serve the GraphiQL tool.
      *
      * @param $route
-     * @param array $headers
+     * @param  array  $headers
      * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
     public function graphiql($route, $headers = [])

@@ -97,8 +97,8 @@ class CollectionFilterType extends EloquentInputType
     /**
      * Return the filters for a field.
      *
-     * @param string $name
-     * @param \Bakery\Fields\Field $field
+     * @param  string  $name
+     * @param  \Bakery\Fields\Field  $field
      * @return \Illuminate\Support\Collection
      */
     protected function getFilters(string $name, Field $field): Collection

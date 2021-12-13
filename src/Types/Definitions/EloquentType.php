@@ -22,8 +22,8 @@ class EloquentType extends ObjectType
     /**
      * Construct a new Eloquent type.
      *
-     * @param \Bakery\Support\TypeRegistry $registry
-     * @param \Bakery\Eloquent\ModelSchema $modelSchema
+     * @param  \Bakery\Support\TypeRegistry  $registry
+     * @param  \Bakery\Eloquent\ModelSchema  $modelSchema
      */
     public function __construct(TypeRegistry $registry, ModelSchema $modelSchema)
     {

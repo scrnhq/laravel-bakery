@@ -13,6 +13,7 @@ trait Authorizable
      * Determine if the current user can create a new model or throw an exception.
      *
      * @return void
+     *
      * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     public function authorizeToCreate(): void
@@ -36,6 +37,7 @@ trait Authorizable
      * Determine if the current user can update the model or throw an exception.
      *
      * @return void
+     *
      * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     public function authorizeToUpdate(): void
@@ -57,6 +59,7 @@ trait Authorizable
      * Determine if the current user can delete the model or throw an exception.
      *
      * @return void
+     *
      * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     public function authorizeToDelete(): void
@@ -77,7 +80,8 @@ trait Authorizable
     /**
      * Determine if the current user can add the given model to the model or throw an exception.
      *
-     * @param \Illuminate\Database\Eloquent\Model $model
+     * @param  \Illuminate\Database\Eloquent\Model  $model
+     *
      * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     public function authorizeToAdd(Model $model): void
@@ -90,7 +94,7 @@ trait Authorizable
     /**
      * Determine if the current user can add the given model to the model.
      *
-     * @param \Illuminate\Database\Eloquent\Model $model
+     * @param  \Illuminate\Database\Eloquent\Model  $model
      * @return bool
      */
     public function authorizedToAdd(Model $model): bool
@@ -103,8 +107,9 @@ trait Authorizable
     /**
      * Determine if the current user can attach the given model to the model.
      *
-     * @param \Illuminate\Database\Eloquent\Model $model
-     * @param array|null $pivot
+     * @param  \Illuminate\Database\Eloquent\Model  $model
+     * @param  array|null  $pivot
+     *
      * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     public function authorizeToAttach(Model $model, array $pivot = null): void
@@ -117,8 +122,8 @@ trait Authorizable
     /**
      * Determine if the current user can attach the given model to the model.
      *
-     * @param \Illuminate\Database\Eloquent\Model $model
-     * @param array|null $pivot
+     * @param  \Illuminate\Database\Eloquent\Model  $model
+     * @param  array|null  $pivot
      * @return bool
      */
     public function authorizedToAttach(Model $model, array $pivot = null): bool
@@ -131,7 +136,8 @@ trait Authorizable
     /**
      * Determine if the current user can detach the given model from the model.
      *
-     * @param \Illuminate\Database\Eloquent\Model $model
+     * @param  \Illuminate\Database\Eloquent\Model  $model
+     *
      * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     public function authorizeToDetach(Model $model): void
@@ -144,7 +150,7 @@ trait Authorizable
     /**
      * Determine if the current user can detach the given model from the model.
      *
-     * @param \Illuminate\Database\Eloquent\Model $model
+     * @param  \Illuminate\Database\Eloquent\Model  $model
      * @return bool
      */
     public function authorizedToDetach(Model $model): bool
@@ -157,8 +163,8 @@ trait Authorizable
     /**
      * Determine if the current user has a given ability or throw an exception.
      *
-     * @param string $ability
-     * @param array|null $arguments
+     * @param  string  $ability
+     * @param  array|null  $arguments
      * @return void
      *
      * @throws \Illuminate\Auth\Access\AuthorizationException
@@ -173,8 +179,8 @@ trait Authorizable
     /**
      * Determine if the current user has a given ability.
      *
-     * @param string $ability
-     * @param array $arguments
+     * @param  string  $ability
+     * @param  array  $arguments
      * @return bool
      */
     public function authorized(string $ability, array $arguments = []): bool

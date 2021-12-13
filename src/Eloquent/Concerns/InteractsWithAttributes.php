@@ -19,7 +19,7 @@ trait InteractsWithAttributes
     /**
      * Fill the scalars in the model.
      *
-     * @param array $scalars
+     * @param  array  $scalars
      */
     protected function fillScalars(array $scalars)
     {
@@ -31,7 +31,8 @@ trait InteractsWithAttributes
     /**
      * Check the policies for the scalars in the model.
      *
-     * @param array $scalars
+     * @param  array  $scalars
+     *
      * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     protected function checkScalars(array $scalars)

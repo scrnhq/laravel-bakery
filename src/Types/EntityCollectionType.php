@@ -33,7 +33,7 @@ class EntityCollectionType extends EloquentType
     /**
      * Resolve the items field.
      *
-     * @param LengthAwarePaginator $paginator
+     * @param  LengthAwarePaginator  $paginator
      * @return array
      */
     public function resolveItemsField(LengthAwarePaginator $paginator): array
@@ -44,7 +44,7 @@ class EntityCollectionType extends EloquentType
     /**
      * Resolve the pagination field.
      *
-     * @param LengthAwarePaginator $paginator
+     * @param  LengthAwarePaginator  $paginator
      * @return array
      */
     public function resolvePaginationField(LengthAwarePaginator $paginator): array

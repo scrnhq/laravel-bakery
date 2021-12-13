@@ -18,8 +18,8 @@ trait OrdersQueries
     /**
      * Apply ordering on the query.
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param Arguments $args
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @param  Arguments  $args
      * @return \Illuminate\Database\Eloquent\Builder
      */
     protected function applyOrderBy(Builder $query, Arguments $args): Builder
@@ -42,10 +42,10 @@ trait OrdersQueries
     /**
      * Apply relational order by.
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param \Illuminate\Database\Eloquent\Model $model
-     * @param string $relation
-     * @param array $args
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @param  \Illuminate\Database\Eloquent\Model  $model
+     * @param  string  $relation
+     * @param  array  $args
      * @return \Illuminate\Database\Eloquent\Builder
      */
     protected function applyRelationalOrderBy(Builder $query, Model $model, string $relation, Arguments $args): Builder
@@ -72,9 +72,9 @@ trait OrdersQueries
     /**
      * Apply the ordering.
      *
-     * @param Builder $query
-     * @param string $column
-     * @param string $ordering
+     * @param  Builder  $query
+     * @param  string  $column
+     * @param  string  $ordering
      * @return Builder
      */
     protected function orderBy(Builder $query, string $column, string $ordering)

@@ -34,7 +34,7 @@ trait InteractsWithPivot
     /**
      * Set the pivot relationship.
      *
-     * @param BelongsToMany $relation
+     * @param  BelongsToMany  $relation
      */
     public function setPivotRelation(BelongsToMany $relation): self
     {

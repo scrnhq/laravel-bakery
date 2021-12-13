@@ -37,9 +37,10 @@ class BakeryController extends Controller
     /**
      * Handle an HTTP response containing the GraphQL query.
      *
-     * @param Request $request
-     * @param \Bakery\Bakery $bakery
+     * @param  Request  $request
+     * @param  \Bakery\Bakery  $bakery
      * @return JsonResponse
+     *
      * @throws \Exception
      */
     public function graphql(Request $request, Bakery $bakery): JsonResponse
@@ -54,8 +55,8 @@ class BakeryController extends Controller
     /**
      * Serve the GraphiQL tool.
      *
-     * @param \Illuminate\Http\Request $request
-     * @param \Bakery\Bakery $bakery
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \Bakery\Bakery  $bakery
      * @return \Illuminate\Contracts\View\View
      */
     public function graphiql(Request $request, Bakery $bakery)

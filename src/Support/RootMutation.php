@@ -10,8 +10,8 @@ class RootMutation extends ObjectType
     /**
      * RootQuery constructor.
      *
-     * @param \Bakery\Support\TypeRegistry $registry
-     * @param array $fields
+     * @param  \Bakery\Support\TypeRegistry  $registry
+     * @param  array  $fields
      */
     public function __construct(TypeRegistry $registry, array $fields)
     {

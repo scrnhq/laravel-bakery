@@ -17,7 +17,7 @@ abstract class UnionType extends RootType implements NamedType
      *
      * @param $value
      * @param $context
-     * @param ResolveInfo $info
+     * @param  ResolveInfo  $info
      * @return mixed
      */
     abstract protected function resolveType($value, $context, ResolveInfo $info);
@@ -39,7 +39,7 @@ abstract class UnionType extends RootType implements NamedType
     /**
      * Define the type resolver.
      *
-     * @param callable $resolver
+     * @param  callable  $resolver
      * @return $this
      */
     public function typeResolver($resolver)
@@ -54,7 +54,7 @@ abstract class UnionType extends RootType implements NamedType
      *
      * @param $value
      * @param $context
-     * @param \GraphQL\Type\Definition\ResolveInfo $info
+     * @param  \GraphQL\Type\Definition\ResolveInfo  $info
      * @return callable
      */
     public function getTypeResolver($value, $context, ResolveInfo $info)

@@ -30,8 +30,9 @@ class UnionEntityType extends UnionType
      *
      * @param $value
      * @param $context
-     * @param ResolveInfo $info
+     * @param  ResolveInfo  $info
      * @return mixed
+     *
      * @throws \Bakery\Exceptions\TypeNotFound
      */
     public function resolveType($value, $context, ResolveInfo $info)

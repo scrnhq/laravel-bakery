@@ -11,7 +11,7 @@ abstract class ScalarType extends RootType implements NamedType
     /**
      * Serializes an internal value to include in a response.
      *
-     * @param string $value
+     * @param  string  $value
      * @return string
      */
     abstract public function serialize($value);
@@ -19,7 +19,7 @@ abstract class ScalarType extends RootType implements NamedType
     /**
      * Parses an externally provided value (query variable) to use as an input.
      *
-     * @param mixed $value
+     * @param  mixed  $value
      * @return mixed
      */
     abstract public function parseValue($value);
@@ -32,8 +32,9 @@ abstract class ScalarType extends RootType implements NamedType
      *   user(email: "user@example.com")
      * }
      *
-     * @param \GraphQL\Language\AST\Node $valueNode
+     * @param  \GraphQL\Language\AST\Node  $valueNode
      * @return string
+     *
      * @throws Error
      */
     abstract public function parseLiteral($valueNode);

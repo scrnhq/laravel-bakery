@@ -34,7 +34,7 @@ trait MutatesModel
     /**
      * Execute a callable in a database transaction and inform the model about that.
      *
-     * @param callable $callback
+     * @param  callable  $callback
      * @return mixed
      */
     public function transaction(callable $callback)
@@ -55,7 +55,7 @@ trait MutatesModel
     /**
      * Create a new instance with GraphQL input.
      *
-     * @param array $input
+     * @param  array  $input
      * @return \Illuminate\Database\Eloquent\Model
      */
     public function create(array $input = []): Model
@@ -71,7 +71,7 @@ trait MutatesModel
     /**
      * Create a model after checking if the user is authorised to do so.
      *
-     * @param array $input
+     * @param  array  $input
      * @return \Illuminate\Database\Eloquent\Model
      */
     public function createIfAuthorized(array $input = []): Model
@@ -85,8 +85,9 @@ trait MutatesModel
     }
 
     /**
-     * @param array $input
+     * @param  array  $input
      * @return \Illuminate\Database\Eloquent\Model
+     *
      * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     public function make(array $input = []): Model
@@ -100,7 +101,7 @@ trait MutatesModel
     /**
      * Update the model with GraphQL input.
      *
-     * @param array $input
+     * @param  array  $input
      * @return \Illuminate\Database\Eloquent\Model
      */
     public function update(array $input = []): Model
@@ -116,7 +117,7 @@ trait MutatesModel
     /**
      * Update a model after checking if the user is authorised to do so.
      *
-     * @param array $input
+     * @param  array  $input
      * @return \Illuminate\Database\Eloquent\Model
      */
     public function updateIfAuthorized(array $input = []): Model
@@ -130,8 +131,9 @@ trait MutatesModel
     /**
      * Fill the underlying model with input.
      *
-     * @param array $input
+     * @param  array  $input
      * @return $this
+     *
      * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     public function fill(array $input = [])
@@ -167,7 +169,7 @@ trait MutatesModel
      * Get the attributes that are mass assignable by cross
      * referencing the attributes with the GraphQL fields.
      *
-     * @param array $attributes
+     * @param  array  $attributes
      * @return array
      */
     protected function getFillableScalars(array $attributes): array
@@ -181,7 +183,7 @@ trait MutatesModel
      * Get the relations that are assignable by cross referencing
      * the attributes with the GraphQL relations.
      *
-     * @param array $attributes
+     * @param  array  $attributes
      * @return array
      */
     protected function getFillableRelations(array $attributes): array
@@ -195,7 +197,7 @@ trait MutatesModel
      * Get the relations that are assignable by cross referencing
      * the attributes with the GraphQL connections.
      *
-     * @param array $attributes
+     * @param  array  $attributes
      * @return array
      */
     protected function getFillableConnections(array $attributes): array

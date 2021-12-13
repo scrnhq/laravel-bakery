@@ -17,8 +17,8 @@ class ReferenceType extends RootType
     /**
      * BaseType constructor.
      *
-     * @param \Bakery\Support\TypeRegistry $registry
-     * @param string $reference
+     * @param  \Bakery\Support\TypeRegistry  $registry
+     * @param  string  $reference
      */
     public function __construct(TypeRegistry $registry, string $reference)
     {
@@ -29,6 +29,7 @@ class ReferenceType extends RootType
 
     /**
      * @return \GraphQL\Type\Definition\NamedType
+     *
      * @throws \Bakery\Exceptions\TypeNotFound
      */
     public function getType(): GraphQLNamedType

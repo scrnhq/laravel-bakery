@@ -32,6 +32,7 @@ class ValidationError extends Error implements ClientAware
      * Returns true when exception message is safe to be displayed to a client.
      *
      * @return bool
+     *
      * @api
      */
     public function isClientSafe()
@@ -45,6 +46,7 @@ class ValidationError extends Error implements ClientAware
      * Value "graphql" is reserved for errors produced by query parsing or validation, do not use it.
      *
      * @return string
+     *
      * @api
      */
     public function getCategory()

@@ -57,8 +57,8 @@ abstract class EloquentMutationInputType extends EloquentInputType
     /**
      * Set the relation fields.
      *
-     * @param string $relation
-     * @param EloquentField $root
+     * @param  string  $relation
+     * @param  EloquentField  $root
      * @return Collection
      */
     protected function getFieldsForRelation(string $relation, EloquentField $root): Collection
@@ -98,8 +98,8 @@ abstract class EloquentMutationInputType extends EloquentInputType
     /**
      * Get the polymorphic relation fields.
      *
-     * @param string $relation
-     * @param \Bakery\Fields\PolymorphicField $field
+     * @param  string  $relation
+     * @param  \Bakery\Fields\PolymorphicField  $field
      * @return Collection
      */
     protected function getFieldsForPolymorphicRelation(string $relation, PolymorphicField $field)
@@ -125,8 +125,8 @@ abstract class EloquentMutationInputType extends EloquentInputType
     /**
      * Get the fields for a pivot relation.
      *
-     * @param \Bakery\Fields\EloquentField $field
-     * @param \Illuminate\Database\Eloquent\Relations\BelongsToMany $relation
+     * @param  \Bakery\Fields\EloquentField  $field
+     * @param  \Illuminate\Database\Eloquent\Relations\BelongsToMany  $relation
      * @return Collection
      */
     protected function getFieldsForPivot(EloquentField $field, BelongsToMany $relation): Collection

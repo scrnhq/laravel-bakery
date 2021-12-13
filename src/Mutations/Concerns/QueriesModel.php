@@ -23,7 +23,7 @@ trait QueriesModel
     /**
      * Get the model based on the arguments provided.
      *
-     * @param Arguments $args
+     * @param  Arguments  $args
      * @return mixed
      */
     public function find(Arguments $args)
@@ -56,7 +56,7 @@ trait QueriesModel
      * Get the model based on the arguments provided.
      * Otherwise fail.
      *
-     * @param Arguments $args
+     * @param  Arguments  $args
      * @return Model
      */
     public function findOrFail(Arguments $args): Model

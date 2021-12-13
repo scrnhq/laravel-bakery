@@ -66,7 +66,7 @@ abstract class IntegrationTest extends TestCase
     /**
      * Get package providers.
      *
-     * @param \Illuminate\Foundation\Application $app
+     * @param  \Illuminate\Foundation\Application  $app
      * @return array
      */
     protected function getPackageProviders($app)
@@ -79,7 +79,7 @@ abstract class IntegrationTest extends TestCase
     /**
      * Define environment setup.
      *
-     * @param  \Illuminate\Foundation\Application $app
+     * @param  \Illuminate\Foundation\Application  $app
      * @return void
      */
     protected function getEnvironmentSetUp($app)
@@ -115,8 +115,8 @@ abstract class IntegrationTest extends TestCase
     /**
      * Visit the GraphQL endpoint.
      *
-     * @param string $query
-     * @param array|null $variables
+     * @param  string  $query
+     * @param  array|null  $variables
      * @return \Illuminate\Foundation\Testing\TestResponse
      */
     protected function graphql(string $query, array $variables = [])

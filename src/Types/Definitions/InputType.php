@@ -39,7 +39,7 @@ class InputType extends ObjectType
     /**
      * Convert the Bakery type to a GraphQL type.
      *
-     * @param array $options
+     * @param  array  $options
      * @return GraphQLType
      */
     public function toType(array $options = []): GraphQLType

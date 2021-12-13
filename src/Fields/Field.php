@@ -96,8 +96,8 @@ class Field
     /**
      * Construct a new field.
      *
-     * @param \Bakery\Support\TypeRegistry $registry
-     * @param \Bakery\Types\Definitions\RootType|null $type
+     * @param  \Bakery\Support\TypeRegistry  $registry
+     * @param  \Bakery\Types\Definitions\RootType|null  $type
      */
     public function __construct(TypeRegistry $registry, RootType $type = null)
     {
@@ -117,7 +117,7 @@ class Field
     }
 
     /**
-     * @param \Bakery\Support\TypeRegistry $registry
+     * @param  \Bakery\Support\TypeRegistry  $registry
      * @return $this
      */
     public function setRegistry(TypeRegistry $registry): self
@@ -187,7 +187,7 @@ class Field
     /**
      * Set the name of the type.
      *
-     * @param string $name
+     * @param  string  $name
      * @return $this
      */
     public function setName(string $name): self
@@ -210,7 +210,7 @@ class Field
     /**
      * Set the description of the field.
      *
-     * @param string $description
+     * @param  string  $description
      * @return $this
      */
     public function description(string $description): self
@@ -233,7 +233,7 @@ class Field
     /**
      * Define the name of the database column associated with this field.
      *
-     * @param string $accessor
+     * @param  string  $accessor
      * @return Field
      */
     public function accessor(string $accessor): self
@@ -246,7 +246,7 @@ class Field
     /**
      * Set the args of the field.
      *
-     * @param array $args
+     * @param  array  $args
      * @return $this
      */
     public function args(array $args): self
@@ -267,7 +267,7 @@ class Field
     }
 
     /**
-     * @param bool $list
+     * @param  bool  $list
      * @return $this
      */
     public function list(bool $list = true): self
@@ -288,7 +288,7 @@ class Field
     /**
      * Set if the field is nullable.
      *
-     * @param bool $nullable
+     * @param  bool  $nullable
      * @return $this
      */
     public function nullable(bool $nullable = true): self
@@ -311,7 +311,7 @@ class Field
     /**
      * Set if the field has nullable items.
      *
-     * @param bool $nullable
+     * @param  bool  $nullable
      * @return \Bakery\Fields\Field
      */
     public function nullableItems(bool $nullable = true): self
@@ -334,7 +334,7 @@ class Field
     /**
      * Set if the field is fillable.
      *
-     * @param bool $fillable
+     * @param  bool  $fillable
      * @return $this
      */
     public function fillable(bool $fillable = true): self
@@ -390,7 +390,7 @@ class Field
     /**
      * Set if the field is searchable.
      *
-     * @param bool $searchable
+     * @param  bool  $searchable
      * @return \Bakery\Fields\Field
      */
     public function searchable(bool $searchable = true): self
@@ -413,7 +413,7 @@ class Field
     /**
      * Set if the field is unique.
      *
-     * @param bool $unique
+     * @param  bool  $unique
      * @return \Bakery\Fields\Field
      */
     public function unique(bool $unique = true): self
@@ -449,7 +449,7 @@ class Field
     /**
      * Set the store policy with a callable.
      *
-     * @param callable $closure
+     * @param  callable  $closure
      * @return $this
      */
     public function canStore(callable $closure): self
@@ -460,7 +460,7 @@ class Field
     /**
      * Set the store policy with a reference to a policy method.
      *
-     * @param string $policy
+     * @param  string  $policy
      * @return $this
      */
     public function canStoreWhen(string $policy): self
@@ -484,7 +484,7 @@ class Field
     /**
      * Set the store policy with a callable.
      *
-     * @param callable $closure
+     * @param  callable  $closure
      * @return $this
      */
     public function canSee(callable $closure = null): self
@@ -495,7 +495,7 @@ class Field
     /**
      * Set the store policy with a reference to a policy method.
      *
-     * @param string $policy
+     * @param  string  $policy
      * @return $this
      */
     public function canSeeWhen(string $policy): self
@@ -536,10 +536,11 @@ class Field
      * Resolve the field.
      *
      * @param $root
-     * @param array $args
+     * @param  array  $args
      * @param $context
-     * @param \GraphQL\Type\Definition\ResolveInfo $info
+     * @param  \GraphQL\Type\Definition\ResolveInfo  $info
      * @return mixed|null
+     *
      * @throws AuthorizationException
      */
     public function resolveField($root, array $args, $context, ResolveInfo $info)
@@ -563,9 +564,10 @@ class Field
     /**
      * Determine if the current user can read the field of the model or throw an exception if not nullable.
      *
-     * @param mixed $source
-     * @param string $fieldName
+     * @param  mixed  $source
+     * @param  string  $fieldName
      * @return bool
+     *
      * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     public function authorizeToRead($source, $fieldName)
@@ -581,7 +583,7 @@ class Field
     /**
      * Determine if the current user can read the field of the model.
      *
-     * @param mixed $source
+     * @param  mixed  $source
      * @return bool
      */
     public function authorizedToRead($source): bool
@@ -609,10 +611,11 @@ class Field
     /**
      * Determine if the current user can store the value on the model or throw an exception.
      *
-     * @param mixed $source
-     * @param mixed $value
-     * @param string $fieldName
+     * @param  mixed  $source
+     * @param  mixed  $value
+     * @param  string  $fieldName
      * @return bool
+     *
      * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     public function authorizeToStore($source, $value, $fieldName): bool
@@ -631,8 +634,8 @@ class Field
     /**
      * Determine if the current user can store the value on the model.
      *
-     * @param mixed $source
-     * @param mixed $value
+     * @param  mixed  $source
+     * @param  mixed  $value
      * @return bool
      */
     public function authorizedToStore($source, $value): bool
@@ -678,11 +681,11 @@ class Field
      * The default resolver for resolving the value of the type.
      * This gets called when there is no custom resolver defined.
      *
-     * @param string $accessor
-     * @param Arguments $args
+     * @param  string  $accessor
+     * @param  Arguments  $args
      * @param $root
      * @param $context
-     * @param \GraphQL\Type\Definition\ResolveInfo $info
+     * @param  \GraphQL\Type\Definition\ResolveInfo  $info
      * @return mixed|null
      */
     public static function defaultResolver($root, string $accessor, Arguments $args, $context, ResolveInfo $info)

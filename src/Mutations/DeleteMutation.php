@@ -49,8 +49,9 @@ class DeleteMutation extends EloquentMutation
     /**
      * Resolve the mutation.
      *
-     * @param Arguments $args
+     * @param  Arguments  $args
      * @return Model
+     *
      * @throws AuthorizationException
      */
     public function resolve(Arguments $args): Model

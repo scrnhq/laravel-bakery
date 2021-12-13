@@ -20,8 +20,8 @@ trait SearchesQueries
     /**
      * Apply search on the query.
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param Arguments $args
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @param  Arguments  $args
      * @return Builder
      */
     protected function applySearch(Builder $query, Arguments $args)
@@ -69,11 +69,11 @@ trait SearchesQueries
     /**
      * Apply a relational search.
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param \Illuminate\Database\Eloquent\Model $model
-     * @param string $relation
-     * @param string $needle
-     * @param array $fields
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @param  \Illuminate\Database\Eloquent\Model  $model
+     * @param  string  $relation
+     * @param  string  $needle
+     * @param  array  $fields
      */
     protected function applyRelationalSearch(
         Builder $query,

@@ -118,7 +118,7 @@ class Schema
     }
 
     /**
-     * @param \Bakery\Support\TypeRegistry $registry
+     * @param  \Bakery\Support\TypeRegistry  $registry
      */
     public function setRegistry(TypeRegistry $registry)
     {
@@ -248,7 +248,7 @@ class Schema
     /**
      * Get the types for a pivot model.
      *
-     * @param \Bakery\Eloquent\ModelSchema $modelSchema
+     * @param  \Bakery\Eloquent\ModelSchema  $modelSchema
      * @return array
      */
     protected function getPivotModelTypes(ModelSchema $modelSchema): array
@@ -262,7 +262,7 @@ class Schema
     /**
      * Get the pivot input types.
      *
-     * @param BelongsToMany $relation
+     * @param  BelongsToMany  $relation
      * @return array
      */
     protected function getPivotInputTypes(BelongsToMany $relation): array
@@ -281,9 +281,9 @@ class Schema
     /**
      * Get the types for a polymorphic field.
      *
-     * @param \Bakery\Eloquent\ModelSchema $modelSchema
-     * @param string $key
-     * @param \Bakery\Fields\PolymorphicField $field
+     * @param  \Bakery\Eloquent\ModelSchema  $modelSchema
+     * @param  string  $key
+     * @param  \Bakery\Fields\PolymorphicField  $field
      * @return array
      */
     protected function getPolymorphicFieldTypes(ModelSchema $modelSchema, string $key, PolymorphicField $field): array
@@ -303,9 +303,9 @@ class Schema
     /**
      * Get the types for a polymorphic relationship.
      *
-     * @param \Bakery\Eloquent\ModelSchema $modelSchema
-     * @param string $key
-     * @param \Bakery\Fields\PolymorphicField $type
+     * @param  \Bakery\Eloquent\ModelSchema  $modelSchema
+     * @param  string  $key
+     * @param  \Bakery\Fields\PolymorphicField  $type
      * @return array
      */
     protected function getPolymorphicRelationshipTypes(ModelSchema $modelSchema, string $key, PolymorphicField $type): array
@@ -438,8 +438,8 @@ class Schema
     /**
      * Get the pivot mutations for a model and a relationship.
      *
-     * @param \Bakery\Eloquent\ModelSchema $modelSchema
-     * @param BelongsToMany $relation
+     * @param  \Bakery\Eloquent\ModelSchema  $modelSchema
+     * @param  BelongsToMany  $relation
      * @return Collection
      */
     protected function getModelPivotMutations(ModelSchema $modelSchema, BelongsToMany $relation): Collection
@@ -483,6 +483,7 @@ class Schema
      * Convert the bakery schema to a GraphQL schema.
      *
      * @return GraphQLSchema
+     *
      * @throws \Exception
      */
     public function toGraphQLSchema(): GraphQLSchema
@@ -542,7 +543,7 @@ class Schema
 
     /**
      * @param $type
-     * @param array $options
+     * @param  array  $options
      * @return \GraphQL\Type\Definition\ObjectType
      */
     protected function makeObjectType($type, array $options = []): ObjectType
@@ -562,7 +563,7 @@ class Schema
 
     /**
      * @param $fields
-     * @param array $options
+     * @param  array  $options
      * @return \GraphQL\Type\Definition\ObjectType
      */
     protected function makeObjectTypeFromFields($fields, $options = []): ObjectType
@@ -573,7 +574,7 @@ class Schema
     }
 
     /**
-     * @param \Bakery\Types\Definitions\RootType $class
+     * @param  \Bakery\Types\Definitions\RootType  $class
      * @return \GraphQL\Type\Definition\Type
      */
     protected function makeObjectTypeFromClass(RootType $class): \GraphQL\Type\Definition\Type
@@ -584,8 +585,8 @@ class Schema
     /**
      * Get the models in the given directory.
      *
-     * @param string $directory
-     * @param string|null $namespace
+     * @param  string  $directory
+     * @param  string|null  $namespace
      * @return array
      */
     public static function modelsIn($directory, $namespace = null)
@@ -609,6 +610,7 @@ class Schema
 
     /**
      * @return array
+     *
      * @throws \Exception
      */
     public function __sleep()

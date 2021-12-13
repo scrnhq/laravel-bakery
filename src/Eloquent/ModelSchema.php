@@ -61,8 +61,8 @@ abstract class ModelSchema
     /**
      * ModelSchema constructor.
      *
-     * @param \Bakery\Support\TypeRegistry $registry
-     * @param \Illuminate\Database\Eloquent\Model|null $instance
+     * @param  \Bakery\Support\TypeRegistry  $registry
+     * @param  \Illuminate\Database\Eloquent\Model|null  $instance
      */
     public function __construct(TypeRegistry $registry, Model $instance = null)
     {
@@ -178,6 +178,7 @@ abstract class ModelSchema
 
     /**
      * @alias getTypename()
+     *
      * @return string
      */
     public function typename(): string
@@ -368,7 +369,7 @@ abstract class ModelSchema
     /**
      * Return a field with a defined.
      *
-     * @param string $key
+     * @param  string  $key
      * @return Field|null
      */
     public function getFieldByKey(string $key): ?Field
@@ -430,7 +431,7 @@ abstract class ModelSchema
      * Note that this does not work for relations, in these cases you
      * should consider using Laravel's global scopes.
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
     protected function scopeQuery(Builder $query): Builder

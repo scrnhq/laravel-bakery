@@ -9,8 +9,8 @@ class Utils
 {
     /**
      * @param $test
-     * @param string $message
-     * @param array $args
+     * @param  string  $message
+     * @param  array  $args
      */
     public static function invariant($test, $message = '', ...$args)
     {

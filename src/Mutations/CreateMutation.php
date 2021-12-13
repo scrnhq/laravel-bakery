@@ -25,7 +25,7 @@ class CreateMutation extends EloquentMutation
     /**
      * Resolve the mutation.
      *
-     * @param Arguments $args
+     * @param  Arguments  $args
      * @return Model
      */
     public function resolve(Arguments $args): Model

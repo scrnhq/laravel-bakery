@@ -76,11 +76,12 @@ class EloquentCollectionQuery extends EloquentQuery
     /**
      * Resolve the CollectionQuery.
      *
-     * @param Arguments $args
-     * @param mixed $root
-     * @param mixed $context
-     * @param \GraphQL\Type\Definition\ResolveInfo $info
+     * @param  Arguments  $args
+     * @param  mixed  $root
+     * @param  mixed  $context
+     * @param  \GraphQL\Type\Definition\ResolveInfo  $info
      * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
+     *
      * @throws PaginationMaxCountExceededException
      */
     public function resolve(Arguments $args, $root, $context, ResolveInfo $info): LengthAwarePaginator

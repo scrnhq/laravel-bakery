@@ -27,8 +27,8 @@ abstract class EloquentQuery extends Query
     /**
      * EloquentQuery constructor.
      *
-     * @param \Bakery\Support\TypeRegistry $registry
-     * @param \Bakery\Eloquent\ModelSchema $modelSchema
+     * @param  \Bakery\Support\TypeRegistry  $registry
+     * @param  \Bakery\Eloquent\ModelSchema  $modelSchema
      */
     public function __construct(TypeRegistry $registry, ModelSchema $modelSchema = null)
     {
@@ -62,7 +62,7 @@ abstract class EloquentQuery extends Query
      * Scope the query.
      * This can be overwritten to make your own collection queries.
      *
-     * @param Builder $query
+     * @param  Builder  $query
      * @return Builder
      */
     protected function scopeQuery(Builder $query): Builder

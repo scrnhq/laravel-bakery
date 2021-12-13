@@ -9,7 +9,7 @@ class Arguments extends ArrayObject
     /**
      * Arguments constructor.
      *
-     * @param array $args
+     * @param  array  $args
      */
     public function __construct(array $args)
     {

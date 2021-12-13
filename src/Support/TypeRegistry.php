@@ -56,7 +56,7 @@ class TypeRegistry
     /**
      * Add types to the registry.
      *
-     * @param array $classes
+     * @param  array  $classes
      */
     public function addTypes(array $classes)
     {
@@ -90,8 +90,8 @@ class TypeRegistry
     /**
      * Add a type to the registry.
      *
-     * @param \Bakery\Types\Definitions\RootType $type
-     * @param string|null $name
+     * @param  \Bakery\Types\Definitions\RootType  $type
+     * @param  string|null  $name
      */
     public function addType(RootType $type, string $name = null)
     {
@@ -103,7 +103,7 @@ class TypeRegistry
     /**
      * Add the models as model schemas to the registry.
      *
-     * @param \ArrayAccess|array $models
+     * @param  \ArrayAccess|array  $models
      */
     public function addModelSchemas($models)
     {
@@ -115,7 +115,7 @@ class TypeRegistry
     /**
      * Add a single model schema to the registry.
      *
-     * @param string $class
+     * @param  string  $class
      */
     public function addModelSchema(string $class)
     {
@@ -131,7 +131,7 @@ class TypeRegistry
     /**
      * Get a model schema instance based on it's class name.
      *
-     * @param string $class
+     * @param  string  $class
      * @return mixed
      */
     public function getModelSchema(string $class): ModelSchema
@@ -148,7 +148,7 @@ class TypeRegistry
      * Return a model schema for a Eloquent model instance.
      * This 'wraps' a model schema around it.
      *
-     * @param mixed $model
+     * @param  mixed  $model
      * @return \Bakery\Eloquent\ModelSchema
      */
     public function getSchemaForModel(Model $model): ModelSchema
@@ -170,7 +170,7 @@ class TypeRegistry
     /**
      * Resolve the schema for a model based on the class name.
      *
-     * @param string $model
+     * @param  string  $model
      * @return \Bakery\Eloquent\ModelSchema
      */
     public function resolveSchemaForModel(string $model): ModelSchema
@@ -201,7 +201,7 @@ class TypeRegistry
     /**
      * Return if the name is registered as a type.
      *
-     * @param string $name
+     * @param  string  $name
      * @return bool
      */
     public function hasType(string $name): bool
@@ -213,7 +213,7 @@ class TypeRegistry
      * Get a type by name.
      * This can be a string or a class path of a Type that has that name.
      *
-     * @param string $name
+     * @param  string  $name
      * @return \Bakery\Types\Definitions\RootType|null
      */
     public function getType(string $name): ?RootType
@@ -241,8 +241,9 @@ class TypeRegistry
     /**
      * Resolve a type from the registry.
      *
-     * @param string $name
+     * @param  string  $name
      * @return GraphQLType
+     *
      * @throws \Bakery\Exceptions\TypeNotFound
      */
     public function resolve(string $name): GraphQLType
@@ -280,7 +281,7 @@ class TypeRegistry
     /**
      * Set the type instances.
      *
-     * @param array $typeInstances
+     * @param  array  $typeInstances
      */
     public function setTypeInstances(array $typeInstances)
     {
@@ -305,7 +306,7 @@ class TypeRegistry
     /**
      * Create a new Eloquent field.
      *
-     * @param string $modelSchema
+     * @param  string  $modelSchema
      * @return \Bakery\Fields\EloquentField
      */
     public function eloquent(string $modelSchema): EloquentField
@@ -316,7 +317,7 @@ class TypeRegistry
     /**
      * Create a new polymorphic field.
      *
-     * @param array $modelSchemas
+     * @param  array  $modelSchemas
      * @return \Bakery\Fields\PolymorphicField
      */
     public function polymorphic(array $modelSchemas): PolymorphicField

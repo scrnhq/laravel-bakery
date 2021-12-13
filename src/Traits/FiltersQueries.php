@@ -21,8 +21,8 @@ trait FiltersQueries
     /**
      * Filter the query based on the filter argument.
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param Arguments $args
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @param  Arguments  $args
      * @return \Illuminate\Database\Eloquent\Builder
      */
     protected function applyFilters(Builder $query, Arguments $args): Builder
@@ -37,9 +37,9 @@ trait FiltersQueries
     /**
      * Apply filters recursively.
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param Arguments $args
-     * @param mixed $type
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @param  Arguments  $args
+     * @param  mixed  $type
      * @return \Illuminate\Database\Eloquent\Builder
      */
     protected function applyFiltersRecursively(Builder $query, Arguments $args = null, $type = null): Builder
@@ -74,10 +74,10 @@ trait FiltersQueries
     /**
      * Filter the query based on the filter argument that contain relations.
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param string $relation
-     * @param Arguments $args
-     * @param string $type
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @param  string  $relation
+     * @param  Arguments  $args
+     * @param  string  $type
      * @return \Illuminate\Database\Eloquent\Builder
      */
     protected function applyRelationFilter(Builder $query, string $relation, Arguments $args = null, $type = null): Builder
@@ -98,11 +98,11 @@ trait FiltersQueries
     /**
      * Filter the query by a key and value.
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param string $key
-     * @param string $column
-     * @param mixed $value
-     * @param string $type (AND or OR)
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @param  string  $key
+     * @param  string  $column
+     * @param  mixed  $value
+     * @param  string  $type  (AND or OR)
      * @return \Illuminate\Database\Eloquent\Builder
      */
     protected function filter(Builder $query, string $key, string $column, $value, $type): Builder
@@ -166,7 +166,7 @@ trait FiltersQueries
      * Get the key for a certain filter.
      * E.g. TitleStartsWith => Title.
      *
-     * @param string $subject
+     * @param  string  $subject
      * @return string
      */
     protected function getKeyForFilter(string $subject): string

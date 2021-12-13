@@ -88,8 +88,8 @@ class EntityType extends EloquentType
     /**
      * Get the fields for a relation.
      *
-     * @param string $key
-     * @param \Bakery\Fields\EloquentField $field
+     * @param  string  $key
+     * @param  \Bakery\Fields\EloquentField  $field
      * @return Collection
      */
     protected function getFieldsForRelation(string $key, EloquentField $field): Collection
@@ -115,8 +115,8 @@ class EntityType extends EloquentType
     /**
      * Get the fields for a plural relation.
      *
-     * @param string $key
-     * @param \Bakery\Fields\EloquentField $field
+     * @param  string  $key
+     * @param  \Bakery\Fields\EloquentField  $field
      * @return Collection
      */
     protected function getPluralRelationFields(string $key, EloquentField $field): Collection
@@ -168,8 +168,8 @@ class EntityType extends EloquentType
     /**
      * Get the fields for a singular relation.
      *
-     * @param string $key
-     * @param \Bakery\Fields\EloquentField $field
+     * @param  string  $key
+     * @param  \Bakery\Fields\EloquentField  $field
      * @return Collection
      */
     protected function getSingularRelationFields(string $key, EloquentField $field): Collection
@@ -193,9 +193,9 @@ class EntityType extends EloquentType
     /**
      * Get the fields for a belongs to many relation.
      *
-     * @param string $key
-     * @param \Bakery\Fields\EloquentField $field
-     * @param Relations\BelongsToMany $relation
+     * @param  string  $key
+     * @param  \Bakery\Fields\EloquentField  $field
+     * @param  Relations\BelongsToMany  $relation
      * @return Collection
      */
     protected function getBelongsToManyRelationFields(string $key, EloquentField $field, Relations\BelongsToMany $relation): Collection
@@ -244,8 +244,8 @@ class EntityType extends EloquentType
     /**
      * Get the fields for a polymorphic relation.
      *
-     * @param string $key
-     * @param \Bakery\Fields\PolymorphicField $field
+     * @param  string  $key
+     * @param  \Bakery\Fields\PolymorphicField  $field
      * @return Collection
      */
     public function getFieldsForPolymorphicField(string $key, PolymorphicField $field): Collection
@@ -258,8 +258,8 @@ class EntityType extends EloquentType
     /**
      * Get the query for the given relationship.
      *
-     * @param Relation $relation
-     * @param Arguments $args
+     * @param  Relation  $relation
+     * @param  Arguments  $args
      * @return Builder
      */
     protected function getRelationQuery(Relation $relation, Arguments $args)

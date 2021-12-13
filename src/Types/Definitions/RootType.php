@@ -71,8 +71,8 @@ class RootType
     /**
      * Construct a new type.
      *
-     * @param \Bakery\Support\TypeRegistry $registry
-     * @param \GraphQL\Type\Definition\Type $type
+     * @param  \Bakery\Support\TypeRegistry  $registry
+     * @param  \GraphQL\Type\Definition\Type  $type
      */
     public function __construct(TypeRegistry $registry, GraphQLType $type = null)
     {
@@ -96,7 +96,7 @@ class RootType
     /**
      * Set the type registry.
      *
-     * @param \Bakery\Support\TypeRegistry $registry
+     * @param  \Bakery\Support\TypeRegistry  $registry
      * @return \Bakery\Types\Definitions\RootType
      */
     public function setRegistry(TypeRegistry $registry): self
@@ -131,7 +131,7 @@ class RootType
     /**
      * Set a description.
      *
-     * @param string $value
+     * @param  string  $value
      * @return $this
      */
     public function description(string $value)
@@ -167,7 +167,7 @@ class RootType
     /**
      * Define if the type is a list.
      *
-     * @param bool|null $value
+     * @param  bool|null  $value
      * @return $this
      */
     public function list(bool $value = true)
@@ -200,7 +200,7 @@ class RootType
     /**
      * Define if the items are nullable.
      *
-     * @param bool $value
+     * @param  bool  $value
      */
     public function nullableItems(bool $value = true)
     {

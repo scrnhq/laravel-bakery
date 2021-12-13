@@ -58,7 +58,7 @@ class Type
     /**
      * Create a new type by reference.
      *
-     * @param string $name
+     * @param  string  $name
      * @return \Bakery\Types\Definitions\RootType
      */
     public static function of(string $name): Types\Definitions\RootType
@@ -69,7 +69,7 @@ class Type
     /**
      * Create a new type for a model schema.
      *
-     * @param string $class
+     * @param  string  $class
      * @return \Bakery\Types\Definitions\RootType
      */
     public static function modelSchema(string $class): Types\Definitions\RootType

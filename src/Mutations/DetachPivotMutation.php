@@ -32,7 +32,7 @@ class DetachPivotMutation extends EloquentMutation
     /**
      * Get the pivot relation for a model.
      *
-     * @param \Illuminate\Database\Eloquent\Model $model
+     * @param  \Illuminate\Database\Eloquent\Model  $model
      * @return mixed
      */
     protected function getRelation(Model $model): Relations\BelongsToMany
@@ -64,7 +64,7 @@ class DetachPivotMutation extends EloquentMutation
     /**
      * Resolve the mutation.
      *
-     * @param Arguments $args
+     * @param  Arguments  $args
      * @return Model
      */
     public function resolve(Arguments $args): Model

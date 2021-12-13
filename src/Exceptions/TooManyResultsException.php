@@ -24,8 +24,8 @@ class TooManyResultsException extends UserError
     /**
      * Set the affected Eloquent model and instance ids.
      *
-     * @param  string $model
-     * @param  array $ids
+     * @param  string  $model
+     * @param  array  $ids
      * @return $this
      */
     public function setModel(string $model, array $ids = [])

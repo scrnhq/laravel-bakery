@@ -53,7 +53,7 @@ abstract class RootField
     /**
      * RootField constructor.
      *
-     * @param \Bakery\Support\TypeRegistry $registry
+     * @param  \Bakery\Support\TypeRegistry  $registry
      */
     public function __construct(TypeRegistry $registry)
     {
@@ -189,9 +189,9 @@ abstract class RootField
 
     /**
      * @param $root
-     * @param array $args
+     * @param  array  $args
      * @param $context
-     * @param ResolveInfo $info
+     * @param  ResolveInfo  $info
      * @return null
      */
     public function abstractResolver($root, array $args, $context, ResolveInfo $info)
@@ -210,7 +210,8 @@ abstract class RootField
 
     /**
      * Check if the user is authorized to perform the query.
-     * @param Arguments $args
+     *
+     * @param  Arguments  $args
      */
     protected function guard(Arguments $args): void
     {
@@ -235,6 +236,7 @@ abstract class RootField
      * Validate the arguments of the query.
      *
      * @param  Arguments  $args
+     *
      * @throws ValidationError
      */
     protected function validate(Arguments $args): void
@@ -291,7 +293,7 @@ abstract class RootField
     /**
      * Set the registry on the root field.
      *
-     * @param \Bakery\Support\TypeRegistry $registry
+     * @param  \Bakery\Support\TypeRegistry  $registry
      * @return $this
      */
     public function setRegistry(TypeRegistry $registry): self

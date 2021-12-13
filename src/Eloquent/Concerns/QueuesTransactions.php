@@ -15,7 +15,7 @@ trait QueuesTransactions
     /**
      * Add a closure to the queue.
      *
-     * @param \Closure $closure
+     * @param  \Closure  $closure
      */
     protected function queue(\Closure $closure)
     {

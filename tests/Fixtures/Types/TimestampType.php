@@ -18,7 +18,7 @@ class TimestampType extends ScalarType
     /**
      * Serializes an internal value to include in a response.
      *
-     * @param mixed $value
+     * @param  mixed  $value
      * @return mixed
      */
     public function serialize($value)
@@ -32,7 +32,7 @@ class TimestampType extends ScalarType
     /**
      * Parses an externally provided value (query variable) to use as an input.
      *
-     * @param mixed $value
+     * @param  mixed  $value
      * @return mixed
      */
     public function parseValue($value)
@@ -43,7 +43,7 @@ class TimestampType extends ScalarType
     /**
      * Parses an externally provided literal value (hardcoded in GraphQL query) to use as an input.
      *
-     * @param \GraphQL\Language\AST\Node $ast
+     * @param  \GraphQL\Language\AST\Node  $ast
      * @return mixed
      */
     public function parseLiteral($ast)

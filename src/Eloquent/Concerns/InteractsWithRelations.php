@@ -43,7 +43,7 @@ trait InteractsWithRelations
     ];
 
     /**
-     * @param \Closure $closure
+     * @param  \Closure  $closure
      * @return void
      */
     abstract protected function queue(\Closure $closure);
@@ -51,7 +51,7 @@ trait InteractsWithRelations
     /**
      * Fill the relations in the model.
      *
-     * @param array $relations
+     * @param  array  $relations
      * @return void
      */
     protected function fillRelations(array $relations)
@@ -72,7 +72,7 @@ trait InteractsWithRelations
     /**
      * Fill the connections in the model.
      *
-     * @param array $connections
+     * @param  array  $connections
      * @return void
      */
     protected function fillConnections(array $connections)
@@ -93,8 +93,8 @@ trait InteractsWithRelations
     /**
      * Connect a belongs to relation.
      *
-     * @param Relations\BelongsTo $relation
-     * @param mixed $id
+     * @param  Relations\BelongsTo  $relation
+     * @param  mixed  $id
      * @return void
      */
     protected function connectBelongsToRelation(Relations\BelongsTo $relation, $id)
@@ -118,8 +118,8 @@ trait InteractsWithRelations
     /**
      * Fill a belongs to relation.
      *
-     * @param Relations\BelongsTo $relation
-     * @param array $attributes
+     * @param  Relations\BelongsTo  $relation
+     * @param  array  $attributes
      * @return void
      */
     protected function fillBelongsToRelation(Relations\BelongsTo $relation, $attributes = [])
@@ -144,8 +144,8 @@ trait InteractsWithRelations
     /**
      * Connect a has one relation.
      *
-     * @param Relations\HasOne $relation
-     * @param string $id
+     * @param  Relations\HasOne  $relation
+     * @param  string  $id
      * @return void
      */
     protected function connectHasOneRelation(Relations\HasOne $relation, $id)
@@ -166,9 +166,10 @@ trait InteractsWithRelations
     /**
      * Create a new has one relation.
      *
-     * @param Relations\HasOne $relation
-     * @param mixed $attributes
+     * @param  Relations\HasOne  $relation
+     * @param  mixed  $attributes
      * @return void
+     *
      * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     protected function fillHasOneRelation(Relations\HasOne $relation, $attributes)
@@ -194,8 +195,8 @@ trait InteractsWithRelations
     /**
      * Connect a has many relation.
      *
-     * @param Relations\HasMany $relation
-     * @param array $ids
+     * @param  Relations\HasMany  $relation
+     * @param  array  $ids
      * @return void
      */
     protected function connectHasManyRelation(Relations\HasMany $relation, array $ids)
@@ -214,8 +215,8 @@ trait InteractsWithRelations
     /**
      * Fill a has many relation.
      *
-     * @param Relations\HasMany $relation
-     * @param array $values
+     * @param  Relations\HasMany  $relation
+     * @param  array  $values
      * @return void
      */
     protected function fillHasManyRelation(Relations\HasMany $relation, array $values)
@@ -238,9 +239,9 @@ trait InteractsWithRelations
     /**
      * Connect the belongs to many relation.
      *
-     * @param Relations\BelongsToMany $relation
-     * @param array $values
-     * @param bool $detaching
+     * @param  Relations\BelongsToMany  $relation
+     * @param  array  $values
+     * @param  bool  $detaching
      * @return void
      */
     public function connectBelongsToManyRelation(Relations\BelongsToMany $relation, array $values, $detaching = true)
@@ -257,9 +258,9 @@ trait InteractsWithRelations
     /**
      * Connect the belongs to many relation without pivot class.
      *
-     * @param Relations\BelongsToMany $relation
-     * @param array $values
-     * @param bool $detaching
+     * @param  Relations\BelongsToMany  $relation
+     * @param  array  $values
+     * @param  bool  $detaching
      * @return void
      */
     protected function connectBelongsToManyWithoutPivot(
@@ -293,9 +294,9 @@ trait InteractsWithRelations
     /**
      * Connect the belongs to many relation with pivot class.
      *
-     * @param Relations\BelongsToMany $relation
-     * @param array $values
-     * @param bool $detaching
+     * @param  Relations\BelongsToMany  $relation
+     * @param  array  $values
+     * @param  bool  $detaching
      * @return void
      */
     protected function connectBelongsToManyWithPivot(
@@ -343,9 +344,9 @@ trait InteractsWithRelations
     /**
      * Fill the belongs to many relation.
      *
-     * @param Relations\BelongsToMany $relation
-     * @param array $value
-     * @param bool $detaching
+     * @param  Relations\BelongsToMany  $relation
+     * @param  array  $value
+     * @param  bool  $detaching
      * @return void
      */
     protected function fillBelongsToManyRelation(Relations\BelongsToMany $relation, array $value, $detaching = true)
@@ -383,7 +384,7 @@ trait InteractsWithRelations
     /**
      * Connect a belongs to relation.
      *
-     * @param \Illuminate\Database\Eloquent\Relations\MorphTo $relation
+     * @param  \Illuminate\Database\Eloquent\Relations\MorphTo  $relation
      * @param $data
      * @return void
      */
@@ -418,8 +419,8 @@ trait InteractsWithRelations
     /**
      * Fill a belongs to relation.
      *
-     * @param \Illuminate\Database\Eloquent\Relations\MorphTo $relation
-     * @param array $data
+     * @param  \Illuminate\Database\Eloquent\Relations\MorphTo  $relation
+     * @param  array  $data
      * @return void
      */
     protected function fillMorphToRelation(Relations\MorphTo $relation, $data)
@@ -452,8 +453,8 @@ trait InteractsWithRelations
      * Get the polymorphic type that belongs to the relation so we can figure
      * out the model.
      *
-     * @param \Illuminate\Database\Eloquent\Relations\MorphTo $relation
-     * @param string $key
+     * @param  \Illuminate\Database\Eloquent\Relations\MorphTo  $relation
+     * @param  string  $key
      * @return \Illuminate\Database\Eloquent\Model
      */
     protected function getPolymorphicModel(Relations\MorphTo $relation, string $key): Model
@@ -467,8 +468,8 @@ trait InteractsWithRelations
     /**
      * Connect a morph many relation.
      *
-     * @param \Illuminate\Database\Eloquent\Relations\MorphMany $relation
-     * @param array $ids
+     * @param  \Illuminate\Database\Eloquent\Relations\MorphMany  $relation
+     * @param  array  $ids
      * @return void
      */
     protected function connectMorphManyRelation(Relations\MorphMany $relation, array $ids)
@@ -489,8 +490,8 @@ trait InteractsWithRelations
     /**
      * Fill a morph many relation.
      *
-     * @param \Illuminate\Database\Eloquent\Relations\MorphMany $relation
-     * @param array $values
+     * @param  \Illuminate\Database\Eloquent\Relations\MorphMany  $relation
+     * @param  array  $values
      * @return void
      */
     protected function fillMorphManyRelation(Relations\MorphMany $relation, array $values)
@@ -512,7 +513,7 @@ trait InteractsWithRelations
     /**
      * Resolve the relation by name.
      *
-     * @param string $relation
+     * @param  string  $relation
      * @return Relations\Relation
      */
     protected function resolveRelation(string $relation): Relations\Relation
@@ -529,7 +530,7 @@ trait InteractsWithRelations
      * e.g. userId => user
      *      commentIds => comments.
      *
-     * @param string $connection
+     * @param  string  $connection
      * @return Relations\Relation
      */
     protected function getRelationOfConnection(string $connection): string
@@ -548,7 +549,7 @@ trait InteractsWithRelations
     /**
      * Resolve the relation class of a connection.
      *
-     * @param string $connection
+     * @param  string  $connection
      * @return Relations\Relation
      */
     protected function resolveRelationOfConnection(string $connection): Relations\Relation
@@ -559,7 +560,7 @@ trait InteractsWithRelations
     /**
      * Return if the relation is a plural relation.
      *
-     * @param Relations\Relation $relation
+     * @param  Relations\Relation  $relation
      * @return bool
      */
     protected function isPluralRelation(Relations\Relation $relation)
@@ -570,7 +571,7 @@ trait InteractsWithRelations
     /**
      * Return if the relation is a singular relation.
      *
-     * @param Relations\Relation $relation
+     * @param  Relations\Relation  $relation
      * @return bool
      */
     protected function isSingularRelation(Relations\Relation $relation)
@@ -584,7 +585,7 @@ trait InteractsWithRelations
      * If the relation is extended from the actual
      * Illuminate relationship we try to resolve the parent here.
      *
-     * @param Relations\Relation $relation
+     * @param  Relations\Relation  $relation
      * @return string
      */
     protected function getRelationTypeName(Relations\Relation $relation): string

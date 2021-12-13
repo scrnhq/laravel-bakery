@@ -25,8 +25,8 @@ class PolymorphicField extends Field
     /**
      * PolymorphicType constructor.
      *
-     * @param \Bakery\Support\TypeRegistry $registry
-     * @param array $modelSchemas
+     * @param  \Bakery\Support\TypeRegistry  $registry
+     * @param  array  $modelSchemas
      */
     public function __construct(TypeRegistry $registry, array $modelSchemas = [])
     {
@@ -48,7 +48,7 @@ class PolymorphicField extends Field
     /**
      * Get the model schema by key.
      *
-     * @param string $key
+     * @param  string  $key
      * @return mixed
      */
     public function getModelSchemaByKey(string $key)
@@ -61,7 +61,7 @@ class PolymorphicField extends Field
     /**
      * Define the type resolver.
      *
-     * @param callable $resolver
+     * @param  callable  $resolver
      * @return $this
      */
     public function typeResolver(callable $resolver)

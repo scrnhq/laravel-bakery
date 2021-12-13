@@ -9,6 +9,7 @@ trait InteractsWithPolymorphism
 {
     /**
      * The definitions of the type.
+     *
      * @var array
      */
     protected $modelSchemas;
@@ -21,7 +22,7 @@ trait InteractsWithPolymorphism
     /**
      * Set the model schemas.
      *
-     * @param array $modelSchemas
+     * @param  array  $modelSchemas
      */
     public function setModelSchemas(array $modelSchemas): self
     {

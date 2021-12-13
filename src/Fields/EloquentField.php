@@ -34,8 +34,8 @@ class EloquentField extends Field
     /**
      * EloquentField constructor.
      *
-     * @param \Bakery\Support\TypeRegistry $registry
-     * @param string $class
+     * @param  \Bakery\Support\TypeRegistry  $registry
+     * @param  string  $class
      */
     public function __construct(TypeRegistry $registry, string $class)
     {
@@ -47,7 +47,7 @@ class EloquentField extends Field
     /**
      * Set the name of the inverse relationship.
      *
-     * @param string $relationName
+     * @param  string  $relationName
      * @return $this
      */
     public function inverse(string $relationName): self
