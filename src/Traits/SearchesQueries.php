@@ -40,7 +40,6 @@ trait SearchesQueries
         $fields = $args['fields'];
 
         $relations = $this->modelSchema->getRelationFields();
-        $qualifiedNeedle = preg_quote($needle);
 
         foreach ($fields as $key => $value) {
             $field = $this->modelSchema->getFieldByKey($key);
@@ -61,8 +60,7 @@ trait SearchesQueries
         if ($grammar instanceof Grammars\PostgresGrammar) {
             $dictionary = config('bakery.postgresDictionary');
             $fields = implode(', ', $this->tsFields);
-            $query->whereRaw("to_tsvector('${dictionary}', concat_ws(' ', ".$fields.")) @@ to_tsquery('${dictionary}', ?)",
-                ["'{$qualifiedNeedle}':*"]);
+            $query->whereRaw("to_tsvector('${dictionary}', concat_ws(' ', ".$fields.")) @@ websearch_to_tsquery('${dictionary}', ?)", $needle);
         }
 
         return $query;
