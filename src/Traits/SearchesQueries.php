@@ -2,6 +2,7 @@
 
 namespace Bakery\Traits;
 
+use Illuminate\Support\Str;
 use Bakery\Support\Arguments;
 use Bakery\Eloquent\ModelSchema;
 use Bakery\Support\TypeRegistry;
@@ -60,7 +61,14 @@ trait SearchesQueries
         if ($grammar instanceof Grammars\PostgresGrammar) {
             $dictionary = config('bakery.postgresDictionary');
             $fields = implode(', ', $this->tsFields);
-            $query->whereRaw("to_tsvector('${dictionary}', concat_ws(' ', ".$fields.")) @@ websearch_to_tsquery('${dictionary}', ?)", $needle);
+            $tsQueryString = Str::of($needle)
+                ->replace(['&', '|', '!', '<->', '<', '>', ':', '"', '\''], ' ') // Replace reserved tsquery characters
+                ->trim() // Trim whitespace
+                ->split('/\s+/') // Split into words
+                ->map(fn ($str) => $str . ':*') // Use prefix matching
+                ->join(' & '); // Join together with AND operators
+
+            $query->whereRaw("to_tsvector('${dictionary}', concat_ws(' ', ".$fields.")) @@ to_tsquery('${dictionary}', ?)", $tsQueryString);
         }
 
         return $query;
