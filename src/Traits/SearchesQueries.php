@@ -65,7 +65,7 @@ trait SearchesQueries
                 ->replace(['&', '|', '!', '<->', '<', '>', ':', '"', '\''], ' ') // Replace reserved tsquery characters
                 ->trim() // Trim whitespace
                 ->split('/\s+/') // Split into words
-                ->map(fn ($str) => $str . ':*') // Use prefix matching
+                ->map(fn ($str) => $str.':*') // Use prefix matching
                 ->join(' & '); // Join together with AND operators
 
             $query->whereRaw("to_tsvector('${dictionary}', concat_ws(' ', ".$fields.")) @@ to_tsquery('${dictionary}', ?)", $tsQueryString);
